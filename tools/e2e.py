@@ -209,6 +209,16 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     run.shot(page, f"{vp}-{tid}-ex1")
     run.layout_ok(page, f"[{vp}] {tid} exercițiul 1")
 
+    # ecranul dintre niveluri apare după ultimul exercițiu ușor
+    easy = page.locator(".c-progress__group[data-level='usor'] .c-progress__dot").count()
+    for _ in range(easy):
+        page.get_by_test_id("next").click()
+        page.wait_for_selector(".ex-card, [data-testid=level-break]")
+    run.check(page.get_by_test_id("level-break").is_visible(), f"[{vp}] {tid}: ecranul dintre niveluri apare după nivelul ușor")
+    page.get_by_test_id("continue").click()
+    page.wait_for_selector(".ex-card")
+    run.check(page.locator(".c-progress__dot.is-current").inner_text() == str(easy + 1), f"[{vp}] {tid}: după pauză continuă cu exercițiul {easy + 1}")
+
     # răspunsuri corecte → 100
     page.evaluate("window.__dbg.fillCorrect()")
     page.wait_for_timeout(200)
@@ -237,6 +247,12 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     page.wait_for_selector("[data-testid=score]")
     score = page.get_by_test_id("score").inner_text()
     run.check(score.startswith("10"), f"[{vp}] {tid}: fără răspunsuri → scor 10 (primit {score!r})")
+
+    # „Mai încerc o dată” pe primul exercițiu
+    first = page.locator(".ex-review__item").first.get_attribute("data-testid").replace("review-", "")
+    page.get_by_test_id(f"retry-{first}").click()
+    page.get_by_test_id(f"retry-check-{first}").click()
+    run.check(page.locator(f"[data-testid=review-{first}] .ex-review__retry .c-callout").count() >= 1, f"[{vp}] {tid}: „Mai încerc o dată” afișează verdictul")
     run.layout_ok(page, f"[{vp}] {tid} rezultate")
 
 

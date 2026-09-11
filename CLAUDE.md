@@ -1,7 +1,7 @@
 # Cifruța — exerciții interactive pentru clasa a II-a
 
 Site static cu teste interactive de **Matematică și explorarea mediului** pentru un copil de clasa a II-a (România).
-Mascota: **Veverița Cifruța**. Publicat pe GitHub Pages din folderul `site/`.
+Mascota: **Veverița Cifruța**. Repo public `or-mihai-or-gheorghe/cifruta`; site live: https://or-mihai-or-gheorghe.github.io/cifruta/ (folderul `site/`, ramura `gh-pages`).
 
 **La începutul fiecărei sesiuni citește `docs/STARE.md`** (stadiu, decizii, backlog, jurnal). La final actualizează-l și fă commit.
 
@@ -45,7 +45,9 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
 - `npm run e2e` — Playwright (Chromium headless): fluxuri pe fiecare test, gesturi pe fiecare tip, tastatură, capturi în `test-results/`
   (`python3 tools/e2e.py --only recap-c1-t2 --shots`, `--viewports laptop`, `--base-url https://…` pentru site-ul publicat).
 - `python3 tools/fetch_assets.py` / `tools/fetch_fonts.py` — descarcă emoji Noto noi (după ce le adaugi în `emoji.js`) și fonturile.
-- Publicare: push pe `main` → GitHub Actions rulează `npm test` și publică `site/` pe https://or-mihai-or-gheorghe.github.io/cifruta/.
+- `npm run deploy` — rulează `npm test` și publică `site/` pe ramura `gh-pages` → https://or-mihai-or-gheorghe.github.io/cifruta/
+  (build Pages ~1 min; verifică apoi cu `python3 tools/e2e.py --base-url https://or-mihai-or-gheorghe.github.io/cifruta/`).
+  Publicare automată prin Actions: necesită `gh auth refresh -h github.com -s workflow`, apoi mută `tools/github-pages-workflow.yml` în `.github/workflows/`.
 
 ## Rețete
 - **Test nou:** fișier în `site/data/tests/<grup>/`, intrare în `data/catalog.js` (id, file, version, estMin), concepte din
