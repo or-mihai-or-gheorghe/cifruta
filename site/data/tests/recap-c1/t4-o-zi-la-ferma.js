@@ -309,6 +309,7 @@ export default {
         {
           id: 'b',
           type: 'choice',
+          weight: 0.5, // doar două variante: ghicitul nu trebuie să valoreze cât un calcul
           prompt: 'Gâștele sunt **27**, cu **8 mai puține decât** curcanii. Cine sunt mai mulți?',
           items: [
             {

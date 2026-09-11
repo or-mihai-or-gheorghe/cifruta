@@ -60,6 +60,7 @@ export function validateTest(raw, { concepts } = {}) {
       const pw = `${where}.${part.id}`;
       if (!part.id || partIds.has(part.id)) errors.push(`${pw}: id lipsă sau duplicat`);
       partIds.add(part.id);
+      if (part.weight !== undefined && !(typeof part.weight === 'number' && part.weight > 0)) errors.push(`${pw}: weight trebuie să fie un număr pozitiv`);
       if (!hasType(part.type)) {
         errors.push(`${pw}: tip necunoscut „${part.type}”`);
         continue;

@@ -6,7 +6,7 @@ import { lintText, walkTexts } from '../site/js/core/lint.js';
 import { md, markupErrors, plain } from '../site/js/core/markup.js';
 import { cantitate, fixCedilla, formatNumber, numberToWords, sameText, singularOf } from '../site/js/core/ro.js';
 import { check, minPieces, moneyCombos, moneyKey, searchNumbers, trecere } from '../site/js/core/rules.js';
-import { gradeFor, scoreTest } from '../site/js/core/scoring.js';
+import { evaluateExercise, gradeFor, scoreTest } from '../site/js/core/scoring.js';
 import { getLogic } from '../site/js/core/registry.js';
 import { normalizeTest, validateTest } from '../site/js/core/spec.js';
 import demo from '../site/data/demo.js';
@@ -157,4 +157,32 @@ test('scoring: calificative și scor total', () => {
   assert.equal(full.score, 100);
   assert.ok(Object.values(full.levels).every((l) => l.star));
   assert.equal(scoreTest(t, empty).score, 10);
+});
+
+test('scoring: subpunctele valorează egal, `weight` schimbă ponderea, steaua la exact 80%', () => {
+  const sums = (n) => ({ type: 'fill', rows: Array.from({ length: n }, (_, i) => `1 + ${i} = [[b${i}]]`), blanks: Object.fromEntries(Array.from({ length: n }, (_, i) => [`b${i}`, { answer: i + 1 }])) });
+  const answers = (n, right) => Object.fromEntries(Array.from({ length: n }, (_, i) => [`b${i}`, i < right ? String(i + 1) : '0']));
+  const pick = { type: 'choice', items: [{ id: 'i1', options: ['40', '50'], correct: '50' }] };
+
+  // a) 4 casete corecte, b) alegerea greșită → jumătate din exercițiu (nu 4 din 5)
+  const ex = { id: 'e1', level: 'intermediar', parts: [{ id: 'a', ...sums(4) }, { id: 'b', ...pick }] };
+  const both = { a: answers(4, 4), b: { i1: '40' } };
+  assert.equal(evaluateExercise(ex, both).fraction, 0.5);
+  const lighter = { ...ex, parts: [ex.parts[0], { ...ex.parts[1], weight: 0.5 }] };
+  assert.equal(evaluateExercise(lighter, both).fraction, 1 / 1.5);
+  assert.equal(evaluateExercise(lighter, { a: answers(4, 4), b: { i1: '50' } }).fraction, 1);
+
+  // 3 × 1 + 3 × 0,6 = 4,8 din 6 = exact 80% → stea (în virgulă mobilă dă 0,7999999999999999)
+  const level = {
+    exercises: [
+      { id: 'x1', level: 'intermediar', parts: [{ id: 'a', ...sums(1) }] },
+      { id: 'x2', level: 'intermediar', parts: [{ id: 'a', ...sums(5) }] },
+    ],
+  };
+  const result = scoreTest(level, { x1: { a: answers(1, 1) }, x2: { a: answers(5, 3) } });
+  assert.ok(result.levels.intermediar.fraction < 0.8);
+  assert.equal(result.levels.intermediar.star, true);
+  const [first] = demo.exercises;
+  const zero = { ...demo, exercises: [{ ...first, parts: [{ ...first.parts[0], weight: 0 }, ...first.parts.slice(1)] }] };
+  assert.equal(validateTest(zero).errors.filter((e) => e.includes('weight')).length, 1);
 });

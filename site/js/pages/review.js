@@ -8,14 +8,13 @@ import { h } from '../core/dom.js';
 import { md } from '../core/markup.js';
 import { findTest, loadTest } from '../core/loader.js';
 import { cantitate, formatNumber } from '../core/ro.js';
-import { evaluateExercise, gradeFor } from '../core/scoring.js';
+import { evaluateExercise, gradeFor, reached } from '../core/scoring.js';
 import { clearDraft, lastAttempt, updateAttempt } from '../core/storage.js';
 import { mountExercise } from '../components/exercise.js';
 import { art, backLink, callout, confetti, levelPill, stars } from '../components/ui.js';
 import { emojiHTML } from '../visuals/emoji.js';
 
-const EPS = 1e-9;
-const statusOf = (fraction) => (fraction >= 1 - EPS ? 'correct' : fraction <= EPS ? 'wrong' : 'partial');
+const statusOf = (fraction) => (reached(fraction, 1) ? 'correct' : reached(0, fraction) ? 'wrong' : 'partial');
 const STATUS_ICON = { correct: '✓', wrong: '✗', partial: '◐' };
 const MOOD = { FB: 'sarbatoreste', B: 'vesela', S: 'incurajeaza', EX: 'incurajeaza' };
 const minutes = (ms) => cantitate(Math.max(1, Math.round(ms / 60000)), 'minut', 'minute');
@@ -77,7 +76,7 @@ export default async function review(container, [testId]) {
   );
 
   const practice = Object.entries(attempt.concepts ?? {})
-    .filter(([, c]) => c.total && c.earned / c.total < config.practiceBelow - EPS)
+    .filter(([, c]) => c.total && !reached(c.earned / c.total, config.practiceBelow))
     .map(([id]) => concepts[id]?.title ?? id);
 
   const levelTimes = config.levels

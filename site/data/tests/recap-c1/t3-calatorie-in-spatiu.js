@@ -202,6 +202,7 @@ export default {
         {
           id: 'b',
           type: 'choice',
+          weight: 0.5, // doar două variante: ghicitul nu trebuie să valoreze cât poziționarea pe axă
           prompt: 'Numărul 48 este mai aproape de…',
           items: [
             {
