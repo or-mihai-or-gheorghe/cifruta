@@ -21,7 +21,7 @@ site/                      ← publicat
   index.html, css/main.css (@layer: tokens, base, layout, components, exercises, visuals, animations, utilities)
   js/app.js                pornire + router
   js/core/                 expr (calcule fără eval) · rules · markup · spec (validare) · scoring · registry
-                           storage (localStorage simplu) · loader · router · dom · ro (diacritice, cuDe) · lint · dnd
+                           storage (localStorage simplu) · loader · router · dom · ro (diacritice, cantitate) · lint · dnd
   js/components/, js/pages/  interfața (player, rezultate/revizuire, atelier)
   js/types/<tip>/logic.js  logică pură (Node o poate importa): validate · count · answered · empty · solution · evaluate
   js/types/<tip>/view.js   DOM: mount(el, part, ctx) → { get, set, mode, showResult, destroy }
@@ -29,7 +29,7 @@ site/                      ← publicat
   data/catalog.js          secțiuni → grupuri → teste · concepts.js (ID-uri de concepte) · scoring.js · demo.js
   data/tests/<grup>/tN-nume.js   testele (NU le numi test-*.js)
 docs/  STARE.md · curriculum.md (harta conceptelor + surse) · cercetare.md · ghid-autor.md
-tests/ *.test.js (node --test)   tools/ e2e.py (Playwright), fetch_assets.py
+tests/ *.test.js (node --test)   tools/ e2e.py (Playwright), acoperire.mjs (tabelul teste × concepte), fetch_assets.py
 _surse/ scanările PDF (ignorate de git) — deschide-le doar dacă docs/curriculum.md nu acoperă ce cauți
 ```
 
@@ -40,7 +40,8 @@ _surse/ scanările PDF (ignorate de git) — deschide-le doar dacă docs/curricu
 Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual` (desen deasupra casetelor), `feedback: [{ if, text }]` pentru greșeli tipice.
 
 ## Comenzi
-- `npm test` — teste unitare + validarea întregului conținut (schemă, răspunsuri, unicitate, durată 40–48 min, diacritice).
+- `npm test` — teste unitare + validarea întregului conținut (schemă, răspunsuri, unicitate, durată 40–48 min, diacritice,
+  etichete „cu / fără trecere”) + verifică dacă tabelul de acoperire din `docs/curriculum.md` e la zi (`npm run acoperire` îl regenerează).
 - `npm run serve` — site local la http://localhost:8080 (`?debug=1` expune `window.__dbg`).
 - `npm run e2e` — Playwright (Chromium headless): fluxuri pe fiecare test, gesturi pe fiecare tip, tastatură, capturi în `test-results/`
   (`python3 tools/e2e.py --only recap-c1-t2 --shots`, `--viewports laptop`, `--base-url https://…` pentru site-ul publicat).
@@ -50,9 +51,10 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   Publicare automată prin Actions: necesită `gh auth refresh -h github.com -s workflow`, apoi mută `tools/github-pages-workflow.yml` în `.github/workflows/`.
 
 ## Rețete
-- **Test nou:** fișier în `site/data/tests/<grup>/`, intrare în `data/catalog.js` (id, file, version, estMin), concepte din
+- **Test nou:** fișier în `site/data/tests/<grup>/`, intrare în `data/catalog.js` (id, file, version, estMin, exercises), concepte din
   `data/concepts.js`; 4 ușor → 4 intermediar → 3 avansat, ~43 min; `npm test` până e verde. Detalii: `docs/ghid-autor.md`.
-- **Modificare de test publicat:** crește `version` (în test și în catalog) → ciornele vechi sunt ignorate.
+- **Modificare de test publicat:** crește `version` (în test și în catalog) → ciornele vechi sunt ignorate, iar rezultatele vechi
+  își păstrează scorul, dar nu mai arată lista pe exerciții (rezumatul vine din încercarea salvată).
 - **Tip nou:** `js/types/<tip>/logic.js` + `view.js`, o linie în `core/registry.js`, un exemplu în `data/demo.js`, stiluri în `css/04-exercises.css`.
 - **Vizual nou:** `registerVisual` într-un modul din `js/visuals/`, culori din variabile `--v-*`, `demos` pentru atelier.
 
@@ -61,4 +63,10 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
 - GitHub Pages ține fișierele în cache ~10 min; testele se încarcă cu `?v=<version>`.
 - În capturile headless nu există font de emoji → emoji-urile vin din `site/assets/emoji/*.svg`.
 - Slider/ceas/numărătoare: răspunsul e `null` până la prima atingere.
-- „de” după numerale: `cuDe(19,'lei')` → „19 lei”, `cuDe(20,'lei')` → „20 de lei”.
+- Acordul numeral + substantiv: `cantitate(n, 'leu', 'lei')` → „1 leu”, „19 lei”, „20 de lei”, „101 lei”; `formatNumber(2.7)` → „2,7”.
+- „Cu / fără trecere peste ordin” se verifică automat (`trecere(op, a, b)` pe coloane: 24 − 18, 7 + 5, 28 + 12, 100 − 50 sunt
+  cu trecere): eticheta `mat.op(1000).cu-trecere` / `fara-trecere` trebuie să se potrivească cu calculele din `fill`/`choice`/`match`.
+- Subpunctele a/b/c valorează egal în exercițiu, oricâte casete au; `weight: 0.5` pe subpunct la alegeri între două variante.
+- În reguli (`holds`), `u z s m` sunt **cifrele** unităților, zecilor, sutelor, miilor (1000 → `m = 1`, `s = 0`); `n` e numărul.
+- Răspunsurile vin din `localStorage`, deci pot avea orice formă: `evaluate` le verifică strict (`isInt` din `types/_shared.js`).
+- Pragurile (stea 80%, de exersat 70%) se compară cu `reached()` din `core/scoring.js` (toleranță pentru virgula mobilă).

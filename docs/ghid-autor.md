@@ -11,12 +11,15 @@ vizibil în site la `#/atelier/tipuri`) și cele 4 teste din `site/data/tests/re
    o poveste din viața reală, 1–2 exerciții de explorarea mediului.
 4. Etichetează fiecare exercițiu cu ID-uri din `site/data/concepts.js` (adaugă concepte noi acolo, cu `grade`,
    `competencies`, `source`).
-5. Adaugă intrarea în catalog: `{ id, file, version, theme, title, subtitle, estMin }` (`estMin` = suma exercițiilor).
-6. Rulează `npm test` până e verde (schemă, răspunsuri recalculate, unicitate, durată, diacritice).
+5. Adaugă intrarea în catalog: `{ id, file, version, theme, title, subtitle, estMin, exercises }` (`estMin` = suma
+   exercițiilor, `exercises` = câte exerciții are testul; ambele sunt verificate).
+6. Rulează `npm run acoperire` (actualizează tabelul teste × concepte din `docs/curriculum.md`), apoi `npm test` până e
+   verde (schemă, răspunsuri recalculate, unicitate, durată, diacritice, etichete „cu / fără trecere”).
 7. Rulează `npm run e2e` (sau `python3 tools/e2e.py --only <id> --shots`) și privește capturile din `test-results/`.
 8. Actualizează `docs/STARE.md` (catalog + jurnal) și fă commit.
 
-**Modifici un test deja publicat?** Crește `version` în test **și** în catalog — ciornele vechi ale copiilor sunt ignorate.
+**Modifici un test deja publicat?** Crește `version` în test **și** în catalog — ciornele vechi ale copiilor sunt ignorate,
+iar rezultatele vechi își păstrează scorul (fără lista pe exerciții, care nu s-ar mai potrivi cu testul nou).
 
 ## 2. Schema
 
@@ -35,6 +38,9 @@ export default {
 - `parts: [{ id: 'a', type, prompt, visual?, …câmpurile tipului }]` — subpunctele a), b), c). Dacă exercițiul are o
   singură parte, câmpurile ei se scriu direct pe exercițiu (forma scurtă).
 - `points` lipsește de obicei: implicit 2 / 3 / 4 după nivel. Scorul: 10 din oficiu + 90 × puncte obținute / total.
+- **Subpunctele valorează egal** în exercițiu, oricâte casete ar avea fiecare (a) cu 5 casete și b) cu o alegere: câte
+  jumătate). Pentru o alegere între **două** variante, unde ghicitul e ușor, pune `weight: 0.5` pe subpunct
+  (T3-e07 b, T4-e09 b). Implicit `weight` e 1.
 - `explain: { idea, steps: [...], check?, trap? }` — apare la rezultate, în „De ce? Cum rezolvăm”; `idea` este și
   indiciul de la „Mai încerc o dată”.
 
@@ -66,10 +72,34 @@ export default {
   `calc: false` oprește verificarea unui rând.
 - **Ghicitori:** `search: { from, to, rules: [...], pick: 'unique'|'max'|'min' }` — validatorul caută toate numerele
   și confirmă că răspunsul e cel corect și unic. Reguli: `equals`, `oneOf`, `range {min,max,inclusive}`,
-  `parity {even}`, `digitsDistinct`, `digitCount`, `digitSum`, `holds {expr cu n, z, u, s}`, `all`, `any`, `not`.
+  `parity {even}`, `digitsDistinct`, `digitCount`, `digitSum`, `holds {expr}`, `all`, `any`, `not`. În `holds`, `n` e
+  numărul, iar `u`, `z`, `s`, `m` sunt **cifrele** unităților, zecilor, sutelor și miilor (1000 → `m = 1`, `s = 0`).
+  Cu `of: 'n'`, regula (și regulile din `all`/`any`/`not`) se aplică pe acel câmp al elementului.
 - **Adunări:** la `[[a]] + [[b]] = …` termenii sunt acceptați în orice ordine.
 - **Mesaj țintit:** `feedback: [{ if: 35, text: '8 + 7 = 15: nu uita zecea nouă!' }]` pe casetă (sau pe item la
   `choice`/`match`).
+- **Lățimea casetelor:** toate casetele numerice ale unui subpunct au aceeași lățime (după cel mai lung răspuns), ca
+  lățimea să nu trădeze răspunsul; se pot scrie până la 4 cifre.
+
+### Etichetele „cu / fără trecere peste ordin”
+- Definiția, pe coloane: la **adunare** e cu trecere dacă suma cifrelor unei coloane e cel puțin 10 (7 + 5, 28 + 12);
+  la **scădere**, dacă o cifră a descăzutului e mai mică decât cifra scăzătorului de pe aceeași coloană (24 − 18, 100 − 50).
+- Validatorul urmărește toate adunările și scăderile din `fill` (rândurile verificate, `checks`, `expr`, cu răspunsurile
+  puse în casete, inclusiv calculele intermediare: 45 − 15 − 12 conține 30 − 12), `choice` (`calc`) și `match` (`calc`).
+- `mat.op.cu-trecere` / `mat.op1000.cu-trecere` cer cel puțin un calcul cu trecere; `mat.op.fara-trecere` /
+  `mat.op1000.fara-trecere` (fără eticheta „cu trecere”) nu permit niciunul. Un exercițiu mixt le poate avea pe amândouă.
+- Etichetează „cu / fără trecere” doar exercițiile în care **calculul e scopul**. Dacă într-o problemă de raționament calculul e
+  întâmplător, nu pune eticheta: altfel greșeala de raționament ar apărea la părinți ca „de exersat: cu trecere”.
+
+### Creditul parțial, pe scurt
+- Majoritatea tipurilor dau credit pe element (casetă, afirmație, pereche, element sortat).
+- `choice` multiplu: (variante corecte alese − variante greșite alese) / variante corecte, minim 0.
+- `mark` cu o culoare: (atinse corect − atinse greșit) / câte trebuiau atinse, minim 0.
+- `mark` cu paletă: (colorate corect − colorate deși nu trebuiau) / câte trebuiau colorate, minim 0. Cu două culori
+  folosite la fel de des, totul colorat cu aceeași culoare dă 50%, exact ca la sortarea în coșuri, unde totul pus într-un
+  singur coș dă tot 50%. O culoare greșită pe un element care trebuia colorat nu primește punct, dar nici nu scade în
+  plus: credit parțial fără penalizări negative (`docs/cercetare.md`, „Credit parțial”).
+- `order`: elementele din cel mai lung subșir aflat deja în ordine; `money` cu `distinct`: fiecare fel diferit.
 
 ## 4. Mini-markup (în orice text)
 `**tare**` · `==evidențiat==` · `\n` rând nou · `{{e:mar}}` emoji (lista în `site/js/visuals/emoji.js`) ·
@@ -95,8 +125,8 @@ Toate apar cu exemple la `#/atelier/vizualuri`. **Desen nou:** `registerVisual('
 - Contexte **reale și concrete** (piață, vacanță, fermă, școală); conținut **original**, nu copiat din manuale.
 - Cel puțin o **capcană de gândire** pe nivel: limbaj înșelător („mai puține decât” → adunăm), date în plus,
   mai multe soluții, verificarea rezultatului, „găsește greșeala”, mersul invers.
-- Diacritice corecte (ș, ț cu virgulă). „de” după numerale: 19 lei, **20 de lei** (în șabloane cu casete folosește
-  formulări neutre: „Rest (lei): [[a]]”).
+- Diacritice corecte (ș, ț cu virgulă). Acordul cu numeralul: **1 leu**, 19 lei, **20 de lei**, 101 lei, **1 grad**,
+  **22 de grade** (în șabloane cu casete folosește formulări neutre: „Rest (lei): [[a]]”). În cod: `cantitate(n, 'leu', 'lei')`.
 
 ## 7. Explicații și mesaje de feedback
 Șablon: **Ce ne cere? → idee (desen) → pași → proba → capcana**. Lăudăm strategia, nu copilul („Încă nu — hai să privim zecile”).
@@ -129,4 +159,4 @@ La începutul clasei a II-a se adaugă ~20–30 s pentru citirea fiecărui enun�
 - [ ] `npm test` verde (0 erori; citește și avertismentele)
 - [ ] `npm run e2e` verde; capturile arată bine pe laptop, tabletă și telefon
 - [ ] durata 40–48 min, 4/4/3 exerciții, 1–2 de explorarea mediului, fiecare exercițiu cu `explain`
-- [ ] catalogul actualizat (`version`, `estMin`), `docs/STARE.md` actualizat
+- [ ] catalogul actualizat (`version`, `estMin`, `exercises`), `npm run acoperire`, `docs/STARE.md` actualizat
