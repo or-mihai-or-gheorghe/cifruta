@@ -30,7 +30,10 @@ export default async function player(container, [testId]) {
   if (!draft || draft.version !== test.version) {
     draft = { testId, version: test.version, seed: newSeed(), current: -1, answers: {}, activeMs: 0, msByExercise: {}, seenBreaks: [], startedAt: new Date().toISOString() };
   }
-  const save = () => saveDraft(testId, draft);
+  let submitted = false; // după trimitere, ciorna nu mai trebuie salvată (altfel reapare la redeschidere)
+  const save = () => {
+    if (!submitted) saveDraft(testId, draft);
+  };
   const total = test.exercises.length;
   const totalMin = test.exercises.reduce((s, e) => s + e.estMin, 0);
 
@@ -219,6 +222,8 @@ export default async function player(container, [testId]) {
       feeling: null,
       secondChance: {},
     });
+    submitted = true;
+    clearInterval(timer);
     clearDraft(testId);
     location.hash = `#/rezultate/${testId}`;
   }

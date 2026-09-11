@@ -201,8 +201,10 @@ def types_flow(run: Run, page: Page, vp: str):
 
 def test_flow(run: Run, page: Page, test: dict, vp: str):
     tid = test["id"]
-    page.evaluate("localStorage.clear()")
     run.goto(page, f"test/{tid}", debug=True)
+    page.evaluate("localStorage.clear()")
+    page.reload()
+    page.wait_for_load_state("networkidle")
     run.shot(page, f"{vp}-{tid}-intro")
     page.get_by_test_id("start").click()
     page.wait_for_selector(".ex-card")
@@ -235,6 +237,15 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     page.wait_for_timeout(600)
     run.shot(page, f"{vp}-{tid}-rezultate-100")
 
+    # după trimitere ciorna nu mai există, iar testul se redeschide de la început
+    draft = page.evaluate(f"localStorage.getItem('cifruta:draft:{tid}')")
+    run.check(draft is None, f"[{vp}] {tid}: ciorna e ștearsă după trimitere")
+    run.goto(page, f"test/{tid}", debug=True)
+    page.wait_for_selector("[data-testid=start], .ex-card")
+    run.check(page.get_by_test_id("start").count() == 1 and page.locator(".ex-card").count() == 0, f"[{vp}] {tid}: redeschis după trimitere, testul pornește de la intro")
+    run.goto(page, f"rezultate/{tid}", debug=True)
+    page.wait_for_selector("[data-testid=retake]")
+
     # gol → fereastra de confirmare → 10
     page.get_by_test_id("retake").click()
     page.wait_for_selector("[data-testid=start]")
@@ -246,7 +257,7 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     page.get_by_test_id("modal-confirm").click()
     page.wait_for_selector("[data-testid=score]")
     score = page.get_by_test_id("score").inner_text()
-    run.check(score.startswith("10"), f"[{vp}] {tid}: fără răspunsuri → scor 10 (primit {score!r})")
+    run.check(re.match(r"^10\s*/\s*100$", score) is not None, f"[{vp}] {tid}: fără răspunsuri → scor 10 (primit {score!r})")
 
     # „Mai încerc o dată” pe primul exercițiu
     first = page.locator(".ex-review__item").first.get_attribute("data-testid").replace("review-", "")

@@ -10,7 +10,13 @@ const read = (key, fallback) => {
   }
 };
 
-const write = (key, value) => localStorage.setItem(PREFIX + key, JSON.stringify(value));
+const write = (key, value) => {
+  try {
+    localStorage.setItem(PREFIX + key, JSON.stringify(value));
+  } catch {
+    /* stocare blocată sau plină: testul continuă, doar nu se salvează */
+  }
+};
 
 export const getDraft = (testId) => read(`draft:${testId}`, null);
 export const saveDraft = (testId, draft) => write(`draft:${testId}`, draft);
