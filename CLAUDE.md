@@ -36,12 +36,16 @@ _surse/ scanările PDF (ignorate de git) — deschide-le doar dacă docs/curricu
 ## Tipuri de exerciții (11)
 `choice` · `truefalse` · `fill` (layout inline/steps/table/tree/chain; casete number/relation/sign/select/text) ·
 `slider` · `match` (săgeți) · `order` (+ cuvânt secret / indicii logice) · `categorize` · `mark` (+ paletă) ·
-`build` (numărătoare) · `clock` · `money`. Exemple complete: `site/data/demo.js`; ghid: `docs/ghid-autor.md`.
+`build` (numărătoare) · `clock` · `money`. Exemple complete: `site/data/demo.js` (vizibile la `#/atelier/tipuri`); ghid: `docs/ghid-autor.md`.
+Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual` (desen deasupra casetelor), `feedback: [{ if, text }]` pentru greșeli tipice.
 
 ## Comenzi
 - `npm test` — teste unitare + validarea întregului conținut (schemă, răspunsuri, unicitate, durată 40–48 min, diacritice).
 - `npm run serve` — site local la http://localhost:8080 (`?debug=1` expune `window.__dbg`).
-- `npm run e2e` — Playwright (Chromium headless): fluxuri pe fiecare test, gesturi pe fiecare tip, capturi în `test-results/`.
+- `npm run e2e` — Playwright (Chromium headless): fluxuri pe fiecare test, gesturi pe fiecare tip, tastatură, capturi în `test-results/`
+  (`python3 tools/e2e.py --only recap-c1-t2 --shots`, `--viewports laptop`, `--base-url https://…` pentru site-ul publicat).
+- `python3 tools/fetch_assets.py` / `tools/fetch_fonts.py` — descarcă emoji Noto noi (după ce le adaugi în `emoji.js`) și fonturile.
+- Publicare: push pe `main` → GitHub Actions rulează `npm test` și publică `site/` pe https://or-mihai-or-gheorghe.github.io/cifruta/.
 
 ## Rețete
 - **Test nou:** fișier în `site/data/tests/<grup>/`, intrare în `data/catalog.js` (id, file, version, estMin), concepte din

@@ -1,13 +1,13 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-11 · **Versiune:** 0.1.0 (în lucru)
+- **Data:** 2026-09-11 · **Versiune:** 0.1.0
 - **URL live:** (după publicare) https://or-mihai-or-gheorghe.github.io/cifruta/
-- **Ce funcționează:** nucleul pur (expresii, reguli, punctaj, validare), logica celor 11 tipuri, CSS centralizat și
-  fonturi, paginile acasă / secțiune / atelier / 404, player complet (hartă pe niveluri, ecrane între niveluri, ciornă,
-  confirmare), rezultate (scor, calificativ, stele, confetti, autoevaluare, zona pentru părinți, revizuire, a doua
-  încercare), interfețele `choice`, `truefalse`, `fill`; E2E Playwright pe demo (scor 100 / 10 / ciornă).
-- **În lucru:** cele 4 teste de recapitulare (M8). Toate cele 11 tipuri au interfață; E2E: 128 de verificări pe laptop, tabletă, telefon.
+- **Ce funcționează:** site complet: catalog pe secțiuni, player (un exercițiu pe ecran, hartă pe niveluri, ecrane între
+  niveluri, ciornă), rezultate (scor, calificativ, stele, confetti, autoevaluare, zona pentru părinți, revizuire cu
+  explicații, rezolvare, „Mai încerc o dată”), 11 tipuri de exerciții, banca vizuală (36 de desene), atelier pentru autori.
+  Conținut: **4 teste de recapitulare a clasei I** (T1–T4). Calitate: 22 de teste Node, E2E 225+ verificări pe 3 ecrane.
+- **Următorul pas:** copilul rezolvă T1–T4 → notăm timpii reali și dificultatea; apoi secțiunile U1 (numere 0–1000) și U2.
 
 ## Etape
 - [x] M0 Schelet: git, `_surse/`, `.gitignore`, `package.json`, `CLAUDE.md`, docs (curriculum, cercetare)
@@ -18,17 +18,17 @@
 - [x] M5 `dnd` + `order`, `categorize`, `match`, `mark`
 - [x] M6 `slider`, `build`, `clock`, `money`
 - [x] M7 Banca vizuală (36 de desene), emoji Noto locale, mascota, atelier „Vizualuri” / „Tipuri”
-- [ ] M8 Testele T1–T4
-- [ ] M9 Finisaj: animații, accesibilitate
+- [x] M8 Testele T1–T4
+- [x] M9 Finisaj: animații, tastatură, animații reduse (fără voce, la cerere)
 - [ ] M10 Publicare pe GitHub Pages
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
 |-|-|-|-|-|-|-|
-| recap-c1-t1 | Amintiri din vacanță | – | planificat | – | 44 | – |
-| recap-c1-t2 | La piață cu bunica | – | planificat | – | 44 | – |
-| recap-c1-t3 | Călătorie în spațiu | – | planificat | – | 43 | – |
-| recap-c1-t4 | O zi la fermă | – | planificat | – | 43 | – |
+| recap-c1-t1 | Amintiri din vacanță | 1 | publicat | npm test + E2E | 44 | – |
+| recap-c1-t2 | La piață cu bunica | 1 | publicat | npm test + E2E | 44 | – |
+| recap-c1-t3 | Călătorie în spațiu | 1 | publicat | npm test + E2E | 43 | – |
+| recap-c1-t4 | O zi la fermă | 1 | publicat | npm test + E2E | 43 | – |
 
 ## Decizii
 | data | decizie | motiv |
@@ -47,7 +47,9 @@
 | 2026-09-11 | Revizuirea arată răspunsul copilului vs. cel corect (✓/✗ + text), explicație (idee, pași, probă, capcană), rezolvarea completă și „Mai încerc o dată” | feedback eficient pentru 6–8 ani (docs/cercetare.md) |
 
 ## Probleme cunoscute
-- (niciuna încă)
+- Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
+- Talerele desenului `balance` se rotesc cu brațul (nu atârnă vertical) — nefolosit încă în teste.
+- După publicare, GitHub Pages poate servi ~10 min fișiere vechi (cache).
 
 ## Backlog
 - Scanările actuale acoperă manualul până la înmulțire; utilizatorul adaugă scanări noi după finalizarea etapei curente.
@@ -60,4 +62,6 @@
 ## Jurnal de sesiuni
 - **2026-09-11** — Analiză scanări + documentare online (programă, EN II, exemple, aplicații). Plan aprobat.
   Implementat M0–M1: schelet, nucleu pur, logica celor 11 tipuri, demo, 14 teste unitare verzi. Docs: curriculum, cercetare.
-  M2–M3: design system, pagini, player, rezultate; E2E pe demo trece (100 / 10 / ciornă). Început M4 (`fill`) și banca vizuală.
+  M2–M3: design system, pagini, player, rezultate; E2E pe demo trece (100 / 10 / ciornă).
+  M4–M7: interfețele celor 11 tipuri (dnd, săgeți, slider, numărătoare, ceas, bani), banca vizuală, emoji locale.
+  M8–M9: testele T1–T4 (validate automat: 0 erori), E2E 225 de verificări; ghidul autorului; README și licențe.
