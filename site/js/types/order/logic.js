@@ -79,7 +79,8 @@ export default {
       const values = part.items.map(valueOf);
       if (new Set(values).size !== values.length) errors.push('order: valori egale — ordinea nu e unică');
     }
-    if (part.constraints) {
+    if (part.constraints && ids.length > 8) errors.push('order: indiciile se verifică doar pentru cel mult 8 elemente');
+    else if (part.constraints) {
       const found = [...permutations(ids)].filter((p) => satisfies(p, part.constraints));
       if (found.length !== 1) errors.push(`order: indiciile permit ${found.length} ordini (trebuie una)`);
       else if (found[0].join() !== key.join()) errors.push(`order: indiciile dau ${found[0].join(', ')}, nu ${key.join(', ')}`);

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { calc, holds, relation } from '../site/js/core/expr.js';
+import { calc, holds, relation, trace } from '../site/js/core/expr.js';
 import { lintText } from '../site/js/core/lint.js';
 import { md, markupErrors, plain } from '../site/js/core/markup.js';
 import { cantitate, fixCedilla, formatNumber, numberToWords, sameText, singularOf } from '../site/js/core/ro.js';
@@ -25,6 +25,10 @@ test('expr: calcule și relații', () => {
   assert.equal(relation(47, 74), '<');
   assert.throws(() => calc('7 zeci'));
   assert.throws(() => calc('7 : 2'));
+  assert.equal(calc('+18'), 18); // plus unar
+  assert.ok(holds('+5 = 5'));
+  assert.deepEqual(trace('45 − 15 − 12 = 18'), [{ op: '-', a: 45, b: 15 }, { op: '-', a: 30, b: 12 }]);
+  assert.deepEqual(trace('(7 + 5) + 28 = 3 × 4 + 28'), [{ op: '+', a: 7, b: 5 }, { op: '+', a: 12, b: 28 }, { op: '+', a: 12, b: 28 }]);
 });
 
 test('ro: acordul numeral + substantiv, numere în litere, comparare', () => {
@@ -68,9 +72,23 @@ test('rules: condiții pentru numere și bani', () => {
   assert.deepEqual(riddle, [37]);
   assert.equal(minPieces(35, [1, 5, 10, 20, 50]), 3);
   const combos = moneyCombos(12, [1, 5, 10]).map(moneyKey);
-  assert.ok(combos.includes('10x1,1x2'));
-  assert.ok(combos.includes('5x2,1x2'));
-  assert.equal(combos[0], '10x1,1x2'); // cele mai puține bancnote primele
+  assert.deepEqual(combos, ['10x1,1x2', '5x2,1x2', '5x1,1x7', '1x12']); // toate, cele mai puține bancnote primele
+  assert.deepEqual(moneyCombos(20, [1, 5, 10], { limit: 3 }).map(moneyKey), ['10x2', '10x1,5x2', '5x4']);
+  assert.deepEqual(moneyCombos(30, [5, 10, 20], { maxPieces: 2 }).map(moneyKey), ['20x1,10x1']);
+  const t0 = performance.now();
+  const notes = [1, 5, 10, 20, 50, 100, 200, 500];
+  assert.deepEqual(moneyCombos(500, notes, { limit: 2 }).map(moneyKey), ['500x1', '200x2,100x1']);
+  assert.deepEqual(moneyCombos(500, notes, { maxPieces: minPieces(500, notes) }).map(moneyKey), ['500x1']);
+  assert.ok(performance.now() - t0 < 50, 'moneyCombos cu limită e rapid');
+  // cifrele: s = sute, m = mii
+  assert.ok(check({ rule: 'holds', expr: 'm = 1' }, 1000));
+  assert.ok(check({ rule: 'holds', expr: 's = 0' }, 1000));
+  assert.ok(check({ rule: 'holds', expr: 's + z + u = 10' }, 253)); // 2 + 5 + 3
+  // regulile compuse lucrează pe valoarea extrasă prin `of`
+  const item = { id: 's1', n: 14 };
+  assert.ok(check({ rule: 'all', of: 'n', rules: [{ rule: 'parity', even: true }, { rule: 'range', min: 10, max: 20 }] }, item));
+  assert.ok(check({ rule: 'any', of: 'n', rules: [{ rule: 'equals', value: 3 }, { rule: 'equals', value: 14 }] }, item));
+  assert.ok(check({ rule: 'not', of: 'n', inner: { rule: 'parity', even: false } }, item));
 });
 
 test('markup: escapare, formatare, tokenuri', () => {

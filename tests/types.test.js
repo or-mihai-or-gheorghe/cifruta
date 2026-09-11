@@ -67,6 +67,9 @@ test('order: credit pentru cel mai lung subșir în ordine; indicii unice', () =
   };
   assert.deepEqual(logic.validate(clues), []);
   assert.ok(logic.validate({ ...clues, constraints: clues.constraints.slice(0, 2) }).some((e) => e.includes('ordini')));
+  const nine = Array.from({ length: 9 }, (_, i) => `c${i}`);
+  const big = { type: 'order', items: nine.map((id) => ({ id, text: id })), key: nine, constraints: [{ rule: 'first', a: 'c0' }] };
+  assert.ok(logic.validate(big).some((e) => e.includes('cel mult 8')));
 });
 
 test('mark: atingerile greșite scad din credit', () => {

@@ -43,7 +43,8 @@ export function tokenize(src) {
   return out;
 }
 
-function parser(tokens, env) {
+// onOp(op, a, b) e anunțat la fiecare adunare sau scădere, cu operanzii ei (pentru trace)
+function parser(tokens, env, onOp) {
   let pos = 0;
   const peek = () => tokens[pos];
   const next = () => tokens[pos++];
@@ -62,6 +63,7 @@ function parser(tokens, env) {
       return v;
     }
     if (tok.t === 'op' && tok.v === '-') return -factor();
+    if (tok.t === 'op' && tok.v === '+') return factor();
     throw new Error(`Simbol neașteptat: ${tok.v ?? tok.t}`);
   }
 
@@ -84,6 +86,7 @@ function parser(tokens, env) {
     while (peek()?.t === 'op' && (peek().v === '+' || peek().v === '-')) {
       const op = next().v;
       const r = term();
+      onOp?.(op, v, r);
       v = op === '+' ? v + r : v - r;
     }
     return v;
@@ -115,6 +118,19 @@ export function holds(src, env = {}) {
   }
   if (!p.done() || !seen) throw new Error(`Relație invalidă: ${src}`);
   return ok;
+}
+
+/** Adunările și scăderile dintr-o expresie sau relație, în ordinea calculului: trace("45 − 15 − 12") → [{ op:'-', a:45, b:15 }, { op:'-', a:30, b:12 }] */
+export function trace(src, env = {}) {
+  const ops = [];
+  const p = parser(tokenize(src), env, (op, a, b) => ops.push({ op, a, b }));
+  p.sum();
+  while (p.peek()?.t === 'rel') {
+    p.next();
+    p.sum();
+  }
+  if (!p.done()) throw new Error(`Expresie invalidă: ${src}`);
+  return ops;
 }
 
 export const relation = (a, b) => (a < b ? '<' : a > b ? '>' : '=');

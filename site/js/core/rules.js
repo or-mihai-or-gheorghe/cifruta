@@ -27,15 +27,17 @@ export function check(rule, value, env = {}) {
     case 'digitSum':
       return digitsOf(v).reduce((a, b) => a + b, 0) === rule.value;
     case 'holds': {
+      // n = numărul; u, z, s, m = cifrele unităților, zecilor, sutelor, miilor (1000 → m = 1, s = 0)
       const n = Number(v);
-      return holds(rule.expr, { ...env, n, z: Math.floor(n / 10) % 10, u: n % 10, s: Math.floor(n / 100) % 10 });
+      return holds(rule.expr, { ...env, n, u: n % 10, z: Math.floor(n / 10) % 10, s: Math.floor(n / 100) % 10, m: Math.floor(n / 1000) % 10 });
     }
+    // regulile compuse primesc valoarea deja extrasă prin `of`
     case 'all':
-      return rule.rules.every((r) => check(r, value, env));
+      return rule.rules.every((r) => check(r, v, env));
     case 'any':
-      return rule.rules.some((r) => check(r, value, env));
+      return rule.rules.some((r) => check(r, v, env));
     case 'not':
-      return !check(rule.inner, value, env);
+      return !check(rule.inner, v, env);
     default:
       throw new Error(`Regulă necunoscută: ${rule.rule}`);
   }
@@ -74,19 +76,30 @@ export function minPieces(target, allowed) {
   return best[target];
 }
 
-/** Toate combinațiile (ordonate după numărul de bucăți) care dau exact suma. */
-export function moneyCombos(target, allowed) {
-  const ds = [...allowed].map(Number).sort((a, b) => b - a);
+/**
+ * Combinațiile care dau exact suma, cele cu mai puține bucăți primele.
+ * limit: câte combinații sunt necesare (se oprește când le are); maxPieces: cel mult atâtea bucăți.
+ * Caută pe rând combinațiile cu 1, 2, 3… bucăți, de la bancnota cea mai mare, și abandonează ramurile imposibile.
+ */
+export function moneyCombos(target, allowed, { limit = Infinity, maxPieces = Infinity } = {}) {
+  const ds = [...new Set(allowed.map(Number))].sort((a, b) => b - a);
+  const smallest = ds.at(-1);
   const res = [];
-  (function rec(i, rest, combo) {
-    if (rest === 0) { res.push({ ...combo }); return; }
-    if (i >= ds.length) return;
-    const d = ds[i];
-    for (let c = Math.floor(rest / d); c >= 0; c--) {
-      const next = { ...combo };
-      if (c) next[d] = c;
-      rec(i + 1, rest - c * d, next);
+  const combo = {};
+  function rec(i, rest, pieces) {
+    if (rest === 0) {
+      if (pieces === 0) res.push({ ...combo });
+      return;
     }
-  })(0, target, {});
-  return res.sort((a, b) => moneyPieces(a) - moneyPieces(b));
+    if (i >= ds.length || rest > pieces * ds[i] || rest < pieces * smallest) return;
+    const d = ds[i];
+    for (let c = Math.min(pieces, Math.floor(rest / d)); c >= 0 && res.length < limit; c--) {
+      if (c) combo[d] = c;
+      rec(i + 1, rest - c * d, pieces - c);
+      delete combo[d];
+    }
+  }
+  const most = Math.min(maxPieces, Math.floor(target / smallest));
+  for (let k = 1; k <= most && res.length < limit; k++) rec(0, target, k);
+  return res;
 }

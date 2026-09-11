@@ -15,12 +15,9 @@ export const validCombo = (part, combo) =>
   typeof combo === 'object' && combo !== null && !Array.isArray(combo) &&
   Object.entries(combo).every(([note, count]) => part.allowed.includes(Number(note)) && isInt(count, 0, 100));
 
-const combosFor = (part) => {
-  const all = moneyCombos(part.target, part.allowed);
-  if (!part.fewest) return all;
-  const min = minPieces(part.target, part.allowed);
-  return all.filter((c) => moneyPieces(c) === min);
-};
+/** Primele `limit` feluri de plată (cu cele mai puține bancnote întâi); cu `fewest`, doar cele cu minimul de bancnote. */
+const combosFor = (part, limit) =>
+  moneyCombos(part.target, part.allowed, { limit, maxPieces: part.fewest ? minPieces(part.target, part.allowed) : Infinity });
 
 export default {
   type: 'money',
@@ -33,7 +30,7 @@ export default {
     if (!Array.isArray(part.items) || !part.items.length) errors.push('money: lipsește lista „items”');
     if (errors.length) return errors;
     checkIds(part.items, 'money.items', errors);
-    const combos = combosFor(part);
+    const combos = combosFor(part, part.items.length);
     if (!combos.length) errors.push(`money: ${part.target} nu se poate plăti exact cu ${part.allowed.join(', ')}`);
     if (part.distinct && combos.length < part.items.length) errors.push(`money: există doar ${combos.length} feluri, dar se cer ${part.items.length}`);
     return errors;
@@ -43,7 +40,7 @@ export default {
   answered: (part, ans) => part.items.filter((it) => moneyPieces(ans?.[it.id]) > 0).length,
   empty: () => ({}),
   solution: (part) => {
-    const combos = combosFor(part);
+    const combos = combosFor(part, part.distinct ? part.items.length : 1);
     return Object.fromEntries(part.items.map((it, i) => [it.id, combos[part.distinct ? i : 0]]));
   },
 
