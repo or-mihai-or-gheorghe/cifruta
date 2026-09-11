@@ -96,6 +96,7 @@ class Run:
 def smoke(run: Run, page: Page, vp: str):
     for route, name in [("", "acasa"), ("sectiune/recapitulare", "sectiune"), ("atelier/componente", "atelier-componente"), ("atelier/vizualuri", "atelier-vizualuri"), ("atelier/tipuri", "atelier-tipuri"), ("nu-exista", "404")]:
         run.goto(page, route)
+        page.wait_for_function("document.querySelector('main')?.innerText.trim().length > 0")
         page.wait_for_timeout(300)
         run.check(page.locator("main").inner_text().strip() != "", f"[{vp}] pagina „{name}” are conținut")
         run.layout_ok(page, f"[{vp}] {name}")

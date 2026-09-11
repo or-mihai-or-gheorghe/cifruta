@@ -69,9 +69,9 @@ function visuals() {
   );
 }
 
-async function types() {
+async function types(wrap) {
   const test = normalizeTest(demoTest);
-  const wrap = h('div', { class: 'l-stack l-stack--lg' }, h('p', { class: 'u-muted' }, 'Fiecare exemplu este definit în site/data/demo.js. Butoanele de mai jos sunt doar pentru autori.'));
+  wrap.append(h('p', { class: 'u-muted' }, 'Fiecare exemplu este definit în site/data/demo.js. Butoanele de mai jos sunt doar pentru autori.'));
   const ctls = {};
   for (const [i, ex] of test.exercises.entries()) {
     const box = h('div', { class: 'l-stack', 'data-testid': `demo-${ex.id}` });
@@ -100,12 +100,11 @@ async function types() {
   if (new URLSearchParams(location.search).has('debug')) {
     window.__dbg = { answer: (id) => JSON.parse(JSON.stringify(ctls[id].get())), evaluate: (id) => evaluateExercise(test.exercises.find((e) => e.id === id), ctls[id].get()) };
   }
-  return wrap;
 }
 
 export default async function atelier(container, [tab = 'componente']) {
   document.title = 'Atelier — Cifruța';
-  const body = tab === 'vizualuri' ? visuals() : tab === 'tipuri' ? await types() : components();
+  const body = h('div', { class: 'l-stack l-stack--lg' });
   container.append(
     h(
       'div',
@@ -115,5 +114,8 @@ export default async function atelier(container, [tab = 'componente']) {
       body,
     ),
   );
+  if (tab === 'vizualuri') body.append(visuals());
+  else if (tab === 'tipuri') await types(body);
+  else body.append(components());
   return () => delete window.__dbg;
 }
