@@ -116,7 +116,10 @@ export default {
       mode(m) {
         mode = m;
         for (const b of el.querySelectorAll('button')) b.disabled = isLocked(m);
-        if (isLocked(m)) for (const w of Object.values(wallets)) w.wallet.classList.remove('is-active');
+        for (const w of Object.values(wallets)) {
+          w.wallet.tabIndex = isLocked(m) ? -1 : 0;
+          if (isLocked(m)) w.wallet.classList.remove('is-active');
+        }
       },
       showResult(res) {
         for (const x of res.items) {
