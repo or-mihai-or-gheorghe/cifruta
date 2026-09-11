@@ -130,6 +130,10 @@ def types_flow(run: Run, page: Page, vp: str):
 
     tap(tid("tf-i1-A")); tap(tid("tf-i2-F")); ok("truefalse")
 
+    blank = page.locator(f"{tid('demo-fill')} {tid('blank-a')}")
+    blank.press_sequentially("1000")
+    run.check(page.evaluate("window.__dbg.answer('fill').a.a") == "1000", f"[{vp}] caseta numerică acceptă 1000")
+    blank.fill("")
     typing("fill", {"a": 69, "b": 24})
     box = f"{tid('demo-fill')} "
     tap(box + tid("seg-c-<")); tap(box + tid("seg-d-=")); tap(box + tid("seg-e-−")); ok("fill")
@@ -174,7 +178,36 @@ def types_flow(run: Run, page: Page, vp: str):
             tap(tid(f"order-{current[i]}"))
     ok("order")
 
-    page.locator(tid("slider-i1")).fill("48"); ok("slider")
+    # slider pe axă: atingeri pe liniuțele desenate (poziția lor se citește din desen), tragere, tastatură
+    page.locator(f"{tid('demo-slider')} .ex-slider__art").scroll_into_view_if_needed()
+    axis = lambda: page.evaluate("""() => {
+      const svg = document.querySelector("[data-testid='demo-slider'] .ex-slider__art svg");
+      const line = svg.querySelector('line').getBoundingClientRect();
+      const labels = Object.fromEntries([...svg.querySelectorAll('text')].map((t) => { const r = t.getBoundingClientRect(); return [t.textContent, r.left + r.width / 2]; }));
+      return { y: line.top + line.height / 2, labels };
+    }""")
+    slider = lambda: page.evaluate("window.__dbg.answer('slider').a?.i1 ?? null")
+    press = page.touchscreen.tap if touch else page.mouse.click
+    for label in ("0", "50", "100"):
+        geo = axis()
+        press(geo["labels"][label], geo["y"])
+        got = slider()
+        run.check(got is not None and abs(got - int(label)) <= 1, f"[{vp}] slider: atingerea liniuței {label} dă {got}")
+    if not touch:
+        geo = axis()
+        page.mouse.move(geo["labels"]["0"], geo["y"])
+        page.mouse.down()
+        page.mouse.move(geo["labels"]["50"], geo["y"], steps=8)
+        page.mouse.up()
+        got = slider()
+        run.check(got is not None and abs(got - 50) <= 1, f"[{vp}] slider: tragerea cu mouse-ul până la 50 dă {got}")
+    page.locator(tid("slider-i1")).focus()
+    before = slider()
+    page.keyboard.press("ArrowLeft")
+    run.check(slider() == before - 1, f"[{vp}] slider: săgeata stânga mută cu 1 ({before} → {slider()})")
+    geo = axis()
+    press(geo["labels"]["0"] + (geo["labels"]["100"] - geo["labels"]["0"]) * 0.48, geo["y"])
+    ok("slider")
 
     tap(tid("brush-verde")); tap(tid("mark-soare")); tap(tid("mark-vant"))
     tap(tid("brush-rosu")); tap(tid("mark-carbune")); tap(tid("mark-petrol"))

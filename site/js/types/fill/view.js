@@ -3,12 +3,13 @@
 import { h } from '../../core/dom.js';
 import { md } from '../../core/markup.js';
 import { feedbackBox, isLocked, setState } from '../_view.js';
-import { kindOf } from './logic.js';
+import { keyOf, kindOf } from './logic.js';
 
 const BLANK = /\[\[(\w+)\]\]/g;
 const SEGMENTS = { relation: ['<', '=', '>'], sign: ['+', '−'] };
 const SEGMENT_LABELS = { '<': 'mai mic decât', '=': 'egal cu', '>': 'mai mare decât', '+': 'plus', '−': 'minus' };
-const niceMinus = (s) => String(s).replace(/-/g, '−');
+// „-” devine „−” tipografic, dar nu în token-uri precum {{v:ten-frame}}
+const niceMinus = (s) => String(s).replace(/\{\{.*?\}\}|-/g, (m) => (m === '-' ? '−' : m));
 
 export default {
   howto: (part) => {
@@ -23,6 +24,9 @@ export default {
 
   mount(el, part, ctx) {
     const blanks = part.blanks ?? {};
+    // casetele numerice ale subpunctului au aceeași lățime, ca lățimea să nu trădeze răspunsul (100 printre 42 și 56)
+    const key = keyOf(part);
+    const digits = Math.max(2, ...Object.keys(blanks).filter((id) => kindOf(blanks[id]) === 'number').map((id) => String(key[id] ?? '').length));
     let answer = {};
     let mode = 'solve';
     const widgets = {}; // blankId → { wrap, set(value), lock(bool) }
@@ -35,21 +39,21 @@ export default {
     }
 
     function numberWidget(id, blank) {
-      const digits = String(blank.answer ?? blank.expr ?? '00').length > 3 ? 3 : Math.max(2, String(blank.answer ?? '').length);
+      const text = kindOf(blank) === 'text';
       const input = h('input', {
         class: 'ex-blank',
-        type: kindOf(blank) === 'text' ? 'text' : 'text',
-        inputmode: kindOf(blank) === 'text' ? 'text' : 'numeric',
-        pattern: kindOf(blank) === 'text' ? null : '[0-9]*',
-        maxlength: kindOf(blank) === 'text' ? '20' : String(blank.maxDigits ?? 3),
+        type: 'text',
+        inputmode: text ? 'text' : 'numeric',
+        pattern: text ? null : '[0-9]*',
+        maxlength: text ? '20' : '4', // până la 1000
         autocomplete: 'off',
         spellcheck: 'false',
         'aria-label': blank.label ?? 'căsuță',
         'data-testid': `blank-${id}`,
-        style: { '--digits': kindOf(blank) === 'text' ? 6 : digits },
+        style: { '--digits': text ? 6 : digits },
       });
       input.addEventListener('input', () => {
-        if (kindOf(blank) !== 'text') input.value = input.value.replace(/\D/g, '');
+        if (!text) input.value = input.value.replace(/\D/g, '');
         input.classList.toggle('has-value', input.value !== '');
         change(id, input.value);
       });
@@ -68,8 +72,10 @@ export default {
     }
 
     function segmentWidget(id, blank) {
-      const values = kindOf(blank) === 'select' ? blank.options.map(String) : SEGMENTS[kindOf(blank)];
-      const group = h('span', { class: `ex-seg${kindOf(blank) === 'select' ? ' ex-seg--words' : ''}`, role: 'radiogroup', 'aria-label': blank.label ?? 'alege' });
+      const kind = kindOf(blank);
+      const values = kind === 'select' ? blank.options.map(String) : SEGMENTS[kind];
+      const shown = (v) => (kind === 'sign' ? niceMinus(v) : String(v)); // variantele de la select se compară exact
+      const group = h('span', { class: `ex-seg${kind === 'select' ? ' ex-seg--words' : ''}`, role: 'radiogroup', 'aria-label': blank.label ?? 'alege' });
       const buttons = values.map((v) =>
         h(
           'button',
@@ -93,17 +99,17 @@ export default {
       );
       group.append(...buttons);
       const paint = (v) => {
-        group.dataset.value = v ?? '';
-        group.classList.toggle('has-value', !!v);
+        group.dataset.value = v;
+        group.classList.toggle('has-value', v !== '');
         for (const b of buttons) {
-          const on = b.dataset.value === niceMinus(v ?? '');
+          const on = b.dataset.value === v;
           b.classList.toggle('is-selected', on);
           b.setAttribute('aria-checked', String(on));
         }
       };
       return {
         wrap: h('span', { class: 'ex-blank-wrap' }, group),
-        set: (v) => paint(v === undefined || v === null ? '' : niceMinus(v)),
+        set: (v) => paint(v === undefined || v === null ? '' : shown(v)),
         lock: (l) => buttons.forEach((b) => { b.disabled = l; }),
       };
     }
@@ -199,7 +205,8 @@ export default {
           if (!w) continue;
           w.wrap.querySelector('.ex-expected')?.remove();
           setState(w.wrap, r.ok ? 'correct' : 'wrong');
-          if (!r.ok) w.wrap.append(h('span', { class: 'ex-expected', 'aria-label': `corect: ${r.expected}` }, niceMinus(r.expected)));
+          const expected = kindOf(blanks[r.id]) === 'sign' ? niceMinus(r.expected) : String(r.expected);
+          if (!r.ok) w.wrap.append(h('span', { class: 'ex-expected', 'aria-label': `corect: ${expected}` }, expected));
           if (r.feedback) notes.push(r.feedback);
         }
         feedbackArea.replaceChildren(...notes.map((n) => feedbackBox(n)));

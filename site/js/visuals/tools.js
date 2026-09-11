@@ -91,6 +91,9 @@ registerVisual('ten-frame', {
 });
 
 // ——— Axa numerelor ———
+/** Geometria axei în viewBox: liniuța lui min e la x0, a lui max la x0 + len (folosită și de slider). */
+export const LINE = { x0: 16, len: 280 };
+
 registerVisual('number-line', {
   group: GROUP,
   defaults: { min: 0, max: 100, minor: 10, labels: '0,50,100' },
@@ -101,7 +104,7 @@ registerVisual('number-line', {
     const max = num(p.max, 100);
     const minor = Math.max(1, num(p.minor, 10));
     const labels = list(p.labels).map(Number);
-    const x = (v) => 16 + ((v - min) / (max - min)) * 280;
+    const x = (v) => LINE.x0 + ((v - min) / (max - min)) * LINE.len;
     let out = `<line x1="10" y1="44" x2="306" y2="44" ${st(3)}/><path d="M304 38 L314 44 L304 50 Z" fill="${C.ink}"/>`;
     for (let v = min; v <= max + 1e-9; v += minor) {
       const major = labels.includes(v);

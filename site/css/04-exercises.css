@@ -425,19 +425,9 @@
 .ex-slider__art { max-width: 40rem; }
 .ex-slider--thermo .ex-slider__stage { display: grid; grid-template-columns: 7rem 1fr; align-items: center; gap: var(--sp-4); }
 .ex-slider__range { width: 100%; height: var(--tap); accent-color: var(--c-brand); cursor: pointer; }
-.ex-slider__range--overlay {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: calc(5% - 22px);
-  width: calc(87.5% + 44px);
-  height: 100%;
-  margin: 0;
-  opacity: 0;
-  cursor: ew-resize;
-}
-.ex-slider__range--overlay::-webkit-slider-thumb { width: 44px; height: 44px; }
-.ex-slider__range--overlay::-moz-range-thumb { width: 44px; height: 44px; }
+/* pe axă se atinge desenul; derularea verticală a paginii rămâne posibilă */
+.ex-slider--line .ex-slider__art { cursor: pointer; touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+.ex-slider.is-locked .ex-slider__art { cursor: default; }
 .ex-slider:focus-within .ex-slider__art { outline: 3px solid var(--c-focus); outline-offset: 4px; border-radius: var(--r-1); }
 .ex-slider.is-untouched .ex-slider__art { opacity: 0.85; }
 .ex-slider.is-correct, .ex-slider.is-wrong { border-color: var(--state); background: var(--state-bg); }
