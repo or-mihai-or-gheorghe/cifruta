@@ -1,0 +1,16 @@
+{
+  "name": "cifruta",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cifruța — exerciții interactive pentru clasa a II-a (Matematică și explorarea mediului)",
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"tests/**/*.test.js\"",
+    "serve": "python3 -m http.server 8080 -d site",
+    "e2e": "python3 tools/e2e.py"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}

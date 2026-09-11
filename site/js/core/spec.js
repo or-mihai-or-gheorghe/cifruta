@@ -1,0 +1,96 @@
+// Structura unui test: normalizare (forma scurtă a exercițiilor) și validare completă.
+
+import config from '../../data/scoring.js';
+import { findNonJSON, lintText, NEGATION, walkTexts, WORD_LIMITS } from './lint.js';
+import { markupErrors, plain } from './markup.js';
+import { getLogic, hasType } from './registry.js';
+import { wordCount } from './ro.js';
+
+const LEVEL_IDS = config.levels.map((l) => l.id);
+const EXERCISE_KEYS = new Set(['id', 'level', 'estMin', 'points', 'concepts', 'title', 'context', 'explain', 'parts']);
+
+/** Un exercițiu cu o singură parte poate fi scris fără `parts`: câmpurile părții stau direct pe exercițiu. */
+export function normalizeExercise(ex) {
+  if (ex.parts) return ex;
+  const out = {};
+  const part = { id: 'a' };
+  for (const [k, v] of Object.entries(ex)) (EXERCISE_KEYS.has(k) ? out : part)[k] = v;
+  return { ...out, parts: [part] };
+}
+
+export const normalizeTest = (test) => ({ ...test, exercises: (test.exercises ?? []).map(normalizeExercise) });
+
+export function validateTest(raw, { concepts } = {}) {
+  const errors = [];
+  const warnings = [];
+  const test = normalizeTest(raw);
+
+  if (test.schema !== 1) errors.push('schema trebuie să fie 1');
+  if (!test.id) errors.push('lipsește id');
+  if (!test.title) errors.push('lipsește title');
+  if (!Number.isInteger(test.version)) errors.push('version trebuie să fie un număr întreg');
+  if (!test.exercises.length) errors.push('testul nu are exerciții');
+  for (const p of findNonJSON(raw)) errors.push(`${p}: valoare care nu poate fi salvată ca JSON`);
+
+  const exIds = new Set();
+  let levelIndex = 0;
+  let totalMin = 0;
+  for (const ex of test.exercises) {
+    const where = `exercițiul ${ex.id}`;
+    if (!ex.id || exIds.has(ex.id)) errors.push(`${where}: id lipsă sau duplicat`);
+    exIds.add(ex.id);
+    const li = LEVEL_IDS.indexOf(ex.level);
+    if (li < 0) errors.push(`${where}: nivel necunoscut „${ex.level}”`);
+    else if (li < levelIndex) errors.push(`${where}: nivelurile trebuie să crească (ușor → intermediar → avansat)`);
+    else levelIndex = li;
+    if (!(ex.estMin > 0)) errors.push(`${where}: lipsește estMin`);
+    else totalMin += ex.estMin;
+    if (!ex.title) errors.push(`${where}: lipsește titlul`);
+    if (!ex.concepts?.length) errors.push(`${where}: lipsesc conceptele`);
+    for (const c of ex.concepts ?? []) if (concepts && !concepts[c]) errors.push(`${where}: concept necunoscut „${c}”`);
+    if (!ex.explain?.idea) warnings.push(`${where}: lipsește explicația (explain.idea)`);
+
+    const partIds = new Set();
+    for (const part of ex.parts) {
+      const pw = `${where}.${part.id}`;
+      if (!part.id || partIds.has(part.id)) errors.push(`${pw}: id lipsă sau duplicat`);
+      partIds.add(part.id);
+      if (!hasType(part.type)) {
+        errors.push(`${pw}: tip necunoscut „${part.type}”`);
+        continue;
+      }
+      const logic = getLogic(part.type);
+      let partErrors;
+      try {
+        partErrors = logic.validate(part);
+      } catch (e) {
+        partErrors = [`eroare la validare: ${e.message}`];
+      }
+      errors.push(...partErrors.map((e) => `${pw}: ${e}`));
+      if (partErrors.length) continue;
+
+      const full = logic.evaluate(part, logic.solution(part));
+      if (full.earned !== full.total) errors.push(`${pw}: soluția nu primește punctaj maxim (${full.earned}/${full.total})`);
+      if (logic.evaluate(part, logic.empty(part)).earned !== 0) errors.push(`${pw}: răspunsul gol primește puncte`);
+
+      const limit = WORD_LIMITS[ex.level];
+      const words = part.prompt ? wordCount(plain(part.prompt)) : 0;
+      if (limit && words > limit) warnings.push(`${pw}: enunț de ${words} cuvinte (recomandat ≤ ${limit})`);
+      if (part.type === 'truefalse') {
+        for (const it of part.items) if (NEGATION.test(it.text)) warnings.push(`${pw}.${it.id}: evită negațiile în afirmațiile A/F`);
+      }
+    }
+  }
+
+  const [lo, hi] = config.estMinRange;
+  if (test.exercises.length && (totalMin < lo || totalMin > hi)) {
+    errors.push(`durata estimată ${totalMin} min este în afara intervalului ${lo}–${hi} min`);
+  }
+
+  walkTexts(raw, (text, path) => {
+    for (const e of lintText(text)) errors.push(`${path}: ${e}`);
+    for (const e of markupErrors(text)) errors.push(`${path}: ${e}`);
+  });
+
+  return { errors, warnings, totalMin };
+}

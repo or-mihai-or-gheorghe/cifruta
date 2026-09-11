@@ -1,0 +1,14 @@
+# Surse de inspirație (scanări) — nu intră în repo
+_surse/
+*.pdf
+
+# Rezultate locale ale testelor E2E / capturi
+test-results/
+
+# Unelte
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+.claude/settings.local.json
