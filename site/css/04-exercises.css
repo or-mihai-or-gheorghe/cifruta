@@ -483,3 +483,8 @@
 .ex-piece:hover:not(:disabled), .ex-note:hover:not(:disabled) { transform: translateY(-2px); }
 .ex-money-tray { display: flex; flex-wrap: wrap; gap: var(--sp-3); padding: var(--sp-3); border-radius: var(--r-3); background: var(--c-surface-2); }
 .ex-money-tray__title { margin-bottom: calc(-1 * var(--sp-2)); }
+
+/* ——— desene în context și în subpuncte ——— */
+.ex-context--lg { flex-direction: column; text-align: center; }
+.ex-context--lg .ex-context__visual { width: min(100%, 24rem); }
+.ex-part__visual { width: min(100%, 22rem); padding: var(--sp-2); border-radius: var(--r-2); background: var(--c-theme-bg); }

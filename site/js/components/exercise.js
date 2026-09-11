@@ -38,7 +38,7 @@ export async function mountExercise(host, exercise, { number, answers = {}, onCh
     card.append(
       h(
         'div',
-        { class: 'ex-context' },
+        { class: `ex-context${exercise.context.size === 'lg' ? ' ex-context--lg' : ''}` },
         visual ? h('div', { class: 'ex-context__visual', html: visual }) : null,
         exercise.context.text ? h('p', { class: 'ex-context__text', html: md(exercise.context.text) }) : null,
       ),
@@ -64,6 +64,7 @@ export async function mountExercise(host, exercise, { number, answers = {}, onCh
           ? h('p', { class: 'ex-prompt' }, multi ? h('span', { class: 'ex-part__letter' }, `${LETTERS[i]})`) : null, h('span', { html: md(part.prompt) }))
           : null,
         howto ? h('p', { class: 'ex-howto', html: `${emojiHTML('deget')} ${howto}` }) : null,
+        part.visual && hasVisual(part.visual.v) ? h('div', { class: 'ex-part__visual', html: visualSVG(part.visual) }) : null,
         body,
       ),
     );

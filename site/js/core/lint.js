@@ -18,7 +18,7 @@ export function lintText(s) {
 
 // câmpuri care conțin identificatori, nu text pentru copii
 const SKIP_KEYS = new Set(['id', 'type', 'layout', 'kind', 'level', 'v', 'bin', 'color', 'skin', 'rule', 'direction',
-  'concepts', 'key', 'a', 'b', 'of', 'theme', 'places', 'tool', 'file', 'expr', 'calc', 'checks']);
+  'concepts', 'key', 'a', 'b', 'of', 'theme', 'places', 'tool', 'file', 'expr', 'calc', 'checks', 'correct', 'if', 'name', 'style']);
 
 /** Parcurge toate textele dintr-un obiect: fn(text, cale) */
 export function walkTexts(value, fn, path = '') {

@@ -122,7 +122,7 @@ export default {
           const btn = leftEls[r.id];
           btn.querySelector('.ex-expected')?.remove();
           setState(btn, r.ok ? 'correct' : 'wrong');
-          if (!r.ok) btn.append(h('span', { class: 'ex-expected' }, String(rightById[r.expected]?.text ?? r.expected)));
+          if (!r.ok) btn.append(h('span', { class: 'ex-expected' }, String(rightById[r.expected]?.text ?? rightById[r.expected]?.label ?? r.expected)));
           if (r.feedback) messages.push(r.feedback);
         }
         notes.replaceChildren(...messages.map(feedbackBox));

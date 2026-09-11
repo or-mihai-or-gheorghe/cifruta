@@ -239,6 +239,30 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     run.layout_ok(page, f"[{vp}] {tid} rezultate")
 
 
+def keyboard_flow(run: Run, browser, base: str):
+    """Doar tastatura + animații reduse: pornește T1, răspunde la primul exercițiu, trece mai departe."""
+    context = browser.new_context(locale="ro-RO", reduced_motion="reduce", viewport={"width": 1280, "height": 800})
+    page = context.new_page()
+    run.watch(page, "tastatură")
+    tests = [t for t in catalog_tests() if t["id"].startswith("recap-")]
+    if not tests:
+        context.close()
+        return
+    page.goto(f"{base}#/test/{tests[0]['id']}")
+    page.wait_for_selector("[data-testid=start]")
+    page.get_by_test_id("start").focus()
+    page.keyboard.press("Enter")
+    page.wait_for_selector(".ex-card")
+    first = page.locator(".ex-card button:not([disabled])").first
+    first.focus()
+    page.keyboard.press("Space")
+    pressed = page.evaluate("document.activeElement && (document.activeElement.getAttribute('aria-pressed') === 'true' || document.activeElement.getAttribute('aria-checked') === 'true')")
+    run.check(bool(pressed), "[tastatură] un element se poate alege cu Space")
+    duration = page.evaluate("getComputedStyle(document.querySelector('.ex-card')).animationDuration")
+    run.check(duration in ("0.001s", "1e-06s", "0s"), f"[tastatură] animațiile sunt reduse (durată {duration})")
+    context.close()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--only", help="rulează doar testul cu acest id")
@@ -264,6 +288,8 @@ def main() -> int:
             for test in tests:
                 test_flow(run, page, test, vp)
             context.close()
+        if not args.only:
+            keyboard_flow(run, browser, run.base)
         browser.close()
     if httpd:
         httpd.shutdown()

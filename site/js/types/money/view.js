@@ -8,7 +8,10 @@ import { visualSVG } from '../../visuals/index.js';
 import { feedbackBox, isLocked, setState } from '../_view.js';
 
 export default {
-  howto: () => 'Alege un portofel, apoi atinge bancnotele de mai jos. Atinge o bancnotă din portofel ca s-o scoți.',
+  howto: (part) =>
+    part.items.length > 1
+      ? 'Alege un portofel, apoi atinge bancnotele de mai jos. Atinge o bancnotă din portofel ca s-o scoți.'
+      : 'Atinge bancnotele de mai jos ca să le pui în portofel. Atinge o bancnotă din portofel ca s-o scoți.',
 
   mount(el, part, ctx) {
     let answer = {};

@@ -128,7 +128,7 @@ export default async function review(container, [testId]) {
   container.append(
     h(
       'div',
-      { class: 'l-container l-stack l-stack--lg' },
+      { class: 'l-container l-stack l-stack--lg', 'data-theme': test.theme },
       backLink(`#/sectiune/${entry.section.id}`, entry.section.title),
       summary,
       h('section', { class: 'c-card l-stack' }, h('h2', { class: 'u-center' }, 'Cum te-ai simțit?'), h('div', { class: 'c-feel' }, feelButtons)),
