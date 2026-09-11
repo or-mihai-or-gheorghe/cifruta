@@ -259,7 +259,7 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     page.evaluate("window.__dbg.fillCorrect()")
     page.wait_for_timeout(200)
     dots = page.locator(".c-progress__dot.is-done").count()
-    run.check(dots == test.get("exercises", dots), f"[{vp}] {tid}: toate bulinele sunt „terminat” ({dots})")
+    run.check(dots == test["exercises"], f"[{vp}] {tid}: toate bulinele sunt „terminat” ({dots} din {test['exercises']})")
     page.reload()
     page.wait_for_selector(".ex-card")
     run.check(page.locator(".c-progress__dot.is-done").count() == dots, f"[{vp}] {tid}: ciorna se păstrează după reîncărcare")

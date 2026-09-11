@@ -4,6 +4,7 @@ import demoTest from '../../data/demo.js';
 import { h } from '../core/dom.js';
 import { md } from '../core/markup.js';
 import { evaluateExercise } from '../core/scoring.js';
+import { formatNumber } from '../core/ro.js';
 import { normalizeTest } from '../core/spec.js';
 import { mountExercise } from '../components/exercise.js';
 import { callout, chip, levelPill, mascot, stars } from '../components/ui.js';
@@ -83,7 +84,7 @@ async function types(wrap, ctls) {
       h('button', { class: 'c-btn c-btn--primary c-btn--sm', 'data-testid': `demo-check-${ex.id}`, onClick: () => {
         const res = evaluateExercise(ex, ctl.get());
         ctl.showResults(res);
-        status.textContent = `${Math.round(res.earned * 10) / 10} din ${res.total}`;
+        status.textContent = `${formatNumber(res.earned)} din ${res.total}`;
       } }, 'Verifică'),
       h('button', { class: 'c-btn c-btn--sm', onClick: () => ctl.showSolution() }, 'Soluția'),
       h('button', { class: 'c-btn c-btn--ghost c-btn--sm', onClick: async () => {

@@ -2,6 +2,7 @@
 
 import { h } from '../core/dom.js';
 import { findSection } from '../core/loader.js';
+import { cantitate } from '../core/ro.js';
 import { bestScore, getDraft } from '../core/storage.js';
 import { gradeFor } from '../core/scoring.js';
 import { art, backLink, chip } from '../components/ui.js';
@@ -21,7 +22,7 @@ function testCard(test) {
     h('div', { class: 'c-card__media' }, art({ v: 'scene', theme: test.theme, decorative: true }, { fallbackEmoji: 'veverita' })),
     h('h3', { class: 'c-card__title' }, test.title),
     test.subtitle ? h('p', { class: 'c-card__text' }, test.subtitle) : null,
-    h('div', { class: 'c-card__footer l-cluster' }, chip(`⏱ ~${test.estMin} min`), chip('11 exerciții · 3 niveluri'), status),
+    h('div', { class: 'c-card__footer l-cluster' }, chip(`⏱ ~${test.estMin} min`), chip(cantitate(test.exercises, 'exercițiu', 'exerciții')), status),
   );
 }
 

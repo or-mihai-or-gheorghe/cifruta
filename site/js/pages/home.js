@@ -2,6 +2,7 @@
 
 import { h } from '../core/dom.js';
 import { catalog } from '../core/loader.js';
+import { cantitate } from '../core/ro.js';
 import { art, chip, mascot } from '../components/ui.js';
 
 export default function home(container) {
@@ -21,7 +22,7 @@ export default function home(container) {
       art({ v: 'level-icon', level: section.color === 'brand' ? 'usor' : section.color, decorative: true }, { fallbackEmoji: section.icon, cls: 'c-card__icon' }),
       h('h2', { class: 'c-card__title' }, section.title),
       h('p', { class: 'c-card__text' }, section.subtitle),
-      h('div', { class: 'c-card__footer l-cluster' }, soon ? chip('în curând', 'c-chip--soon') : chip(`${count} ${count === 1 ? 'test' : 'teste'}`)),
+      h('div', { class: 'c-card__footer l-cluster' }, soon ? chip('în curând', 'c-chip--soon') : chip(cantitate(count, 'test', 'teste'))),
     );
   });
 

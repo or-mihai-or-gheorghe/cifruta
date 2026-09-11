@@ -1,5 +1,6 @@
 // Geometrie: figuri plane, corpuri, racheta din figuri, figuri compuse pentru numărat.
 
+import { cantitate } from '../core/ro.js';
 import { registerVisual } from './index.js';
 import { C, list, num, ST, st, txt } from './palette.js';
 
@@ -105,7 +106,7 @@ export function fanTriangles(cuts) {
 registerVisual('triangle-fan', {
   group: GROUP,
   defaults: { cuts: 2 },
-  label: (p) => `triunghi mare împărțit de ${num(p.cuts, 2)} segmente care pleacă din vârf`,
+  label: (p) => `triunghi mare împărțit de ${cantitate(num(p.cuts, 2), 'segment', 'segmente')} care pleacă din vârf`,
   render: (p) => {
     const cuts = Math.max(0, Math.min(4, num(p.cuts, 2)));
     const bx = (i) => 6 + (88 * i) / (cuts + 1);
@@ -131,7 +132,7 @@ export function gridSquares(n) {
 registerVisual('square-grid', {
   group: GROUP,
   defaults: { n: 2 },
-  label: (p) => `pătrat mare împărțit în ${num(p.n, 2) ** 2} pătrățele`,
+  label: (p) => `pătrat mare împărțit în ${cantitate(num(p.n, 2) ** 2, 'pătrățel', 'pătrățele')}`,
   render: (p) => {
     const n = Math.max(1, Math.min(4, num(p.n, 2)));
     const cell = 80 / n;

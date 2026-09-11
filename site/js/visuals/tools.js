@@ -5,7 +5,7 @@ import { registerVisual } from './index.js';
 import { C, has, list, num, st, txt } from './palette.js';
 
 const GROUP = 'Unelte de matematică';
-const PLACE = { S: { color: C.s, name: 'sute' }, Z: { color: C.z, name: 'zeci' }, U: { color: C.u, name: 'unități' } };
+const PLACE = { S: { color: C.s, one: 'sută', name: 'sute' }, Z: { color: C.z, one: 'zece', name: 'zeci' }, U: { color: C.u, one: 'unitate', name: 'unități' } };
 
 // ——— Numărătoarea pozițională ———
 const placesOf = (p) => String(p.places ?? 'ZU').toUpperCase().split('').filter((x) => PLACE[x]);
@@ -14,7 +14,7 @@ registerVisual('abacus', {
   group: GROUP,
   defaults: { places: 'ZU' },
   viewBox: (p) => `0 0 ${20 + 45 * placesOf(p).length} 142`,
-  label: (p) => `numărătoare cu ${placesOf(p).map((k) => `${num(p[k], 0)} ${PLACE[k].name}`).join(', ')}`,
+  label: (p) => `numărătoare cu ${placesOf(p).map((k) => cantitate(num(p[k], 0), PLACE[k].one, PLACE[k].name)).join(', ')}`,
   render: (p) => {
     const places = placesOf(p);
     const width = 20 + 45 * places.length;
@@ -53,7 +53,7 @@ registerVisual('egg-carton', {
     const slots = Math.max(1, cartonSlots(p));
     return `0 0 ${Math.min(slots, 3) * 100 + 4} ${Math.ceil(slots / 3) * 56 + 4}`;
   },
-  label: (p) => `${num(p.full, 0)} cofraje pline cu câte 10 ouă și ${num(p.loose, 0)} ouă separate`,
+  label: (p) => `${cantitate(num(p.full, 0), 'cofraj plin', 'cofraje pline')} cu câte 10 ouă și ${cantitate(num(p.loose, 0), 'ou separat', 'ouă separate')}`,
   render: (p) => {
     const full = num(p.full, 0);
     const loose = Math.min(10, num(p.loose, 0));
@@ -78,7 +78,7 @@ registerVisual('egg-carton', {
 registerVisual('ten-frame', {
   group: GROUP,
   viewBox: '0 0 110 52',
-  label: (p) => `cadru de zece cu ${num(p.n, 0)} jetoane`,
+  label: (p) => `cadru de zece cu ${cantitate(num(p.n, 0), 'jeton', 'jetoane')}`,
   render: (p) => {
     const n = Math.max(0, Math.min(10, num(p.n, 0)));
     let out = `<rect x="3" y="3" width="104" height="46" rx="5" fill="${C.white}" ${st(2.5)}/>`;

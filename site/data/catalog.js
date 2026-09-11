@@ -22,6 +22,7 @@ export default {
               title: 'Amintiri din vacanță',
               subtitle: 'Numerele până la 100 · adunări și scăderi · corpul omenesc',
               estMin: 44,
+              exercises: 11,
             },
             {
               id: 'recap-c1-t2',
@@ -31,6 +32,7 @@ export default {
               title: 'La piață cu bunica',
               subtitle: 'Adunări și scăderi cu trecere peste ordin · măsurări · plantele',
               estMin: 44,
+              exercises: 11,
             },
             {
               id: 'recap-c1-t3',
@@ -40,6 +42,7 @@ export default {
               title: 'Călătorie în spațiu',
               subtitle: 'Șiruri · termenul necunoscut · axa numerelor · figuri și corpuri',
               estMin: 43,
+              exercises: 11,
             },
             {
               id: 'recap-c1-t4',
@@ -49,6 +52,7 @@ export default {
               title: 'O zi la fermă',
               subtitle: 'Test de sinteză: numere, operații, probleme, măsurări și natură',
               estMin: 43,
+              exercises: 11,
             },
           ],
         },
@@ -96,7 +100,7 @@ export default {
         {
           id: 'demo',
           title: 'Toate tipurile de exerciții',
-          tests: [{ id: 'demo', file: 'demo.js', version: 1, theme: 'mare', title: 'Toate tipurile de exerciții', subtitle: 'Pagina de atelier pentru autori', estMin: 48 }],
+          tests: [{ id: 'demo', file: 'demo.js', version: 1, theme: 'mare', title: 'Toate tipurile de exerciții', subtitle: 'Pagina de atelier pentru autori', estMin: 48, exercises: 16 }],
         },
       ],
     },

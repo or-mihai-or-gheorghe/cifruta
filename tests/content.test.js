@@ -29,5 +29,6 @@ for (const entry of entries) {
     const result = validateTest(t, { concepts });
     report(entry.id, result);
     assert.equal(result.totalMin, entry.estMin, 'estMin din catalog diferă de suma exercițiilor');
+    assert.equal(t.exercises.length, entry.exercises, 'numărul de exerciții din catalog diferă de cel din fișier');
   });
 }
