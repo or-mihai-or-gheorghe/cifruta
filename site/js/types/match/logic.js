@@ -32,6 +32,8 @@ export default {
     return errors;
   },
 
+  expressions: (part) => [...part.left, ...part.right].filter((x) => x.calc !== undefined).map((x) => String(x.calc)),
+
   count: (part) => part.left.length,
   answered: (part, ans) => countAnswered(part.left.map((l) => l.id), ans),
   empty: () => ({}),

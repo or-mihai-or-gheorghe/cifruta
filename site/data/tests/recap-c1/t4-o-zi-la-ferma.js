@@ -261,7 +261,7 @@ export default {
       id: 'e08',
       level: 'intermediar',
       estMin: 4,
-      concepts: ['mat.op.semne', 'mat.op.fara-trecere'],
+      concepts: ['mat.op.semne', 'mat.op.cu-trecere'],
       title: 'Semnele pierdute',
       type: 'fill',
       layout: 'inline',

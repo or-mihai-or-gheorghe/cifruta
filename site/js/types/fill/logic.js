@@ -192,6 +192,15 @@ export default {
     return errors;
   },
 
+  /** Calculele exercițiului, cu răspunsurile corecte în casete (pentru verificarea „cu/fără trecere”). */
+  expressions(part) {
+    const blanks = part.blanks ?? {};
+    const key = keyOf(part);
+    const out = checksOf(part).map((src) => substitute(src, key, blanks));
+    for (const b of Object.values(blanks)) if (b.expr !== undefined) out.push(String(b.expr));
+    return out;
+  },
+
   count: (part) => Object.keys(part.blanks ?? {}).length,
   answered: (part, ans) => countAnswered(Object.keys(part.blanks ?? {}), ans),
   empty: () => ({}),

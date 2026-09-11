@@ -69,7 +69,7 @@ export default {
       id: 'fill',
       level: 'usor',
       estMin: 3,
-      concepts: ['mat.op.fara-trecere', 'mat.op.necunoscut', 'mat.nr100.comparare', 'mat.op.semne'],
+      concepts: ['mat.op.cu-trecere', 'mat.op.necunoscut', 'mat.nr100.comparare', 'mat.op.semne'],
       title: 'Completează căsuțele',
       type: 'fill',
       layout: 'inline',

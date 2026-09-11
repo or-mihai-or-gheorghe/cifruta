@@ -4,7 +4,7 @@
 export default {
   schema: 1,
   id: 'recap-c1-t1',
-  version: 1,
+  version: 2,
   theme: 'mare',
   title: 'Amintiri din vacanță',
   subtitle: 'Numerele până la 100 · adunări și scăderi · corpul omenesc',
@@ -243,7 +243,7 @@ export default {
       estMin: 4,
       concepts: ['mat.mas.termometru', 'mat.op.fara-trecere', 'mat.pb.mai-mult-mai-putin'],
       title: 'Cât de caldă e apa?',
-      context: { text: 'Andrei a măsurat temperatura apei mării: ziua avea **24 de grade**, iar seara **18 grade**. {{e:termometru}}' },
+      context: { text: 'Andrei a măsurat temperatura apei mării: ziua avea **28 de grade**, iar seara **22 de grade**. {{e:termometru}}' },
       parts: [
         {
           id: 'a',
@@ -256,8 +256,8 @@ export default {
           unit: 'grade',
           prompt: 'Arată pe termometre temperatura apei.',
           items: [
-            { id: 'zi', label: 'Ziua: 24 de grade', answer: 24 },
-            { id: 'seara', label: 'Seara: 18 grade', answer: 18 },
+            { id: 'zi', label: 'Ziua: 28 de grade', answer: 28 },
+            { id: 'seara', label: 'Seara: 22 de grade', answer: 22 },
           ],
         },
         {
@@ -265,14 +265,14 @@ export default {
           type: 'fill',
           prompt: 'Cu câte grade s-a răcit apa până seara?',
           rows: ['Apa s-a răcit cu: [[a]]'],
-          checks: ['24 - 18 = [[a]]'],
-          blanks: { a: { answer: 6, feedback: [{ if: 42, text: 'Ai adunat. Când apa se răcește, temperatura **scade**: 24 − 18.' }] } },
+          checks: ['28 - 22 = [[a]]'],
+          blanks: { a: { answer: 6, feedback: [{ if: 50, text: 'Ai adunat. Când apa se răcește, temperatura **scade**: 28 − 22.' }] } },
         },
       ],
       explain: {
         idea: 'Pe termometru, fiecare liniuță mică înseamnă **2 grade**. Liniuțele lungi cu număr merg din 10 în 10.',
-        steps: ['24 de grade: pornești de la 20 și mai urci 2 liniuțe mici.', '18 grade: pornești de la 20 și cobori o liniuță mică.', 'Diferența: 24 − 18 = 6 grade.'],
-        check: '18 + 6 = 24',
+        steps: ['28 de grade: pornești de la 30 și cobori o liniuță mică.', '22 de grade: pornești de la 20 și urci o liniuță mică.', 'Diferența: 28 − 22 = 6 grade.'],
+        check: '22 + 6 = 28',
       },
     },
     {
@@ -332,21 +332,21 @@ export default {
       estMin: 6,
       concepts: ['mat.mas.bani', 'mat.op.fara-trecere', 'mat.pb.o-operatie'],
       title: 'La chioșcul cu înghețată',
-      context: { text: 'O înghețată {{e:inghetata}} costă **7 lei**, iar un suc {{e:suc}} costă **5 lei**. Andrei cumpără o înghețată și un suc.' },
+      context: { text: 'O înghețată {{e:inghetata}} costă **12 lei**, iar un suc {{e:suc}} costă **6 lei**. Andrei cumpără o înghețată și un suc.' },
       parts: [
         {
           id: 'a',
           type: 'fill',
           prompt: 'Cât plătește Andrei **în total**?',
           rows: ['Total de plată (lei): [[a]]'],
-          checks: ['7 + 5 = [[a]]'],
-          blanks: { a: { answer: 12, feedback: [{ if: 2, text: '„În total” înseamnă că **adunăm** prețurile.' }] } },
+          checks: ['12 + 6 = [[a]]'],
+          blanks: { a: { answer: 18, feedback: [{ if: 6, text: '„În total” înseamnă că **adunăm** prețurile.' }] } },
         },
         {
           id: 'b',
           type: 'money',
           allowed: [1, 5, 10],
-          target: 12,
+          target: 18,
           distinct: true,
           prompt: 'Plătește exact această sumă, în **două feluri diferite**.',
           items: [
@@ -357,7 +357,7 @@ export default {
       ],
       explain: {
         idea: 'Aceeași sumă se poate plăti cu bancnote diferite. Contează **valoarea** banilor, nu câte bancnote ai.',
-        steps: ['7 + 5 = 12 lei.', 'Un fel: 10 + 1 + 1 = 12.', 'Alt fel: 5 + 5 + 1 + 1 = 12.', 'Încă un fel: 5 + 1 + 1 + 1 + 1 + 1 + 1 + 1 = 12.'],
+        steps: ['12 + 6 = 18 lei.', 'Un fel: 10 + 5 + 1 + 1 + 1 = 18.', 'Alt fel: 5 + 5 + 5 + 1 + 1 + 1 = 18.'],
         trap: 'Două bancnote de 5 lei nu înseamnă 2 lei, ci 10 lei!',
       },
     },

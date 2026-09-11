@@ -5,10 +5,10 @@ import { calc, holds, relation, trace } from '../site/js/core/expr.js';
 import { lintText, walkTexts } from '../site/js/core/lint.js';
 import { md, markupErrors, plain } from '../site/js/core/markup.js';
 import { cantitate, fixCedilla, formatNumber, numberToWords, sameText, singularOf } from '../site/js/core/ro.js';
-import { check, minPieces, moneyCombos, moneyKey, searchNumbers } from '../site/js/core/rules.js';
+import { check, minPieces, moneyCombos, moneyKey, searchNumbers, trecere } from '../site/js/core/rules.js';
 import { gradeFor, scoreTest } from '../site/js/core/scoring.js';
 import { getLogic } from '../site/js/core/registry.js';
-import { normalizeTest } from '../site/js/core/spec.js';
+import { normalizeTest, validateTest } from '../site/js/core/spec.js';
 import demo from '../site/data/demo.js';
 import '../site/js/visuals/all.js';
 
@@ -89,6 +89,24 @@ test('rules: condiții pentru numere și bani', () => {
   assert.ok(check({ rule: 'all', of: 'n', rules: [{ rule: 'parity', even: true }, { rule: 'range', min: 10, max: 20 }] }, item));
   assert.ok(check({ rule: 'any', of: 'n', rules: [{ rule: 'equals', value: 3 }, { rule: 'equals', value: 14 }] }, item));
   assert.ok(check({ rule: 'not', of: 'n', inner: { rule: 'parity', even: false } }, item));
+});
+
+test('trecerea peste ordin: pe coloane; validatorul prinde etichetele greșite', () => {
+  for (const [op, a, b] of [['-', 24, 18], ['+', 7, 5], ['+', 28, 12], ['-', 100, 50], ['-', 70, 26], ['+', 256, 128]]) assert.ok(trecere(op, a, b), `${a} ${op} ${b}`);
+  for (const [op, a, b] of [['-', 45, 15], ['+', 27, 42], ['-', 28, 22], ['+', 12, 6], ['+', 300, 400], ['-', 99, 99]]) assert.ok(!trecere(op, a, b), `${a} ${op} ${b}`);
+
+  const withRow = (concepts, row) => ({
+    schema: 1, id: 't', version: 1, title: 'Test',
+    exercises: [{ id: 'e1', level: 'usor', estMin: 44, concepts, title: 'Calcule', type: 'fill', rows: [row], blanks: { a: { expr: row.split('=')[0] } }, explain: { idea: 'Calculăm.' } }],
+  });
+  const errorsOf = (concepts, row) => validateTest(withRow(concepts, row.replace('=', '= [[a]]'))).errors;
+  assert.deepEqual(errorsOf(['mat.op.fara-trecere'], '45 - 15 ='), []);
+  assert.deepEqual(errorsOf(['mat.op.cu-trecere'], '24 - 18 ='), []);
+  assert.match(errorsOf(['mat.op.fara-trecere'], '24 - 18 =').join(), /fără trecere.*24 − 18/);
+  assert.match(errorsOf(['mat.op.cu-trecere'], '45 - 15 =').join(), /cu trecere/);
+  assert.match(errorsOf(['mat.op.fara-trecere'], '45 - 15 - 12 =').join(), /30 − 12/); // și calculele intermediare
+  assert.deepEqual(errorsOf(['mat.op.fara-trecere', 'mat.op.cu-trecere'], '45 - 15 - 12 ='), []); // exercițiu mixt
+  assert.deepEqual(errorsOf(['mat.nr100.comparare'], '24 - 18 ='), []); // fără etichete de operații: nu se verifică
 });
 
 test('markup: escapare, formatare, tokenuri', () => {

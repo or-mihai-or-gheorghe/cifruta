@@ -50,6 +50,20 @@ export function searchNumbers({ from, to, rules }) {
   return out;
 }
 
+// ——— Trecerea peste ordin ———
+
+/**
+ * true dacă adunarea sau scăderea se face „cu trecere peste ordin”, pe coloane:
+ * la adunare, suma cifrelor unei coloane e cel puțin 10 (7 + 5, 28 + 12);
+ * la scădere, o cifră a descăzutului e mai mică decât cifra scăzătorului (24 − 18, 100 − 50).
+ */
+export function trecere(op, a, b) {
+  for (let x = Math.abs(a), y = Math.abs(b); x > 0 || y > 0; x = Math.floor(x / 10), y = Math.floor(y / 10)) {
+    if (op === '+' ? (x % 10) + (y % 10) >= 10 : x % 10 < y % 10) return true;
+  }
+  return false;
+}
+
 // ——— Bani ———
 
 export const moneySum = (combo) =>

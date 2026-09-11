@@ -1,12 +1,16 @@
 // Structura unui test: normalizare (forma scurtă a exercițiilor) și validare completă.
 
 import config from '../../data/scoring.js';
+import { trace } from './expr.js';
 import { findNonJSON, lintText, NEGATION, walkTexts, WORD_LIMITS } from './lint.js';
 import { markupErrors, plain } from './markup.js';
 import { getLogic, hasType } from './registry.js';
 import { wordCount } from './ro.js';
+import { trecere } from './rules.js';
 
 const LEVEL_IDS = config.levels.map((l) => l.id);
+const CU_TRECERE = ['mat.op.cu-trecere', 'mat.op1000.cu-trecere'];
+const FARA_TRECERE = ['mat.op.fara-trecere', 'mat.op1000.fara-trecere'];
 const EXERCISE_KEYS = new Set(['id', 'level', 'estMin', 'points', 'concepts', 'title', 'context', 'explain', 'parts']);
 
 /** Un exercițiu cu o singură parte poate fi scris fără `parts`: câmpurile părții stau direct pe exercițiu. */
@@ -51,6 +55,7 @@ export function validateTest(raw, { concepts } = {}) {
     if (!ex.explain?.idea) warnings.push(`${where}: lipsește explicația (explain.idea)`);
 
     const partIds = new Set();
+    const ops = []; // adunările și scăderile din exercițiu, pentru etichetele „cu / fără trecere”
     for (const part of ex.parts) {
       const pw = `${where}.${part.id}`;
       if (!part.id || partIds.has(part.id)) errors.push(`${pw}: id lipsă sau duplicat`);
@@ -68,6 +73,13 @@ export function validateTest(raw, { concepts } = {}) {
       }
       errors.push(...partErrors.map((e) => `${pw}: ${e}`));
       if (partErrors.length) continue;
+      for (const src of logic.expressions?.(part) ?? []) {
+        try {
+          ops.push(...trace(src));
+        } catch {
+          /* expresiile greșite sunt raportate de validarea tipului */
+        }
+      }
 
       const full = logic.evaluate(part, logic.solution(part));
       if (full.earned !== full.total) errors.push(`${pw}: soluția nu primește punctaj maxim (${full.earned}/${full.total})`);
@@ -79,6 +91,14 @@ export function validateTest(raw, { concepts } = {}) {
       if (part.type === 'truefalse') {
         for (const it of part.items) if (NEGATION.test(it.text)) warnings.push(`${pw}.${it.id}: evită negațiile în afirmațiile A/F`);
       }
+    }
+
+    const tagged = (ids) => ids.some((c) => ex.concepts?.includes(c));
+    const carried = ops.filter((o) => trecere(o.op, o.a, o.b));
+    if (tagged(CU_TRECERE) && !carried.length) errors.push(`${where}: e etichetat „cu trecere”, dar niciun calcul nu are trecere peste ordin`);
+    if (tagged(FARA_TRECERE) && !tagged(CU_TRECERE) && carried.length) {
+      const { op, a, b } = carried[0];
+      errors.push(`${where}: e etichetat „fără trecere”, dar ${a} ${op === '-' ? '−' : '+'} ${b} are trecere peste ordin`);
     }
   }
 

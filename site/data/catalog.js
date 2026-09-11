@@ -17,7 +17,7 @@ export default {
             {
               id: 'recap-c1-t1',
               file: 'tests/recap-c1/t1-amintiri-din-vacanta.js',
-              version: 1,
+              version: 2,
               theme: 'mare',
               title: 'Amintiri din vacanță',
               subtitle: 'Numerele până la 100 · adunări și scăderi · corpul omenesc',

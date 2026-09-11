@@ -239,40 +239,46 @@ S 50–70, B 70–90, FB 90–100.
 
 ## Tabel de acoperire: teste × concepte (recapitularea clasei I)
 
+<!-- acoperire:start -->
 T1 „Amintiri din vacanță” · T2 „La piață cu bunica” · T3 „Călătorie în spațiu” · T4 „O zi la fermă”.
-Numărul este al exercițiului în test. Etichetele finale sunt în fișierele testelor (`site/data/tests/recap-c1/`); dacă
-se schimbă, se actualizează și acest tabel.
+Numărul este al exercițiului în test. Tabelul se generează din etichetele testelor cu `npm run acoperire`;
+nu îl edita de mână.
 
 | Concept | T1 | T2 | T3 | T4 |
 |-|-|-|-|-|
 | `mat.nr100.formare` | 2 | 1 | — | 3 |
-| `mat.nr100.comparare` | 6 | — | 3 | — |
+| `mat.nr100.comparare` | 5, 6 | — | 3, 5 | — |
 | `mat.nr100.ordonare` | 5 | — | 5 | — |
-| `mat.nr100.paritate` | 1 | — | — | — |
+| `mat.nr100.paritate` | 1, 11 | — | — | — |
 | `mat.nr100.vecini` | 3, 11 | — | — | — |
 | `mat.nr100.siruri` | — | — | 1 | — |
 | `mat.nr100.axa` | — | — | 7 | — |
 | `mat.nr100.rotunjire` | — | — | 7 | — |
-| `mat.nr100.conditii` | 11 | — | 3 | — |
+| `mat.nr100.conditii` | 11 | — | — | — |
+| `mat.nr100.valoare-pozitionala` | 2 | — | — | 3 |
+| `mat.nr100.estimare` | — | — | 7 | — |
+| `mat.nr100.adunare-repetata` | — | 1 | — | — |
 | `mat.op.fara-trecere` | 4, 8, 10 | — | — | — |
-| `mat.op.cu-trecere` | — | 3, 5, 7 | — | 5 |
+| `mat.op.cu-trecere` | — | 3, 5, 7, 9 | 9 | 5, 8 |
 | `mat.op.proprietati` | 6 | — | — | — |
-| `mat.op.comparare-expresii` | 6 | — | — | — |
 | `mat.op.necunoscut` | — | 11 | 6 | — |
 | `mat.op.balanta` | — | — | 6 | — |
-| `mat.op.proba` | — | — | 11 | 6 |
+| `mat.op.proba` | — | — | 6, 11 | 6 |
 | `mat.op.lanturi` | — | — | 9 | — |
 | `mat.op.semne` | — | — | — | 8 |
+| `mat.op.comparare-expresii` | 6 | — | — | — |
 | `mat.op.greseala` | — | 5 | — | — |
-| `mat.op.strategii` | — | 10 | — | — |
-| `mat.pb.o-operatie` | 9 | — | — | — |
+| `mat.op.strategii` | — | 3 | — | — |
+| `mat.op.familii` | — | — | — | 6 |
+| `mat.pb.o-operatie` | 9, 10 | — | — | — |
 | `mat.pb.doua-operatii` | — | 9, 10 | — | 9 |
-| `mat.pb.mai-mult-mai-putin` | 9 | — | — | 9 |
+| `mat.pb.mai-mult-mai-putin` | 8, 9 | 7 | — | 5, 9 |
 | `mat.pb.doua-moduri` | — | 10 | — | — |
-| `mat.pb.mersul-invers` | — | — | 11 | — |
+| `mat.pb.mersul-invers` | — | — | 9, 11 | — |
 | `mat.pb.capcana-limbaj` | — | — | — | 9 |
-| `mat.pb.decizie` | — | — | — | 10 |
-| `mat.geo.figuri` | — | — | 2 | — |
+| `mat.pb.decizie` | 9 | — | — | 10 |
+| `mat.pb.plan` | — | 10 | — | — |
+| `mat.geo.figuri` | — | — | 2, 10 | — |
 | `mat.geo.corpuri` | — | — | 8 | — |
 | `mat.geo.numarare-figuri` (II) | — | — | 10 | — |
 | `mat.geo.pozitii` | — | — | — | 1 |
@@ -280,14 +286,17 @@ se schimbă, se actualizează și acest tabel.
 | `mat.mas.lungime` | — | 2 | — | — |
 | `mat.mas.termometru` | 8 | — | — | — |
 | `mat.mas.ceas` | — | 8 | — | — |
+| `mat.mas.durata` | — | 8 | — | — |
 | `mat.mas.calendar` | — | — | — | 4 |
 | `mat.mas.bani` | 10 | 9 | — | 10 |
 | `mat.mas.buget` | — | — | — | 10 |
 | `mat.log.tabel` | — | 7 | — | 5 |
 | `mat.log.ghicitori` | 11 | — | — | — |
-| `mat.log.simboluri` | — | 11 | 6 | — |
+| `mat.log.simboluri` | — | 11 | — | — |
 | `mat.log.ordonare-indicii` | — | — | — | 11 |
-| `mat.log.clasificare` | — | 6 | 8 | 2, 7 |
+| `mat.log.clasificare` | — | 6 | 8 | 2 |
+| `mat.log.si-sau-nu` | — | — | 3 | — |
+| `mat.log.modele` | — | — | 1 | — |
 | `med.corp.organe` | 7 | — | — | — |
 | `med.plante.parti` | — | 4, 6 | — | — |
 | `med.plante.nevoi` | — | 4 | — | — |
@@ -298,10 +307,8 @@ se schimbă, se actualizează și acest tabel.
 | `med.energie.surse` | — | — | — | 7 |
 | `med.anotimpuri` | — | — | — | 4 |
 
-**Neacoperite încă (candidate pentru testele următoare):** `mat.nr100.citire-scriere`, `mat.nr100.consecutive`,
-`mat.nr100.estimare`, `mat.op.familii`, `mat.pb.plan` (folosit implicit în T2-10, T3-11, T4-9), `mat.pb.date-lipsa`,
-`mat.geo.interior-exterior`, `mat.geo.trasee`, `mat.mas.capacitate`, `mat.mas.durata`, `mat.log.si-sau-nu`,
-`mat.log.modele`, `med.corp.simturi`, `med.energie.forme`, `med.caderea-libera`, `med.sunete`.
+**Neacoperite încă (clasa pregătitoare și clasa I), candidate pentru testele următoare:** `mat.nr100.citire-scriere`, `mat.nr100.consecutive`, `mat.nr100.prietenii-lui-10`, `mat.op.terminologie`, `mat.pb.date-lipsa`, `mat.pb.compunere`, `mat.geo.interior-exterior`, `mat.geo.trasee`, `mat.mas.capacitate`, `mat.log.adevarat-fals`, `med.corp.simturi`, `med.corp.igiena`, `med.energie.forme`, `med.caderea-libera`, `med.sunete`, `med.reutilizare`.
+<!-- acoperire:end -->
 
 ## Formatul EN II, pe scurt
 
