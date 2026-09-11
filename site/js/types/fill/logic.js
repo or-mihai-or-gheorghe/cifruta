@@ -116,6 +116,7 @@ export function keyOf(part) {
 
 function matches(blank, given, expected) {
   if (isBlank(given) || expected === undefined) return false;
+  if (typeof given !== 'string' && typeof given !== 'number') return false; // o casetă are un singur răspuns
   switch (kindOf(blank)) {
     case 'number':
       return /^\s*\d+\s*$/.test(String(given)) && Number(given) === Number(expected);
@@ -208,9 +209,7 @@ export default {
       if (!m) continue;
       const [, a, b] = m;
       if (ok[a] && ok[b]) continue;
-      const g = [Number(given[a]), Number(given[b])].sort((x, y) => x - y);
-      const k = [Number(key[a]), Number(key[b])].sort((x, y) => x - y);
-      if (!isBlank(given[a]) && !isBlank(given[b]) && g[0] === k[0] && g[1] === k[1]) ok[a] = ok[b] = true;
+      if (matches(blanks[a], given[a], key[b]) && matches(blanks[b], given[b], key[a])) ok[a] = ok[b] = true;
     }
     return makeResult(
       Object.keys(blanks).map((id) => ({

@@ -19,6 +19,9 @@ export function checkIds(list, label, errors) {
   }
 }
 
+/** Întreg între min și max, inclusiv. Răspunsurile vin din stocare, deci pot avea orice formă. */
+export const isInt = (v, min = -Infinity, max = Infinity) => Number.isInteger(v) && v >= min && v <= max;
+
 export const isBlank = (v) => v === null || v === undefined || v === '' || (Array.isArray(v) && v.length === 0);
 
 export const countAnswered = (ids, ans) => ids.filter((id) => !isBlank(ans?.[id])).length;

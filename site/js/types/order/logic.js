@@ -10,6 +10,10 @@ import { checkIds, isBlank } from '../_shared.js';
 
 const valueOf = (it) => it.value ?? calc(String(it.calc ?? it.text));
 
+/** Aceleași id-uri ca în listă, fiecare exact o dată. */
+export const isPermutation = (order, ids) =>
+  Array.isArray(order) && order.length === ids.length && new Set(order).size === ids.length && order.every((id) => ids.includes(id));
+
 export function keyOf(part) {
   if (part.key) return [...part.key];
   const sorted = [...part.items].sort((a, b) => valueOf(a) - valueOf(b));
@@ -95,7 +99,7 @@ export default {
 
   evaluate(part, ans) {
     const key = keyOf(part);
-    if (!Array.isArray(ans) || ans.length !== key.length) {
+    if (!isPermutation(ans, key)) {
       return { items: key.map((id, i) => ({ id, ok: false, credit: 0, expected: i, given: null })), earned: 0, total: key.length };
     }
     const keep = longestInOrder(ans.map((id) => key.indexOf(id)));

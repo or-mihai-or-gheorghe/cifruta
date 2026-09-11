@@ -6,9 +6,14 @@
 
 import { cantitate } from '../../core/ro.js';
 import { minPieces, moneyCombos, moneyKey, moneyPieces, moneySum } from '../../core/rules.js';
-import { checkIds, makeResult } from '../_shared.js';
+import { checkIds, isInt, makeResult } from '../_shared.js';
 
 export const RON_NOTES = [1, 5, 10, 20, 50, 100, 200, 500];
+
+/** Combinație făcută doar din bancnotele de pe tavă, fiecare de cel mult 100 de ori. */
+export const validCombo = (part, combo) =>
+  typeof combo === 'object' && combo !== null && !Array.isArray(combo) &&
+  Object.entries(combo).every(([note, count]) => part.allowed.includes(Number(note)) && isInt(count, 0, 100));
 
 const combosFor = (part) => {
   const all = moneyCombos(part.target, part.allowed);
@@ -48,6 +53,9 @@ export default {
     return makeResult(
       part.items.map((it) => {
         const combo = ans?.[it.id] ?? null;
+        if (combo !== null && !validCombo(part, combo)) {
+          return { id: it.id, ok: false, expected: part.target, given: null, feedback: 'Folosește doar bancnotele de pe tavă.' };
+        }
         const sum = moneySum(combo);
         const pieces = moneyPieces(combo);
         let ok = false;

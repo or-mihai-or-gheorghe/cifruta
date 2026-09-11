@@ -2,9 +2,11 @@
 // { type:'clock', step:30, items:[{ id, label:'9 și jumătate', answer:{ h:9, m:30 } }] }
 // Răspuns: { [itemId]: { h, m } | null }
 
-import { checkIds, countAnswered, makeResult } from '../_shared.js';
+import { checkIds, countAnswered, isInt, makeResult } from '../_shared.js';
 
-export const sameTime = (a, b) => !!a && !!b && a.h % 12 === b.h % 12 && a.m === b.m;
+const isTime = (t) => typeof t === 'object' && t !== null && isInt(t.h, 0, 23) && isInt(t.m, 0, 59);
+
+export const sameTime = (a, b) => isTime(a) && isTime(b) && a.h % 12 === b.h % 12 && a.m === b.m;
 
 export const timeText = (t) => {
   if (!t) return '—';

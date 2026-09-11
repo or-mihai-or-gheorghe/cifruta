@@ -5,7 +5,7 @@ import { h } from '../../core/dom.js';
 import { shuffled } from '../../core/rng.js';
 import { hasVisual, visualSVG } from '../../visuals/index.js';
 import { isLocked, itemFace, setState } from '../_view.js';
-import { keyOf } from './logic.js';
+import { isPermutation, keyOf } from './logic.js';
 
 export default {
   howto: () => 'Atinge un card, apoi atinge locul unde vrei să-l muți. Poți și să-l tragi.',
@@ -62,7 +62,7 @@ export default {
     return {
       get: () => (touched ? [...order] : null),
       set(a) {
-        if (Array.isArray(a) && a.length === order.length) {
+        if (isPermutation(a, start)) {
           order = [...a];
           touched = true;
         } else {

@@ -41,7 +41,7 @@ export default {
         const corr = correctOf(it);
         const given = ans?.[it.id] ?? null;
         if (it.multi) {
-          const sel = [].concat(given ?? []).map(String);
+          const sel = [...new Set([].concat(given ?? []).map(String))]; // o variantă aleasă de două ori contează o dată
           const hits = sel.filter((s) => corr.includes(s)).length;
           const wrong = sel.length - hits;
           return {
@@ -52,8 +52,9 @@ export default {
             given: sel,
           };
         }
-        const ok = given !== null && String(given) === corr[0];
-        return { id: it.id, ok, expected: corr[0], given, feedback: ok ? null : feedbackFor(it.feedback, given) };
+        const single = typeof given === 'string' || typeof given === 'number' ? String(given) : null;
+        const ok = single === corr[0];
+        return { id: it.id, ok, expected: corr[0], given, feedback: ok ? null : feedbackFor(it.feedback, single) };
       }),
     );
   },

@@ -2,7 +2,7 @@
 // { type:'build', tool:'abacus', places:['Z','U'], items:[{ id, label:'46 de ouă', target:46 }] }
 // Răspuns: { [itemId]: { Z:4, U:6 } | null }
 
-import { checkIds, countAnswered, makeResult } from '../_shared.js';
+import { checkIds, countAnswered, isInt, makeResult } from '../_shared.js';
 
 export const WEIGHTS = { S: 100, Z: 10, U: 1 };
 
@@ -23,7 +23,7 @@ export default {
     checkIds(part.items, 'build.items', errors);
     const max = places.reduce((s, p) => s + WEIGHTS[p] * 9, 0);
     for (const it of part.items) {
-      if (!Number.isInteger(it.target) || it.target < 0 || it.target > max) errors.push(`build.${it.id}: ${it.target} nu se poate forma cu ${places.join('')}`);
+      if (!isInt(it.target, 1, max)) errors.push(`build.${it.id}: ținta ${it.target} trebuie să fie între 1 și ${max} (cu ${places.join('')})`);
     }
     return errors;
   },
@@ -37,9 +37,9 @@ export default {
     return makeResult(
       part.items.map((it) => {
         const beads = ans?.[it.id] ?? null;
-        const value = valueOf(part.places, beads);
-        const valid = beads !== null && part.places.every((p) => Number(beads[p] ?? 0) <= 9);
-        return { id: it.id, ok: valid && value === it.target, expected: it.target, given: value };
+        const valid = typeof beads === 'object' && beads !== null && part.places.every((p) => isInt(beads[p] ?? 0, 0, 9));
+        const value = valid ? valueOf(part.places, beads) : null;
+        return { id: it.id, ok: value === it.target, expected: it.target, given: value };
       }),
     );
   },

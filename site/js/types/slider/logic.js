@@ -31,7 +31,8 @@ export default {
     return makeResult(
       part.items.map((it) => {
         const given = ans?.[it.id] ?? null;
-        const ok = given !== null && Math.abs(Number(given) - it.answer) <= (it.tolerance ?? 0);
+        const onAxis = typeof given === 'number' && given >= part.min && given <= part.max;
+        const ok = onAxis && Math.abs(given - it.answer) <= (it.tolerance ?? 0);
         return { id: it.id, ok, expected: it.answer, given };
       }),
     );

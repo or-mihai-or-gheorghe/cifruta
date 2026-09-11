@@ -83,6 +83,40 @@ test('money: două feluri trebuie să fie diferite', () => {
   assert.equal(wrongSum.items[0].feedback, 'Ai pus 10 lei, dar trebuiau 12 lei.');
 });
 
+test('răspunsurile malformate nu primesc puncte', () => {
+  // choice: o variantă corectă aleasă de două ori nu ține loc de două variante; alegerea simplă nu e un tablou
+  const doubled = evalPart('choice.b', { i1: ['triunghi', 'triunghi'] });
+  assert.equal(doubled.items[0].ok, false);
+  assert.ok(doubled.earned < 1);
+  assert.equal(evalPart('choice.a', { i1: ['50'] }).earned, 0);
+  assert.equal(evalPart('choice.a', { i1: '50' }).earned, 1);
+  // build: bile negative sau fracționare
+  assert.equal(evalPart('build.a', { i1: { Z: 5, U: -4 } }).earned, 0);
+  assert.equal(evalPart('build.a', { i1: { Z: 4.5, U: 1 } }).earned, 0);
+  assert.equal(evalPart('build.a', { i1: { Z: 4, U: 6 } }).earned, 1);
+  assert.ok(getLogic('build').validate({ ...parts['build.a'], items: [{ id: 'i1', label: 'zero', target: 0 }] }).length > 0);
+  // money: bancnote care nu sunt pe tavă, cantități negative sau fracționare
+  const notOnTray = evalPart('money.a', { f1: { 2: 6 }, f2: { 20: 1, 5: -2, 1: 2 } }); // ambele fac 12
+  assert.equal(notOnTray.earned, 0);
+  assert.equal(notOnTray.items[0].feedback, 'Folosește doar bancnotele de pe tavă.');
+  assert.equal(evalPart('money.a', { f1: { 10: 1, 1: 1.5, 5: 0.1 } }).earned, 0);
+  // order: același element de mai multe ori
+  assert.equal(evalPart('order.a', ['v2', 'v2', 'v2', 'v2', 'v2', 'v2', 'v2']).earned, 0);
+  assert.equal(evalPart('order.a', ['v2', 'v6', 'v4', 'v7', 'v1', 'v5', 'zz']).earned, 0);
+  // clock: ora 33 nu e 9
+  assert.equal(evalPart('clock.a', { i1: { h: 33, m: 30 } }).earned, 0);
+  assert.equal(evalPart('clock.a', { i1: { h: 9, m: 90 } }).earned, 0);
+  // slider: doar numere de pe axă
+  assert.equal(evalPart('slider.a', { i1: '48' }).earned, 0);
+  assert.equal(evalPart('slider.a', { i1: 48 }).earned, 1);
+  // fill: tablouri în loc de text, termeni inversați cu forme nevalide
+  assert.equal(evalPart('fill.a', { a: ['69'], c: ['<'], e: ['−'] }).earned, 0);
+  const swapped = evalPart('fill-steps.a', { a: '12', b: '18', c: '30', d: '30', e: '15', f: '15' });
+  assert.equal(swapped.earned, swapped.total);
+  const swappedBad = evalPart('fill-steps.a', { a: '12.0', b: ' 1.8e1 ' });
+  assert.equal(swappedBad.items.filter((i) => ['a', 'b'].includes(i.id) && i.ok).length, 0);
+});
+
 test('choice multiplu, match cu mesaj țintit, ceas, numărătoare', () => {
   const multi = evalPart('choice.b', { i1: ['triunghi', 'patrat'] });
   assert.equal(multi.earned, 0);

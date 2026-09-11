@@ -6,6 +6,7 @@ import { cantitate } from '../../core/ro.js';
 import { moneySum } from '../../core/rules.js';
 import { visualSVG } from '../../visuals/index.js';
 import { feedbackBox, isLocked, setState } from '../_view.js';
+import { validCombo } from './logic.js';
 
 export default {
   howto: (part) =>
@@ -94,7 +95,8 @@ export default {
     return {
       get: () => answer,
       set(a) {
-        answer = JSON.parse(JSON.stringify(a ?? {}));
+        // o combinație stricată din stocare (de ex. un milion de bancnote) nu trebuie să blocheze pagina
+        answer = Object.fromEntries(Object.entries(a ?? {}).filter(([, combo]) => validCombo(part, combo)).map(([id, combo]) => [id, { ...combo }]));
         paint();
       },
       mode(m) {
