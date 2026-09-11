@@ -1,21 +1,24 @@
 // Rezultatele unui test: rezumat, autoevaluare, zona pentru părinți și revizuirea fiecărui exercițiu.
+// Rezumatul vine din încercarea salvată, deci arată același scor ca cardul testului. Lista pe exerciții
+// se reconstruiește doar dacă testul nu s-a schimbat de atunci.
 
 import concepts from '../../data/concepts.js';
 import config from '../../data/scoring.js';
 import { h } from '../core/dom.js';
 import { md } from '../core/markup.js';
 import { findTest, loadTest } from '../core/loader.js';
-import { cuDe } from '../core/ro.js';
-import { evaluateExercise, scoreTest } from '../core/scoring.js';
+import { cantitate, formatNumber } from '../core/ro.js';
+import { evaluateExercise, gradeFor } from '../core/scoring.js';
 import { clearDraft, lastAttempt, updateAttempt } from '../core/storage.js';
 import { mountExercise } from '../components/exercise.js';
-import { art, backLink, callout, confetti, levelPill, mascot, stars } from '../components/ui.js';
+import { art, backLink, callout, confetti, levelPill, stars } from '../components/ui.js';
 import { emojiHTML } from '../visuals/emoji.js';
 
-const round1 = (x) => Math.round(x * 10) / 10;
-const statusOf = (fraction) => (fraction >= 1 ? 'correct' : fraction <= 0 ? 'wrong' : 'partial');
+const EPS = 1e-9;
+const statusOf = (fraction) => (fraction >= 1 - EPS ? 'correct' : fraction <= EPS ? 'wrong' : 'partial');
 const STATUS_ICON = { correct: '✓', wrong: '✗', partial: '◐' };
 const MOOD = { FB: 'sarbatoreste', B: 'vesela', S: 'incurajeaza', EX: 'incurajeaza' };
+const minutes = (ms) => cantitate(Math.max(1, Math.round(ms / 60000)), 'minut', 'minute');
 
 function explanation(ex) {
   const e = ex.explain ?? {};
@@ -36,15 +39,18 @@ export default async function review(container, [testId]) {
     return;
   }
   const test = await loadTest(testId);
+  if (!container.isConnected) return; // s-a navigat în altă parte cât se încărca testul
   const attempt = lastAttempt(testId);
   if (!attempt) {
     location.hash = `#/test/${testId}`;
     return;
   }
   document.title = `Rezultate: ${test.title} — Cifruța`;
-  const result = scoreTest(test, attempt.answers);
-  const grade = result.grade;
-  const starCount = Object.values(result.levels).filter((l) => l.star).length;
+  const grade = gradeFor(attempt.score);
+  const levels = config.levels.filter((l) => attempt.levels?.[l.id]);
+  const starCount = levels.filter((l) => attempt.levels[l.id].star).length;
+  const sameVersion = attempt.testVersion === test.version;
+  const controllers = [];
 
   // ——— rezumat ———
   const feelButtons = [
@@ -56,24 +62,28 @@ export default async function review(container, [testId]) {
       type: 'button',
       class: `c-feel__btn${attempt.feeling === emoji ? ' is-selected' : ''}`,
       'aria-label': label,
+      'aria-pressed': String(attempt.feeling === emoji),
       title: label,
       'data-testid': `feel-${emoji}`,
       html: emojiHTML(emoji),
       onClick: (e) => {
         updateAttempt(attempt.id, { feeling: emoji });
-        for (const b of e.currentTarget.parentElement.children) b.classList.toggle('is-selected', b === e.currentTarget);
+        for (const b of e.currentTarget.parentElement.children) {
+          b.classList.toggle('is-selected', b === e.currentTarget);
+          b.setAttribute('aria-pressed', String(b === e.currentTarget));
+        }
       },
     }),
   );
 
-  const practice = Object.entries(result.concepts)
-    .filter(([, c]) => c.total && c.earned / c.total < config.practiceBelow)
+  const practice = Object.entries(attempt.concepts ?? {})
+    .filter(([, c]) => c.total && c.earned / c.total < config.practiceBelow - EPS)
     .map(([id]) => concepts[id]?.title ?? id);
 
   const levelTimes = config.levels
     .map((l) => {
       const ms = test.exercises.filter((e) => e.level === l.id).reduce((s, e) => s + (attempt.msByExercise?.[e.id] ?? 0), 0);
-      return ms ? `${l.label}: ${cuDe(Math.max(1, Math.round(ms / 60000)), 'minute')}` : null;
+      return ms ? `${l.label}: ${minutes(ms)}` : null;
     })
     .filter(Boolean);
 
@@ -88,18 +98,16 @@ export default async function review(container, [testId]) {
       h(
         'div',
         { class: 'l-cluster' },
-        h('p', { class: 'c-score', 'data-testid': 'score', 'aria-live': 'polite' }, String(result.score), h('small', {}, ' / 100')),
+        h('p', { class: 'c-score', 'data-testid': 'score', 'aria-live': 'polite' }, String(attempt.score), h('small', {}, ' / 100')),
         h('span', { class: 'c-grade', 'data-grade': grade.code }, grade.code === 'EX' ? '' : `${grade.code} · `, grade.label),
       ),
       h('p', { class: 'u-big' }, grade.message),
       h(
         'div',
         { class: 'ex-levels' },
-        config.levels.map((l) =>
-          result.levels[l.id] ? h('span', { class: 'ex-level-result', 'data-level': l.id }, levelPill(l.id), stars(result.levels[l.id].star ? 1 : 0, 1)) : null,
-        ),
+        levels.map((l) => h('span', { class: 'ex-level-result', 'data-level': l.id }, levelPill(l.id), stars(attempt.levels[l.id].star ? 1 : 0, 1, { label: attempt.levels[l.id].star ? 'stea câștigată' : 'fără stea' }))),
       ),
-      h('p', { class: 'u-muted' }, `Ai câștigat ${starCount} din 3 stele. O stea înseamnă cel puțin 80% dintr-un nivel.`),
+      h('p', { class: 'u-muted' }, `Ai câștigat ${starCount} din ${cantitate(levels.length, 'stea', 'stele')}. O stea înseamnă cel puțin 80% dintr-un nivel.`),
     ),
   );
 
@@ -110,10 +118,13 @@ export default async function review(container, [testId]) {
     h(
       'div',
       { class: 'c-explain__body' },
-      h('p', {}, `Timp de lucru: ${cuDe(Math.max(1, Math.round((attempt.activeMs ?? 0) / 60000)), 'minute')}${levelTimes.length ? ` (${levelTimes.join(' · ')})` : ''}. Estimare pentru un elev mediu: ${cuDe(test.exercises.reduce((s, e) => s + e.estMin, 0), 'minute')}.`),
+      h('p', {}, `Timp de lucru: ${minutes(attempt.activeMs ?? 0)}${levelTimes.length ? ` (${levelTimes.join(' · ')})` : ''}. Estimare pentru un elev mediu: ${cantitate(test.exercises.reduce((s, e) => s + e.estMin, 0), 'minut', 'minute')}.`),
       h('p', {}, practice.length ? `De exersat: ${practice.join('; ')}.` : 'Toate conceptele din test au fost stăpânite (peste 70%).'),
     ),
   );
+
+  const retake = () =>
+    h('button', { class: 'c-btn c-btn--primary', 'data-testid': 'retake', onClick: () => { clearDraft(testId); location.hash = `#/test/${testId}`; } }, 'Reia testul');
 
   // ——— lista de exerciții ———
   const list = h('div', { class: 'ex-review', 'data-testid': 'review-list' });
@@ -133,35 +144,37 @@ export default async function review(container, [testId]) {
       summary,
       h('section', { class: 'c-card l-stack' }, h('h2', { class: 'u-center' }, 'Cum te-ai simțit?'), h('div', { class: 'c-feel' }, feelButtons)),
       parents,
-      h(
-        'div',
-        { class: 'l-cluster l-cluster--between' },
-        h('h2', {}, 'Hai să vedem fiecare exercițiu'),
-        h(
-          'div',
-          { class: 'l-cluster' },
-          filterBtn,
-          h('button', { class: 'c-btn c-btn--primary', 'data-testid': 'retake', onClick: () => { clearDraft(testId); location.hash = `#/test/${testId}`; } }, 'Reia testul'),
-        ),
-      ),
-      list,
+      sameVersion
+        ? [
+            h('div', { class: 'l-cluster l-cluster--between' }, h('h2', {}, 'Hai să vedem fiecare exercițiu'), h('div', { class: 'l-cluster' }, filterBtn, retake())),
+            list,
+          ]
+        : h(
+            'section',
+            { class: 'c-card l-stack', 'data-testid': 'old-version' },
+            callout('idea', 'idee', 'Testul a fost actualizat după ce l-ai rezolvat, așa că nu mai putem arăta fiecare exercițiu. Scorul de mai sus rămâne cel obținut atunci.'),
+            h('div', { class: 'l-cluster l-cluster--center' }, retake()),
+          ),
       h('div', { class: 'l-cluster l-cluster--center' }, h('a', { class: 'c-btn c-btn--lg', href: `#/sectiune/${entry.section.id}` }, 'Înapoi la teste')),
     ),
   );
 
-  if (result.score >= config.confettiAt) confetti();
+  if (attempt.score >= config.confettiAt) confetti();
 
-  const controllers = [];
+  const cleanup = () => controllers.forEach((c) => c.destroy());
+  if (!sameVersion) return cleanup;
+
   for (const [i, ex] of test.exercises.entries()) {
-    const r = result.exercises[ex.id];
+    const r = evaluateExercise(ex, attempt.answers?.[ex.id] ?? {});
     const status = statusOf(r.fraction);
     const item = h('section', { class: 'ex-review__item', 'data-status': status, 'data-testid': `review-${ex.id}` });
     list.append(item);
     const ctl = await mountExercise(item, ex, { number: i + 1, answers: attempt.answers?.[ex.id] ?? {}, mode: 'review', seed: attempt.seed });
-    ctl.showResults(r);
     controllers.push(ctl);
+    if (!container.isConnected) break; // pagina a fost părăsită în timpul montării
+    ctl.showResults(r);
     ctl.el.querySelector('.ex-head').append(
-      h('span', { class: `ex-review__score is-${status}` }, STATUS_ICON[status], ` ${round1(r.earned)} din ${r.total}`),
+      h('span', { class: `ex-review__score is-${status}` }, STATUS_ICON[status], ` ${formatNumber(r.earnedPoints)} din ${cantitate(r.points, 'punct', 'puncte')}`),
     );
 
     const solutionHost = h('div');
@@ -178,6 +191,7 @@ export default async function review(container, [testId]) {
       solutionShown = true;
       solutionHost.append(h('h3', { html: `${emojiHTML('calcul')} Rezolvarea` }));
       const sol = await mountExercise(solutionHost, ex, { mode: 'solution', seed: attempt.seed });
+      if (!container.isConnected) return sol.destroy();
       sol.showSolution();
       controllers.push(sol);
     });
@@ -191,6 +205,7 @@ export default async function review(container, [testId]) {
         const box = h('div', { class: 'ex-review__retry' }, ex.explain?.idea ? callout('idea', 'idee', `<strong>Indiciu:</strong> ${md(ex.explain.idea)}`) : null);
         retryHost.append(box);
         const again = await mountExercise(box, ex, { seed: attempt.seed + 1 });
+        if (!container.isConnected) return again.destroy();
         controllers.push(again);
         const verdict = h('div');
         const check = h('button', { class: 'c-btn c-btn--primary', 'data-testid': `retry-check-${ex.id}` }, 'Verifică');
@@ -199,10 +214,9 @@ export default async function review(container, [testId]) {
           again.mode('review');
           again.showResults(res);
           check.remove();
-          const s = statusOf(res.fraction);
           updateAttempt(attempt.id, { secondChance: { ...(lastAttempt(testId)?.secondChance ?? {}), [ex.id]: res.fraction } });
           verdict.replaceChildren(
-            s === 'correct'
+            statusOf(res.fraction) === 'correct'
               ? callout('ok', 'bravo', 'Bravo! Acum ai rezolvat corect. Ai văzut unde era capcana.')
               : callout('warn', 'muschi', 'Încă nu. Deschide „De ce? Cum rezolvăm” și privește rezolvarea pas cu pas.'),
           );
@@ -213,5 +227,5 @@ export default async function review(container, [testId]) {
     }
   }
 
-  return () => controllers.forEach((c) => c.destroy());
+  return cleanup;
 }

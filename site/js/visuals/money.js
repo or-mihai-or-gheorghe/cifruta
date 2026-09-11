@@ -1,6 +1,6 @@
 // Bani românești stilizați: doar valoarea și culoarea (fără portrete sau elemente de siguranță).
 
-import { cuDe } from '../core/ro.js';
+import { cantitate } from '../core/ro.js';
 import { registerVisual } from './index.js';
 import { C, num, st, txt } from './palette.js';
 
@@ -17,7 +17,7 @@ const NOTE_COLORS = {
   500: 'var(--v-note-500, #A7B0DE)',
 };
 
-const lei = (v) => (v === 1 ? '1 leu' : cuDe(v, 'lei'));
+const lei = (v) => cantitate(v, 'leu', 'lei');
 
 registerVisual('banknote', {
   group: GROUP,
@@ -51,7 +51,7 @@ registerVisual('coin', {
   defaults: { value: 50 },
   label: (p) => {
     const v = num(p.value, 50);
-    return `monedă de ${v === 1 ? '1 ban' : cuDe(v, 'bani')}`;
+    return `monedă de ${cantitate(v, 'ban', 'bani')}`;
   },
   render: (p) => {
     const v = num(p.value, 50);

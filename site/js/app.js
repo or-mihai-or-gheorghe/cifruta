@@ -46,18 +46,27 @@ app.replaceChildren(
 );
 
 let cleanup = null;
+let navigation = 0; // doar ultima navigare are voie să afișeze pagina
 
 onRouteChange(async (route) => {
+  const id = ++navigation;
   if (typeof cleanup === 'function') cleanup();
   cleanup = null;
   const load = PAGES[route.name] ?? (() => import('./pages/not-found.js'));
   try {
     const page = (await load()).default;
-    clear(main);
+    if (id !== navigation) return;
+    // fiecare pagină primește un container nou: o pagină depășită scrie într-un nod detașat
+    const host = h('div', { class: 'l-page' });
+    main.replaceChildren(host);
     window.scrollTo(0, 0);
-    cleanup = await page(main, route.params);
+    main.focus({ preventScroll: true });
+    const done = await page(host, route.params);
+    if (id === navigation) cleanup = done;
+    else if (typeof done === 'function') done();
   } catch (err) {
     console.error(err);
+    if (id !== navigation) return;
     clear(main).append(
       h(
         'div',

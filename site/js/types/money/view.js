@@ -2,7 +2,7 @@
 
 import { h } from '../../core/dom.js';
 import { md } from '../../core/markup.js';
-import { cuDe } from '../../core/ro.js';
+import { cantitate } from '../../core/ro.js';
 import { moneySum } from '../../core/rules.js';
 import { visualSVG } from '../../visuals/index.js';
 import { feedbackBox, isLocked, setState } from '../_view.js';
@@ -42,7 +42,7 @@ export default {
       h('button', {
         type: 'button',
         class: 'ex-note',
-        'aria-label': `adaugă ${cuDe(value, 'lei')}`,
+        'aria-label': `adaugă ${cantitate(value, 'leu', 'lei')}`,
         'data-testid': `note-${value}`,
         html: visualSVG({ v: 'banknote', value }),
         onClick: () => add(value),
@@ -84,9 +84,9 @@ export default {
           .sort((a, b) => Number(b[0]) - Number(a[0]))
           .flatMap(([value, count]) => Array.from({ length: count }, () => Number(value)));
         w.pieces.replaceChildren(...(notes.length
-          ? notes.map((value) => h('button', { type: 'button', class: 'ex-piece', 'aria-label': `scoate ${cuDe(value, 'lei')}`, html: visualSVG({ v: 'banknote', value }), onClick: () => remove(id, value) }))
+          ? notes.map((value) => h('button', { type: 'button', class: 'ex-piece', 'aria-label': `scoate ${cantitate(value, 'leu', 'lei')}`, html: visualSVG({ v: 'banknote', value }), onClick: () => remove(id, value) }))
           : [h('span', { class: 'ex-wallet__empty' }, 'Gol')]));
-        w.sum.textContent = `Ai pus: ${cuDe(moneySum(combo), 'lei')}`;
+        w.sum.textContent = `Ai pus: ${cantitate(moneySum(combo), 'leu', 'lei')}`;
       }
     }
     paint();

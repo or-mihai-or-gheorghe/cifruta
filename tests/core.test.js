@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import { calc, holds, relation } from '../site/js/core/expr.js';
 import { lintText } from '../site/js/core/lint.js';
 import { md, markupErrors, plain } from '../site/js/core/markup.js';
-import { cuDe, fixCedilla, numberToWords, sameText } from '../site/js/core/ro.js';
+import { cantitate, fixCedilla, formatNumber, numberToWords, sameText, singularOf } from '../site/js/core/ro.js';
 import { check, minPieces, moneyCombos, moneyKey, searchNumbers } from '../site/js/core/rules.js';
 import { gradeFor, scoreTest } from '../site/js/core/scoring.js';
 import { getLogic } from '../site/js/core/registry.js';
@@ -27,12 +27,23 @@ test('expr: calcule și relații', () => {
   assert.throws(() => calc('7 : 2'));
 });
 
-test('ro: „de” după numerale, numere în litere, comparare', () => {
-  assert.equal(cuDe(19, 'lei'), '19 lei');
-  assert.equal(cuDe(20, 'lei'), '20 de lei');
-  assert.equal(cuDe(100, 'lei'), '100 de lei');
-  assert.equal(cuDe(101, 'lei'), '101 lei');
-  assert.equal(cuDe(0, 'lei'), '0 lei');
+test('ro: acordul numeral + substantiv, numere în litere, comparare', () => {
+  const lei = (n) => cantitate(n, 'leu', 'lei');
+  assert.equal(lei(0), '0 lei');
+  assert.equal(lei(1), '1 leu');
+  assert.equal(lei(2), '2 lei');
+  assert.equal(lei(19), '19 lei');
+  assert.equal(lei(20), '20 de lei');
+  assert.equal(lei(21), '21 de lei');
+  assert.equal(lei(100), '100 de lei');
+  assert.equal(lei(101), '101 lei');
+  assert.equal(lei(120), '120 de lei');
+  assert.equal(cantitate(1, 'minut', 'minute'), '1 minut');
+  assert.equal(cantitate(44, 'minut', 'minute'), '44 de minute');
+  assert.equal(cantitate(1, singularOf('grade'), 'grade'), '1 grad');
+  assert.equal(cantitate(2.7, 'punct', 'puncte'), '2,7 puncte');
+  assert.equal(formatNumber(0.7), '0,7');
+  assert.equal(formatNumber(4), '4');
   assert.equal(numberToWords(14), 'paisprezece');
   assert.equal(numberToWords(16), 'șaisprezece');
   assert.equal(numberToWords(18), 'optsprezece');

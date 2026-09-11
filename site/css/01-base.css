@@ -60,6 +60,9 @@ button:disabled { cursor: default; }
 
 ::selection { background: var(--c-accent); }
 
+/* containerele primesc focus doar din cod (pentru cititoarele de ecran), fără contur vizibil */
+[tabindex='-1']:focus { outline: none; }
+
 [hidden] { display: none !important; }
 
 strong { font-weight: 700; }

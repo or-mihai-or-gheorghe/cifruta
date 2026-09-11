@@ -1,6 +1,6 @@
 // Suporturi pentru numere: obiecte pe care scriem un număr (scoică, stea, floare, valiză, măr…).
 
-import { cuDe } from '../core/ro.js';
+import { cantitate, singularOf } from '../core/ro.js';
 import { registerVisual, svgText } from './index.js';
 import { C, fit, has, numberBadge, ST, st, txt } from './palette.js';
 
@@ -146,7 +146,7 @@ registerVisual('tag', {
   group: GROUP,
   defaults: { unit: 'lei' },
   viewBox: '0 0 120 64',
-  label: (p) => `etichetă de preț: ${has(p.n) ? cuDe(Number(p.n), p.unit) : p.unit}`,
+  label: (p) => `etichetă de preț: ${has(p.n) ? cantitate(Number(p.n), singularOf(p.unit), p.unit) : p.unit}`,
   render: (p) => `
     <path d="M4 32 L28 6 H110 Q116 6 116 12 V52 Q116 58 110 58 H28 Z" fill="${C.yellow}" ${st(3)}/>
     <circle cx="24" cy="32" r="5" fill="${C.white}" ${st(2)}/>

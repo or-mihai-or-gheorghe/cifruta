@@ -69,15 +69,15 @@ function visuals() {
   );
 }
 
-async function types(wrap) {
+async function types(wrap, ctls) {
   const test = normalizeTest(demoTest);
   wrap.append(h('p', { class: 'u-muted' }, 'Fiecare exemplu este definit în site/data/demo.js. Butoanele de mai jos sunt doar pentru autori.'));
-  const ctls = {};
   for (const [i, ex] of test.exercises.entries()) {
     const box = h('div', { class: 'l-stack', 'data-testid': `demo-${ex.id}` });
     wrap.append(box);
     let ctl = await mountExercise(box, ex, { number: i + 1, seed: 7 });
     ctls[ex.id] = ctl;
+    if (!wrap.isConnected) return; // s-a schimbat pagina în timpul montării
     const status = h('span', { class: 'u-muted', 'data-testid': `demo-status-${ex.id}` });
     box.append(h('div', { class: 'l-cluster' },
       h('button', { class: 'c-btn c-btn--primary c-btn--sm', 'data-testid': `demo-check-${ex.id}`, onClick: () => {
@@ -91,6 +91,7 @@ async function types(wrap) {
         ctl.el.remove();
         ctl = await mountExercise(box, ex, { number: i + 1, seed: 7 });
         ctls[ex.id] = ctl;
+        if (!wrap.isConnected) return ctl.destroy();
         box.prepend(ctl.el);
         status.textContent = '';
       } }, 'Resetează'),
@@ -114,8 +115,12 @@ export default async function atelier(container, [tab = 'componente']) {
       body,
     ),
   );
+  const ctls = {};
   if (tab === 'vizualuri') body.append(visuals());
-  else if (tab === 'tipuri') await types(body);
+  else if (tab === 'tipuri') await types(body, ctls);
   else body.append(components());
-  return () => delete window.__dbg;
+  return () => {
+    Object.values(ctls).forEach((c) => c.destroy());
+    delete window.__dbg;
+  };
 }

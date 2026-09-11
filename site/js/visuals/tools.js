@@ -1,6 +1,6 @@
 // Unelte de matematică: numărătoare, cofraje, axa numerelor, termometru, riglă, ceas, balanță, model cu bare.
 
-import { cuDe } from '../core/ro.js';
+import { cantitate } from '../core/ro.js';
 import { registerVisual } from './index.js';
 import { C, has, list, num, st, txt } from './palette.js';
 
@@ -124,7 +124,7 @@ registerVisual('thermometer', {
   group: GROUP,
   defaults: { min: 0, max: 40, minor: 2, major: 10 },
   viewBox: '0 0 90 222',
-  label: (p) => `termometru${has(p.value) ? ` care arată ${cuDe(num(p.value, 0), 'grade')}` : ''}`,
+  label: (p) => `termometru${has(p.value) ? ` care arată ${cantitate(num(p.value, 0), 'grad', 'grade')}` : ''}`,
   render: (p, { uid }) => {
     const min = num(p.min, 0);
     const max = num(p.max, 40);
@@ -179,7 +179,7 @@ const clockLabel = (h, m) => {
   const hh = h % 12 === 0 ? 12 : h % 12;
   if (m === 30) return `ora ${hh} și jumătate`;
   if (m === 0) return `ora ${hh}`;
-  return `ora ${hh} și ${m} minute`;
+  return `ora ${hh} și ${cantitate(m, 'minut', 'minute')}`;
 };
 
 registerVisual('clock', {

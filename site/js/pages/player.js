@@ -4,7 +4,7 @@ import config from '../../data/scoring.js';
 import { clear, h } from '../core/dom.js';
 import { findTest, loadTest } from '../core/loader.js';
 import { getLogic } from '../core/registry.js';
-import { cuDe } from '../core/ro.js';
+import { cantitate } from '../core/ro.js';
 import { newSeed } from '../core/rng.js';
 import { progressOf, scoreTest } from '../core/scoring.js';
 import { addAttempt, clearDraft, getDraft, saveDraft } from '../core/storage.js';
@@ -24,6 +24,7 @@ export default async function player(container, [testId]) {
     return;
   }
   const test = await loadTest(testId);
+  if (!container.isConnected) return; // s-a navigat în altă parte cât se încărca testul
   document.title = `${test.title} — Cifruța`;
 
   let draft = getDraft(testId);
@@ -31,8 +32,9 @@ export default async function player(container, [testId]) {
     draft = { testId, version: test.version, seed: newSeed(), current: -1, answers: {}, activeMs: 0, msByExercise: {}, seenBreaks: [], startedAt: new Date().toISOString() };
   }
   let submitted = false; // după trimitere, ciorna nu mai trebuie salvată (altfel reapare la redeschidere)
+  // ciorna există doar după „Începe testul” (altfel cardul ar arăta „început” la simpla deschidere)
   const save = () => {
-    if (!submitted) saveDraft(testId, draft);
+    if (!submitted && draft.current >= 0) saveDraft(testId, draft);
   };
   const total = test.exercises.length;
   const totalMin = test.exercises.reduce((s, e) => s + e.estMin, 0);
@@ -124,7 +126,7 @@ export default async function player(container, [testId]) {
         renderMap();
       },
     });
-    if (token !== renderToken) return ctl.destroy();
+    if (token !== renderToken || !container.isConnected) return ctl.destroy();
     controller = ctl;
     stage.append(host);
     renderNav(index);
@@ -134,7 +136,7 @@ export default async function player(container, [testId]) {
     const levels = config.levels
       .map((l) => {
         const count = test.exercises.filter((e) => e.level === l.id).length;
-        return count ? h('span', { class: 'l-cluster' }, levelPill(l.id), h('span', { class: 'u-small u-muted' }, `${count} exerciții`)) : null;
+        return count ? h('span', { class: 'l-cluster' }, levelPill(l.id), h('span', { class: 'u-small u-muted' }, cantitate(count, 'exercițiu', 'exerciții'))) : null;
       })
       .filter(Boolean);
     stage.append(
@@ -145,7 +147,7 @@ export default async function player(container, [testId]) {
         test.subtitle ? h('p', { class: 'u-big u-muted' }, test.subtitle) : null,
         test.story ? mascot('vesela', test.story) : null,
         h('div', { class: 'ex-intro__levels' }, levels),
-        h('p', { class: 'u-muted' }, `Durează cam ${cuDe(totalMin, 'minute')}. Poți sări peste un exercițiu și poți reveni oricând. Rezultatele și explicațiile le vezi la final.`),
+        h('p', { class: 'u-muted' }, `Durează cam ${cantitate(totalMin, 'minut', 'minute')}. Poți sări peste un exercițiu și poți reveni oricând. Rezultatele și explicațiile le vezi la final.`),
         h('button', { class: 'c-btn c-btn--primary c-btn--lg', 'data-testid': 'start', onClick: () => show(0) }, Object.keys(draft.answers).length ? 'Continuă testul' : 'Începe testul'),
       ),
     );
@@ -190,7 +192,7 @@ export default async function player(container, [testId]) {
     if (unfinished > 0) {
       const ok = await confirmModal({
         title: 'Mai ai exerciții de lucru',
-        text: `${unfinished === 1 ? 'Un exercițiu nu este terminat' : `${unfinished} exerciții nu sunt terminate`}. Vrei să vezi rezultatele acum?`,
+        text: `${unfinished === 1 ? 'Un exercițiu nu este terminat' : `${cantitate(unfinished, 'exercițiu', 'exerciții')} nu sunt terminate`}. Vrei să vezi rezultatele acum?`,
         confirm: 'Vezi rezultatele',
         cancel: 'Mai lucrez',
       });

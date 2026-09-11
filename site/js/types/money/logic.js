@@ -4,7 +4,7 @@
 //   fewest?: true }    // cu cât mai puține bancnote
 // Răspuns: { [itemId]: { '10': 1, '1': 2 } }
 
-import { cuDe } from '../../core/ro.js';
+import { cantitate } from '../../core/ro.js';
 import { minPieces, moneyCombos, moneyKey, moneyPieces, moneySum } from '../../core/rules.js';
 import { checkIds, makeResult } from '../_shared.js';
 
@@ -53,7 +53,7 @@ export default {
         let ok = false;
         let feedback = null;
         if (pieces > 0) {
-          if (sum !== part.target) feedback = `Ai pus ${cuDe(sum, 'lei')}, dar trebuiau ${cuDe(part.target, 'lei')}.`;
+          if (sum !== part.target) feedback = `Ai pus ${cantitate(sum, 'leu', 'lei')}, dar trebuiau ${cantitate(part.target, 'leu', 'lei')}.`;
           else if (part.fewest && pieces !== min) feedback = 'Suma e bună, dar se poate cu mai puține bancnote.';
           else ok = true;
         }

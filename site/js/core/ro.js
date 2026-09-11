@@ -22,12 +22,24 @@ export function sameText(a, b, { ignoreDiacritics = false } = {}) {
   return norm(a) === norm(b);
 }
 
-/** 19 lei, 20 de lei, 100 de lei, 101 lei */
-export function cuDe(n, noun) {
+/**
+ * Numeral + substantiv cu acordul corect în română:
+ * cantitate(1, 'leu', 'lei') → „1 leu”, (5) → „5 lei”, (19) → „19 lei”, (20) → „20 de lei”, (101) → „101 lei”.
+ */
+export function cantitate(n, singular, plural) {
+  if (Math.abs(n) === 1) return `${n} ${singular}`;
   const r = Math.abs(n) % 100;
-  const de = r >= 20 || (r === 0 && n !== 0);
-  return `${n} ${de ? 'de ' : ''}${noun}`;
+  const de = Number.isInteger(n) && (r >= 20 || (r === 0 && n !== 0));
+  return `${formatNumber(n)} ${de ? 'de ' : ''}${plural}`;
 }
+
+const SINGULAR = { lei: 'leu', bani: 'ban', grade: 'grad', minute: 'minut', ore: 'oră', puncte: 'punct', ouă: 'ou', mere: 'măr', litri: 'litru', centimetri: 'centimetru' };
+
+/** Forma de singular pentru unitățile folosite în conținut: singularOf('grade') → „grad”. */
+export const singularOf = (plural) => SINGULAR[plural] ?? plural;
+
+/** Număr scris românește, cu virgulă zecimală și cel mult o zecimală: 2.7 → „2,7”, 4 → „4”. */
+export const formatNumber = (x, digits = 1) => String(Math.round(x * 10 ** digits) / 10 ** digits).replace('.', ',');
 
 const UNITS = ['zero', 'unu', 'doi', 'trei', 'patru', 'cinci', 'șase', 'șapte', 'opt', 'nouă'];
 const TEENS = ['zece', 'unsprezece', 'doisprezece', 'treisprezece', 'paisprezece', 'cincisprezece',

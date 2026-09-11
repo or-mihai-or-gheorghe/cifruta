@@ -18,6 +18,7 @@ import re
 import subprocess
 import sys
 import threading
+import time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -46,7 +47,7 @@ def serve() -> tuple[ThreadingHTTPServer, str]:
 
 
 def catalog_tests() -> list[dict]:
-    script = "import('./site/data/catalog.js').then(m => console.log(JSON.stringify(m.default.sections.flatMap(s => s.groups.flatMap(g => g.tests)))))"
+    script = "import('./site/data/catalog.js').then(m => console.log(JSON.stringify(m.default.sections.flatMap(s => s.groups.flatMap(g => g.tests.map(t => ({ ...t, section: s.id })))))))"
     out = subprocess.run(["node", "--input-type=module", "-e", script], cwd=ROOT, capture_output=True, text=True, check=True)
     return json.loads(out.stdout)
 
@@ -199,6 +200,39 @@ def types_flow(run: Run, page: Page, vp: str):
     run.shot(page, f"{vp}-atelier-tipuri-rezolvat")
 
 
+def pages_flow(run: Run, page: Page, test: dict, vp: str):
+    """Ciorna la deschidere, rezultatele unei versiuni vechi a testului, schimbarea rapidă de rută."""
+    tid, sid = test["id"], test["section"]
+    run.goto(page, f"test/{tid}")
+    page.evaluate("localStorage.clear()")
+    page.reload()
+    page.wait_for_selector("[data-testid=start]")
+    run.check(page.evaluate(f"localStorage.getItem('cifruta:draft:{tid}')") is None, f"[{vp}] {tid}: simpla deschidere a testului nu creează ciornă")
+
+    old = {"id": f"{tid}-vechi", "testId": tid, "testVersion": 0, "seed": 1, "score": 77, "grade": "B", "activeMs": 600000,
+           "msByExercise": {}, "answers": {}, "levels": {"usor": {"fraction": 1, "star": True}}, "concepts": {}, "exercises": {},
+           "feeling": None, "secondChance": {}}
+    page.evaluate("a => localStorage.setItem('cifruta:attempts', JSON.stringify([a]))", old)
+    run.goto(page, f"rezultate/{tid}")
+    page.wait_for_selector("[data-testid=score]")
+    score = page.get_by_test_id("score").inner_text()
+    run.check(re.match(r"^77\s*/\s*100$", score) is not None, f"[{vp}] {tid}: versiune veche → scorul salvat (primit {score!r})")
+    run.check(page.get_by_test_id("old-version").is_visible() and page.get_by_test_id("review-list").count() == 0, f"[{vp}] {tid}: versiune veche → mesajul de actualizare, fără lista pe exerciții")
+    run.shot(page, f"{vp}-{tid}-versiune-veche")
+
+    # rezultatele încă se încarcă (fișierul testului întârzie), dar utilizatorul a ajuns deja pe pagina secțiunii
+    run.goto(page, f"sectiune/{sid}")
+    page.reload()  # golește modulele încărcate, ca testul să fie descărcat din nou
+    page.wait_for_load_state("networkidle")
+    page.route("**/data/tests/**", lambda route: (time.sleep(1), route.continue_()))
+    page.evaluate(f"location.hash = '#/rezultate/{tid}'; setTimeout(() => {{ location.hash = '#/sectiune/{sid}'; }}, 300)")
+    page.wait_for_timeout(1500)
+    page.wait_for_load_state("networkidle")
+    page.unroute("**/data/tests/**")
+    run.check(page.get_by_test_id("summary").count() == 0 and page.get_by_test_id(f"test-card-{tid}").is_visible(), f"[{vp}] {tid}: schimbarea rapidă de rută nu lasă rezultatele peste pagina secțiunii")
+    page.evaluate("localStorage.clear()")
+
+
 def test_flow(run: Run, page: Page, test: dict, vp: str):
     tid = test["id"]
     run.goto(page, f"test/{tid}", debug=True)
@@ -313,6 +347,8 @@ def main() -> int:
             if not args.only:
                 smoke(run, page, vp)
                 types_flow(run, page, vp)
+            if tests:
+                pages_flow(run, page, tests[0], vp)
             for test in tests:
                 test_flow(run, page, test, vp)
             context.close()

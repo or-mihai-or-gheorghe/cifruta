@@ -3,6 +3,7 @@
 
 import { h } from '../../core/dom.js';
 import { md, plain } from '../../core/markup.js';
+import { cantitate, formatNumber, singularOf } from '../../core/ro.js';
 import { visualSVG } from '../../visuals/index.js';
 import { isLocked, setState } from '../_view.js';
 
@@ -72,11 +73,11 @@ export default {
         for (const x of res.items) {
           const r = rows[x.id];
           setState(r.row, x.ok ? 'correct' : 'wrong');
-          const unit = part.unit ? ` ${part.unit}` : '';
+          const qty = (v) => (part.unit ? cantitate(v, singularOf(part.unit), part.unit) : formatNumber(v));
           r.row.querySelector('.ex-slider__result').replaceChildren(
             x.ok
-              ? h('span', { class: 'u-small' }, `Ai arătat ${x.given}${unit}.`)
-              : h('span', { class: 'u-small' }, x.given === null ? 'Nu ai mutat cursorul. ' : `Ai arătat ${x.given}${unit}. `, h('span', { class: 'ex-expected' }, `${x.expected}${unit}`)),
+              ? h('span', { class: 'u-small' }, `Ai arătat ${qty(x.given)}.`)
+              : h('span', { class: 'u-small' }, x.given === null ? 'Nu ai mutat cursorul. ' : `Ai arătat ${qty(x.given)}. `, h('span', { class: 'ex-expected' }, qty(x.expected))),
           );
         }
       },
