@@ -12,7 +12,7 @@ const ORGANS = {
   inima: {
     label: 'inima',
     draw: () => `
-      ${tube('M40 18 V6', C.blueDark)}${tube('M58 18 V8 Q58 4 64 4', C.redDark)}
+      ${tube('M38 22 V7', C.blueDark, 6)}${tube('M52 22 C50 6 66 2 70 13', C.redDark, 7)}
       <path d="M50 90 C22 70 8 52 8 34 C8 18 20 10 32 10 C40 10 46 14 50 20 C54 14 60 10 68 10 C80 10 92 18 92 34 C92 52 78 70 50 90 Z" fill="${C.red}" ${st(3)}/>
       <path d="M22 32 C23 24 29 19 36 19" fill="none" stroke="${C.white}" stroke-width="4" opacity=".5" stroke-linecap="round"/>`,
   },

@@ -22,3 +22,4 @@
 .u-mt-4 { margin-top: var(--sp-4); }
 .u-mt-6 { margin-top: var(--sp-6); }
 .u-w-full { width: 100%; }
+.u-break { overflow-wrap: anywhere; word-break: break-word; }

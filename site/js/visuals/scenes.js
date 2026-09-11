@@ -60,7 +60,7 @@ const SCENES = {
         .map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i % 3 === 0 ? 2.2 : 1.4}" fill="${i % 2 ? C.white : C.yellow}"/>`).join('');
       return `
         <rect width="300" height="120" fill="var(--v-space, #2B2552)"/>${stars}
-        <path d="M46 12 A17 17 0 1 0 46 46 A13 13 0 1 1 46 12 Z" fill="${C.grayLight}" ${st(1.5)}/>
+        <circle cx="40" cy="30" r="15" fill="${C.grayLight}"/><circle cx="47" cy="25" r="13" fill="var(--v-space, #2B2552)"/>
         <ellipse cx="244" cy="72" rx="36" ry="9" fill="none" stroke="${C.yellow}" stroke-width="4"/>
         <circle cx="244" cy="70" r="21" fill="${C.orange}" ${st(2)}/>
         <path d="M208 72 A36 9 0 0 0 280 72" fill="none" stroke="${C.yellow}" stroke-width="4"/>

@@ -3,17 +3,21 @@
 ## Instantaneu
 - **Data:** 2026-09-11 · **Versiune:** 0.1.0 (în lucru)
 - **URL live:** (după publicare) https://or-mihai-or-gheorghe.github.io/cifruta/
-- **Ce funcționează:** nucleul pur (expresii, reguli, punctaj, validare), logica celor 11 tipuri, demo + teste unitare.
+- **Ce funcționează:** nucleul pur (expresii, reguli, punctaj, validare), logica celor 11 tipuri, CSS centralizat și
+  fonturi, paginile acasă / secțiune / atelier / 404, player complet (hartă pe niveluri, ecrane între niveluri, ciornă,
+  confirmare), rezultate (scor, calificativ, stele, confetti, autoevaluare, zona pentru părinți, revizuire, a doua
+  încercare), interfețele `choice`, `truefalse`, `fill`; E2E Playwright pe demo (scor 100 / 10 / ciornă).
+- **În lucru:** cele 4 teste de recapitulare (M8). Toate cele 11 tipuri au interfață; E2E: 128 de verificări pe laptop, tabletă, telefon.
 
 ## Etape
 - [x] M0 Schelet: git, `_surse/`, `.gitignore`, `package.json`, `CLAUDE.md`, docs (curriculum, cercetare)
 - [x] M1 Nucleu pur + logica tipurilor + teste unitare
-- [ ] M2 Sistem de design (CSS, fonturi), router, pagini acasă/secțiune, atelier „Componente”
-- [ ] M3 Player + rezultate/revizuire cu `choice`, `truefalse`
-- [ ] M4 `fill` (toate layout-urile)
-- [ ] M5 `dnd` + `order`, `categorize`, `match`, `mark`
-- [ ] M6 `slider`, `build`, `clock`, `money`
-- [ ] M7 Banca vizuală, emoji, mascota, atelier „Vizualuri” / „Tipuri”
+- [x] M2 Sistem de design (CSS, fonturi), router, pagini acasă/secțiune, atelier „Componente”
+- [x] M3 Player + rezultate/revizuire cu `choice`, `truefalse`
+- [x] M4 `fill` (toate layout-urile)
+- [x] M5 `dnd` + `order`, `categorize`, `match`, `mark`
+- [x] M6 `slider`, `build`, `clock`, `money`
+- [x] M7 Banca vizuală (36 de desene), emoji Noto locale, mascota, atelier „Vizualuri” / „Tipuri”
 - [ ] M8 Testele T1–T4
 - [ ] M9 Finisaj: animații, accesibilitate
 - [ ] M10 Publicare pe GitHub Pages
@@ -38,6 +42,9 @@
 | 2026-09-11 | Fără voce (TTS), fără tastatură numerică proprie, localStorage simplu | cererea utilizatorului: fără over-engineering |
 | 2026-09-11 | Explorarea mediului: 1–2 exerciții pe test | cererea utilizatorului |
 | 2026-09-11 | Mascotă originală Veverița Cifruța; licențe MIT (cod) + CC BY-NC-SA 4.0 (conținut) | site public, fără personaje protejate |
+| 2026-09-11 | Demo-ul tuturor tipurilor stă în catalog într-o secțiune ascunsă (`hidden: true`) | E2E și atelierul folosesc același player ca testele reale |
+| 2026-09-11 | Casete numerice cu `inputmode="numeric"` (tastatura dispozitivului), semnele ca butoane | fără tastatură proprie, conform cererii |
+| 2026-09-11 | Revizuirea arată răspunsul copilului vs. cel corect (✓/✗ + text), explicație (idee, pași, probă, capcană), rezolvarea completă și „Mai încerc o dată” | feedback eficient pentru 6–8 ani (docs/cercetare.md) |
 
 ## Probleme cunoscute
 - (niciuna încă)
@@ -53,3 +60,4 @@
 ## Jurnal de sesiuni
 - **2026-09-11** — Analiză scanări + documentare online (programă, EN II, exemple, aplicații). Plan aprobat.
   Implementat M0–M1: schelet, nucleu pur, logica celor 11 tipuri, demo, 14 teste unitare verzi. Docs: curriculum, cercetare.
+  M2–M3: design system, pagini, player, rezultate; E2E pe demo trece (100 / 10 / ciornă). Început M4 (`fill`) și banca vizuală.

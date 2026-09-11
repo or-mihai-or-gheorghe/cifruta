@@ -2,7 +2,7 @@
 
 import { cuDe } from '../core/ro.js';
 import { registerVisual, svgText } from './index.js';
-import { C, has, numberBadge, ST, st, txt } from './palette.js';
+import { C, fit, has, numberBadge, ST, st, txt } from './palette.js';
 
 const GROUP = 'Suporturi pentru numere';
 const withNumber = (name) => (p) => (has(p.n) ? `${name} cu numărul ${p.n}` : name);
@@ -28,7 +28,7 @@ registerVisual('star', {
   label: withNumber('stea'),
   render: (p) => `
     <path d="M50 5 L62 36 L95 38 L69 58 L78 92 L50 73 L22 92 L31 58 L5 38 L38 36 Z" fill="${C.yellow}" ${st(3)}/>
-    ${has(p.n) ? svgText(50, 55, p.n, { size: 24 }) : ''}`,
+    ${has(p.n) ? svgText(50, 55, p.n, { size: fit(p.n, 24) }) : ''}`,
   demos: [{ n: 47 }],
 });
 
@@ -41,7 +41,7 @@ registerVisual('flower', {
     const petals = [0, 60, 120, 180, 240, 300]
       .map((a) => `<ellipse cx="50" cy="24" rx="15" ry="22" fill="${fill}" ${ST} transform="rotate(${a} 50 50)"/>`)
       .join('');
-    return `${petals}<circle cx="50" cy="50" r="22" fill="${C.white}" ${ST}/>${has(p.n) ? svgText(50, 51, p.n, { size: 22 }) : ''}`;
+    return `${petals}<circle cx="50" cy="50" r="22" fill="${C.white}" ${ST}/>${has(p.n) ? svgText(50, 51, p.n, { size: fit(p.n, 22) }) : ''}`;
   },
   demos: [{ n: 39 }, { n: 82, color: 'galben' }],
 });
@@ -56,7 +56,7 @@ registerVisual('suitcase', {
       <path d="M36 22 V14 Q36 8 42 8 H58 Q64 8 64 14 V22" fill="none" ${st(4)}/>
       <rect x="10" y="22" width="80" height="66" rx="10" fill="${fill}" ${st(3)}/>
       <rect x="18" y="22" width="8" height="66" fill="${C.ink}" opacity=".15"/><rect x="74" y="22" width="8" height="66" fill="${C.ink}" opacity=".15"/>
-      ${has(p.n) ? `<rect x="30" y="36" width="40" height="30" rx="6" fill="${C.white}" ${st(2)}/>${svgText(50, 52, p.n, { size: 22 })}` : ''}
+      ${has(p.n) ? `<rect x="30" y="36" width="40" height="30" rx="6" fill="${C.white}" ${st(2)}/>${svgText(50, 52, p.n, { size: fit(p.n, 22) })}` : ''}
       ${p.tag ? svgText(50, 79, p.tag, { size: 14, cls: 'v-tag' }) : ''}`;
   },
   demos: [{ n: 65, tag: 'N' }],
@@ -124,7 +124,7 @@ registerVisual('rocket', {
     <path d="M50 4 C70 18 76 42 73 76 L27 76 C24 42 30 18 50 4 Z" fill="${C.grayLight}" ${st(3)}/>
     <path d="M50 4 C61 12 67 21 70 31 L30 31 C33 21 39 12 50 4 Z" fill="${C.red}" ${ST}/>
     <circle cx="50" cy="52" r="15" fill="${C.blueLight}" ${st(2.5)}/>
-    ${has(p.n) ? svgText(50, 53, p.n, { size: 16 }) : ''}`,
+    ${has(p.n) ? svgText(50, 53, p.n, { size: fit(p.n, 16) }) : ''}`,
   demos: [{ n: 48 }],
 });
 

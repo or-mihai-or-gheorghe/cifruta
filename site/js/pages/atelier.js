@@ -61,7 +61,7 @@ function visuals() {
         items.flatMap((v) => v.demos.map((params) =>
           h('figure', { class: 'c-card u-center', style: { margin: 0 }, 'data-testid': `visual-${v.name}` },
             h('div', { html: visualSVG({ v: v.name, ...params }) }),
-            h('figcaption', { class: 'u-small' }, h('strong', {}, v.name), h('br'), h('code', {}, JSON.stringify(params))),
+            h('figcaption', { class: 'u-small u-break' }, h('strong', {}, v.name), h('br'), h('code', {}, JSON.stringify(params))),
           ),
         )),
       )),

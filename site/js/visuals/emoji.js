@@ -54,6 +54,35 @@ export const EMOJI = {
   trist: { char: '😟', code: '1f61f', label: 'îngrijorat' },
   neutru: { char: '😐', code: '1f610', label: 'așa și așa' },
   vesel: { char: '🙂', code: '1f642', label: 'mulțumit' },
+  // obiecte (corpuri geometrice în viața reală)
+  zar: { char: '🎲', code: '1f3b2', label: 'zar' },
+  gheata: { char: '🧊', code: '1f9ca', label: 'cub de gheață' },
+  minge: { char: '⚽', code: '26bd', label: 'minge' },
+  glob: { char: '🌍', code: '1f30d', label: 'glob pământesc' },
+  conserva: { char: '🥫', code: '1f96b', label: 'conservă' },
+  baterie: { char: '🔋', code: '1f50b', label: 'baterie' },
+  cutie: { char: '📦', code: '1f4e6', label: 'cutie' },
+  carte: { char: '📕', code: '1f4d5', label: 'carte' },
+  creion: { char: '✏️', code: '270f', label: 'creion' },
+  rigla: { char: '📏', code: '1f4cf', label: 'riglă' },
+  // piață și legume
+  salata: { char: '🥬', code: '1f96c', label: 'salată' },
+  ardei: { char: '🫑', code: '1fad1', label: 'ardei' },
+  castravete: { char: '🥒', code: '1f952', label: 'castravete' },
+  suc: { char: '🧃', code: '1f9c3', label: 'suc' },
+  // energie și anotimpuri
+  vant: { char: '💨', code: '1f4a8', label: 'vânt' },
+  apa: { char: '💧', code: '1f4a7', label: 'apă' },
+  petrol: { char: '🛢️', code: '1f6e2', label: 'petrol' },
+  foc: { char: '🔥', code: '1f525', label: 'foc' },
+  fulg: { char: '❄️', code: '2744', label: 'fulg de nea' },
+  frunze: { char: '🍂', code: '1f342', label: 'frunze de toamnă' },
+  lalea: { char: '🌷', code: '1f337', label: 'lalea' },
+  // oameni
+  bunic: { char: '👴', code: '1f474', label: 'bunic' },
+  bunica: { char: '👵', code: '1f475', label: 'bunică' },
+  baiat: { char: '👦', code: '1f466', label: 'băiat' },
+  fata: { char: '👧', code: '1f467', label: 'fată' },
 };
 
 export const hasEmoji = (name) => Object.hasOwn(EMOJI, name);

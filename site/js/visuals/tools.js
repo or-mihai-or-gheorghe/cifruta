@@ -200,8 +200,8 @@ registerVisual('clock', {
     if (has(p.h)) {
       const h = num(p.h, 0);
       const m = num(p.m, 0);
-      out += `<line x1="50" y1="50" x2="50" y2="26" stroke="${C.ink}" stroke-width="5" stroke-linecap="round" transform="rotate(${(h % 12) * 30 + m * 0.5} 50 50)"/>`;
-      out += `<line x1="50" y1="50" x2="50" y2="14" stroke="${C.blueDark}" stroke-width="3" stroke-linecap="round" transform="rotate(${m * 6} 50 50)"/>`;
+      out += `<line x1="50" y1="50" x2="50" y2="31" stroke="${C.ink}" stroke-width="5" stroke-linecap="round" transform="rotate(${(h % 12) * 30 + m * 0.5} 50 50)"/>`;
+      out += `<line x1="50" y1="50" x2="50" y2="22" stroke="${C.blueDark}" stroke-width="3" stroke-linecap="round" transform="rotate(${m * 6} 50 50)"/>`;
     }
     return `${out}<circle cx="50" cy="50" r="3.5" fill="${C.ink}"/>`;
   },

@@ -55,7 +55,10 @@ export const emojiImage = (name, x, y, size) => {
   return e ? `<image href="assets/emoji/${e.code}.svg" x="${x}" y="${y}" width="${size}" height="${size}"/>` : '';
 };
 
+/** Mărimea fontului micșorată pentru numere cu 3 sau mai multe cifre. */
+export const fit = (n, size) => (String(n).length >= 3 ? Math.round(size * 0.74) : size);
+
 /** Cerc alb cu număr (pentru obiecte colorate). */
 export const numberBadge = (cx, cy, r, n, size) =>
   `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${C.white}" ${st(2)}/>` +
-  `<text x="${cx}" y="${cy + 1}" class="v-num" font-size="${size}" font-weight="700" text-anchor="middle" dominant-baseline="central">${escapeHTML(n)}</text>`;
+  `<text x="${cx}" y="${cy + 1}" class="v-num" font-size="${fit(n, size)}" font-weight="700" text-anchor="middle" dominant-baseline="central">${escapeHTML(n)}</text>`;
