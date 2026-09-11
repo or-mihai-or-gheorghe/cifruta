@@ -31,7 +31,7 @@ export function visualSVG(spec) {
   const label = def.label ? def.label(p) : v;
   const viewBox = typeof def.viewBox === 'function' ? def.viewBox(p) : (def.viewBox ?? '0 0 100 100');
   const body = def.render(p, { uid });
-  return `<svg class="v-svg v-${v}${cls ? ` ${cls}` : ''}" viewBox="${viewBox}" role="img" aria-label="${escapeHTML(label)}" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
+  return `<svg class="v-svg v-${escapeHTML(v)}${cls ? ` ${escapeHTML(cls)}` : ''}" viewBox="${viewBox}" role="img" aria-label="${escapeHTML(label)}" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
 }
 
 export function visualLabel(spec) {

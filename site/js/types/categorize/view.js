@@ -2,7 +2,7 @@
 
 import { createDnd } from '../../core/dnd.js';
 import { h } from '../../core/dom.js';
-import { md } from '../../core/markup.js';
+import { md, plain } from '../../core/markup.js';
 import { shuffled } from '../../core/rng.js';
 import { hasVisual, visualSVG } from '../../visuals/index.js';
 import { isLocked, itemFace, setState } from '../_view.js';
@@ -16,7 +16,14 @@ export default {
     const order = part.shuffle === false ? part.items.map((i) => i.id) : shuffled(part.items.map((i) => i.id), ctx.seed);
     const byId = Object.fromEntries(part.items.map((i) => [i.id, i]));
 
-    const tray = h('div', { class: 'ex-tray ex-drop', 'data-bin': '', 'aria-label': 'Elemente de sortat' });
+    // Enter/Space pe coș sau pe tavă pune elementul ridicat; tastele apăsate pe un element din coș îi aparțin elementului
+    const pressable = (node) => node.addEventListener('keydown', (e) => {
+      if (e.target !== node || (e.key !== 'Enter' && e.key !== ' ')) return;
+      e.preventDefault();
+      node.click();
+    });
+    const tray = h('div', { class: 'ex-tray ex-drop', 'data-bin': '', role: 'button', tabindex: '0', 'aria-label': 'Elemente de sortat. Pune aici un element ca să-l scoți din coș.', 'data-testid': 'tray' });
+    pressable(tray);
     const bins = {};
     const binList = h(
       'div',
@@ -29,7 +36,7 @@ export default {
           h('div', { class: 'ex-bin__head' }, b.visual && hasVisual(b.visual.v) ? h('span', { class: 'ex-bin__art', html: visualSVG(b.visual) }) : null, h('span', { html: md(b.label) })),
           content,
         );
-        bin.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); bin.click(); } });
+        pressable(bin);
         bins[b.id] = { el: bin, content };
         return bin;
       }),
@@ -74,6 +81,9 @@ export default {
       mode(m) {
         mode = m;
         el.classList.toggle('is-locked', isLocked(m));
+        if (isLocked(m)) dnd.cancel();
+        tray.tabIndex = isLocked(m) ? -1 : 0;
+        for (const b of Object.values(bins)) b.el.tabIndex = isLocked(m) ? -1 : 0;
         for (const c of Object.values(chips)) c.disabled = isLocked(m);
       },
       showResult(res) {
@@ -83,7 +93,7 @@ export default {
           setState(chip, r.given === null ? 'wrong' : r.ok ? 'correct' : 'wrong');
           if (!r.ok) {
             const label = part.bins.find((b) => b.id === r.expected)?.label ?? r.expected;
-            chip.append(h('span', { class: 'ex-chip__expected' }, `→ ${label}`));
+            chip.append(h('span', { class: 'ex-chip__expected' }, `→ ${plain(label)}`));
           }
         }
       },

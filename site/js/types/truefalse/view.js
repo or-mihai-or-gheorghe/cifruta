@@ -69,9 +69,9 @@ export default {
       showResult(res) {
         for (const r of res.items) {
           const row = rows[r.id];
-          setState(row, r.given === null ? 'missed' : r.ok ? 'correct' : 'wrong');
+          setState(row, r.ok ? 'correct' : 'wrong');
           const item = part.items.find((i) => i.id === r.id);
-          const note = r.ok ? null : `Răspunsul corect: **${r.expected ? 'Adevărat' : 'Fals'}**.${item.why ? ` ${item.why}` : ''}`;
+          const note = r.ok ? null : `${r.given === null ? 'Nu ai ales. ' : ''}Răspunsul corect: **${r.expected ? 'Adevărat' : 'Fals'}**.${item.why ? ` ${item.why}` : ''}`;
           row.querySelector('.ex-tf__why').replaceChildren(feedbackBox(note) ?? '');
         }
       },

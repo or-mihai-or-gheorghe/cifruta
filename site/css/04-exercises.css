@@ -301,6 +301,7 @@
 
 /* ——— order ——— */
 .ex-order { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.ex-order__slot { display: flex; }
 .ex-order__card {
   position: relative;
   display: grid;
@@ -387,10 +388,10 @@
 @media (max-width: 30rem) { .ex-match__item { font-size: var(--fs-1); padding-inline: 0.4rem; } }
 
 /* ——— mark ——— */
-.ex-palette { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.ex-palette { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-bottom: var(--sp-3); }
 .ex-palette__btn { display: inline-flex; align-items: center; gap: 0.5rem; min-height: var(--tap); padding: 0.3rem 1rem 0.3rem 0.4rem; border: 3px solid var(--c-line); border-radius: var(--r-pill); background: var(--c-surface); font-weight: 700; }
 .ex-palette__btn.is-selected { border-color: var(--c-ink); box-shadow: 0 0 0 3px var(--c-accent); }
-.ex-palette__swatch { width: 2rem; height: 2rem; border-radius: 50%; background: var(--paint); border: 2px solid rgb(0 0 0 / 0.2); }
+.ex-palette__swatch { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; background: var(--paint); border: 2px solid rgb(0 0 0 / 0.2); color: var(--c-ink); font-size: 0.9rem; line-height: 1; }
 .is-color-verde { --paint: #6bcb77; }
 .is-color-rosu { --paint: #f07167; }
 .is-color-galben { --paint: #ffd34d; }
@@ -415,6 +416,8 @@
 .ex-mark--palette .ex-mark__item { --face-art: 3.4rem; font-size: var(--fs-1); min-width: 7rem; }
 .ex-mark__item.is-marked { border-color: var(--c-ink); background: var(--c-accent); transform: scale(1.04); }
 .ex-mark__item.is-marked[class*='is-color-'] { background: var(--paint); }
+.ex-mark__tag { font-size: var(--fs-0); font-weight: 700; line-height: 1.2; }
+.ex-mark__tag:empty { display: none; }
 .ex-mark__item.is-correct, .ex-mark__item.is-wrong, .ex-mark__item.is-missed { border-color: var(--state); }
 .ex-mark__item.is-missed { border-style: dashed; }
 

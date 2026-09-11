@@ -51,7 +51,7 @@ export function createDnd(root, { items, zones, onDrop, locked = () => false }) 
   }
 
   function onPointerDown(e) {
-    if (locked() || e.button > 0) return;
+    if (locked() || e.button > 0 || !e.isPrimary) return;
     const item = e.target.closest(items);
     if (!item || !root.contains(item)) return;
     press = { item, x: e.clientX, y: e.clientY, id: e.pointerId };
@@ -112,6 +112,10 @@ export function createDnd(root, { items, zones, onDrop, locked = () => false }) 
     }
   }
 
+  function onCancel(e) {
+    if (press && e.pointerId === press.id) endDrag(); // alt deget sau alt element nu oprește tragerea
+  }
+
   function onKey(e) {
     if (e.key === 'Escape') unpick();
   }
@@ -121,10 +125,13 @@ export function createDnd(root, { items, zones, onDrop, locked = () => false }) 
   root.addEventListener('keydown', onKey);
   addEventListener('pointermove', onPointerMove, { passive: false });
   addEventListener('pointerup', onPointerUp);
-  addEventListener('pointercancel', endDrag);
+  addEventListener('pointercancel', onCancel);
 
   return {
-    cancel: unpick,
+    cancel() {
+      endDrag();
+      unpick();
+    },
     destroy() {
       endDrag();
       unpick();
@@ -133,7 +140,7 @@ export function createDnd(root, { items, zones, onDrop, locked = () => false }) 
       root.removeEventListener('keydown', onKey);
       removeEventListener('pointermove', onPointerMove);
       removeEventListener('pointerup', onPointerUp);
-      removeEventListener('pointercancel', endDrag);
+      removeEventListener('pointercancel', onCancel);
     },
   };
 }

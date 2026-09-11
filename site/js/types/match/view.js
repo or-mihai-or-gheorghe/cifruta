@@ -2,6 +2,7 @@
 
 import { createDnd } from '../../core/dnd.js';
 import { h } from '../../core/dom.js';
+import { plain } from '../../core/markup.js';
 import { shuffled } from '../../core/rng.js';
 import { feedbackBox, isLocked, itemFace, setState } from '../_view.js';
 
@@ -113,6 +114,7 @@ export default {
       },
       mode(m) {
         mode = m;
+        if (isLocked(m)) dnd.cancel();
         for (const b of [...Object.values(leftEls), ...Object.values(rightEls)]) b.disabled = isLocked(m);
       },
       showResult(res) {
@@ -122,7 +124,7 @@ export default {
           const btn = leftEls[r.id];
           btn.querySelector('.ex-expected')?.remove();
           setState(btn, r.ok ? 'correct' : 'wrong');
-          if (!r.ok) btn.append(h('span', { class: 'ex-expected' }, String(rightById[r.expected]?.text ?? rightById[r.expected]?.label ?? r.expected)));
+          if (!r.ok) btn.append(h('span', { class: 'ex-expected' }, plain(String(rightById[r.expected]?.text ?? rightById[r.expected]?.label ?? r.expected))));
           if (r.feedback) messages.push(r.feedback);
         }
         notes.replaceChildren(...messages.map(feedbackBox));

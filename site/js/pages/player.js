@@ -61,41 +61,38 @@ export default async function player(container, [testId]) {
   let controller = null;
   let renderToken = 0;
 
+  // se numără doar timpul petrecut pe exerciții: nu intro-ul, pauza dintre niveluri sau fereastra de confirmare
   const timer = setInterval(() => {
-    if (document.visibilityState !== 'visible') return;
+    if (document.visibilityState !== 'visible' || !controller || document.querySelector('dialog[open]')) return;
     draft.activeMs += 1000;
     const ex = test.exercises[draft.current];
     if (ex) draft.msByExercise[ex.id] = (draft.msByExercise[ex.id] ?? 0) + 1000;
     if (draft.activeMs % 5000 === 0) save();
   }, 1000);
 
+  // bulinele se creează o dată și se actualizează pe loc (focusul de pe o bulină nu se pierde)
+  const dots = test.exercises.map((ex, i) => h('button', { type: 'button', class: 'c-progress__dot', 'data-testid': `dot-${i + 1}`, onClick: () => show(i) }, i + 1));
+  map.append(
+    ...config.levels
+      .map((lvl) => {
+        const own = dots.filter((_, i) => test.exercises[i].level === lvl.id);
+        return own.length ? h('div', { class: 'c-progress__group', 'data-level': lvl.id, title: lvl.label }, own) : null;
+      })
+      .filter(Boolean),
+  );
+
   function renderMap() {
-    map.replaceChildren(
-      ...config.levels
-        .map((lvl) => {
-          const dots = test.exercises
-            .map((ex, i) => ({ ex, i }))
-            .filter(({ ex }) => ex.level === lvl.id)
-            .map(({ ex, i }) => {
-              const p = progressOf(ex, draft.answers[ex.id]);
-              const state = p.done === 0 ? '' : p.done >= p.count ? ' is-done' : ' is-partial';
-              return h(
-                'button',
-                {
-                  type: 'button',
-                  class: `c-progress__dot${state}${i === draft.current ? ' is-current' : ''}`,
-                  'aria-label': `Exercițiul ${i + 1}, nivel ${lvl.label}${p.done >= p.count ? ', terminat' : ''}`,
-                  'aria-current': i === draft.current ? 'step' : null,
-                  'data-testid': `dot-${i + 1}`,
-                  onClick: () => show(i),
-                },
-                i + 1,
-              );
-            });
-          return dots.length ? h('div', { class: 'c-progress__group', 'data-level': lvl.id, title: lvl.label }, dots) : null;
-        })
-        .filter(Boolean),
-    );
+    for (const [i, ex] of test.exercises.entries()) {
+      const p = progressOf(ex, draft.answers[ex.id]);
+      const done = p.done >= p.count;
+      const dot = dots[i];
+      dot.classList.toggle('is-done', done);
+      dot.classList.toggle('is-partial', p.done > 0 && !done);
+      dot.classList.toggle('is-current', i === draft.current);
+      dot.setAttribute('aria-label', `Exercițiul ${i + 1}, nivel ${levelInfo(ex.level).label}${done ? ', terminat' : ''}`);
+      if (i === draft.current) dot.setAttribute('aria-current', 'step');
+      else dot.removeAttribute('aria-current');
+    }
   }
 
   function resetStage() {
@@ -130,6 +127,10 @@ export default async function player(container, [testId]) {
     controller = ctl;
     stage.append(host);
     renderNav(index);
+    // cititoarele de ecran anunță exercițiul nou; Tab continuă din exercițiu
+    const title = ctl.el.querySelector('.ex-title');
+    title.tabIndex = -1;
+    title.focus({ preventScroll: true });
   }
 
   function renderIntro() {

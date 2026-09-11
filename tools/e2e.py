@@ -325,6 +325,10 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     page.wait_for_selector("[data-testid=score]")
     score = page.get_by_test_id("score").inner_text()
     run.check(re.match(r"^10\s*/\s*100$", score) is not None, f"[{vp}] {tid}: fără răspunsuri → scor 10 (primit {score!r})")
+    page.wait_for_selector(".ex-review__item")
+    if page.locator(".ex-tf__row").count():
+        row = page.locator(".ex-tf__row").first
+        run.check("is-wrong" in (row.get_attribute("class") or "") and "Nu ai ales" in row.inner_text(), f"[{vp}] {tid}: afirmația A/F sărită apare greșită, cu „Nu ai ales.”")
 
     # „Mai încerc o dată” pe primul exercițiu
     first = page.locator(".ex-review__item").first.get_attribute("data-testid").replace("review-", "")
@@ -355,6 +359,37 @@ def keyboard_flow(run: Run, browser, base: str):
     run.check(bool(pressed), "[tastatură] un element se poate alege cu Space")
     duration = page.evaluate("getComputedStyle(document.querySelector('.ex-card')).animationDuration")
     run.check(duration in ("0.001s", "1e-06s", "0s"), f"[tastatură] animațiile sunt reduse (durată {duration})")
+
+    # în atelier: un element iese din coș, o bancnotă iese din portofel, cardul mutat păstrează focusul
+    page.goto(f"{base}?debug=1#/atelier/tipuri")
+    page.wait_for_selector("[data-testid=demo-money]")
+
+    def key(selector, name):
+        page.locator(selector).first.focus()
+        page.keyboard.press(name)
+
+    answer = lambda ex: page.evaluate(f"window.__dbg.answer('{ex}').a ?? null")
+    key("[data-testid=item-vaca]", "Space")
+    key("[data-testid=bin-dom]", "Enter")
+    in_bin = (answer("categorize") or {}).get("vaca")
+    key("[data-testid=bin-dom] [data-testid=item-vaca]", "Space")
+    key("[data-testid=tray]", "Enter")
+    back = (answer("categorize") or {}).get("vaca")
+    run.check(in_bin == "dom" and back is None, f"[tastatură] un element intră în coș și se scoate înapoi pe tavă ({in_bin} → {back})")
+
+    key("[data-testid=note-10]", "Enter")
+    added = (answer("money") or {}).get("f1", {}).get("10")
+    key("[data-testid=wallet-f1] .ex-piece", "Enter")
+    left = (answer("money") or {}).get("f1", {}).get("10")
+    in_wallet = page.evaluate("!!document.activeElement?.closest('[data-testid=wallet-f1]')")
+    run.check(added == 1 and not left and in_wallet, f"[tastatură] o bancnotă se scoate din portofel, focusul rămâne în portofel ({added} → {left})")
+
+    cards = lambda: page.locator("[data-testid=demo-order] .ex-order__card").evaluate_all("els => els.map((e) => e.dataset.id)")
+    first, third = cards()[0], cards()[2]
+    key(f"[data-testid=order-{first}]", "Space")
+    key(f"[data-testid=order-{third}]", "Space")
+    focused = page.evaluate("document.activeElement?.dataset.id ?? null")
+    run.check(cards().index(first) == 2 and focused == first, f"[tastatură] cardul mutat ajunge pe locul 3 și păstrează focusul (focus pe {focused})")
     context.close()
 
 

@@ -2,6 +2,7 @@
 
 import { createDnd } from '../../core/dnd.js';
 import { h } from '../../core/dom.js';
+import { plain } from '../../core/markup.js';
 import { shuffled } from '../../core/rng.js';
 import { hasVisual, visualSVG } from '../../visuals/index.js';
 import { isLocked, itemFace, setState } from '../_view.js';
@@ -26,19 +27,22 @@ export default {
     el.append(hint, row, reveal);
 
     const cards = {};
+    const slots = {}; // elementul de listă care conține cardul
     for (const id of part.items.map((i) => i.id)) {
       const item = byId[id];
       const visual = item.visual ?? (part.itemVisual ? { ...part.itemVisual, n: item.text } : null);
       const face = visual && hasVisual(visual.v)
         ? h('span', { class: 'ex-face' }, h('span', { class: 'ex-face__art', html: visualSVG(visual) }))
         : itemFace({ ...item, tag: undefined });
-      cards[id] = h('button', { type: 'button', class: 'ex-order__card ex-drag ex-drop', role: 'listitem', 'aria-pressed': 'false', 'data-id': id, 'data-testid': `order-${id}` }, face);
+      cards[id] = h('button', { type: 'button', class: 'ex-order__card ex-drag ex-drop', 'aria-pressed': 'false', 'data-id': id, 'data-testid': `order-${id}` }, face);
+      slots[id] = h('div', { class: 'ex-order__slot', role: 'listitem' }, cards[id]);
     }
 
-    const paint = () => row.replaceChildren(...order.map((id, i) => {
-      cards[id].setAttribute('aria-label', `${byId[id].text ?? id}, poziția ${i + 1}`);
-      return cards[id];
-    }));
+    const label = () => order.forEach((id, i) => cards[id].setAttribute('aria-label', `${plain(String(byId[id].text ?? id))}, poziția ${i + 1}`));
+    const paint = () => {
+      row.replaceChildren(...order.map((id) => slots[id]));
+      label();
+    };
     paint();
 
     const dnd = createDnd(row, {
@@ -49,10 +53,14 @@ export default {
         const from = order.indexOf(item.dataset.id);
         const to = order.indexOf(zone.dataset.id);
         if (from < 0 || to < 0 || from === to) return;
+        const keepFocus = row.contains(document.activeElement);
         order.splice(from, 1);
         order.splice(to, 0, item.dataset.id);
         touched = true;
-        paint();
+        // mută doar cardul ales (celelalte rămân pe loc) și păstrează focusul pe el, pentru tastatură
+        row.insertBefore(slots[item.dataset.id], slots[order[to + 1]] ?? null);
+        label();
+        if (keepFocus) item.focus();
         item.classList.add('anim-pop');
         setTimeout(() => item.classList.remove('anim-pop'), 320);
         ctx.onChange([...order]);
@@ -74,11 +82,12 @@ export default {
       mode(m) {
         mode = m;
         row.classList.toggle('is-locked', isLocked(m));
+        if (isLocked(m)) dnd.cancel();
         for (const c of Object.values(cards)) c.disabled = isLocked(m);
       },
       showResult(res) {
         for (const r of res.items) setState(cards[r.id], res.earned === res.total ? 'correct' : r.ok ? null : 'wrong');
-        const correctText = key.map((id) => byId[id].text ?? id).join(part.direction === 'desc' ? ' > ' : part.direction ? ' < ' : ', ');
+        const correctText = key.map((id) => plain(String(byId[id].text ?? id))).join(part.direction === 'desc' ? ' > ' : part.direction ? ' < ' : ', ');
         const parts = [h('p', {}, h('strong', {}, 'Ordinea corectă: '), correctText)];
         if (part.reveal?.word) {
           parts.push(h('p', { class: 'ex-word', 'aria-label': `Cuvântul secret: ${part.reveal.word}` },

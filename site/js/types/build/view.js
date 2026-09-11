@@ -34,6 +34,7 @@ export default {
       const beads = { ...Object.fromEntries(places.map((p) => [p, 0])), ...(answer[id] ?? {}) };
       beads[place] = Math.max(0, Math.min(9, beads[place] + delta));
       answer = { ...answer, [id]: beads };
+      if (places.every((p) => beads[p] === 0)) delete answer[id]; // toate bilele scoase: la fel ca neatinsă
       paint(id);
       ctx.onChange(answer);
     }

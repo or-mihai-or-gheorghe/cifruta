@@ -34,7 +34,11 @@ export default {
         if (e.target.closest('.ex-piece')) return;
         activate(item.id);
       });
-      wallet.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(item.id); } });
+      wallet.addEventListener('keydown', (e) => {
+        if (e.target !== wallet || (e.key !== 'Enter' && e.key !== ' ')) return; // Enter pe o bancnotă din portofel o scoate
+        e.preventDefault();
+        activate(item.id);
+      });
       wallets[item.id] = { wallet, pieces, sum };
       return wallet;
     }));
@@ -85,7 +89,17 @@ export default {
           .sort((a, b) => Number(b[0]) - Number(a[0]))
           .flatMap(([value, count]) => Array.from({ length: count }, () => Number(value)));
         w.pieces.replaceChildren(...(notes.length
-          ? notes.map((value) => h('button', { type: 'button', class: 'ex-piece', 'aria-label': `scoate ${cantitate(value, 'leu', 'lei')}`, html: visualSVG({ v: 'banknote', value }), onClick: () => remove(id, value) }))
+          ? notes.map((value) => h('button', {
+              type: 'button',
+              class: 'ex-piece',
+              'aria-label': `scoate ${cantitate(value, 'leu', 'lei')}`,
+              html: visualSVG({ v: 'banknote', value }),
+              onClick: (e) => {
+                const hadFocus = document.activeElement === e.currentTarget;
+                remove(id, value);
+                if (hadFocus) (w.pieces.querySelector('.ex-piece') ?? w.wallet).focus(); // butonul apăsat a dispărut
+              },
+            }))
           : [h('span', { class: 'ex-wallet__empty' }, 'Gol')]));
         w.sum.textContent = `Ai pus: ${cantitate(moneySum(combo), 'leu', 'lei')}`;
       }
