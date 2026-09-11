@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { calc, holds, relation, trace } from '../site/js/core/expr.js';
-import { lintText } from '../site/js/core/lint.js';
+import { lintText, walkTexts } from '../site/js/core/lint.js';
 import { md, markupErrors, plain } from '../site/js/core/markup.js';
 import { cantitate, fixCedilla, formatNumber, numberToWords, sameText, singularOf } from '../site/js/core/ro.js';
 import { check, minPieces, moneyCombos, moneyKey, searchNumbers } from '../site/js/core/rules.js';
@@ -106,6 +106,15 @@ test('lint: diacritice și sedilă', () => {
   assert.equal(lintText('Cate mere').length, 1);
   assert.equal(lintText('mere si pere').length, 1);
   assert.equal(lintText('şi').length, 1);
+  // casetele numite `a`/`b` au mesaje care se verifică; id-urile din indicii (`a: 'aceeasi'`) nu
+  const part = {
+    blanks: { a: { answer: 24, feedback: [{ if: 60, text: 'Ai adunat şi ai greşit.' }] }, b: { answer: 3 } },
+    constraints: [{ rule: 'first', a: 'aceeasi', b: 'fara' }],
+    key: { aceeasi: 'r1' },
+  };
+  const seen = [];
+  walkTexts(part, (text, path) => seen.push(path));
+  assert.deepEqual(seen, ['blanks.a.feedback[0].text']);
 });
 
 test('scoring: calificative și scor total', () => {

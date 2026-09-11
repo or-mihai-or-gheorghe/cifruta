@@ -16,16 +16,20 @@ export function lintText(s) {
   return errors;
 }
 
-// câmpuri care conțin identificatori, nu text pentru copii
-const SKIP_KEYS = new Set(['id', 'type', 'layout', 'kind', 'level', 'v', 'bin', 'color', 'skin', 'rule', 'direction',
-  'concepts', 'key', 'a', 'b', 'of', 'theme', 'places', 'tool', 'file', 'expr', 'calc', 'checks', 'correct', 'if', 'name', 'style']);
+// câmpuri care conțin identificatori, nu text pentru copii. Se sar doar când au valori simple:
+// `constraints[].a` e un id, dar `blanks.a` e o casetă cu mesaje care trebuie verificate. `key` se sare mereu.
+const ID_KEYS = new Set(['id', 'type', 'layout', 'kind', 'level', 'v', 'bin', 'color', 'skin', 'rule', 'direction',
+  'concepts', 'a', 'b', 'of', 'theme', 'places', 'tool', 'file', 'expr', 'calc', 'checks', 'correct', 'if', 'name', 'style']);
+
+const isScalar = (v) => v === null || typeof v !== 'object';
+const skipped = (k, v) => k === 'key' || (ID_KEYS.has(k) && (isScalar(v) || (Array.isArray(v) && v.every(isScalar))));
 
 /** Parcurge toate textele dintr-un obiect: fn(text, cale) */
 export function walkTexts(value, fn, path = '') {
   if (typeof value === 'string') fn(value, path);
   else if (Array.isArray(value)) value.forEach((v, i) => walkTexts(v, fn, `${path}[${i}]`));
   else if (value && typeof value === 'object') {
-    for (const [k, v] of Object.entries(value)) if (!SKIP_KEYS.has(k)) walkTexts(v, fn, path ? `${path}.${k}` : k);
+    for (const [k, v] of Object.entries(value)) if (!skipped(k, v)) walkTexts(v, fn, path ? `${path}.${k}` : k);
   }
 }
 
