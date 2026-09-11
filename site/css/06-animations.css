@@ -1,0 +1,68 @@
+/* Animații: scurte, calme, doar transform/opacity. Dezactivate de prefers-reduced-motion (01-base.css). */
+
+@keyframes anim-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes anim-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+@keyframes anim-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+@keyframes anim-bounce-in {
+  0% { opacity: 0; transform: scale(0.6); }
+  60% { opacity: 1; transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+@keyframes anim-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes anim-flip-in {
+  from { opacity: 0; transform: rotateX(90deg); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes anim-draw {
+  from { stroke-dashoffset: var(--len, 400); }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes anim-confetti {
+  0% { opacity: 1; transform: translate3d(0, -10vh, 0) rotate(0deg); }
+  100% { opacity: 0.9; transform: translate3d(var(--dx, 0), 105vh, 0) rotate(var(--rot, 540deg)); }
+}
+
+.anim-fade-up { animation: anim-fade-up var(--dur-3) var(--ease-out) both; }
+.anim-pop { animation: anim-pop var(--dur-3) var(--ease-spring); }
+.anim-shake { animation: anim-shake var(--dur-3) ease-in-out 2; }
+.anim-bounce-in { animation: anim-bounce-in 450ms var(--ease-spring) both; }
+.anim-float { animation: anim-float 3s ease-in-out infinite; }
+.anim-flip-in { animation: anim-flip-in 400ms var(--ease-out) both; }
+
+.anim-stagger > * { animation: anim-fade-up var(--dur-3) var(--ease-out) both; }
+.anim-stagger > :nth-child(2) { animation-delay: 60ms; }
+.anim-stagger > :nth-child(3) { animation-delay: 120ms; }
+.anim-stagger > :nth-child(4) { animation-delay: 180ms; }
+.anim-stagger > :nth-child(5) { animation-delay: 240ms; }
+.anim-stagger > :nth-child(n + 6) { animation-delay: 300ms; }
+
+/* confetti CSS (fără bibliotecă) */
+.anim-confetti {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  pointer-events: none;
+  overflow: hidden;
+}
+.anim-confetti i {
+  position: absolute;
+  top: 0;
+  width: 10px;
+  height: 14px;
+  border-radius: 2px;
+  animation: anim-confetti var(--fall, 1.6s) cubic-bezier(0.3, 0.6, 0.6, 1) var(--delay, 0s) both;
+}

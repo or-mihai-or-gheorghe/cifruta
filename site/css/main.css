@@ -1,0 +1,15 @@
+/* Cifruța — foaia de stil centrală.
+   Ordinea straturilor: cele de mai jos câștigă în fața celor de mai sus.
+   Prefixe: l- layout · c- componente · ex- exerciții · v- vizuale · anim- animații · u- utilitare · is-/has- stări */
+
+@layer tokens, base, layout, components, exercises, visuals, animations, utilities;
+
+@import url('fonts.css') layer(tokens);
+@import url('00-tokens.css') layer(tokens);
+@import url('01-base.css') layer(base);
+@import url('02-layout.css') layer(layout);
+@import url('03-components.css') layer(components);
+@import url('04-exercises.css') layer(exercises);
+@import url('05-visuals.css') layer(visuals);
+@import url('06-animations.css') layer(animations);
+@import url('07-utilities.css') layer(utilities);

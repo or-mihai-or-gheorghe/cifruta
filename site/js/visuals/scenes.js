@@ -1,0 +1,106 @@
+// Peisaje mici (bannere) pentru cardurile testelor.
+
+import { registerVisual } from './index.js';
+import { C, st, txt } from './palette.js';
+
+const GROUP = 'Peisaje';
+
+const sunRays = (cx, cy, r) =>
+  Array.from({ length: 8 }, (_, i) => `<line x1="${cx}" y1="${cy - r - 4}" x2="${cx}" y2="${cy - r - 11}" stroke="${C.orange}" stroke-width="3.5" stroke-linecap="round" transform="rotate(${i * 45} ${cx} ${cy})"/>`).join('') +
+  `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${C.yellow}" ${st(2)}/>`;
+
+const cloud = (x, y, s = 1) =>
+  `<path transform="translate(${x} ${y}) scale(${s})" d="M6 20 C0 20 0 10 8 10 C8 2 20 0 24 7 C28 0 42 2 40 12 C48 12 48 20 42 20 Z" fill="${C.white}" ${st(2)}/>`;
+
+const SCENES = {
+  mare: {
+    label: 'marea și plaja',
+    draw: () => `
+      <rect width="300" height="120" fill="${C.sky}"/>
+      ${sunRays(254, 30, 15)}${cloud(40, 18)}${cloud(150, 8, 0.8)}
+      <path d="M0 62 C20 56 40 68 60 62 C80 56 100 68 120 62 C140 56 160 68 180 62 C200 56 220 68 240 62 C260 56 280 68 300 62 V96 H0 Z" fill="${C.blue}"/>
+      <path d="M0 74 C20 70 40 78 60 74 C80 70 100 78 120 74 C140 70 160 78 180 74 C200 70 220 78 240 74 C260 70 280 78 300 74" fill="none" stroke="${C.white}" stroke-width="2" opacity=".6"/>
+      <line x1="168" y1="66" x2="168" y2="36" stroke="${C.ink}" stroke-width="2"/>
+      <path d="M170 38 L170 62 L188 62 Z" fill="${C.white}" ${st(2)}/>
+      <path d="M150 66 H188 L181 77 H157 Z" fill="${C.red}" ${st(2)}/>
+      <path d="M0 94 C60 84 140 100 200 90 C240 86 280 88 300 92 V120 H0 Z" fill="${C.yellow}"/>
+      <line x1="62" y1="80" x2="68" y2="114" stroke="${C.ink}" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M32 86 C38 66 84 62 94 78 Z" fill="${C.red}" ${st(2)}/>
+      <path d="M48 81 C54 70 66 67 72 72 L63 78 Z" fill="${C.white}" opacity=".8"/>
+      <path d="M226 108 C226 96 244 96 244 108 Z" fill="${C.pink}" ${st(2)}/>
+      <path d="M235 97 V108 M230 99 L232 108 M240 99 L238 108" stroke="${C.pinkDark}" stroke-width="1.5"/>`,
+  },
+  piata: {
+    label: 'piața',
+    draw: () => {
+      const scallops = Array.from({ length: 12 }, (_, i) => `Q${45.5 + i * 19} 52 ${55 + i * 19} 40`).join(' ');
+      const stripes = Array.from({ length: 6 }, (_, i) => `<rect x="${55 + i * 38}" y="26" width="19" height="14" fill="${C.white}"/>`).join('');
+      const fruits = [
+        ...[70, 82, 94, 76, 88].map((x, i) => `<circle cx="${x}" cy="${i < 3 ? 64 : 56}" r="6.5" fill="${C.red}" ${st(1.8)}/>`),
+        ...[130, 142, 136].map((x, i) => `<ellipse cx="${x}" cy="${i < 2 ? 63 : 55}" rx="5.5" ry="7" fill="${C.yellow}" ${st(1.8)}/>`),
+        `<ellipse cx="190" cy="60" rx="16" ry="11" fill="${C.green}" ${st(2)}/><path d="M178 56 C186 60 194 60 202 56 M180 64 C188 66 194 66 200 64" fill="none" stroke="${C.greenDark}" stroke-width="2"/>`,
+        ...[226, 238, 232].map((x, i) => `<circle cx="${x}" cy="${i < 2 ? 64 : 56}" r="6" fill="${C.orange}" ${st(1.8)}/>`),
+      ].join('');
+      return `
+        <rect width="300" height="120" fill="${C.sky}"/>
+        <rect y="100" width="300" height="20" fill="${C.grayLight}"/>
+        <rect x="46" y="36" width="6" height="66" fill="${C.brown}" ${st(1.5)}/><rect x="248" y="36" width="6" height="66" fill="${C.brown}" ${st(1.5)}/>
+        <rect x="36" y="26" width="228" height="14" fill="${C.red}" ${st(2)}/>${stripes}
+        <path d="M36 40 ${scallops} Z" fill="${C.red}" ${st(2)}/>
+        <rect x="118" y="4" width="64" height="18" rx="5" fill="${C.yellow}" ${st(2)}/>${txt(150, 13, 'PIAȚA', { size: 11, weight: 800 })}
+        ${fruits}
+        <rect x="40" y="70" width="220" height="10" rx="3" fill="${C.brownLight}" ${st(2)}/>
+        <rect x="52" y="80" width="196" height="20" fill="${C.brown}" ${st(2)}/>`;
+    },
+  },
+  spatiu: {
+    label: 'spațiul cu o rachetă și planete',
+    draw: () => {
+      const stars = [[20, 20], [70, 12], [110, 36], [200, 14], [280, 24], [260, 100], [130, 104], [30, 60], [180, 90], [96, 80], [230, 48]]
+        .map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i % 3 === 0 ? 2.2 : 1.4}" fill="${i % 2 ? C.white : C.yellow}"/>`).join('');
+      return `
+        <rect width="300" height="120" fill="var(--v-space, #2B2552)"/>${stars}
+        <path d="M46 12 A17 17 0 1 0 46 46 A13 13 0 1 1 46 12 Z" fill="${C.grayLight}" ${st(1.5)}/>
+        <ellipse cx="244" cy="72" rx="36" ry="9" fill="none" stroke="${C.yellow}" stroke-width="4"/>
+        <circle cx="244" cy="70" r="21" fill="${C.orange}" ${st(2)}/>
+        <path d="M208 72 A36 9 0 0 0 280 72" fill="none" stroke="${C.yellow}" stroke-width="4"/>
+        <circle cx="62" cy="94" r="12" fill="${C.teal}" ${st(2)}/>
+        <g transform="translate(150 58) rotate(40)">
+          <path d="M-8 28 C-6 40 -3 44 0 50 C3 44 6 40 8 28 Z" fill="${C.orange}"/>
+          <path d="M-12 12 L-22 30 L-12 26 Z M12 12 L22 30 L12 26 Z" fill="${C.red}" ${st(1.5)}/>
+          <path d="M0 -34 C12 -24 16 -6 13 28 L-13 28 C-16 -6 -12 -24 0 -34 Z" fill="${C.grayLight}" ${st(2)}/>
+          <path d="M0 -34 C7 -28 10 -22 12 -16 L-12 -16 C-10 -22 -7 -28 0 -34 Z" fill="${C.red}" ${st(1.5)}/>
+          <circle cx="0" cy="2" r="7" fill="${C.blueLight}" ${st(1.5)}/>
+        </g>`;
+    },
+  },
+  ferma: {
+    label: 'ferma',
+    draw: () => {
+      const posts = Array.from({ length: 7 }, (_, i) => `<rect x="${16 + i * 22}" y="80" width="6" height="24" rx="1" fill="${C.brownLight}" ${st(1.5)}/>`).join('');
+      return `
+        <rect width="300" height="120" fill="${C.sky}"/>
+        ${sunRays(40, 28, 14)}${cloud(110, 12, 0.9)}
+        <path d="M0 78 C50 58 110 66 160 76 C210 64 260 60 300 72 V120 H0 Z" fill="${C.grass}"/>
+        <path d="M0 98 C80 90 200 102 300 94 V120 H0 Z" fill="${C.green}"/>
+        <rect x="14" y="86" width="140" height="5" fill="${C.brownLight}" ${st(1.2)}/><rect x="14" y="96" width="140" height="5" fill="${C.brownLight}" ${st(1.2)}/>
+        ${posts}
+        <rect x="172" y="50" width="70" height="52" fill="${C.red}" ${st(2)}/>
+        <path d="M164 52 L207 24 L250 52 Z" fill="${C.redDark}" ${st(2)}/>
+        <rect x="199" y="36" width="16" height="11" fill="${C.yellow}" ${st(1.5)}/>
+        <rect x="194" y="72" width="26" height="30" fill="${C.white}" ${st(2)}/>
+        <path d="M194 72 L220 102 M220 72 L194 102" stroke="${C.red}" stroke-width="2.5"/>
+        <rect x="270" y="72" width="7" height="28" fill="${C.brown}" ${st(1.5)}/>
+        <circle cx="273" cy="62" r="17" fill="${C.greenDark}" ${st(2)}/>`;
+    },
+  },
+};
+
+registerVisual('scene', {
+  group: GROUP,
+  defaults: { theme: 'mare' },
+  viewBox: '0 0 300 120',
+  label: (p) => `peisaj: ${(SCENES[p.theme] ?? SCENES.mare).label}`,
+  render: (p) => (SCENES[p.theme] ?? SCENES.mare).draw(),
+  demos: Object.keys(SCENES).map((theme) => ({ theme })),
+});

@@ -1,0 +1,24 @@
+/* Utilitare mici, cu efect unic. */
+
+.u-visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.u-center { text-align: center; }
+.u-muted { color: var(--c-ink-soft); }
+.u-small { font-size: var(--fs-0); }
+.u-big { font-size: var(--fs-2); }
+.u-nowrap { white-space: nowrap; }
+.u-title-font { font-family: var(--font-title); }
+.u-mt-0 { margin-top: 0; }
+.u-mt-4 { margin-top: var(--sp-4); }
+.u-mt-6 { margin-top: var(--sp-6); }
+.u-w-full { width: 100%; }

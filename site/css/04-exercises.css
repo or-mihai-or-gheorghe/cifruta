@@ -1,0 +1,211 @@
+/* Exerciții: cardul exercițiului, playerul și primitivele comune ale tipurilor. */
+
+/* ——— Cardul exercițiului ——— */
+.ex-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: clamp(1rem, 0.5rem + 2vw, 2rem);
+  background: var(--c-surface);
+  border: 2px solid var(--c-line);
+  border-top: 8px solid var(--c-level, var(--c-brand));
+  border-radius: var(--r-4);
+  box-shadow: var(--sh-1);
+}
+.ex-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
+.ex-num {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  background: var(--c-level, var(--c-brand));
+  color: #fff;
+  font-family: var(--font-title);
+  font-size: var(--fs-2);
+  line-height: 1;
+}
+.ex-title { font-size: var(--fs-3); flex: 1 1 12rem; }
+
+.ex-context {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+  border-radius: var(--r-3);
+  background: var(--c-theme-bg);
+  font-size: var(--fs-2);
+}
+.ex-context__visual { flex: none; width: clamp(4.5rem, 3rem + 8vw, 8rem); }
+@media (max-width: 30rem) { .ex-context { flex-direction: column; text-align: center; } }
+
+.ex-part { display: flex; flex-direction: column; gap: var(--sp-3); }
+.ex-part + .ex-part { padding-top: var(--sp-5); border-top: 2px dashed var(--c-line); }
+.ex-part__letter { margin-right: 0.4rem; color: var(--c-level, var(--c-brand)); font-family: var(--font-title); font-weight: 700; }
+.ex-prompt { font-size: var(--fs-2); line-height: 1.4; }
+.ex-howto { display: flex; align-items: center; gap: 0.35rem; color: var(--c-ink-soft); font-size: var(--fs-0); }
+.ex-howto .c-emoji { width: 1.2em; height: 1.2em; }
+
+/* ——— Stări comune (bun / greșit / răspunsul corect) — mereu cu icon ——— */
+.is-correct { --state: var(--c-ok); --state-bg: var(--c-ok-bg); }
+.is-wrong { --state: var(--c-bad); --state-bg: var(--c-bad-bg); }
+.is-missed { --state: var(--c-ok); --state-bg: #fff; }
+.ex-state {
+  position: absolute;
+  top: -0.7rem;
+  right: -0.7rem;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  background: var(--state);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: var(--sh-1);
+  animation: anim-bounce-in 400ms var(--ease-spring) both;
+}
+.is-missed > .ex-state { background: #fff; color: var(--c-ok); border: 2px solid var(--c-ok); }
+.ex-feedback { display: flex; gap: 0.4rem; align-items: flex-start; font-size: var(--fs-0); padding: 0.4rem 0.7rem; border-radius: var(--r-2); background: #fff6d6; }
+.ex-feedback .c-emoji { flex: none; }
+.ex-expected {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2rem;
+  padding: 0 0.4rem;
+  border-radius: var(--r-1);
+  background: var(--c-ok-bg);
+  color: var(--c-ok);
+  font-family: var(--font-title);
+  font-weight: 700;
+}
+.ex-expected::before { content: '✓ '; }
+
+/* ——— Fața unui element (desen + text) ——— */
+.ex-face { display: inline-flex; flex-direction: column; align-items: center; gap: 0.25rem; pointer-events: none; }
+.ex-face__art { display: block; width: var(--face-art, 3.5rem); }
+.ex-face__art .c-emoji { width: 100%; height: auto; }
+.ex-face__text { line-height: 1.15; }
+
+/* ——— choice ——— */
+.ex-q { display: flex; flex-direction: column; gap: var(--sp-2); }
+.ex-q__text { font-family: var(--font-title); font-size: var(--fs-2); }
+.ex-options { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.ex-option {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--tap-lg);
+  min-height: var(--tap-lg);
+  padding: 0.5rem 1.2rem;
+  border: 3px solid var(--c-line);
+  border-radius: var(--r-3);
+  background: var(--c-surface);
+  box-shadow: 0 4px 0 var(--c-line);
+  font-family: var(--font-title);
+  font-size: var(--fs-2);
+  font-weight: 700;
+  transition: transform var(--dur-1), border-color var(--dur-2), background-color var(--dur-2), box-shadow var(--dur-2);
+  -webkit-tap-highlight-color: transparent;
+}
+.ex-option:hover:not(:disabled) { border-color: var(--c-brand); }
+.ex-option:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--c-line); }
+.ex-option.is-selected { border-color: var(--c-brand); background: var(--c-brand-soft); box-shadow: 0 4px 0 var(--c-brand); }
+.ex-option:disabled { cursor: default; }
+.ex-option.is-correct, .ex-option.is-wrong, .ex-option.is-missed { border-color: var(--state); background: var(--state-bg); box-shadow: 0 4px 0 var(--state); }
+.ex-option.is-missed { border-style: dashed; }
+.ex-options--circles .ex-option { width: var(--tap-lg); height: var(--tap-lg); padding: 0; border-radius: 50%; }
+
+/* ——— truefalse ——— */
+.ex-tf { display: grid; gap: var(--sp-3); }
+.ex-tf__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--sp-2) var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+  border: 2px solid transparent;
+  border-radius: var(--r-3);
+  background: var(--c-surface-2);
+}
+.ex-tf__why { grid-column: 1 / -1; }
+.ex-tf__why:empty { display: none; }
+.ex-tf__btns { display: flex; gap: var(--sp-2); }
+.ex-tf__btn {
+  width: var(--tap-lg);
+  height: var(--tap);
+  border: 3px solid var(--c-line-strong);
+  border-radius: var(--r-pill);
+  background: var(--c-surface);
+  font-family: var(--font-title);
+  font-size: var(--fs-2);
+  font-weight: 700;
+  line-height: 1;
+}
+.ex-tf__btn.is-selected { border-color: var(--c-brand-dark); background: var(--c-brand); color: #fff; }
+.ex-tf__row.is-correct, .ex-tf__row.is-wrong, .ex-tf__row.is-missed { border-color: var(--state); background: var(--state-bg); }
+@media (max-width: 30rem) { .ex-tf__row { grid-template-columns: 1fr; } }
+
+/* ——— Playerul de test ——— */
+.ex-player { display: flex; flex-direction: column; gap: var(--sp-5); }
+.ex-player__top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.ex-player__title { font-size: var(--fs-3); }
+.ex-player__stage { min-height: 20rem; }
+.ex-nav {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--z-sticky);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-inline: calc(-1 * var(--gutter));
+  padding: var(--sp-3) var(--gutter) calc(var(--sp-3) + 4px);
+  background: color-mix(in srgb, var(--c-paper) 94%, transparent);
+  border-top: 2px solid var(--c-line);
+  backdrop-filter: blur(6px);
+}
+.ex-nav:empty { display: none; }
+
+.ex-intro, .ex-break {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-5);
+  padding: clamp(1.5rem, 1rem + 3vw, 3rem) var(--sp-4);
+  text-align: center;
+  background: var(--c-surface);
+  border: 2px solid var(--c-line);
+  border-radius: var(--r-4);
+}
+.ex-intro__scene { width: min(100%, 26rem); border-radius: var(--r-3); overflow: hidden; background: var(--c-theme-bg); }
+.ex-intro__levels { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-2); }
+
+/* ——— Rezultate și revizuire ——— */
+.ex-summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--sp-5);
+  padding: clamp(1.25rem, 1rem + 2vw, 2.5rem);
+  background: var(--c-surface);
+  border: 2px solid var(--c-line);
+  border-radius: var(--r-4);
+  box-shadow: var(--sh-2);
+}
+.ex-summary__art { width: clamp(6rem, 4rem + 8vw, 10rem); }
+@media (max-width: 36rem) { .ex-summary { grid-template-columns: 1fr; justify-items: center; text-align: center; } }
+.ex-levels { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.ex-level-result { display: flex; align-items: center; gap: var(--sp-2); padding: 0.3rem 0.8rem; border-radius: var(--r-pill); background: var(--c-level-bg); }
+.ex-level-result .c-star { width: 1.6rem; height: 1.6rem; }
+
+.ex-review { display: grid; gap: var(--sp-5); }
+.ex-review__item { display: grid; gap: var(--sp-3); }
+.ex-review__score { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--font-title); font-weight: 700; }
+.ex-review__score.is-correct, .ex-review__score.is-wrong, .ex-review__score.is-partial { color: var(--state, var(--c-warn)); }
+.ex-review__actions { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+.ex-review__retry { display: grid; gap: var(--sp-3); padding: var(--sp-4); border: 2px dashed var(--c-brand); border-radius: var(--r-3); background: var(--c-brand-soft); }

@@ -1,0 +1,135 @@
+/* Tokeni de design: singurul loc în care se definesc culori, mărimi, umbre și durate. */
+
+:root {
+  color-scheme: light;
+
+  /* ——— Culori de bază ——— */
+  --c-paper: #fff8ec;
+  --c-surface: #ffffff;
+  --c-surface-2: #fff1d9;
+  --c-ink: #2e2542;
+  --c-ink-soft: #625a74;
+  --c-line: #eadfcb;
+  --c-line-strong: #d6c6aa;
+  --c-brand: #5b5bd6;
+  --c-brand-dark: #3f3fa8;
+  --c-brand-soft: #e8e8fb;
+  --c-accent: #ffc83d;
+  --c-accent-dark: #d99a00;
+  --c-focus: #1c7ed6;
+
+  /* ——— Feedback: sigur pentru daltonism și mereu însoțit de icon + text ——— */
+  --c-ok: #0e8a60;
+  --c-ok-bg: #dcf5ea;
+  --c-bad: #c8440f;
+  --c-bad-bg: #fde6da;
+  --c-warn: #b87d00;
+  --c-warn-bg: #fff1cc;
+  --c-info: #1c6fc0;
+  --c-info-bg: #dfeefb;
+
+  /* ——— Niveluri (distincte de culorile de feedback) ——— */
+  --c-usor: #1b8fcb;
+  --c-usor-bg: #dcf0fa;
+  --c-intermediar: #7c4ddf;
+  --c-intermediar-bg: #eee6fd;
+  --c-avansat: #35339a;
+  --c-avansat-bg: #e1e1f5;
+
+  /* ——— Ordinele numerelor, ca pe numărătoarea din manual ——— */
+  --c-s: #2e9e44;
+  --c-z: #e03131;
+  --c-u: #1c7ed6;
+
+  /* ——— Temele testelor (accent decorativ) ——— */
+  --c-theme: var(--c-brand);
+  --c-theme-bg: var(--c-brand-soft);
+
+  /* ——— Paleta desenelor SVG (banca vizuală) ——— */
+  --v-ink: #3b2f4a;
+  --v-white: #ffffff;
+  --v-red: #f07167;
+  --v-red-dark: #d64545;
+  --v-orange: #f9a03f;
+  --v-orange-dark: #e07b39;
+  --v-yellow: #ffd34d;
+  --v-yellow-dark: #f2b705;
+  --v-green: #6bcb77;
+  --v-green-dark: #3fa34d;
+  --v-teal: #4ecdc4;
+  --v-blue: #5aa9e6;
+  --v-blue-dark: #2f80c8;
+  --v-blue-light: #9ccbf5;
+  --v-purple: #9b7bea;
+  --v-purple-light: #c9b6f2;
+  --v-pink: #f9b8c6;
+  --v-pink-dark: #e48aa2;
+  --v-brown: #a86b3c;
+  --v-brown-light: #d9a066;
+  --v-gray: #b8b3c2;
+  --v-gray-light: #e9e6ef;
+  --v-skin: #f6c9a0;
+  --v-sky: #dff3ff;
+  --v-grass: #9ed98a;
+  --v-s: var(--c-s);
+  --v-z: var(--c-z);
+  --v-u: var(--c-u);
+
+  /* ——— Tipografie ——— */
+  --font-body: 'Andika', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-title: 'Baloo 2', 'Andika', system-ui, sans-serif;
+  --fs-0: clamp(0.9rem, 0.86rem + 0.2vw, 1rem);
+  --fs-1: clamp(1.06rem, 1rem + 0.3vw, 1.2rem);
+  --fs-2: clamp(1.2rem, 1.1rem + 0.5vw, 1.45rem);
+  --fs-3: clamp(1.45rem, 1.25rem + 1vw, 1.9rem);
+  --fs-4: clamp(1.8rem, 1.5rem + 1.5vw, 2.6rem);
+  --fs-5: clamp(2.2rem, 1.7rem + 2.5vw, 3.6rem);
+  --lh-tight: 1.2;
+  --lh-text: 1.55;
+
+  /* ——— Spațiere, raze, umbre ——— */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+  --sp-8: 4rem;
+  --r-1: 8px;
+  --r-2: 14px;
+  --r-3: 20px;
+  --r-4: 28px;
+  --r-pill: 999px;
+  --sh-1: 0 1px 2px rgb(46 37 66 / 0.08), 0 2px 6px rgb(46 37 66 / 0.06);
+  --sh-2: 0 4px 14px rgb(46 37 66 / 0.1);
+  --sh-3: 0 14px 36px rgb(46 37 66 / 0.18);
+  --sh-press: 0 4px 0;
+
+  /* ——— Mișcare ——— */
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 300ms;
+  --dur-4: 700ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ——— Dimensiuni ——— */
+  --tap: 3rem;
+  --tap-lg: 4rem;
+  --w-content: 62rem;
+  --w-narrow: 44rem;
+  --gutter: clamp(1rem, 0.6rem + 2vw, 2rem);
+  --z-sticky: 10;
+  --z-overlay: 50;
+  --z-modal: 100;
+}
+
+[data-theme='mare'] { --c-theme: #0a86a8; --c-theme-bg: #dcf3f8; }
+[data-theme='piata'] { --c-theme: #c46a00; --c-theme-bg: #fdefd9; }
+[data-theme='spatiu'] { --c-theme: #4338ca; --c-theme-bg: #e5e4fa; }
+[data-theme='ferma'] { --c-theme: #4d7c0f; --c-theme-bg: #e8f3d6; }
+
+[data-level='usor'] { --c-level: var(--c-usor); --c-level-bg: var(--c-usor-bg); }
+[data-level='intermediar'] { --c-level: var(--c-intermediar); --c-level-bg: var(--c-intermediar-bg); }
+[data-level='avansat'] { --c-level: var(--c-avansat); --c-level-bg: var(--c-avansat-bg); }

@@ -1,0 +1,74 @@
+/* Layout: containere și aranjări reutilizabile. */
+
+.l-container {
+  width: 100%;
+  max-width: var(--w-content);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.l-container--narrow { max-width: var(--w-narrow); }
+
+.l-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--stack-gap, var(--sp-4));
+}
+.l-stack--sm { --stack-gap: var(--sp-2); }
+.l-stack--lg { --stack-gap: var(--sp-6); }
+
+.l-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cluster-gap, var(--sp-3));
+}
+.l-cluster--between { justify-content: space-between; }
+.l-cluster--center { justify-content: center; }
+.l-cluster--end { justify-content: flex-end; }
+
+.l-grid {
+  display: grid;
+  gap: var(--grid-gap, var(--sp-5));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--grid-min, 16rem)), 1fr));
+}
+
+.l-center {
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+/* ——— Scheletul aplicației ——— */
+.l-app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.l-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  background: color-mix(in srgb, var(--c-paper) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 2px solid var(--c-line);
+}
+.l-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  min-height: 4rem;
+}
+
+.l-main {
+  flex: 1;
+  padding-block: var(--sp-6) var(--sp-8);
+}
+
+.l-footer {
+  padding-block: var(--sp-5);
+  border-top: 2px solid var(--c-line);
+  color: var(--c-ink-soft);
+  font-size: var(--fs-0);
+}

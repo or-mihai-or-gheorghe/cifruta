@@ -1,0 +1,336 @@
+/* Componente reutilizabile. */
+
+/* ——— Butoane (cu „margine 3D” la apăsare) ——— */
+.c-btn {
+  --btn-bg: var(--c-surface);
+  --btn-fg: var(--c-ink);
+  --btn-edge: var(--c-line-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: var(--tap);
+  padding: 0.55rem 1.3rem;
+  border: 2px solid var(--btn-edge);
+  border-radius: var(--r-pill);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-family: var(--font-title);
+  font-size: var(--fs-1);
+  font-weight: 700;
+  line-height: 1.1;
+  text-decoration: none;
+  box-shadow: 0 4px 0 var(--btn-edge);
+  transition: transform var(--dur-1) var(--ease-out), box-shadow var(--dur-1) var(--ease-out), background-color var(--dur-2);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.c-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 0 var(--btn-edge); }
+.c-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--btn-edge); }
+.c-btn:disabled { opacity: 0.45; transform: none; box-shadow: 0 4px 0 var(--btn-edge); }
+.c-btn--primary { --btn-bg: var(--c-brand); --btn-fg: #fff; --btn-edge: var(--c-brand-dark); }
+.c-btn--accent { --btn-bg: var(--c-accent); --btn-fg: var(--c-ink); --btn-edge: var(--c-accent-dark); }
+.c-btn--ok { --btn-bg: var(--c-ok); --btn-fg: #fff; --btn-edge: #0a6547; }
+.c-btn--ghost { --btn-edge: transparent; background: transparent; box-shadow: none; }
+.c-btn--ghost:hover, .c-btn--ghost:active { box-shadow: none; transform: none; background: var(--c-surface-2); }
+.c-btn--lg { min-height: var(--tap-lg); padding-inline: 1.9rem; font-size: var(--fs-2); }
+.c-btn--sm { min-height: 2.5rem; padding: 0.35rem 0.95rem; font-size: var(--fs-0); }
+.c-btn--icon { width: var(--tap); padding: 0; }
+.c-btn__icon { width: 1.5em; height: 1.5em; flex: none; }
+
+/* ——— Logo ——— */
+.c-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--c-ink);
+  text-decoration: none;
+  font-family: var(--font-title);
+  font-size: var(--fs-2);
+  font-weight: 700;
+}
+.c-logo__art { width: 2.8rem; height: 2.8rem; }
+.c-logo__sub { display: block; font-family: var(--font-body); font-size: var(--fs-0); font-weight: 400; color: var(--c-ink-soft); line-height: 1; }
+
+/* ——— Carduri ——— */
+.c-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-5);
+  background: var(--c-surface);
+  border: 2px solid var(--c-line);
+  border-radius: var(--r-3);
+  box-shadow: var(--sh-1);
+}
+.c-card--link {
+  color: inherit;
+  text-decoration: none;
+  transition: transform var(--dur-2) var(--ease-out), box-shadow var(--dur-2), border-color var(--dur-2);
+}
+.c-card--link:hover { transform: translateY(-4px); box-shadow: var(--sh-2); border-color: var(--c-theme); }
+.c-card--soon { border-style: dashed; background: color-mix(in srgb, var(--c-surface) 60%, transparent); box-shadow: none; }
+.c-card__media {
+  margin: calc(-1 * var(--sp-5)) calc(-1 * var(--sp-5)) 0;
+  border-radius: calc(var(--r-3) - 2px) calc(var(--r-3) - 2px) 0 0;
+  overflow: hidden;
+  background: var(--c-theme-bg);
+}
+.c-card__media svg { width: 100%; height: auto; }
+.c-card__icon { width: 3.5rem; height: 3.5rem; }
+.c-card__title { font-size: var(--fs-2); }
+.c-card__text { color: var(--c-ink-soft); }
+.c-card__footer { margin-top: auto; }
+
+/* ——— Pastile și etichete ——— */
+.c-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.7rem;
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-pill);
+  background: var(--c-surface-2);
+  color: var(--c-ink-soft);
+  font-size: var(--fs-0);
+  white-space: nowrap;
+}
+.c-chip--soon { background: var(--c-brand-soft); color: var(--c-brand-dark); border-color: transparent; }
+
+.c-level {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.8rem 0.15rem 0.3rem;
+  border-radius: var(--r-pill);
+  background: var(--c-level-bg, var(--c-brand-soft));
+  color: var(--c-level, var(--c-brand-dark));
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: var(--fs-0);
+}
+.c-level__icon { width: 1.7em; height: 1.7em; }
+
+.c-pv {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.6em;
+  padding: 0 0.3em;
+  border-radius: 0.4em;
+  color: #fff;
+  font-family: var(--font-title);
+  font-weight: 700;
+  line-height: 1.35;
+}
+.c-pv--s { background: var(--c-s); }
+.c-pv--z { background: var(--c-z); }
+.c-pv--u { background: var(--c-u); }
+
+.c-emoji {
+  display: inline-block;
+  width: 1.3em;
+  height: 1.3em;
+  vertical-align: -0.28em;
+  margin-inline: 0.04em;
+}
+
+/* ——— Casete de mesaj ——— */
+.c-callout {
+  --callout-bg: var(--c-info-bg);
+  --callout-edge: var(--c-info);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-2);
+  border-left: 6px solid var(--callout-edge);
+  background: var(--callout-bg);
+}
+.c-callout--ok { --callout-bg: var(--c-ok-bg); --callout-edge: var(--c-ok); }
+.c-callout--bad { --callout-bg: var(--c-bad-bg); --callout-edge: var(--c-bad); }
+.c-callout--warn { --callout-bg: var(--c-warn-bg); --callout-edge: var(--c-warn); }
+.c-callout--idea { --callout-bg: #fff6d6; --callout-edge: var(--c-accent-dark); }
+.c-callout__icon { flex: none; font-size: 1.4rem; line-height: 1.2; }
+.c-callout__icon .c-emoji { width: 1.6rem; height: 1.6rem; vertical-align: -0.35rem; }
+
+/* ——— Mascota și balonul de vorbire ——— */
+.c-mascot { display: flex; align-items: flex-end; gap: var(--sp-3); }
+.c-mascot__art { flex: none; width: clamp(4.5rem, 3.5rem + 5vw, 7.5rem); }
+.c-mascot--center { flex-direction: column; align-items: center; text-align: center; }
+.c-mascot--center .c-bubble::before { left: calc(50% - 9px); bottom: auto; top: -10px; transform: rotate(135deg); }
+.c-bubble {
+  position: relative;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--c-surface);
+  border: 2px solid var(--c-line);
+  border-radius: var(--r-3);
+  box-shadow: var(--sh-1);
+}
+.c-bubble::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  bottom: 1.2rem;
+  width: 18px;
+  height: 18px;
+  background: var(--c-surface);
+  border-left: 2px solid var(--c-line);
+  border-bottom: 2px solid var(--c-line);
+  transform: rotate(45deg);
+}
+
+/* ——— Pagina principală ——— */
+.c-hero {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--sp-5);
+  padding: clamp(1.25rem, 0.8rem + 2vw, 2.5rem);
+  border: 2px solid var(--c-line);
+  border-radius: var(--r-4);
+  background: linear-gradient(135deg, #fff1cf 0%, #fde3e7 55%, #e8e8fb 100%);
+}
+.c-hero__art { width: clamp(6rem, 4rem + 10vw, 11rem); }
+.c-hero__title { font-size: var(--fs-5); }
+.c-hero__text { font-size: var(--fs-2); color: var(--c-ink-soft); max-width: 36rem; }
+@media (max-width: 36rem) {
+  .c-hero { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+}
+
+.c-section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--sp-2); }
+.c-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: var(--tap);
+  font-family: var(--font-title);
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--c-brand-dark);
+}
+
+/* ——— Harta de progres (bulinele exercițiilor) ——— */
+.c-progress { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
+.c-progress__group {
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.3rem;
+  border-radius: var(--r-pill);
+  background: var(--c-level-bg);
+}
+.c-progress__dot {
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  border: 2px solid var(--c-level);
+  border-radius: 50%;
+  background: var(--c-surface);
+  color: var(--c-level);
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: var(--fs-0);
+  transition: transform var(--dur-2) var(--ease-spring), background-color var(--dur-2);
+}
+.c-progress__dot.is-partial { background: linear-gradient(to top, var(--c-level-bg) 50%, var(--c-surface) 50%); }
+.c-progress__dot.is-done { background: var(--c-level); color: #fff; }
+.c-progress__dot.is-current { transform: scale(1.12); box-shadow: 0 0 0 3px var(--c-paper), 0 0 0 5px var(--c-level); }
+
+/* ——— Fereastră (dialog nativ) ——— */
+.c-modal {
+  max-width: min(32rem, calc(100vw - 2rem));
+  padding: var(--sp-6);
+  border: none;
+  border-radius: var(--r-4);
+  background: var(--c-surface);
+  color: var(--c-ink);
+  box-shadow: var(--sh-3);
+}
+.c-modal::backdrop { background: rgb(46 37 66 / 0.45); }
+.c-modal__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--sp-3); margin-top: var(--sp-5); }
+
+/* ——— Stele, scor, calificativ ——— */
+.c-stars { display: inline-flex; gap: 0.25rem; }
+.c-star { width: 2.2rem; height: 2.2rem; }
+.c-star path { fill: var(--c-line); stroke: var(--c-line-strong); stroke-width: 1.5; }
+.c-star.is-on path { fill: var(--c-accent); stroke: var(--c-accent-dark); }
+
+.c-score { font-family: var(--font-title); font-size: var(--fs-5); line-height: 1; color: var(--c-brand-dark); }
+.c-score small { font-size: 0.45em; color: var(--c-ink-soft); }
+.c-grade {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0.3rem 1rem;
+  border-radius: var(--r-pill);
+  background: var(--c-brand-soft);
+  color: var(--c-brand-dark);
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: var(--fs-2);
+}
+.c-grade[data-grade='FB'] { background: var(--c-ok-bg); color: var(--c-ok); }
+.c-grade[data-grade='EX'] { background: var(--c-warn-bg); color: var(--c-warn); }
+
+/* ——— Explicații (detalii pliabile) ——— */
+.c-explain {
+  border: 2px solid var(--c-line);
+  border-radius: var(--r-2);
+  background: var(--c-surface);
+}
+.c-explain > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--tap);
+  padding: 0.5rem 1rem;
+  font-family: var(--font-title);
+  font-weight: 700;
+  list-style: none;
+  cursor: pointer;
+}
+.c-explain > summary::-webkit-details-marker { display: none; }
+.c-explain > summary::after { content: '▸'; margin-left: auto; transition: transform var(--dur-2); }
+.c-explain[open] > summary::after { transform: rotate(90deg); }
+.c-explain__body { display: grid; gap: var(--sp-3); padding: 0 1rem 1rem; }
+.c-steps { display: grid; gap: 0.35rem; margin: 0; padding-left: 1.5rem; }
+
+/* ——— Autoevaluare ——— */
+.c-feel { display: flex; justify-content: center; gap: var(--sp-4); }
+.c-feel__btn {
+  display: grid;
+  place-items: center;
+  width: var(--tap-lg);
+  height: var(--tap-lg);
+  padding: 0.5rem;
+  border: 3px solid var(--c-line);
+  border-radius: 50%;
+  background: var(--c-surface);
+  transition: transform var(--dur-2) var(--ease-spring), border-color var(--dur-2);
+}
+.c-feel__btn img { width: 100%; height: 100%; }
+.c-feel__btn.is-selected { border-color: var(--c-brand); background: var(--c-brand-soft); transform: scale(1.12); }
+
+/* ——— File (tab-uri) ——— */
+.c-tabs { display: flex; flex-wrap: wrap; gap: var(--sp-2); border-bottom: 2px solid var(--c-line); }
+.c-tab {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  padding: 0.4rem 1.1rem;
+  margin-bottom: -2px;
+  border: 2px solid transparent;
+  border-radius: var(--r-2) var(--r-2) 0 0;
+  color: var(--c-ink-soft);
+  font-family: var(--font-title);
+  font-weight: 700;
+  text-decoration: none;
+}
+.c-tab.is-active { border-color: var(--c-line); border-bottom-color: var(--c-paper); background: var(--c-paper); color: var(--c-brand-dark); }
+
+/* ——— Tabel simplu ——— */
+.c-table { border-collapse: collapse; width: 100%; }
+.c-table th, .c-table td { padding: 0.4rem 0.7rem; border-bottom: 1px solid var(--c-line); text-align: left; }
+.c-table th { font-family: var(--font-title); color: var(--c-ink-soft); font-weight: 700; }

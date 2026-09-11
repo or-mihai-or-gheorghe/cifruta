@@ -47,5 +47,21 @@ export default {
       color: 'avansat',
       groups: [{ id: 'logica-1', title: 'Gândește ca un detectiv', tests: [], soon: true }],
     },
+    {
+      // secțiune ascunsă: demonstrația tuturor tipurilor, folosită de atelier și de testele E2E
+      id: 'atelier',
+      hidden: true,
+      title: 'Atelier',
+      subtitle: 'Demonstrație pentru autori',
+      icon: 'calcul',
+      color: 'brand',
+      groups: [
+        {
+          id: 'demo',
+          title: 'Toate tipurile de exerciții',
+          tests: [{ id: 'demo', file: 'demo.js', version: 1, theme: 'mare', title: 'Toate tipurile de exerciții', subtitle: 'Pagina de atelier pentru autori', estMin: 48 }],
+        },
+      ],
+    },
   ],
 };
