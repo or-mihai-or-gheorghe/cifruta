@@ -103,7 +103,8 @@ def smoke(run: Run, page: Page, vp: str):
         run.layout_ok(page, f"[{vp}] {name}")
         run.shot(page, f"{vp}-{name}")
         if name == "sectiune":
-            state = page.evaluate("getComputedStyle(document.querySelector(\".c-card__media [class^='v-scene__']\")).animationPlayState")
+            # dacă desenul nu s-a încărcat (de ex. rețea căzută), verificarea eșuează în loc să oprească toată suita
+            state = page.evaluate("(() => { const g = document.querySelector(\".c-card__media [class^='v-scene__']\"); return g ? getComputedStyle(g).animationPlayState : 'lipsă'; })()")
             run.check(state == "paused", f"[{vp}] pe cardurile testelor peisajele stau pe loc până la hover ({state})")
     fonts = page.evaluate("document.fonts.check('16px Andika', 'ăâîșț') && document.fonts.check('700 16px \"Baloo 2\"', 'ăâîșț')")
     run.check(fonts, f"[{vp}] fonturile Andika și Baloo 2 sunt încărcate")

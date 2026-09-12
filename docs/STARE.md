@@ -43,7 +43,7 @@
   de set; publicat, E2E local 1005 verificări, pe site-ul live 1003/1005 (2 curse de timp în script, corectate), tag `v0.6.0`
 - [x] M16 (v0.6.1): remedierea auditului secțiunii 0–1000: chei și afirmații greșite, explicații contrazise de evaluator, răspunsuri
   vizibile în pași, modele de sănătate, desene ilizibile pe telefon, etichete de concepte, T4 cu numere de trei cifre; validatorul
-  prinde casetele repetate și parametrii desenelor; publicat, E2E: vezi jurnalul, tag `v0.6.1`
+  prinde casetele repetate și parametrii desenelor; publicat, E2E local 1005/1005 și pe site-ul live 1005/1005, tag `v0.6.1`
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -181,4 +181,14 @@
   rânduri (telefon), emoji „ecran”. v0.6.0 publicat: E2E local 1005/1005; pe site-ul live 1003/1005 la prima rulare — cele două
   eșecuri erau o cursă de timp în scriptul E2E (clicul pe „Vezi” citea scorul paginii vechi cât se încărca de pe rețea încercarea
   cerută), corectată; fluxul rerulat pe live: 32/32.
+  **De făcut data viitoare:** copilul rezolvă un test din secțiunea nouă → timpii reali și ce e prea greu; apoi U2.
+- **2026-09-12 (a cincea sesiune)** — Un audit extern al secțiunii 0–1000 (66 de exerciții) a găsit 10 probleme și 5 ambiguități,
+  toate verificate pe conținut, evaluatori și desene și confirmate, plus două constatări proprii (feedback gol în T1-e07, creșterea
+  de 3 cm pe an din T6-e06). Remediere într-un singur lot, la cererea utilizatorului: chei și afirmații greșite, explicații care
+  contraziceau evaluatorul la limite, răspunsuri vizibile în pași, modele de sănătate, desene ilizibile pe telefon, etichete de
+  concepte, T4 cu numere de trei cifre, validator pentru casete repetate și parametrii desenelor. Rezerve păstrate: fără total
+  curent în timpul rezolvării; indiciile și animațiile propuse merg în backlog. v0.6.1 publicat. E2E local 1005/1005; pe site-ul
+  live 1005/1005, adunat din trei rulări (332 laptop, 331 telefon, 342 tabletă și tastatură), pentru că rețeaua mașinii
+  de test s-a schimbat de două ori în timpul rulării (`ERR_NETWORK_CHANGED`); erorile de rețea nu au venit din site. Verificarea
+  peisajului din pagina secțiunii nu mai oprește suita când un desen nu s-a încărcat.
   **De făcut data viitoare:** copilul rezolvă un test din secțiunea nouă → timpii reali și ce e prea greu; apoi U2.
