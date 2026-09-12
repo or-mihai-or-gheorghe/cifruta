@@ -7,7 +7,7 @@ import { markupErrors, plain } from './markup.js';
 import { getLogic, hasType } from './registry.js';
 import { wordCount } from './ro.js';
 import { trecere } from './rules.js';
-import { hasVisual } from '../visuals/index.js';
+import { hasVisual, visualErrors } from '../visuals/index.js';
 
 const LEVEL_IDS = config.levels.map((l) => l.id);
 const CU_TRECERE = ['mat.op.cu-trecere', 'mat.op1000.cu-trecere'];
@@ -55,7 +55,9 @@ export function validateTest(raw, { concepts } = {}) {
     for (const c of ex.concepts ?? []) if (concepts && !concepts[c]) errors.push(`${where}: concept necunoscut „${c}”`);
     if (!ex.explain?.idea) warnings.push(`${where}: lipsește explicația (explain.idea)`);
     const checkVisual = (spec, path) => {
-      if (spec && !hasVisual(spec.v)) errors.push(`${path}: desen necunoscut „${spec.v}”`);
+      if (!spec) return;
+      if (!hasVisual(spec.v)) errors.push(`${path}: desen necunoscut „${spec.v}”`);
+      else for (const e of visualErrors(spec)) errors.push(`${path}: ${e}`);
     };
     checkVisual(ex.context?.visual, `${where}.context.visual`);
 

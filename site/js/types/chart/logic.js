@@ -32,10 +32,10 @@ export function ruleViolation(part, vals) {
         if (v(r.a) !== v(r.b)) return `${labelOf(part, r.a)} și ${labelOf(part, r.b)} trebuie să aibă la fel de mult.`;
         break;
       case 'most':
-        if (!part.categories.every((c) => c.id === r.a || v(r.a) > v(c.id))) return `${labelOf(part, r.a)} trebuie să fie bara cea mai înaltă.`;
+        if (!part.categories.every((c) => c.id === r.a || v(r.a) > v(c.id))) return `${labelOf(part, r.a)} trebuie să aibă mai mult decât fiecare altă bară.`;
         break;
       case 'least':
-        if (!part.categories.every((c) => c.id === r.a || v(r.a) < v(c.id))) return `${labelOf(part, r.a)} trebuie să fie bara cea mai joasă.`;
+        if (!part.categories.every((c) => c.id === r.a || v(r.a) < v(c.id))) return `${labelOf(part, r.a)} trebuie să aibă mai puțin decât fiecare altă bară.`;
         break;
       case 'range':
         if (r.min !== undefined && v(r.a) < r.min) return `${labelOf(part, r.a)} trebuie să aibă cel puțin ${r.min}.`;
@@ -140,7 +140,10 @@ export default {
     }
     const clean = Object.fromEntries(free.map((id) => [id, validValue(part, given[id]) ? given[id] : 0]));
     const touched = free.some((id) => isInt(given[id], 1));
-    const feedback = touched ? ruleViolation(part, allValues(part, clean)) : 'Ridică barele apăsând +.';
+    const invalid = free.some((id) => given[id] !== undefined && !validValue(part, given[id]));
+    const feedback = invalid
+      ? `O bară are o valoare care nu se poate desena aici: între 0 și ${part.max}, din ${part.step} în ${part.step}.`
+      : touched ? ruleViolation(part, allValues(part, clean)) : 'Ridică barele apăsând +.';
     const ok = feedback === null;
     return makeResult([{ id: 'chart', ok, expected: keyOf(part), given: touched ? clean : null, feedback }]);
   },

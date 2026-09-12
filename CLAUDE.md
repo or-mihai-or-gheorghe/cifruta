@@ -101,3 +101,7 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
 - Structura unui test tematic (secțiunea 0–1000): poveste comună, ≥ 6 tipuri, formare + comparare/ordonare + încă un concept
   `mat.nr1000.*` în fiecare test, 1–2 exerciții MEM, la intermediar două probleme în 2 pași, la avansat: problemă în 3+ pași
   (`fill` cu `layout: 'steps'`), sarcină deschisă cu reguli și un puzzle (`search`, cifre ascunse, mers invers, greșeala din bon/tabel).
+- Validatorul refuză o casetă repetată în șabloanele unui `fill` și parametrii greșiți ai desenelor cu date (`check(p)` în
+  `registerVisual`, `visualErrors` din `visuals/index.js`). Explicațiile **nu** sunt verificate automat: exemplele și limitele din
+  `explain` se confruntă cu evaluatorul (auditul din v0.6.1 a găsit acolo erori), iar etichetele `med.*` stau doar pe exercițiile
+  care evaluează cunoștințe. La `chart`, `most`/`least` înseamnă maxim/minim strict: scrie-o în enunț.

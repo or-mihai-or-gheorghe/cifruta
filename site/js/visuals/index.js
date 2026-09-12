@@ -22,6 +22,18 @@ export function registerVisual(name, def) {
 
 export const hasVisual = (name) => registry.has(name);
 
+/** Erorile de parametri ale unui desen cu date (def.check), pentru validarea conținutului. */
+export function visualErrors(spec) {
+  const { v, class: cls, ...params } = spec ?? {};
+  const def = registry.get(v);
+  if (!def?.check) return [];
+  try {
+    return def.check({ ...(def.defaults ?? {}), ...params }) ?? [];
+  } catch (e) {
+    return [`parametri greșiți (${e.message})`];
+  }
+}
+
 export function visualSVG(spec) {
   const { v, class: cls, ...params } = spec ?? {};
   const def = registry.get(v);

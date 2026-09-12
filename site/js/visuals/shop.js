@@ -14,6 +14,7 @@ const productsOf = (p) =>
 
 registerVisual('shelf', {
   group: GROUP,
+  check: (p) => productsOf(p).flatMap((x) => [...(Number.isFinite(x.price) ? [] : [`prețul pentru „${x.emoji}” nu e un număr`])]),
   defaults: { perRow: 3 },
   viewBox: (p) => `0 0 320 ${10 + 84 * Math.ceil(productsOf(p).length / Math.max(1, num(p.perRow, 3)))}`,
   label: (p) => `raft cu produse: ${productsOf(p).map((x) => `${x.label} ${lei(x.price)}`).join(', ')}`,
@@ -40,6 +41,10 @@ registerVisual('shelf', {
 const linesOf = (p) => (Array.isArray(p.lines) ? p.lines : list(p.lines)).map((s) => String(s).split('|').map((x) => x.trim()));
 registerVisual('receipt', {
   group: GROUP,
+  check: (p) => [
+    ...linesOf(p).filter((l) => l.length !== 2 || !Number.isFinite(Number(l[1]))).map((l) => `rândul „${l.join('|')}” trebuie să fie nume|sumă`),
+    ...(has(p.total) && p.total !== '?' && !Number.isFinite(Number(p.total)) ? ['total trebuie să fie un număr sau „?”'] : []),
+  ],
   defaults: { title: 'BON' },
   viewBox: (p) => `0 0 200 ${72 + 22 * linesOf(p).length}`,
   // total: lipsă → suma rândurilor; un număr → tipărit ca atare (poate fi greșit intenționat); '?' → de aflat

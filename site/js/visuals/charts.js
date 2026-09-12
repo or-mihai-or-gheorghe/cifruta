@@ -2,13 +2,32 @@
 // Toate sunt desene „cu date”: schimbarea lor într-un test publicat cere versiune nouă.
 
 import { escapeHTML } from '../core/dom.js';
+import { hasEmoji } from './emoji.js';
 import { registerVisual } from './index.js';
 import { C, emojiImage, has, list, num, st, txt } from './palette.js';
 
 const GROUP = 'Date și grafice';
 const COLORS = [C.blue, C.red, C.yellow, C.green, C.purple, C.orange, C.teal, C.pink];
 const nums = (v) => list(v).map((x) => num(x, 0));
-const pairs = (p) => list(p.labels).map((label, i) => ({ id: list(p.ids)[i] ?? label, label, value: nums(p.values)[i] ?? 0, emoji: list(p.emojis)[i] ?? list(p.emoji)[0] }));
+// listă fără golurile scoase: emoji-ul gol al unei categorii nu trebuie să mute emoji-urile celorlalte
+const raw = (v) => (Array.isArray(v) ? v : has(v) ? String(v).split(',') : []).map((x) => String(x ?? '').trim());
+const pairs = (p) => list(p.labels).map((label, i) => ({ id: raw(p.ids)[i] || label, label, value: nums(p.values)[i] ?? 0, emoji: raw(p.emojis)[i] || raw(p.emoji)[i] || raw(p.emoji)[0] || '' }));
+
+/** Verificările comune ale seriilor de date: etichete, valori numerice, emoji cunoscute, liste de aceeași lungime. */
+function checkSeries(p) {
+  const errors = [];
+  const labels = list(p.labels);
+  const values = raw(p.values).filter((x) => x !== '');
+  if (!labels.length) errors.push('lipsesc etichetele (labels)');
+  if (values.length !== labels.length) errors.push(`labels are ${labels.length} elemente, iar values are ${values.length}`);
+  if (values.some((x) => !Number.isFinite(Number(x)))) errors.push('values trebuie să conțină doar numere');
+  for (const key of ['emojis', 'emoji']) {
+    const names = raw(p[key]);
+    if (names.length > 1 && names.length !== labels.length) errors.push(`${key} are ${names.length} elemente, iar labels are ${labels.length}`);
+    for (const n of names) if (n && !hasEmoji(n)) errors.push(`emoji necunoscut „${n}”`);
+  }
+  return errors;
+}
 const describe = (rows) => rows.map((r) => `${r.label} ${r.value}`).join(', ');
 
 // ——— Grafic cu bare ———
@@ -17,6 +36,7 @@ registerVisual('bar-chart', {
   group: GROUP,
   defaults: { step: 1, numbers: false },
   viewBox: '0 0 320 200',
+  check: (p) => [...checkSeries(p), ...(num(p.step, 0) > 0 ? [] : ['step trebuie să fie un număr pozitiv'])],
   label: (p) => {
     const hidden = new Set(list(p.hide));
     const step = Math.max(1, num(p.step, 1));
@@ -70,12 +90,14 @@ registerVisual('bar-chart', {
 registerVisual('pictogram', {
   group: GROUP,
   defaults: { each: 1, emoji: 'mar', unit: 'copii' },
+  check: (p) => [...checkSeries(p), ...(num(p.each, 0) >= 1 ? [] : ['each trebuie să fie cel puțin 1'])],
   viewBox: (p) => `0 0 320 ${52 + 34 * list(p.labels).length}`,
   label: (p) => `pictogramă (un simbol = ${num(p.each, 1)}): ${describe(pairs(p))}`,
   render: (p) => {
     const rows = pairs(p);
     const each = Math.max(1, num(p.each, 1));
-    const size = 24;
+    const most = Math.max(1, ...rows.map((r) => Math.ceil(r.value / each)));
+    const size = Math.max(12, Math.min(24, Math.floor(220 / most) - 3)); // simbolurile încap pe rând
     let out = '';
     rows.forEach((r, i) => {
       const y = 8 + i * 34;
@@ -92,8 +114,12 @@ registerVisual('pictogram', {
     });
     const ly = 12 + rows.length * 34;
     out += `<rect x="4" y="${ly}" width="312" height="32" rx="6" fill="${C.white}" ${st(1.5)}/>`;
-    out += emojiImage(rows[0]?.emoji ?? list(p.emoji)[0], 12, ly + 4, size);
-    out += txt(44, ly + 16, `= ${each} ${p.unit}`, { size: 12, anchor: 'start' });
+    if (new Set(rows.map((r) => r.emoji)).size === 1) {
+      out += emojiImage(rows[0]?.emoji, 12, ly + 4, 24);
+      out += txt(44, ly + 16, `= ${each} ${p.unit}`, { size: 12, anchor: 'start' });
+    } else {
+      out += txt(14, ly + 16, `Fiecare simbol = ${each} ${p.unit}`, { size: 12, anchor: 'start' });
+    }
     return out;
   },
   demos: [
@@ -105,6 +131,7 @@ registerVisual('pictogram', {
 // ——— Bețișoare (grupe de 5) ———
 registerVisual('tally', {
   group: GROUP,
+  check: checkSeries,
   viewBox: (p) => `0 0 320 ${12 + 34 * list(p.labels).length}`,
   label: (p) => `bețișoare: ${describe(pairs(p))}`,
   render: (p) => {
@@ -135,6 +162,7 @@ registerVisual('pie', {
   group: GROUP,
   defaults: { slices: 4, filled: 1 },
   viewBox: '0 0 120 120',
+  check: (p) => (num(p.filled, 0) <= num(p.slices, 4) ? [] : ['filled nu poate fi mai mare decât slices']),
   label: (p) => `cerc împărțit în ${num(p.slices, 4)} felii egale, ${num(p.filled, 0)} colorate${has(p.labels) ? `: ${list(p.labels).join(', ')}` : ''}`,
   render: (p) => {
     const n = Math.max(2, num(p.slices, 4));
@@ -162,6 +190,10 @@ const cells = (s) => String(s ?? '').split('|').map((x) => x.trim());
 const rowsOf = (p) => (Array.isArray(p.rows) ? p.rows : String(p.rows ?? '').split(';')).map(cells).filter((r) => r.some((c) => c !== ''));
 registerVisual('data-table', {
   group: GROUP,
+  check: (p) => {
+    const width = has(p.head) ? cells(p.head).length : null;
+    return width === null ? [] : rowsOf(p).filter((r) => r.length !== width).map((r) => `rândul „${r.join('|')}” are ${r.length} celule, capul tabelului ${width}`);
+  },
   viewBox: (p) => `0 0 320 ${14 + 28 * (rowsOf(p).length + (has(p.head) ? 1 : 0))}`,
   label: (p) => `tabel: ${[has(p.head) ? cells(p.head) : null, ...rowsOf(p)].filter(Boolean).map((r) => r.join(', ')).join('; ')}`,
   render: (p) => {

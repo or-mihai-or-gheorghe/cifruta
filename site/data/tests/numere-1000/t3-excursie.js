@@ -8,7 +8,7 @@ const DISTANTE = { v: 'data-table', head: 'Drum|Km', rows: 'Râuleni – Brădu�
 export default {
   schema: 1,
   id: 'u1-t3',
-  version: 1,
+  version: 2,
   theme: 'oras',
   title: 'Excursie cu trenul și cu mașina',
   subtitle: 'Mersul trenurilor · distanțe în km · borne · bagaje · apă',
@@ -34,8 +34,8 @@ export default {
           id: 'b',
           concepts: ['mat.mas.durata', 'mat.mas.orar'],
           type: 'fill',
-          prompt: 'Trenul 2 pleacă la 9:15 și ajunge la 11:15. Cât durează drumul?',
-          rows: ['De la 9 la 11 sunt [[a]] ore.'],
+          prompt: 'Cât durează drumul trenului 2? Uită-te în orar.',
+          rows: ['Durata: [[a]] ore'],
           checks: ['11 - 9 = [[a]]'],
           blanks: { a: { answer: 2 } },
         },
@@ -69,19 +69,20 @@ export default {
         {
           id: 'i2',
           shuffle: false,
-          q: 'Care drum are **cam 100 km**?',
+          multi: true,
+          q: 'Care drumuri au, **rotunjit la sute**, 100 km? Alege toate variantele potrivite.',
           options: [
             { id: 'k120', text: '120 km' },
             { id: 'k145', text: '145 km' },
             { id: 'k230', text: '230 km' },
           ],
-          correct: 'k120',
-          feedback: [{ if: 'k145', text: '145 are 4 zeci: e mai aproape de 100 decât de 200, dar 120 e și mai aproape de 100.' }],
+          correct: ['k120', 'k145'],
         },
       ],
       explain: {
-        idea: 'Comparăm întâi **sutele**: 230 are 2 sute, celelalte doar una. „Cam 100” înseamnă numărul cel mai apropiat de 100.',
-        steps: ['230 > 145 > 120: cel mai lung e Brăduț – Soreni.', '120 e la 20 de 100; 145 e la 45. Cel mai aproape: 120.'],
+        idea: 'Comparăm întâi **sutele**: 230 are 2 sute, celelalte doar una. La rotunjirea la sute ne uităm la **zeci**: sub 5 zeci rotunjim în jos.',
+        steps: ['230 > 145 > 120: cel mai lung e Brăduț – Soreni.', '120 are 2 zeci, iar 145 are 4 zeci: amândouă se rotunjesc la 100.', '230 are 3 zeci: se rotunjește la 200.'],
+        trap: '145 pare aproape de jumătatea drumului dintre 100 și 200, dar 4 zeci sunt mai puțin de 5: tot la 100.',
       },
     },
     {
@@ -144,15 +145,15 @@ export default {
       max: 1000,
       step: 10,
       icon: 'masina',
-      ticks: { minor: 100, labels: [0, 500, 1000] },
+      ticks: { minor: 50, labels: [0, 500, 1000] },
       prompt: 'Drumul e o axă de la 0 la 1000 km. Du mașina la borna cerută.',
       items: [
         { id: 'i1', label: 'Borna 460', answer: 460, tolerance: 25 },
         { id: 'i2', label: 'Borna 730', answer: 730, tolerance: 25 },
       ],
       explain: {
-        idea: 'Pe axă, 500 e la **jumătate**. Liniuțele mici sunt din 100 în 100: 460 e puțin înainte de 500, 730 e între 700 și 800.',
-        steps: ['460: a patra liniuță după 400, aproape de 500.', '730: puțin după liniuța lui 700.'],
+        idea: 'Pe axă, 500 e la **jumătate**. Liniuțele sunt din 50 în 50: între 400 și 500 stă liniuța lui 450.',
+        steps: ['460 e între 400 și 500, la 60 după 400: puțin după liniuța lui 450.', '730 e între 700 și 750, mai aproape de 750.'],
       },
     },
     {
@@ -286,7 +287,7 @@ export default {
       estMin: 6,
       concepts: ['mat.mas.distanta', 'mat.pb.date-lipsa', 'mat.nr1000.comparare'],
       title: 'Ce vizităm mâine?',
-      context: { text: 'De la pensiune pornesc mai multe drumuri {{e:masina}}. Mâine, familia vrea **cel puțin 2 excursii**, dar nu mai mult de **400 km** în total.' },
+      context: { text: 'De la pensiune pornesc mai multe excursii {{e:masina}}. Lângă fiecare scrie câți kilometri are drumul **dus-întors**. Mâine, familia vrea **cel puțin 2 excursii**, cu **cel mult 400 km** în total.' },
       type: 'mark',
       prompt: 'Alege drumurile pentru mâine. Sunt mai multe răspunsuri bune!',
       items: [
@@ -299,9 +300,9 @@ export default {
       ],
       rules: { count: { min: 2 }, sum: { max: 400 }, noun: ['drum', 'drumuri'], unit: 'km' },
       explain: {
-        idea: 'Adună kilometrii drumurilor alese și verifică să nu treci de 400. Poți alege drumuri scurte mai multe sau două mai lungi.',
+        idea: 'Adună kilometrii drumurilor alese: totalul poate fi cel mult 400, iar exact 400 este voie. Poți alege mai multe drumuri scurte sau două mai lungi.',
         steps: ['De exemplu: Peștera 100 + Soreni 230 = 330 km.', 'Sau: Cascada 40 + Cetatea 50 + Lacu Verde 120 + Peștera 100 = 310 km.'],
-        trap: 'Munții Albi (310 km) lasă loc doar pentru Cascada sau Cetatea: 310 + 90 ar fi prea mult, dar 310 + 40 sau 310 + 50 merge.',
+        trap: 'Cu Munții Albi (310 km) mai rămân 90 km: încap Cascada și Cetatea, pentru că 310 + 40 + 50 = 400, iar 400 este voie. Peștera (100 km) nu mai încape.',
       },
     },
     {

@@ -5,7 +5,7 @@ import { existsSync } from 'node:fs';
 import { test } from 'node:test';
 
 import { EMOJI } from '../site/js/visuals/emoji.js';
-import { listVisuals, visualSVG } from '../site/js/visuals/index.js';
+import { listVisuals, visualErrors, visualSVG } from '../site/js/visuals/index.js';
 import '../site/js/visuals/all.js';
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -47,4 +47,13 @@ test('fiecare emoji are fișierul SVG local', () => {
   for (const [name, e] of Object.entries(EMOJI)) {
     assert.ok(existsSync(siteFile(`assets/emoji/${e.code}.svg`)), `${name}: lipsește assets/emoji/${e.code}.svg`);
   }
+});
+
+test('desenele cu date își verifică parametrii', () => {
+  for (const { name, demos } of listVisuals()) for (const params of demos) assert.deepEqual(visualErrors({ v: name, ...params }), [], `${name} ${JSON.stringify(params)}`);
+  assert.ok(visualErrors({ v: 'pictogram', labels: 'a,b,c', values: '1,2' }).some((e) => e.includes('values are 2')));
+  assert.ok(visualErrors({ v: 'pictogram', labels: 'a,b', values: '1,2', emoji: 'mar,nuexista' }).some((e) => e.includes('emoji necunoscut')));
+  assert.ok(visualErrors({ v: 'data-table', head: 'A|B', rows: 'x|1;y' }).length === 1);
+  const mixed = visualSVG({ v: 'pictogram', labels: 'legume,fructe', values: '2,1', emoji: 'morcov,mar' });
+  assert.equal(new Set([...mixed.matchAll(/href="([^"]+)"/g)].map((m) => m[1])).size, 2); // fiecare rând cu emoji-ul lui
 });

@@ -259,20 +259,20 @@ nu îl edita de mână.
 | `mat.nr100.estimare` | — | — | 7 | — | — | — | — | — | — | — |
 | `mat.nr100.adunare-repetata` | — | 1 | — | — | — | 9 | — | 1, 5 | 8 | — |
 | `mat.nr1000.formare` (II) | — | — | — | — | 1 | 3 | 11 | — | 1 | 1 |
-| `mat.nr1000.citire-scriere` (II) | — | — | — | — | 2 | 3 | — | — | 1 | 1 |
-| `mat.nr1000.comparare` (II) | — | — | — | — | 3, 8, 10 | 7, 8 | 2, 6, 10 | — | 2, 3, 5 | 5, 9 |
+| `mat.nr1000.citire-scriere` (II) | — | — | — | — | 2 | 3 | — | 2 | 1 | 1 |
+| `mat.nr1000.comparare` (II) | — | — | — | — | 3, 8, 10 | 7, 8 | 2, 6, 10 | 6 | 2, 3, 5 | 5, 9 |
 | `mat.nr1000.ordonare` (II) | — | — | — | — | 8 | 8 | 6 | — | 3, 11 | 5 |
 | `mat.nr1000.paritate` (II) | — | — | — | — | — | 2 | — | 3 | 5 | 3 |
-| `mat.nr1000.rotunjire` (II) | — | — | — | — | 5 | — | 2 | — | — | 6, 9 |
+| `mat.nr1000.rotunjire` (II) | — | — | — | — | 5 | — | 2 | 6 | — | 6, 9 |
 | `mat.nr1000.rasturnat` (II) | — | — | — | — | — | 8 | — | — | 11 | — |
 | `mat.nr1000.vecini` (II) | — | — | — | — | — | 11 | — | — | 11 | — |
 | `mat.nr1000.consecutive` (II) | — | — | — | — | — | 11 | 3 | — | — | — |
 | `mat.nr1000.siruri` (II) | — | — | — | — | — | — | 3 | — | — | 6 |
 | `mat.nr1000.axa` (II) | — | — | — | — | 5 | — | 5 | — | — | 6 |
 | `mat.nr1000.conditii` (II) | — | — | — | — | 3 | 11 | 11 | — | 5, 11 | — |
-| `mat.nr1000.valoare-pozitionala` (II) | — | — | — | — | 1 | 3 | — | — | 1 | 1 |
+| `mat.nr1000.valoare-pozitionala` (II) | — | — | — | — | 1 | 3 | — | 2 | 1 | 1 |
 | `mat.fractii.jumatate-sfert` (II) | — | — | — | — | — | — | — | 8 | — | 10 |
-| `mat.op.fara-trecere` | 4, 8, 10 | — | — | — | — | — | — | 6, 11 | — | 2, 7 |
+| `mat.op.fara-trecere` | 4, 8, 10 | — | — | — | — | — | — | 11 | — | 2, 7 |
 | `mat.op.cu-trecere` | — | 3, 5, 7, 9 | 9 | 5, 8 | 9 | 6, 7 | 9 | 9 | 9 | 11 |
 | `mat.op.proprietati` | 6 | — | — | — | — | — | — | — | — | — |
 | `mat.op.necunoscut` | — | 11 | 6 | — | — | — | — | — | — | — |
@@ -284,7 +284,7 @@ nu îl edita de mână.
 | `mat.op.greseala` | — | 5 | — | — | 11 | — | — | 11 | — | — |
 | `mat.op.strategii` | — | 3 | — | — | — | — | — | — | — | — |
 | `mat.op.familii` | — | — | — | 6 | — | — | — | — | — | — |
-| `mat.op1000.fara-trecere` (II) | — | — | — | — | 6, 7, 9, 11 | — | 8 | — | 7 | 9 |
+| `mat.op1000.fara-trecere` (II) | — | — | — | — | 6, 7, 9, 11 | — | 8 | 6 | 7 | 9 |
 | `mat.pb.o-operatie` | 9, 10 | — | — | — | — | — | — | — | — | — |
 | `mat.pb.doua-operatii` | — | 9, 10 | — | 9 | 9 | 9 | 8, 9 | 7, 9 | 9 | 9 |
 | `mat.pb.mai-mult-mai-putin` | 8, 9 | 7 | — | 5, 9 | — | — | — | 6 | 7 | — |
@@ -313,7 +313,7 @@ nu îl edita de mână.
 | `mat.mas.distanta` (II) | — | — | — | — | — | — | 2, 6, 8, 10 | — | — | — |
 | `mat.mas.orar` (II) | — | — | — | — | — | — | 1, 7 | — | — | — |
 | `mat.log.tabel` | — | 7 | — | 5 | 11 | 7 | 7 | 1, 11 | 2, 6 | 7 |
-| `mat.log.grafic-bare` (II) | — | — | — | — | — | — | — | 2, 6, 7, 10 | 6 | 7, 10 |
+| `mat.log.grafic-bare` (II) | — | — | — | — | — | — | — | 6, 7, 10 | 6 | 7, 10 |
 | `mat.log.pictograma` (II) | — | — | — | — | — | — | — | 5 | 8 | — |
 | `mat.log.ghicitori` | 11 | — | — | — | — | 11 | 11 | — | 11 | 11 |
 | `mat.log.simboluri` | — | 11 | — | — | — | — | — | — | — | — |
@@ -321,9 +321,9 @@ nu îl edita de mână.
 | `mat.log.clasificare` | — | 6 | 8 | 2 | — | — | — | — | — | 8 |
 | `mat.log.si-sau-nu` | — | — | 3 | — | — | — | — | — | — | — |
 | `mat.log.modele` | — | — | 1 | — | — | — | — | — | — | — |
-| `med.corp.organe` | 7 | — | — | — | — | — | — | — | 4, 9 | 1, 2 |
+| `med.corp.organe` | 7 | — | — | — | — | — | — | — | 4 | 9 |
 | `med.corp.igiena` | — | — | — | — | — | — | — | — | — | 3 |
-| `med.corp.miscare-odihna` (II) | — | — | — | — | — | 4 | — | 4 | 4 | 7, 9, 10 |
+| `med.corp.miscare-odihna` (II) | — | — | — | — | — | 4 | — | 4 | 4 | — |
 | `med.plante.parti` | — | 4, 6 | — | — | — | — | — | — | — | — |
 | `med.plante.nevoi` | — | 4 | — | — | — | — | — | — | — | — |
 | `med.soare` | — | — | 4 | — | — | — | — | — | — | — |
@@ -332,7 +332,7 @@ nu îl edita de mână.
 | `med.animale.domestice-salbatice` | — | — | — | 2 | — | — | — | — | — | — |
 | `med.energie.surse` | — | — | — | 7 | — | — | — | — | — | — |
 | `med.anotimpuri` | — | — | — | 4 | — | — | — | — | — | — |
-| `med.alimentatie` (II) | — | — | — | — | 4 | — | 4 | 9 | — | 8 |
+| `med.alimentatie` (II) | — | — | — | — | 4 | — | 4 | — | — | 8 |
 | `med.sanatate.virusuri` (II) | — | — | — | — | — | — | — | — | — | 4 |
 
 **Neacoperite încă (clasa pregătitoare și clasa I), candidate pentru testele următoare:** `mat.nr100.citire-scriere`, `mat.nr100.consecutive`, `mat.nr100.prietenii-lui-10`, `mat.op.terminologie`, `mat.pb.compunere`, `mat.geo.interior-exterior`, `mat.mas.capacitate`, `mat.log.adevarat-fals`, `med.corp.simturi`, `med.energie.forme`, `med.caderea-libera`, `med.sunete`, `med.reutilizare`.

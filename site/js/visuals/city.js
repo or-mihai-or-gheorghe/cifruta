@@ -1,6 +1,5 @@
 // Oraș și transport: harta liniilor (tramvai, metrou, autobuz) și indicatoare de kilometri.
 
-import { escapeHTML } from '../core/dom.js';
 import { registerVisual } from './index.js';
 import { C, has, list, num, st, txt } from './palette.js';
 
@@ -30,6 +29,10 @@ const linesOf = (p) => (Array.isArray(p.lines) && p.lines.length ? p.lines : DEM
 /** Harta unei rețele de linii: stațiile (id, label, x, y), liniile (culoare + stații), un traseu evidențiat (path). */
 registerVisual('route-map', {
   group: GROUP,
+  check: (p) => {
+    const ids = new Set(stopsOf(p).map((s) => s.id));
+    return [...list(p.path), ...linesOf(p).flatMap((l) => l.stops ?? [])].filter((id) => !ids.has(id)).map((id) => `stație necunoscută „${id}”`);
+  },
   defaults: { w: 320, h: 200 },
   viewBox: (p) => `0 0 ${num(p.w, 320)} ${num(p.h, 200)}`,
   label: (p) => {
@@ -80,12 +83,14 @@ registerVisual('route-map', {
 registerVisual('signpost', {
   group: GROUP,
   defaults: { unit: 'km' },
-  viewBox: '0 0 120 70',
+  viewBox: '0 0 120 92',
+  check: (p) => (has(p.n) && !Number.isFinite(Number(p.n)) ? ['n trebuie să fie un număr'] : []),
   label: (p) => `indicator: ${p.label ?? ''} ${has(p.n) ? `${p.n} ${p.unit}` : ''}`.trim(),
+  // numărul e informația de care are nevoie copilul: scris mare, sub numele locului
   render: (p) => `
-    <rect x="56" y="34" width="8" height="34" fill="${C.brown}" ${st(1.5)}/>
-    <path d="M6 8 H100 L114 24 L100 40 H6 Z" fill="${C.green}" ${st(2)}/>
-    ${txt(52, 18, p.label ?? '', { size: 11, fill: C.white })}
-    ${txt(52, 32, has(p.n) ? `${escapeHTML(String(p.n))} ${p.unit}` : '', { size: 12, fill: C.white })}`,
+    <rect x="56" y="54" width="8" height="36" fill="${C.brown}" ${st(1.5)}/>
+    <path d="M4 6 H102 L116 30 L102 54 H4 Z" fill="${C.green}" ${st(2)}/>
+    ${txt(53, 18, p.label ?? '', { size: 12, fill: C.white })}
+    ${has(p.n) ? txt(53, 39, `${p.n} ${p.unit}`, { size: 20, fill: C.white, weight: 800 }) : ''}`,
   demos: [{ label: 'Brăduț', n: 145 }, { label: 'Lacu Verde', n: 95 }],
 });

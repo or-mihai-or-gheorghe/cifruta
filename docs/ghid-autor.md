@@ -93,6 +93,7 @@ export default {
   lățimea să nu trădeze răspunsul; se pot scrie până la 4 cifre.
 - **Cititorul de ecran** aude fiecare casetă cu șablonul ei („Căsuță: 40 + 8 = …”; în tabel, capul rândului și al coloanei;
   în arbore, „zeci din 47”). `blank.label` înlocuiește eticheta automată când e nevoie.
+- **O casetă apare o singură dată** în șabloane (validatorul verifică); o relație între casete se scrie în `checks`.
 
 ### Etichetele „cu / fără trecere peste ordin”
 - Definiția, pe coloane: la **adunare** e cu trecere dacă suma cifrelor unei coloane e cel puțin 10 (7 + 5, 28 + 12);
@@ -132,7 +133,9 @@ HTML nu este permis (se afișează ca text).
 
 Toate apar cu exemple la `#/atelier/vizualuri`. **Desen nou:** `registerVisual('nume', { group, defaults, label, render, viewBox, demos })`
 într-un modul din `site/js/visuals/`; culori doar din variabile `--v-*` (vezi `css/00-tokens.css`), contur
-`var(--v-ink)`, text cu `svgText`; `tests/visuals.test.js` îl verifică automat.
+`var(--v-ink)`, text cu `svgText`; `tests/visuals.test.js` îl verifică automat. Desenele cu date primesc și `check(p)`,
+care întoarce erorile de parametri (liste de lungimi diferite, emoji necunoscute, valori care nu sunt numere); `npm test` le
+raportează pentru desenele folosite în teste.
 
 **Desene care se mișcă:** partea animată stă într-un grup cu clasă (`<g class="v-nume__parte">`) și e animată din
 `css/05-visuals.css`. Regula (verificată de test): nici grupul, nici copiii lui nu poartă atributul `transform` dacă grupul
@@ -153,6 +156,14 @@ schimbă doar rotația), bila nouă de pe numărătoare, confetti-ul mascotei (d
   verificate prin reguli (`mark.rules`, `route.rules`, `chart.rules`, `money.distinct`), o problemă în **3+ pași** (`fill` cu
   `layout: 'steps'`, plan → calcul → verificare) și un puzzle (ghicitoare cu `search`, cifre ascunse, mers invers, greșeala din
   bon sau tabel). La intermediar, două probleme în 2 pași.
+- **Limitele se spun exact:** „cel mult 400 de lei, iar 400 este voie”. Limita impusă de interfață (o bară până la 10) apare și în
+  enunț, iar „cele mai puține” se scrie „mai puține decât fiecare dintre celelalte”, pentru că evaluatorul cere un minim strict.
+- **Explicațiile se confruntă cu evaluatorul:** fiecare exemplu și fiecare „nu se poate” din explicație trebuie să dea același verdict
+  ca evaluatorul, inclusiv la limită. Pașii unei probleme nu scriu rezultatele cerute mai sus (T1-e09 folosește casete pentru ele).
+- **Etichetele de concepte descriu ce se evaluează, nu tema poveștii:** un calcul despre pași sau puls nu primește eticheta de mișcare
+  ori de organe; o întrebare de cunoștințe (A/F, sortare, unire) o primește.
+- **Datele despre sănătate din povești** sunt ale poveștii (ce a pus Vlad în coș, ținta propusă de învățătoare), nu recomandări
+  generale, iar o afirmație dată drept adevărată trebuie să fie corectă în întregime, cu tot cu motivul ei.
 - **Răspunsul nu stă la vedere:** variantele nu repetă pictograma sau textul din desen (țarcurile → doar numele animalelor),
   o variantă corectă nu spune rezultatul altui subpunct (T4-e10: a) estimează, b) calculează), contextul nu dă prima pereche
   din exercițiu, iar suma din portofel nu se vede în timpul rezolvării. Amestecă variantele (`shuffle: true`) când n-au o ordine

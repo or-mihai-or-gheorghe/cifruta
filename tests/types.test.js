@@ -236,6 +236,7 @@ test('chart: credit pe bară cu cheie; cu reguli, orice grafic bun ia tot', () =
   assert.match(logic.evaluate(rules, { mere: 3, pere: 1, banane: 3 }).items[0].feedback, /împreună 7, dar trebuie să facă 6/);
   assert.match(logic.evaluate(rules, { mere: 1, pere: 2, banane: 3 }).items[0].feedback, /mere trebuie să aibă mai mult decât pere/);
   assert.match(logic.evaluate(rules, {}).items[0].feedback, /apăsând \+/);
+  assert.match(logic.evaluate(rules, { mere: 12, pere: 1, banane: 2 }).items[0].feedback, /nu se poate desena/);
   const sol = logic.solution(rules);
   assert.equal(logic.evaluate(rules, sol).earned, 1);
   assert.equal(logic.count(rules), 1);
@@ -251,4 +252,9 @@ test('chart: credit pe bară cu cheie; cu reguli, orice grafic bun ia tot', () =
   assert.ok(logic.validate({ ...rules, rules: [{ rule: 'each', max: 6 }] }).some((e) => e.includes('barele goale')));
   assert.ok(logic.validate({ ...rules, rules: [{ rule: 'total', value: 100 }] }).some((e) => e.includes('nicio combinație')));
   assert.ok(logic.validate({ ...rules, max: 100, step: 1, categories: Array.from({ length: 4 }, (_, i) => ({ id: `c${i}`, label: `c${i}` })), rules: [{ rule: 'total', value: 5 }] }).some((e) => e.includes('prea multe')));
+});
+
+test('fill: o casetă apare o singură dată în șabloane', () => {
+  const dup = { type: 'fill', rows: ['Adultul are cu [[b]] dinți mai mult: 32 − 20 = [[b]]'], blanks: { b: { answer: 12 } } };
+  assert.ok(getLogic('fill').validate(dup).some((e) => e.includes('apare de 2 ori')));
 });

@@ -331,7 +331,7 @@ export default {
       rules: { maxStops: 6 },
       explain: {
         idea: 'Numără stațiile pe fiecare drum posibil și alege unul care se încadrează în 6.',
-        steps: ['Muzeul → Piața Mare → Parcul → Școala → Stadionul → Lacul: 6 stații, cu tramvaiul.', 'Muzeul → Piața Mare → Teatrul → Stadionul → Lacul: 5 stații, cu metroul și autobuzul.'],
+        steps: ['Muzeul → Piața Mare cu metroul, apoi Parcul, Școala, Stadionul și Lacul cu tramvaiul: 6 stații.', 'Muzeul → Piața Mare → Teatrul cu metroul, Teatrul → Stadionul cu autobuzul, Stadionul → Lacul cu tramvaiul: 5 stații.'],
         trap: 'Prin Podul și Spitalul nu ajungi la Lac: metroul se oprește la Spitalul.',
       },
     },

@@ -191,7 +191,12 @@ export default {
     const blanks = part.blanks ?? {};
     const layout = part.layout ?? 'inline';
     if (!LAYOUTS.includes(layout)) return [`fill: layout necunoscut „${layout}”`];
-    const used = new Set(templatesOf(part).flatMap(blanksIn));
+    const all = templatesOf(part).flatMap(blanksIn);
+    const used = new Set(all);
+    for (const id of used) {
+      const times = all.filter((x) => x === id).length;
+      if (times > 1) errors.push(`fill: caseta [[${id}]] apare de ${times} ori; fiecare casetă apare o singură dată (relațiile se scriu în checks)`);
+    }
     if (!used.size) errors.push('fill: nicio casetă [[x]] în șabloane');
     for (const id of used) if (!blanks[id]) errors.push(`fill: caseta [[${id}]] nu este definită în „blanks”`);
     for (const [id, b] of Object.entries(blanks)) {

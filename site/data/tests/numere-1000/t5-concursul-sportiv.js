@@ -228,7 +228,7 @@ export default {
       id: 'e09',
       level: 'avansat',
       estMin: 6,
-      concepts: ['mat.op.cu-trecere', 'mat.pb.doua-operatii', 'med.corp.organe', 'mat.pb.plan', 'mat.pb.decizie'],
+      concepts: ['mat.op.cu-trecere', 'mat.pb.doua-operatii', 'mat.pb.plan', 'mat.pb.decizie'],
       title: 'Pulsul lui Vlad',
       context: { text: 'Înainte de cursă, pulsul lui Vlad era **72** de bătăi pe minut. După alergare a crescut cu **25**, iar după pauză a scăzut cu **18**.', visual: { v: 'organ', name: 'inima' } },
       parts: [
@@ -250,7 +250,7 @@ export default {
         },
         {
           id: 'b',
-          concepts: ['med.corp.organe', 'mat.pb.decizie'],
+          concepts: ['mat.pb.decizie'],
           type: 'choice',
           weight: 0.5,
           prompt: 'A revenit pulsul lui Vlad la 72?',
@@ -307,7 +307,8 @@ export default {
         'Cel mai mare număr: [[a]]',
         'Cel mai mic număr de trei cifre: [[b]]',
         'Răsturnatul celui mai mic: [[c]]',
-        'Vecinii celui mai mare: [[e]] și [[f]]',
+        'Vecinul dinaintea celui mai mare: [[e]]',
+        'Vecinul de după cel mai mare: [[f]]',
         'Dacă 0 se schimbă în 2, cel mai mare număr devine [[d]]',
       ],
       checks: ['[[a]] - 1 = [[e]]', '[[a]] + 1 = [[f]]'],

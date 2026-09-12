@@ -160,7 +160,7 @@ export default {
         { id: 'p6', text: 'creion, 5 lei', emoji: 'creion', n: 5 },
       ],
       rules: { count: { min: 2 }, sum: { max: 100 }, noun: ['jucărie', 'jucării'] },
-      explain: { idea: 'Sunt mai multe răspunsuri bune: adună prețurile și oprește-te înainte de 100 de lei.', steps: ['De exemplu: cană 20 + creion 5 = 25 de lei.', 'Sau: carte 30 + minge 45 + cană 20 = 95 de lei.'] },
+      explain: { idea: 'Sunt mai multe răspunsuri bune: adună prețurile; totalul poate fi cel mult 100 de lei, iar exact 100 este voie.', steps: ['De exemplu: cană 20 + creion 5 = 25 de lei.', 'Sau: carte 30 + minge 45 + cană 20 = 95 de lei.'] },
     },
     {
       id: 'build',

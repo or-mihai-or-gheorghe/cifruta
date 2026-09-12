@@ -1,7 +1,7 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-12 · **Versiune:** 0.6.0
+- **Data:** 2026-09-12 · **Versiune:** 0.6.1
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -41,6 +41,9 @@
 - [x] M15 (v0.6.0): secțiunea „Numerele de la 0 la 1000 · Corpul omenesc” cu 6 teste tematice; 12 concepte noi, 39 de emoji, 4 scene
   și 14 desene noi (grafice, hartă de linii, magazin, tabel de poziție, cuburi, medalie); tipurile `route` și `chart`, `mark` cu reguli
   de set; publicat, E2E local 1005 verificări, pe site-ul live 1003/1005 (2 curse de timp în script, corectate), tag `v0.6.0`
+- [x] M16 (v0.6.1): remedierea auditului secțiunii 0–1000: chei și afirmații greșite, explicații contrazise de evaluator, răspunsuri
+  vizibile în pași, modele de sănătate, desene ilizibile pe telefon, etichete de concepte, T4 cu numere de trei cifre; validatorul
+  prinde casetele repetate și parametrii desenelor; publicat, E2E: vezi jurnalul, tag `v0.6.1`
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -49,12 +52,12 @@
 | recap-c1-t2 | La piață cu bunica | 2 | publicat | npm test + E2E | 45 | – |
 | recap-c1-t3 | Călătorie în spațiu | 2 | publicat | npm test + E2E | 45 | – |
 | recap-c1-t4 | O zi la fermă | 2 | publicat | npm test + E2E | 45 | – |
-| u1-t1 | Lista de cumpărături | 1 | publicat | npm test + E2E | 45 | – |
+| u1-t1 | Lista de cumpărături | 2 | publicat | npm test + E2E | 45 | – |
 | u1-t2 | Prin oraș: tramvai, metrou, autobuz | 1 | publicat | npm test + E2E | 45 | – |
-| u1-t3 | Excursie cu trenul și cu mașina | 1 | publicat | npm test + E2E | 45 | – |
-| u1-t4 | Sondajul clasei | 1 | publicat | npm test + E2E | 45 | – |
+| u1-t3 | Excursie cu trenul și cu mașina | 2 | publicat | npm test + E2E | 45 | – |
+| u1-t4 | Sondajul clasei | 2 | publicat | npm test + E2E | 45 | – |
 | u1-t5 | Concursul sportiv al școlii | 1 | publicat | npm test + E2E | 45 | – |
-| u1-t6 | Corpul meu în numere | 1 | publicat | npm test + E2E | 45 | – |
+| u1-t6 | Corpul meu în numere | 2 | publicat | npm test + E2E | 45 | – |
 
 ## Decizii
 | data | decizie | motiv |
@@ -103,6 +106,11 @@
 | 2026-09-12 | Harta liniilor e fictivă (Gara, Piața Mare, Teatrul…), orașele și trenurile sunt inventate; graficele cu bare urmează programa (clasa a II-a), pictograma cu legendă 2/5/10 și cercul cu 4 felii egale sunt sprijin, nu obiective | sursele reale se contrazic (metroul), iar programa nu numește pictograma; ½ și ¼ sunt în programă |
 | 2026-09-12 | Adunările până la 1000 doar fără trecere sau cu sute rotunde; trecerea peste ordin rămâne în 0–100 | programa spune „fără trecere” la 0–1000 (contradicție cu CS 1.4); U2 va lămuri |
 | 2026-09-12 | Agenții se lansează pe rând; pauze la cererea utilizatorului până la resetarea consumului | cererea utilizatorului (consum responsabil) |
+| 2026-09-12 | Explicațiile se confruntă cu evaluatorul la limite; enunțul spune limitele interfeței; minimul și maximul strict se scriu explicit | auditul secțiunii 0–1000: erorile erau în explicații și enunțuri, nu în calcule (97 de egalități verificate, 0 greșite) |
+| 2026-09-12 | Validatorul refuză casetele repetate și parametrii greșiți ai desenelor cu date (`check`) | caseta dublă din T6-e02 și pictograma cu un singur emoji trecuseră de `npm test` |
+| 2026-09-12 | Etichetele `med.*` doar pe exerciții care evaluează cunoștințe; datele de sănătate din povești nu sunt recomandări | raportul pe concepte credita igiena sau organele pentru calcule |
+| 2026-09-12 | T4 lucrează și cu numere de trei cifre (cărțile bibliotecii, voturile școlii); totalul curent rămâne ascuns în timpul rezolvării | structura secțiunii; decizia din v0.5.0 (suma afișată pe loc dădea răspunsul) |
+| 2026-09-12 | Remedierea se face în loturi mari, cu teste și commit-uri puține | cererea utilizatorului |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -110,12 +118,16 @@
   (poate diferi puțin de scorul din rezumat); la T1 (v2) încercările vechi arată doar rezumatul.
 - După publicare, GitHub Pages poate servi ~10 min fișiere vechi (cache).
 - T2–T4 au trecut la versiunea 2 (v0.5.0): încercările făcute pe versiunea 1 arată doar rezumatul, fără lista pe exerciții.
+- Testele u1-t1, u1-t3, u1-t4 și u1-t6 au trecut la versiunea 2 (v0.6.1), cu același efect pentru încercările făcute înainte.
 
 ## Backlog
 - Scanările actuale acoperă manualul până la înmulțire; utilizatorul adaugă scanări noi după finalizarea etapei curente.
 - Secțiuni noi după manual: Numerele 0–1000 · Corpul omenesc (U1); Adunarea și scăderea 0–1000 · Pământul (U2); apoi înmulțirea.
 - Tipuri noi: balanță interactivă, hotspot pe imagine, calendar, desen/simetrie (traseul și graficul cu bare există din v0.6.0).
 - Secțiunea următoare: U2 „Adunarea și scăderea până la 1000 · Pământul” (grupurile din catalog sunt marcate `soon`).
+- Din auditul secțiunii 0–1000, neaplicate: condiția încălcată evidențiată la verificare, schimbările de linie marcate pe traseu,
+  indicii treptate, pașii unei probleme afișați pe rând, animații legate de operație (gruparea din 5 în 5, simbolul care se desface,
+  deplasarea pe axă).
 - Variante generate aleator (cu sămânță), diplomă printabilă.
 - Amânate la cerere: citire cu voce (TTS), tastatură numerică proprie pe ecran.
 - Din feedback-ul nr. 2, neaplicate: săgeți sus/jos la butoanele radio (Tab + Space merg); explicații vizuale interactive

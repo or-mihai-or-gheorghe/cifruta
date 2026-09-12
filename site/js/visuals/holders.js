@@ -147,14 +147,16 @@ registerVisual('tag', {
   group: GROUP,
   defaults: { unit: 'lei' },
   viewBox: '0 0 120 64',
+  check: (p) => (has(p.n) && !Number.isFinite(Number(p.n)) ? ['n trebuie să fie un număr'] : []),
   label: (p) => `etichetă de preț: ${has(p.n) ? cantitate(Number(p.n), singularOf(p.unit), p.unit) : p.unit}`,
-  render: (p) => `
-    <path d="M4 32 L28 6 H110 Q116 6 116 12 V52 Q116 58 110 58 H28 Z" fill="${C.yellow}" ${st(3)}/>
-    <circle cx="24" cy="32" r="5" fill="${C.white}" ${st(2)}/>
-    ${(() => {
-      const text = has(p.n) ? cantitate(Number(p.n), singularOf(p.unit), p.unit) : p.unit;
-      return svgText(72, 32, text, { size: text.length > 8 ? 12.5 : text.length > 6 ? 15 : 20 });
-    })()}`,
+  // prețul mare pe primul rând, unitatea („de lei”) mică dedesubt, ca numărul să se citească și pe telefon
+  render: (p) => {
+    const shape = `<path d="M4 32 L28 6 H110 Q116 6 116 12 V52 Q116 58 110 58 H28 Z" fill="${C.yellow}" ${st(3)}/><circle cx="24" cy="32" r="5" fill="${C.white}" ${st(2)}/>`;
+    if (!has(p.n)) return shape + svgText(72, 32, p.unit, { size: 20 });
+    const n = String(p.n);
+    const unit = cantitate(Number(p.n), singularOf(p.unit), p.unit).slice(n.length).trim();
+    return shape + svgText(72, 25, n, { size: n.length > 3 ? 20 : 26 }) + txt(72, 47, unit, { size: 12 });
+  },
   demos: [{ n: 18 }, { n: 42 }],
 });
 
