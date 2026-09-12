@@ -193,7 +193,7 @@ export default {
     {
       id: 'fill-chain',
       level: 'intermediar',
-      estMin: 3,
+      estMin: 2,
       concepts: ['mat.op.lanturi'],
       title: 'Lanț de operații',
       context: { text: 'Racheta pornește de la stația 25.', visual: { v: 'rocket', n: 25 } },
@@ -210,7 +210,7 @@ export default {
     {
       id: 'match',
       level: 'intermediar',
-      estMin: 3,
+      estMin: 2,
       concepts: ['mat.op.cu-trecere'],
       title: 'Unește',
       type: 'match',
@@ -232,7 +232,7 @@ export default {
     {
       id: 'order',
       level: 'intermediar',
-      estMin: 3,
+      estMin: 2,
       concepts: ['mat.nr100.ordonare'],
       title: 'Ordonează',
       type: 'order',
@@ -295,6 +295,25 @@ export default {
       to: 'teatru',
       key: ['gara', 'piata', 'teatru'],
       explain: { idea: 'Cauți drumul cu cele mai puține stații: schimbi linia la Piața Mare.', steps: ['Gara → Piața Mare cu tramvaiul 3.', 'Piața Mare → Teatrul cu metroul M1: în total 3 stații.'], trap: 'Pe la Parcul și Lacul ajungi tot la Teatru, dar prin 5 stații.' },
+    },
+    {
+      id: 'chart',
+      level: 'intermediar',
+      estMin: 3,
+      concepts: ['mat.log.grafic-bare', 'mat.log.tabel'],
+      title: 'Construiește graficul',
+      context: { text: 'Fructele preferate în clasă: mere 3, pere 2, banane 4.', visual: { v: 'data-table', head: 'Fruct|Copii', rows: 'mere|3;pere|2;banane|4' } },
+      type: 'chart',
+      prompt: 'Ridică fiecare bară cât arată tabelul.',
+      categories: [
+        { id: 'mere', label: 'mere', emoji: 'mar' },
+        { id: 'pere', label: 'pere', emoji: 'para' },
+        { id: 'banane', label: 'banane', emoji: 'banana' },
+      ],
+      max: 6,
+      step: 1,
+      key: { mere: 3, pere: 2, banane: 4 },
+      explain: { idea: 'Fiecare linie a graficului înseamnă un copil: bara merelor urcă până la 3.' },
     },
     {
       id: 'mark-palette',

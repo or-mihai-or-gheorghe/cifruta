@@ -63,7 +63,7 @@ registerVisual('route-map', {
       out += `<circle cx="${s.x}" cy="${s.y}" r="${transfer ? 10 : 8}" fill="${fill}" ${st(2.5)}/>`;
       if (transfer) out += `<circle cx="${s.x}" cy="${s.y}" r="4.5" fill="${C.white}" ${st(1.5)}/>`;
       const side = s.side ?? 'bottom';
-      const [lx, ly, anchor] = side === 'top' ? [s.x, s.y - 18, 'middle'] : side === 'left' ? [s.x - 14, s.y, 'end'] : side === 'right' ? [s.x + 14, s.y, 'start'] : [s.x, s.y + 20, 'middle'];
+      const [lx, ly, anchor] = side === 'top' ? [s.x, s.y - 22, 'middle'] : side === 'left' ? [s.x - 16, s.y, 'end'] : side === 'right' ? [s.x + 16, s.y, 'start'] : [s.x, s.y + 24, 'middle'];
       out += txt(lx, ly, s.label ?? s.id, { size: 11, anchor });
       const k = path.indexOf(s.id);
       if (k >= 0) {

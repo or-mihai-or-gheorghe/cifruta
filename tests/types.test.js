@@ -215,3 +215,40 @@ test('route: drumul cerut ia tot, alt drum bun ia jumătate, drumurile rupte nim
   assert.ok(logic.validate({ ...part, key: undefined }).some((e) => e.includes('exact unul')));
   assert.ok(logic.validate({ ...part, to: 'gara' }).some((e) => e.includes('diferite')));
 });
+
+test('chart: credit pe bară cu cheie; cu reguli, orice grafic bun ia tot', () => {
+  const logic = getLogic('chart');
+  const part = parts['chart.a'];
+  assert.deepEqual(logic.solution(part), { mere: 3, pere: 2, banane: 4 });
+  assert.equal(evalPart('chart.a', { mere: 3, pere: 2, banane: 4 }).earned, 3);
+  const two = evalPart('chart.a', { mere: 3, pere: 5, banane: 4 });
+  assert.equal(two.earned, 2);
+  assert.equal(two.items.find((i) => i.id === 'pere').expected, 2);
+  assert.equal(evalPart('chart.a', { mere: 3.5, pere: 2, banane: 4 }).earned, 2); // valoare nevalidă
+  assert.equal(evalPart('chart.a', null).earned, 0);
+  assert.equal(evalPart('chart.a', [3, 2, 4]).earned, 0);
+  assert.equal(logic.answered(part, { mere: 3 }), 1);
+
+  const rules = { ...part, key: undefined, rules: [{ rule: 'total', value: 6 }, { rule: 'more', a: 'mere', b: 'pere' }, { rule: 'least', a: 'pere' }, { rule: 'each', min: 1 }] };
+  assert.equal(logic.validate(rules).length, 0);
+  assert.equal(logic.evaluate(rules, { mere: 3, pere: 1, banane: 2 }).earned, 1);
+  assert.equal(logic.evaluate(rules, { mere: 2, pere: 1, banane: 3 }).earned, 1);
+  assert.match(logic.evaluate(rules, { mere: 3, pere: 1, banane: 3 }).items[0].feedback, /împreună 7, dar trebuie să facă 6/);
+  assert.match(logic.evaluate(rules, { mere: 1, pere: 2, banane: 3 }).items[0].feedback, /mere trebuie să aibă mai mult decât pere/);
+  assert.match(logic.evaluate(rules, {}).items[0].feedback, /apăsând \+/);
+  const sol = logic.solution(rules);
+  assert.equal(logic.evaluate(rules, sol).earned, 1);
+  assert.equal(logic.count(rules), 1);
+
+  const given = { ...part, key: { banane: 4 }, given: { mere: 3, pere: 2 } };
+  assert.equal(logic.validate(given).length, 0);
+  assert.equal(logic.count(given), 1);
+  assert.equal(logic.evaluate(given, { banane: 4 }).earned, 1);
+  assert.equal(logic.evaluate(given, { banane: 4, mere: 9 }).earned, 1); // barele date nu se pot schimba
+
+  assert.ok(logic.validate({ ...part, max: 7, step: 2 }).some((e) => e.includes('multiplu')));
+  assert.ok(logic.validate({ ...part, key: { mere: 3, pere: 2 } }).some((e) => e.includes('lipsește valoarea')));
+  assert.ok(logic.validate({ ...rules, rules: [{ rule: 'each', max: 6 }] }).some((e) => e.includes('barele goale')));
+  assert.ok(logic.validate({ ...rules, rules: [{ rule: 'total', value: 100 }] }).some((e) => e.includes('nicio combinație')));
+  assert.ok(logic.validate({ ...rules, max: 100, step: 1, categories: Array.from({ length: 4 }, (_, i) => ({ id: `c${i}`, label: `c${i}` })), rules: [{ rule: 'total', value: 5 }] }).some((e) => e.includes('prea multe')));
+});

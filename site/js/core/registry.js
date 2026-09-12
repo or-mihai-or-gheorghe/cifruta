@@ -2,6 +2,7 @@
 
 import build from '../types/build/logic.js';
 import categorize from '../types/categorize/logic.js';
+import chart from '../types/chart/logic.js';
 import choice from '../types/choice/logic.js';
 import clock from '../types/clock/logic.js';
 import fill from '../types/fill/logic.js';
@@ -13,7 +14,7 @@ import route from '../types/route/logic.js';
 import slider from '../types/slider/logic.js';
 import truefalse from '../types/truefalse/logic.js';
 
-const LOGIC = { choice, truefalse, fill, slider, match, order, categorize, mark, build, clock, money, route };
+const LOGIC = { choice, truefalse, fill, slider, match, order, categorize, mark, build, clock, money, route, chart };
 
 export const TYPE_NAMES = Object.keys(LOGIC);
 
