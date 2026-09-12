@@ -18,6 +18,27 @@
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
 }
+@keyframes anim-nudge {
+  0%, 100% { transform: none; }
+  50% { transform: translateY(-4px); }
+}
+@keyframes anim-spin { to { transform: rotate(360deg); } }
+@keyframes anim-drift {
+  from { transform: translateX(-8px); }
+  to { transform: translateX(8px); }
+}
+@keyframes anim-bob {
+  0%, 100% { transform: none; }
+  50% { transform: translateY(-2.5px) rotate(-1.5deg); }
+}
+@keyframes anim-swing {
+  from { transform: rotate(-2deg); }
+  to { transform: rotate(2deg); }
+}
+@keyframes anim-twinkle {
+  from { opacity: 1; }
+  to { opacity: 0.3; }
+}
 @keyframes anim-drop {
   from { opacity: 0.4; transform: translateY(-40px); }
   to { opacity: 1; transform: none; }
@@ -41,6 +62,8 @@
 .anim-bounce-in { animation: anim-bounce-in 450ms var(--ease-spring) both; }
 .anim-float { animation: anim-float 3s ease-in-out infinite; }
 .anim-flip-in { animation: anim-flip-in 400ms var(--ease-out) both; }
+/* butonul care „se anunță” când exercițiul e gata: două săltări, niciodată la infinit */
+.c-btn.is-ready { animation: anim-nudge 700ms var(--ease-out) 2; }
 
 .anim-stagger > * { animation: anim-fade-up var(--dur-3) var(--ease-out) both; }
 .anim-stagger > :nth-child(2) { animation-delay: 60ms; }

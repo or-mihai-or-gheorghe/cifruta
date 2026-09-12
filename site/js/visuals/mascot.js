@@ -60,7 +60,7 @@ registerVisual('mascot', {
       const confetti = [
         [12, 16, C.yellow, 20], [98, 8, C.blue, -25], [20, 80, C.green, 40], [8, 50, C.purple, -10],
         [30, 4, C.pink, 60], [106, 104, C.yellow, 15], [90, 18, C.green, 50], [14, 104, C.blue, -35],
-      ].map(([x, y, fill, a]) => `<rect x="${x}" y="${y}" width="7" height="4" rx="1" fill="${fill}" transform="rotate(${a} ${x + 3.5} ${y + 2})"/>`).join('');
+      ].map(([x, y, fill, a]) => `<rect class="v-mascot__confetti" x="${x}" y="${y}" width="7" height="4" rx="1" fill="${fill}" transform="rotate(${a} ${x + 3.5} ${y + 2})"/>`).join('');
       return `${confetti}${tail}${ears}
         <path d="M34 76 L22 58 M68 76 L80 58" stroke="${C.ink}" stroke-width="9" stroke-linecap="round"/>
         <path d="M34 76 L22 58 M68 76 L80 58" stroke="${C.orange}" stroke-width="5" stroke-linecap="round"/>

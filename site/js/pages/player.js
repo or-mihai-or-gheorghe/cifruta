@@ -10,7 +10,7 @@ import { progressOf, scoreTest } from '../core/scoring.js';
 import { addAttempt, clearDraft, getDraft, saveDraft } from '../core/storage.js';
 import { mountExercise } from '../components/exercise.js';
 import { confirmModal } from '../components/modal.js';
-import { art, backLink, levelInfo, levelPill, mascot } from '../components/ui.js';
+import { art, backLink, confetti, levelInfo, levelPill, mascot } from '../components/ui.js';
 
 const isDone = (ex, answers) => {
   const p = progressOf(ex, answers?.[ex.id]);
@@ -42,6 +42,7 @@ export default async function player(container, [testId]) {
   const map = h('nav', { class: 'c-progress', 'aria-label': 'Exercițiile testului' });
   const stage = h('div', { class: 'ex-player__stage' });
   const nav = h('div', { class: 'ex-nav' });
+  const finishTop = h('button', { class: 'c-btn c-btn--accent ex-player__finish', 'data-testid': 'finish-top', onClick: () => finish() }, 'Vezi rezultatele');
   container.append(
     h(
       'div',
@@ -50,7 +51,7 @@ export default async function player(container, [testId]) {
         'div',
         { class: 'ex-player__top' },
         h('div', { class: 'l-stack l-stack--sm' }, backLink(`#/sectiune/${entry.section.id}`, entry.section.title), h('h1', { class: 'ex-player__title' }, test.title)),
-        h('button', { class: 'c-btn c-btn--accent', 'data-testid': 'finish-top', onClick: () => finish() }, 'Vezi rezultatele'),
+        finishTop,
       ),
       map,
       stage,
@@ -107,6 +108,7 @@ export default async function player(container, [testId]) {
     const token = ++renderToken;
     resetStage();
     draft.current = index;
+    finishTop.hidden = index < 0; // pe intro nu are sens „Vezi rezultatele”
     save();
     renderMap();
     if (index < 0) return renderIntro();
@@ -121,6 +123,7 @@ export default async function player(container, [testId]) {
         (draft.answers[ex.id] ??= {})[partId] = answer;
         save();
         renderMap();
+        renderReady(index);
       },
     });
     if (token !== renderToken || !container.isConnected) return ctl.destroy();
@@ -162,6 +165,12 @@ export default async function player(container, [testId]) {
         ? h('button', { class: 'c-btn c-btn--accent c-btn--lg', 'data-testid': 'finish', onClick: () => finish() }, 'Vezi rezultatele')
         : h('button', { class: 'c-btn c-btn--primary c-btn--lg', 'data-testid': 'next', onClick: () => next(index) }, 'Mai departe →'),
     );
+    renderReady(index);
+  }
+
+  // când exercițiul e complet, butonul de mers mai departe se „anunță” cu o mică săltare
+  function renderReady(index) {
+    nav.lastElementChild?.classList.toggle('is-ready', isDone(test.exercises[index], draft.answers));
   }
 
   function next(index) {
@@ -176,16 +185,20 @@ export default async function player(container, [testId]) {
     resetStage();
     draft.seenBreaks.push(to);
     save();
+    const icon = art({ v: 'level-icon', level: to, decorative: true }, { cls: 'ex-break__icon anim-bounce-in' });
+    icon.style.animationDelay = '200ms';
     stage.append(
       h(
         'section',
         { class: 'ex-break anim-bounce-in', 'data-level': to, 'data-testid': 'level-break' },
         mascot('sarbatoreste', `Bravo! Ai terminat nivelul **${levelInfo(from).label}**. Urmează nivelul **${levelInfo(to).label}**.`, { center: true }),
+        icon,
         levelPill(to),
         h('p', { class: 'u-muted' }, 'Ce zici de o mică pauză? Ridică-te, întinde-te ca o veveriță și respiră adânc de trei ori.'),
         h('button', { class: 'c-btn c-btn--primary c-btn--lg', 'data-testid': 'continue', onClick: () => show(nextIndex) }, 'Continuă'),
       ),
     );
+    confetti({ count: 24 });
   }
 
   async function finish() {

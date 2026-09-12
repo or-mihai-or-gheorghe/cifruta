@@ -12,3 +12,19 @@
    (Chromium le-ar strica), iar `transform-box` se pune doar pe aceste grupuri. */
 .v-clock__hand { transform-box: view-box; transform-origin: 50px 50px; transition: transform 400ms var(--ease-out); }
 .v-abacus__bead.is-new { transform-box: fill-box; animation: anim-drop 250ms var(--ease-out) both; }
+.ex-break .v-mascot__confetti, .ex-summary__art .v-mascot__confetti { animation: anim-twinkle 1.4s ease-in-out infinite alternate; }
+.ex-break .v-mascot__confetti:nth-of-type(2n), .ex-summary__art .v-mascot__confetti:nth-of-type(2n) { animation-delay: -0.7s; }
+
+/* Peisajele: mișcare lentă, pornită doar pe intro (--scene-play) și la hover pe cardul testului. */
+.v-scene__rays { transform-box: fill-box; transform-origin: center; animation: anim-spin 24s linear infinite; }
+.v-scene__cloud { animation: anim-drift 6s ease-in-out infinite alternate; }
+.v-scene__cloud + .v-scene__cloud { animation-duration: 8s; animation-delay: -3s; }
+.v-scene__boat { transform-box: fill-box; transform-origin: center; animation: anim-bob 3s ease-in-out infinite; }
+.v-scene__rocket { animation: anim-float 3s ease-in-out infinite; }
+.v-scene__stars circle:nth-child(2n) { animation: anim-twinkle 1.8s ease-in-out infinite alternate; }
+.v-scene__stars circle:nth-child(3n) { animation-delay: -0.9s; }
+.v-scene__sign { transform-box: fill-box; transform-origin: top; animation: anim-swing 4s ease-in-out infinite alternate; }
+.v-scene__tree { transform-box: fill-box; transform-origin: bottom; animation: anim-swing 5s ease-in-out infinite alternate; }
+/* ultima regulă: shorthand-ul `animation` de mai sus ar reseta play-state */
+.v-scene [class^='v-scene__'], .v-scene__stars circle { animation-play-state: var(--scene-play, paused); }
+.ex-intro__scene, .c-card--link:hover { --scene-play: running; }

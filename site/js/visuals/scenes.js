@@ -5,12 +5,18 @@ import { C, st, txt } from './palette.js';
 
 const GROUP = 'Peisaje';
 
+// Părțile care se mișcă (raze, nori, barcă, rachetă, firmă, copac) stau în grupuri cu clasă, animate din CSS.
+// Grupul care se rotește nu are copii cu atributul `transform` (razele sunt calculate), altfel Chromium le strică.
 const sunRays = (cx, cy, r) =>
-  Array.from({ length: 8 }, (_, i) => `<line x1="${cx}" y1="${cy - r - 4}" x2="${cx}" y2="${cy - r - 11}" stroke="${C.orange}" stroke-width="3.5" stroke-linecap="round" transform="rotate(${i * 45} ${cx} ${cy})"/>`).join('') +
+  `<g class="v-scene__rays">${Array.from({ length: 8 }, (_, i) => {
+    const a = (i * Math.PI) / 4;
+    const [sx, cy1] = [Math.sin(a), -Math.cos(a)];
+    return `<line x1="${(cx + (r + 4) * sx).toFixed(1)}" y1="${(cy + (r + 4) * cy1).toFixed(1)}" x2="${(cx + (r + 11) * sx).toFixed(1)}" y2="${(cy + (r + 11) * cy1).toFixed(1)}" stroke="${C.orange}" stroke-width="3.5" stroke-linecap="round"/>`;
+  }).join('')}</g>` +
   `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${C.yellow}" ${st(2)}/>`;
 
 const cloud = (x, y, s = 1) =>
-  `<path transform="translate(${x} ${y}) scale(${s})" d="M6 20 C0 20 0 10 8 10 C8 2 20 0 24 7 C28 0 42 2 40 12 C48 12 48 20 42 20 Z" fill="${C.white}" ${st(2)}/>`;
+  `<g class="v-scene__cloud"><path transform="translate(${x} ${y}) scale(${s})" d="M6 20 C0 20 0 10 8 10 C8 2 20 0 24 7 C28 0 42 2 40 12 C48 12 48 20 42 20 Z" fill="${C.white}" ${st(2)}/></g>`;
 
 const SCENES = {
   mare: {
@@ -20,9 +26,11 @@ const SCENES = {
       ${sunRays(254, 30, 15)}${cloud(40, 18)}${cloud(150, 8, 0.8)}
       <path d="M0 62 C20 56 40 68 60 62 C80 56 100 68 120 62 C140 56 160 68 180 62 C200 56 220 68 240 62 C260 56 280 68 300 62 V96 H0 Z" fill="${C.blue}"/>
       <path d="M0 74 C20 70 40 78 60 74 C80 70 100 78 120 74 C140 70 160 78 180 74 C200 70 220 78 240 74 C260 70 280 78 300 74" fill="none" stroke="${C.white}" stroke-width="2" opacity=".6"/>
-      <line x1="168" y1="66" x2="168" y2="36" stroke="${C.ink}" stroke-width="2"/>
-      <path d="M170 38 L170 62 L188 62 Z" fill="${C.white}" ${st(2)}/>
-      <path d="M150 66 H188 L181 77 H157 Z" fill="${C.red}" ${st(2)}/>
+      <g class="v-scene__boat">
+        <line x1="168" y1="66" x2="168" y2="36" stroke="${C.ink}" stroke-width="2"/>
+        <path d="M170 38 L170 62 L188 62 Z" fill="${C.white}" ${st(2)}/>
+        <path d="M150 66 H188 L181 77 H157 Z" fill="${C.red}" ${st(2)}/>
+      </g>
       <path d="M0 94 C60 84 140 100 200 90 C240 86 280 88 300 92 V120 H0 Z" fill="${C.yellow}"/>
       <line x1="62" y1="80" x2="68" y2="114" stroke="${C.ink}" stroke-width="2.5" stroke-linecap="round"/>
       <path d="M32 86 C38 66 84 62 94 78 Z" fill="${C.red}" ${st(2)}/>
@@ -47,7 +55,7 @@ const SCENES = {
         <rect x="46" y="36" width="6" height="66" fill="${C.brown}" ${st(1.5)}/><rect x="248" y="36" width="6" height="66" fill="${C.brown}" ${st(1.5)}/>
         <rect x="36" y="26" width="228" height="14" fill="${C.red}" ${st(2)}/>${stripes}
         <path d="M36 40 ${scallops} Z" fill="${C.red}" ${st(2)}/>
-        <rect x="118" y="4" width="64" height="18" rx="5" fill="${C.yellow}" ${st(2)}/>${txt(150, 13, 'PIAȚA', { size: 11, weight: 800 })}
+        <g class="v-scene__sign"><rect x="118" y="4" width="64" height="18" rx="5" fill="${C.yellow}" ${st(2)}/>${txt(150, 13, 'PIAȚA', { size: 11, weight: 800 })}</g>
         ${fruits}
         <rect x="40" y="70" width="220" height="10" rx="3" fill="${C.brownLight}" ${st(2)}/>
         <rect x="52" y="80" width="196" height="20" fill="${C.brown}" ${st(2)}/>`;
@@ -59,19 +67,19 @@ const SCENES = {
       const stars = [[20, 20], [70, 12], [110, 36], [200, 14], [280, 24], [260, 100], [130, 104], [30, 60], [180, 90], [96, 80], [230, 48]]
         .map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i % 3 === 0 ? 2.2 : 1.4}" fill="${i % 2 ? C.white : C.yellow}"/>`).join('');
       return `
-        <rect width="300" height="120" fill="var(--v-space, #2B2552)"/>${stars}
+        <rect width="300" height="120" fill="var(--v-space, #2B2552)"/><g class="v-scene__stars">${stars}</g>
         <circle cx="40" cy="30" r="15" fill="${C.grayLight}"/><circle cx="47" cy="25" r="13" fill="var(--v-space, #2B2552)"/>
         <ellipse cx="244" cy="72" rx="36" ry="9" fill="none" stroke="${C.yellow}" stroke-width="4"/>
         <circle cx="244" cy="70" r="21" fill="${C.orange}" ${st(2)}/>
         <path d="M208 72 A36 9 0 0 0 280 72" fill="none" stroke="${C.yellow}" stroke-width="4"/>
         <circle cx="62" cy="94" r="12" fill="${C.teal}" ${st(2)}/>
-        <g transform="translate(150 58) rotate(40)">
+        <g class="v-scene__rocket"><g transform="translate(150 58) rotate(40)">
           <path d="M-8 28 C-6 40 -3 44 0 50 C3 44 6 40 8 28 Z" fill="${C.orange}"/>
           <path d="M-12 12 L-22 30 L-12 26 Z M12 12 L22 30 L12 26 Z" fill="${C.red}" ${st(1.5)}/>
           <path d="M0 -34 C12 -24 16 -6 13 28 L-13 28 C-16 -6 -12 -24 0 -34 Z" fill="${C.grayLight}" ${st(2)}/>
           <path d="M0 -34 C7 -28 10 -22 12 -16 L-12 -16 C-10 -22 -7 -28 0 -34 Z" fill="${C.red}" ${st(1.5)}/>
           <circle cx="0" cy="2" r="7" fill="${C.blueLight}" ${st(1.5)}/>
-        </g>`;
+        </g></g>`;
     },
   },
   ferma: {
@@ -90,8 +98,8 @@ const SCENES = {
         <rect x="199" y="36" width="16" height="11" fill="${C.yellow}" ${st(1.5)}/>
         <rect x="194" y="72" width="26" height="30" fill="${C.white}" ${st(2)}/>
         <path d="M194 72 L220 102 M220 72 L194 102" stroke="${C.red}" stroke-width="2.5"/>
-        <rect x="270" y="72" width="7" height="28" fill="${C.brown}" ${st(1.5)}/>
-        <circle cx="273" cy="62" r="17" fill="${C.greenDark}" ${st(2)}/>`;
+        <g class="v-scene__tree"><rect x="270" y="72" width="7" height="28" fill="${C.brown}" ${st(1.5)}/>
+        <circle cx="273" cy="62" r="17" fill="${C.greenDark}" ${st(2)}/></g>`;
     },
   },
 };

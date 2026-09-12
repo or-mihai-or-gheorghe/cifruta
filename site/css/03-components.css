@@ -77,7 +77,8 @@
   overflow: hidden;
   background: var(--c-theme-bg);
 }
-.c-card__media svg { width: 100%; height: auto; }
+.c-card__media svg { width: 100%; height: auto; transition: transform var(--dur-3) var(--ease-out); }
+.c-card--link:hover .c-card__media svg { transform: scale(1.04); }
 .c-card__icon { width: 3.5rem; height: 3.5rem; }
 .c-card__title { font-size: var(--fs-2); }
 .c-card__text { color: var(--c-ink-soft); }
@@ -242,7 +243,7 @@
 }
 .c-progress__dot:hover:not(.is-current) { transform: scale(1.08); }
 .c-progress__dot.is-partial { background: linear-gradient(to top, var(--c-level-bg) 50%, var(--c-surface) 50%); }
-.c-progress__dot.is-done { background: var(--c-level); color: var(--c-on-brand); }
+.c-progress__dot.is-done { background: var(--c-level); color: var(--c-on-brand); animation: anim-pop var(--dur-3) var(--ease-spring); }
 .c-progress__dot.is-current { transform: scale(1.12); box-shadow: 0 0 0 3px var(--c-paper), 0 0 0 5px var(--c-level); }
 .c-progress__dot:active { transform: scale(0.94); }
 
