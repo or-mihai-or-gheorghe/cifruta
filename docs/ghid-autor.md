@@ -20,6 +20,8 @@ vizibil în site la `#/atelier/tipuri`) și cele 4 teste din `site/data/tests/re
 
 **Modifici un test deja publicat?** Crește `version` în test **și** în catalog — ciornele vechi ale copiilor sunt ignorate,
 iar rezultatele vechi își păstrează scorul (fără lista pe exerciții, care nu s-ar mai potrivi cu testul nou).
+**Excepție:** dacă adaugi sau schimbi doar un desen (`context.visual`, `part.visual`, `itemVisual`), versiunea rămâne —
+răspunsurile, id-urile și ciornele nu sunt afectate.
 
 ## 2. Schema
 
@@ -34,7 +36,10 @@ export default {
 ```
 
 **Exercițiu:** `{ id, level: 'usor'|'intermediar'|'avansat', estMin, points?, concepts: [...], title, context?, parts | (câmpurile unei singure părți), explain }`
-- `context: { text, visual?, size?: 'lg' }` — povestea exercițiului (desenul mare cu `size: 'lg'`).
+- `context: { text, visual?, size?: 'lg' }` — povestea exercițiului (desenul mare cu `size: 'lg'`). Desene se pot pune și pe
+  subpunct (`part.visual`, deasupra casetelor), pe elemente (`itemVisual` pentru toate, `item.visual` pentru unul), pe coșuri
+  (`bin.visual`) și pe perechi (`left/right[].visual`); numele se verifică la `npm test`. Fiecare exercițiu ar trebui să aibă
+  măcar un desen sau un emoji — vezi exemplele din `site/data/demo.js`.
 - `parts: [{ id: 'a', type, prompt, visual?, …câmpurile tipului }]` — subpunctele a), b), c). Dacă exercițiul are o
   singură parte, câmpurile ei se scriu direct pe exercițiu (forma scurtă).
 - `points` lipsește de obicei: implicit 2 / 3 / 4 după nivel. Scorul: 10 din oficiu + 90 × puncte obținute / total.
@@ -118,6 +123,12 @@ Toate apar cu exemple la `#/atelier/vizualuri`. **Desen nou:** `registerVisual('
 într-un modul din `site/js/visuals/`; culori doar din variabile `--v-*` (vezi `css/00-tokens.css`), contur
 `var(--v-ink)`, text cu `svgText`; `tests/visuals.test.js` îl verifică automat.
 
+**Desene care se mișcă:** partea animată stă într-un grup cu clasă (`<g class="v-nume__parte">`) și e animată din
+`css/05-visuals.css`. Regula (verificată de test): nici grupul, nici copiii lui nu poartă atributul `transform` dacă grupul
+se rotește (razele soarelui sunt calculate cu sin/cos), iar `transform-box: fill-box` se pune doar pe grupul animat. Exemple:
+razele, norii, barca și racheta din peisaje (pornite doar pe intro și la hover pe card), acele ceasului (`clock/view.js`
+schimbă doar rotația), bila nouă de pe numărătoare, confetti-ul mascotei (doar opacitate).
+
 ## 6. Reguli de scriere pentru copii de 7–8 ani
 - Enunț **scurt**: ≤ 20 de cuvinte la ușor, ≤ 35 la intermediar, ≤ 50 (max. 3 propoziții) la avansat. Verbul la început, întrebarea la final.
 - Numerele se scriu **cu cifre**; cuvintele-cheie se îngroașă: „**cu 6 mai puține**”, „**în total**”, „**cuprinse între**”.
@@ -154,6 +165,9 @@ La începutul clasei a II-a se adaugă ~20–30 s pentru citirea fiecărui enun�
    pentru mutări folosește `core/dnd.js`, pentru stări `setState` din `types/_view.js`.
 3. O linie în `site/js/core/registry.js`, un exemplu în `site/data/demo.js`, stiluri în `css/04-exercises.css`,
    gesturi în `tools/e2e.py` (`types_flow`).
+4. Feedback la atingere: `pop(el)` din `core/dom.js` pe elementul ales sau „aterizat” și `play('tap')` / `play('place')` din
+   `core/sound.js`; elementele de apăsat primesc muchia 3D comună (`--sh-edge`) și stilul unic de „ales” (contur brand;
+   plin doar la butoanele-glifă).
 
 ## 10. Checklist înainte de commit
 - [ ] `npm test` verde (0 erori; citește și avertismentele)

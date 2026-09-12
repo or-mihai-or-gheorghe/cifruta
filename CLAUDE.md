@@ -21,7 +21,7 @@ site/                      ← publicat
   index.html, css/main.css (@layer: tokens, base, layout, components, exercises, visuals, animations, utilities)
   js/app.js                pornire + router
   js/core/                 expr (calcule fără eval) · rules · markup · spec (validare) · scoring · registry
-                           storage (localStorage simplu) · loader · router · dom · ro (diacritice, cantitate) · lint · dnd
+                           storage (localStorage simplu) · loader · router · dom (h, pop, countUp) · ro (diacritice, cantitate) · lint · dnd · sound
   js/components/, js/pages/  interfața (player, rezultate/revizuire, atelier)
   js/types/<tip>/logic.js  logică pură (Node o poate importa): validate · count · answered · empty · solution · evaluate
   js/types/<tip>/view.js   DOM: mount(el, part, ctx) → { get, set, mode, showResult, destroy }
@@ -57,6 +57,8 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   își păstrează scorul, dar nu mai arată lista pe exerciții (rezumatul vine din încercarea salvată).
 - **Tip nou:** `js/types/<tip>/logic.js` + `view.js`, o linie în `core/registry.js`, un exemplu în `data/demo.js`, stiluri în `css/04-exercises.css`.
 - **Vizual nou:** `registerVisual` într-un modul din `js/visuals/`, culori din variabile `--v-*`, `demos` pentru atelier.
+- **Desen nou într-un exercițiu publicat:** `context.visual` / `part.visual` / `itemVisual` / `item.visual` / `bin.visual` din bancă;
+  **nu** cere versiune nouă (răspunsurile și ciornele nu sunt afectate); `npm test` verifică numele desenului.
 
 ## Capcane știute
 - `node --test` fără argumente ar prinde fișiere `test-*.js` — rulăm explicit `tests/**/*.test.js`.
@@ -70,3 +72,11 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
 - În reguli (`holds`), `u z s m` sunt **cifrele** unităților, zecilor, sutelor, miilor (1000 → `m = 1`, `s = 0`); `n` e numărul.
 - Răspunsurile vin din `localStorage`, deci pot avea orice formă: `evaluate` le verifică strict (`isInt` din `types/_shared.js`).
 - Pragurile (stea 80%, de exersat 70%) se compară cu `reached()` din `core/scoring.js` (toleranță pentru virgula mobilă).
+- Mișcare: doar `transform`/`opacity`, cu tokenii `--dur-*`/`--ease-*`; `pop(el)` (core/dom.js) pentru feedback la atingere,
+  `countUp(el, to)` pentru scor, `confetti({ count })` (nimic la `prefers-reduced-motion`; regula globală zerează și delay-ul).
+- SVG animat: partea care se mișcă stă într-un `<g class="v-<desen>__<parte>">` **fără atribut `transform`** (nici pe copii, dacă
+  grupul se rotește — Chromium le strică); `transform-box` doar pe aceste grupuri, niciodată cu `*`. Ancore existente:
+  `v-clock__hand--h/--m` (rotite din `clock/view.js`), `v-abacus__bead` (+ `is-new`), `v-scene__rays/cloud/boat/stars/rocket/sign/tree`
+  (pornite de `--scene-play` pe intro și la hover pe card), `v-mascot__confetti`. `tests/visuals.test.js` impune regula.
+- Sunete: `play('tap'|'place'|'done'|'level'|'win'|'yes'|'no')` din `core/sound.js` (WebAudio sintetizat, fără fișiere), pornite
+  la gesturi; butonul din antet ține preferința în `cifruta:sound`; implicit oprite la `prefers-reduced-motion`.
