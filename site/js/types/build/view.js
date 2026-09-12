@@ -4,7 +4,7 @@ import { h } from '../../core/dom.js';
 import { play } from '../../core/sound.js';
 import { md } from '../../core/markup.js';
 import { visualSVG } from '../../visuals/index.js';
-import { isLocked, setState } from '../_view.js';
+import { expectedTag, isLocked, setState } from '../_view.js';
 
 const NAMES = { S: 'sute', Z: 'zeci', U: 'unități' };
 
@@ -63,7 +63,7 @@ export default {
         for (const x of res.items) {
           setState(rows[x.id].row, x.ok ? 'correct' : 'wrong');
           rows[x.id].row.querySelector('.ex-abacus__result').replaceChildren(
-            x.ok ? '' : h('span', { class: 'u-small' }, x.given === null ? 'Numărătoarea a rămas goală. ' : `Ai format ${x.given}. `, h('span', { class: 'ex-expected' }, String(x.expected))),
+            x.ok ? '' : h('span', { class: 'u-small' }, x.given === null ? 'Numărătoarea a rămas goală. ' : `Ai format ${x.given}. `, expectedTag(String(x.expected))),
           );
         }
       },

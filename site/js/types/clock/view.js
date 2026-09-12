@@ -4,7 +4,7 @@ import { h } from '../../core/dom.js';
 import { play } from '../../core/sound.js';
 import { md } from '../../core/markup.js';
 import { visualLabel, visualSVG } from '../../visuals/index.js';
-import { isLocked, setState } from '../_view.js';
+import { expectedTag, isLocked, setState } from '../_view.js';
 import { timeText } from './logic.js';
 
 export default {
@@ -81,7 +81,7 @@ export default {
         for (const x of res.items) {
           setState(rows[x.id].row, x.ok ? 'correct' : 'wrong');
           rows[x.id].row.querySelector('.ex-clock__result').replaceChildren(
-            x.ok ? '' : h('span', { class: 'u-small' }, x.given ? `Ai arătat ${timeText(x.given)}. ` : 'Nu ai mutat acele. ', h('span', { class: 'ex-expected' }, timeText(x.expected))),
+            x.ok ? '' : h('span', { class: 'u-small' }, x.given ? `Ai arătat ${timeText(x.given)}. ` : 'Nu ai mutat acele. ', expectedTag(timeText(x.expected))),
           );
         }
       },

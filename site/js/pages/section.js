@@ -12,7 +12,7 @@ function testCard(test) {
   const draft = getDraft(test.id);
   const status =
     best >= 0
-      ? chip(`cel mai bun scor: ${best} · ${gradeFor(best).label}`)
+      ? chip(`cel mai bun scor: ${best} · ${gradeFor(best).label}`, '', 'stea')
       : draft?.version === test.version
         ? chip('început — continuă', 'c-chip--soon')
         : chip('nou');
@@ -22,7 +22,7 @@ function testCard(test) {
     h('div', { class: 'c-card__media' }, art({ v: 'scene', theme: test.theme, decorative: true }, { fallbackEmoji: 'veverita' })),
     h('h3', { class: 'c-card__title' }, test.title),
     test.subtitle ? h('p', { class: 'c-card__text' }, test.subtitle) : null,
-    h('div', { class: 'c-card__footer l-cluster' }, chip(`⏱ ~${test.estMin} min`), chip(cantitate(test.exercises, 'exercițiu', 'exerciții')), status),
+    h('div', { class: 'c-card__footer l-cluster' }, chip(`~${test.estMin} min`, '', 'ceas'), chip(cantitate(test.exercises, 'exercițiu', 'exerciții')), status),
   );
 }
 

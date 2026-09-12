@@ -28,6 +28,7 @@ registerVisual('star', {
   label: withNumber('stea'),
   render: (p) => `
     <path d="M50 5 L62 36 L95 38 L69 58 L78 92 L50 73 L22 92 L31 58 L5 38 L38 36 Z" fill="${C.yellow}" ${st(3)}/>
+    <path d="M44 34 L50 16 L53 26 L47 37 Z" fill="${C.white}" opacity=".5"/>
     ${has(p.n) ? svgText(50, 55, p.n, { size: fit(p.n, 24) }) : ''}`,
   demos: [{ n: 47 }],
 });

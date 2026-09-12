@@ -3,7 +3,7 @@
 import { h, pop } from '../../core/dom.js';
 import { play } from '../../core/sound.js';
 import { md } from '../../core/markup.js';
-import { feedbackBox, isLocked, setState } from '../_view.js';
+import { expectedTag, feedbackBox, isLocked, setState } from '../_view.js';
 import { keyOf, kindOf } from './logic.js';
 
 const BLANK = /\[\[(\w+)\]\]/g;
@@ -211,7 +211,7 @@ export default {
           w.wrap.querySelector('.ex-expected')?.remove();
           setState(w.wrap, r.ok ? 'correct' : 'wrong');
           const expected = kindOf(blanks[r.id]) === 'sign' ? niceMinus(r.expected) : String(r.expected);
-          if (!r.ok) w.wrap.append(h('span', { class: 'ex-expected', 'aria-label': `corect: ${expected}` }, expected));
+          if (!r.ok) w.wrap.append(expectedTag(expected));
           if (r.feedback) notes.push(r.feedback);
         }
         feedbackArea.replaceChildren(...notes.map((n) => feedbackBox(n)));

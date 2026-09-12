@@ -31,7 +31,7 @@ function components() {
       h('button', { class: 'c-btn', disabled: true }, 'Dezactivat'),
     )),
     h('section', { class: 'l-stack' }, h('h2', {}, 'Niveluri, pastile, stele'), h('div', { class: 'l-cluster' },
-      levelPill('usor'), levelPill('intermediar'), levelPill('avansat'), chip('⏱ ~43 min'), chip('în curând', 'c-chip--soon'), stars(2, 3),
+      levelPill('usor'), levelPill('intermediar'), levelPill('avansat'), chip('~43 min', '', 'ceas'), chip('în curând', 'c-chip--soon'), stars(2, 3),
     )),
     h('section', { class: 'l-stack' }, h('h2', {}, 'Mini-markup'), h('p', { class: 'u-big', html: md('**Tare**, ==evidențiat==, emoji {{e:mar}} {{e:stea}}, jetoane {{s:3}} {{z:4}} {{u:7}} și vizual inline {{v:star n=47}}') })),
     h('section', { class: 'l-stack' }, h('h2', {}, 'Mesaje'),

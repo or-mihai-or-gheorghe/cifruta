@@ -5,7 +5,7 @@ import { h, pop } from '../../core/dom.js';
 import { play } from '../../core/sound.js';
 import { plain } from '../../core/markup.js';
 import { shuffled } from '../../core/rng.js';
-import { feedbackBox, isLocked, itemFace, setState } from '../_view.js';
+import { expectedTag, feedbackBox, isLocked, itemFace, setState } from '../_view.js';
 
 const PAIR_COLORS = ['#5b5bd6', '#e07b39', '#1b8fcb', '#b04fa8', '#2e9e44', '#a86b3c', '#35339a', '#d99a00'];
 
@@ -131,7 +131,7 @@ export default {
           const btn = leftEls[r.id];
           btn.querySelector('.ex-expected')?.remove();
           setState(btn, r.ok ? 'correct' : 'wrong');
-          if (!r.ok) btn.append(h('span', { class: 'ex-expected' }, plain(String(rightById[r.expected]?.text ?? rightById[r.expected]?.label ?? r.expected))));
+          if (!r.ok) btn.append(expectedTag(plain(String(rightById[r.expected]?.text ?? rightById[r.expected]?.label ?? r.expected))));
           if (r.feedback) messages.push(r.feedback);
         }
         notes.replaceChildren(...messages.map(feedbackBox));

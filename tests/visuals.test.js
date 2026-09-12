@@ -25,6 +25,8 @@ test('fiecare vizual randează corect toate demo-urile', () => {
       assert.ok(!svg.replace('xmlns="http://www.w3.org/2000/svg"', '').includes('http'), `${where}: adresă externă`);
       assert.ok(!/NaN|undefined|\[object/.test(svg), `${where}: valoare lipsă în SVG`);
       assert.ok(!/[şţŞŢ]/.test(svg) && svg === svg.normalize('NFC'), `${where}: diacritice greșite`);
+      // grupurile animate din CSS (v-nume__parte) nu au voie să poarte atributul transform (Chromium le-ar strica)
+      assert.ok(!/<g class="v-[\w-]+__[\w-]+[^"]*"[^>]*\stransform="/.test(svg), `${where}: un grup animat poartă atributul transform`);
       for (const [, id] of svg.matchAll(/\sid="([^"]+)"/g)) {
         assert.match(id, new RegExp(`^${escapeRe(name)}\\d+`), `${where}: id „${id}” fără prefixul unic`);
       }

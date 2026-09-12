@@ -80,7 +80,18 @@
 }
 .c-card__media svg { width: 100%; height: auto; transition: transform var(--dur-3) var(--ease-out); }
 .c-card--link:hover .c-card__media svg { transform: scale(1.04); }
-.c-card__icon { width: 3.5rem; height: 3.5rem; }
+.c-card__icon {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  border: 2px solid var(--c-level, var(--c-brand));
+  background: var(--c-level-bg, var(--c-brand-soft));
+  transition: transform var(--dur-2) var(--ease-spring);
+}
+.c-card__icon .c-emoji { width: 2.1rem; height: 2.1rem; margin: 0; }
+.c-card--link:hover .c-card__icon { transform: scale(1.08) rotate(-5deg); }
 .c-card__title { font-size: var(--fs-2); }
 .c-card__text { color: var(--c-ink-soft); }
 .c-card__footer { margin-top: auto; }
@@ -99,6 +110,7 @@
   white-space: nowrap;
 }
 .c-chip--soon { background: var(--c-brand-soft); color: var(--c-brand-dark); border-color: transparent; }
+.c-chip__icon .c-emoji { width: 1.1em; height: 1.1em; margin: 0; vertical-align: -0.2em; }
 
 .c-level {
   display: inline-flex;

@@ -222,18 +222,20 @@ registerVisual('balance', {
     const left = String(p.left ?? '');
     const right = String(p.right ?? '');
     const both = left !== '' && right !== '' && !Number.isNaN(Number(left)) && !Number.isNaN(Number(right));
-    const tilt = both ? Math.sign(Number(right) - Number(left)) * 8 : 0;
+    const tilt = both ? Math.sign(Number(right) - Number(left)) * 8 : 0; // partea mai grea coboară
+    const rad = (tilt * Math.PI) / 180;
+    // talerul atârnă vertical de capătul rotit al brațului: doar îl mutăm, nu îl rotim
     const pan = (x, text) => `
-      <line x1="${x}" y1="30" x2="${x - 18}" y2="62" stroke="${C.ink}" stroke-width="1.5"/><line x1="${x}" y1="30" x2="${x + 18}" y2="62" stroke="${C.ink}" stroke-width="1.5"/>
-      <path d="M${x - 26} 62 H${x + 26} C${x + 22} 74 ${x - 22} 74 ${x - 26} 62 Z" fill="${C.yellow}" ${st(2)}/>
-      <rect x="${x - 24}" y="40" width="48" height="20" rx="5" fill="${C.white}" ${st(2)}/>
-      ${txt(x, 50, text, { size: text.length > 6 ? 9 : 12 })}`;
+      <g transform="translate(${((x - 80) * (Math.cos(rad) - 1)).toFixed(1)} ${((x - 80) * Math.sin(rad)).toFixed(1)})">
+        <line x1="${x}" y1="30" x2="${x - 18}" y2="62" stroke="${C.ink}" stroke-width="1.5"/><line x1="${x}" y1="30" x2="${x + 18}" y2="62" stroke="${C.ink}" stroke-width="1.5"/>
+        <path d="M${x - 26} 62 H${x + 26} C${x + 22} 74 ${x - 22} 74 ${x - 26} 62 Z" fill="${C.yellow}" ${st(2)}/>
+        <rect x="${x - 24}" y="40" width="48" height="20" rx="5" fill="${C.white}" ${st(2)}/>
+        ${txt(x, 50, text, { size: text.length > 6 ? 9 : 12 })}
+      </g>`;
     return `
       <path d="M80 30 L96 100 H64 Z" fill="${C.gray}" ${st(2.5)}/><rect x="52" y="98" width="56" height="8" rx="4" fill="${C.brown}" ${st(2)}/>
-      <g transform="rotate(${tilt} 80 30)">
-        <line x1="24" y1="30" x2="136" y2="30" stroke="${C.ink}" stroke-width="5" stroke-linecap="round"/>
-        ${pan(28, left)}${pan(132, right)}
-      </g>
+      <line x1="24" y1="30" x2="136" y2="30" stroke="${C.ink}" stroke-width="5" stroke-linecap="round" transform="rotate(${tilt} 80 30)"/>
+      ${pan(28, left)}${pan(132, right)}
       <circle cx="80" cy="30" r="5" fill="${C.ink}"/>`;
   },
   demos: [{ left: '64', right: '39 + ?' }, { left: 20, right: 35 }],

@@ -54,6 +54,8 @@
   min-height: 4rem;
 }
 
+.l-header__inner nav { flex-wrap: nowrap; }
+
 .l-main {
   flex: 1;
   padding-block: var(--sp-6) var(--sp-8);

@@ -55,7 +55,9 @@ export function callout(kind, emojiName, html) {
   );
 }
 
-export const chip = (text, cls = '') => h('span', { class: `c-chip ${cls}` }, text);
+/** Pastilă de text, opțional cu un emoji local în față (nu depinde de fontul de emoji al dispozitivului). */
+export const chip = (text, cls = '', icon = null) =>
+  h('span', { class: `c-chip ${cls}` }, icon ? h('span', { class: 'c-chip__icon', 'aria-hidden': 'true', html: emojiHTML(icon) }) : null, text);
 
 export function backLink(href, text) {
   return h('a', { class: 'c-back', href }, '← ', text);
