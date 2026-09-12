@@ -61,6 +61,8 @@ export default async function player(container, [testId]) {
   );
   const countFill = countdown.querySelector('.c-countdown__fill');
   let lastMinute = -1;
+  let warned = false; // „Mai ai 5 minute” și „timpul a trecut” se anunță o singură dată, exact la prag
+  let ended = false;
   function paintCountdown() {
     const remaining = Math.max(0, totalMs - draft.activeMs);
     const m = Math.floor(remaining / 60000);
@@ -68,14 +70,25 @@ export default async function player(container, [testId]) {
     countTime.textContent = `${m}:${String(s).padStart(2, '0')}`;
     countFill.style.strokeDashoffset = (RING * (1 - remaining / totalMs)).toFixed(2);
     const over = remaining === 0;
-    countdown.classList.toggle('is-low', !over && remaining <= 5 * 60000);
+    const low = !over && remaining <= 5 * 60000;
+    countdown.classList.toggle('is-low', low);
     countdown.classList.toggle('is-over', over);
     countNote.textContent = over ? 'Timpul a trecut, dar poți continua.' : '';
+    const first = lastMinute < 0; // la prima afișare (sau la reluare) pragurile deja trecute nu se mai anunță
     if (m !== lastMinute) {
-      if (lastMinute >= 0) pop(countTime, 'anim-tick');
-      if (over) countLive.textContent = 'Timpul estimat a trecut. Poți continua în liniște.';
-      else if (m === 5 && lastMinute > 5) countLive.textContent = 'Mai ai 5 minute.';
+      if (!first) pop(countTime, 'anim-tick');
       lastMinute = m;
+    }
+    if ((low || over) && !warned) {
+      warned = true;
+      if (!first) {
+        countLive.textContent = 'Mai ai 5 minute.';
+        pop(countdown, 'anim-pop'); // o singură reacție, apoi doar culoarea se schimbă
+      }
+    }
+    if (over && !ended) {
+      ended = true;
+      if (!first) countLive.textContent = 'Timpul estimat a trecut. Poți continua în liniște.';
     }
   }
   container.append(
@@ -225,21 +238,31 @@ export default async function player(container, [testId]) {
     resetStage();
     draft.seenBreaks.push(to);
     save();
-    const icon = art({ v: 'level-icon', level: to, decorative: true }, { cls: 'ex-break__icon anim-bounce-in' });
-    icon.style.animationDelay = '200ms';
+    // sărbătorim doar un nivel chiar terminat; cu exerciții sărite, pauza e neutră (fără confetti și sunet)
+    const left = test.exercises.filter((ex) => ex.level === from && !isDone(ex, draft.answers)).length;
+    const bravo = left === 0;
+    const icon = art({ v: 'level-icon', level: to, decorative: true }, { cls: `ex-break__icon${bravo ? ' anim-bounce-in' : ''}` });
+    if (bravo) icon.style.animationDelay = '200ms';
+    const leftText = left === 1 ? 'Un exercițiu a rămas neterminat' : `${cantitate(left, 'exercițiu', 'exerciții')} au rămas neterminate`;
     stage.append(
       h(
         'section',
-        { class: 'ex-break anim-bounce-in', 'data-level': to, 'data-testid': 'level-break' },
-        mascot('sarbatoreste', `Bravo! Ai terminat nivelul **${levelInfo(from).label}**. Urmează nivelul **${levelInfo(to).label}**.`, { center: true }),
+        { class: `ex-break ${bravo ? 'anim-bounce-in' : 'anim-fade-up'}`, 'data-level': to, 'data-variant': bravo ? 'bravo' : 'neutru', 'data-testid': 'level-break' },
+        bravo
+          ? mascot('sarbatoreste', `Bravo! Ai terminat nivelul **${levelInfo(from).label}**. Urmează nivelul **${levelInfo(to).label}**.`, { center: true })
+          : mascot('vesela', `Ai ajuns la capătul nivelului **${levelInfo(from).label}**. Urmează nivelul **${levelInfo(to).label}**.`, { center: true }),
         icon,
         levelPill(to),
-        h('p', { class: 'u-muted' }, 'Ce zici de o mică pauză? Ridică-te, întinde-te ca o veveriță și respiră adânc de trei ori.'),
+        bravo
+          ? h('p', { class: 'u-muted' }, 'Ce zici de o mică pauză? Ridică-te, întinde-te ca o veveriță și respiră adânc de trei ori.')
+          : h('p', { class: 'u-muted' }, `${leftText} la nivelul ${levelInfo(from).label}. Poți reveni oricând, din bulinele de sus.`),
         h('button', { class: 'c-btn c-btn--primary c-btn--lg', 'data-testid': 'continue', onClick: () => show(nextIndex) }, 'Continuă'),
       ),
     );
-    confetti({ count: 24 });
-    play('level');
+    if (bravo) {
+      confetti({ count: 24 });
+      play('level');
+    }
   }
 
   async function finish() {
@@ -308,6 +331,10 @@ export default async function player(container, [testId]) {
       },
       current: () => draft.current,
       goto: (i) => show(i),
+      resetBreaks() {
+        draft.seenBreaks = [];
+        save();
+      },
       submit,
       finish,
     };

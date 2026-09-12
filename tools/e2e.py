@@ -344,13 +344,14 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     run.shot(page, f"{vp}-{tid}-ex1")
     run.layout_ok(page, f"[{vp}] {tid} exercițiul 1")
 
-    # ecranul dintre niveluri apare după ultimul exercițiu ușor
+    # ecranul dintre niveluri: neutru când au rămas exerciții neterminate (fără confetti), „Bravo!” când nivelul e gata
     easy = page.locator(".c-progress__group[data-level='usor'] .c-progress__dot").count()
     for _ in range(easy):
         page.get_by_test_id("next").click()
         page.wait_for_selector(".ex-card, [data-testid=level-break]")
-    run.check(page.get_by_test_id("level-break").is_visible(), f"[{vp}] {tid}: ecranul dintre niveluri apare după nivelul ușor")
-    run.check(page.locator(".ex-break__icon").count() == 1 and page.locator(".anim-confetti").count() == 1, f"[{vp}] {tid}: pauza arată iconița nivelului următor și confetti")
+    brk = page.get_by_test_id("level-break")
+    run.check(brk.is_visible() and brk.get_attribute("data-variant") == "neutru" and page.locator(".anim-confetti").count() == 0, f"[{vp}] {tid}: după exerciții sărite, pauza dintre niveluri e neutră, fără confetti")
+    run.shot(page, f"{vp}-{tid}-pauza-neutra")
     page.get_by_test_id("continue").click()
     page.wait_for_selector(".ex-card")
     run.check(page.locator(".c-progress__dot.is-current").inner_text() == str(easy + 1), f"[{vp}] {tid}: după pauză continuă cu exercițiul {easy + 1}")
@@ -362,16 +363,29 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     run.check(dots == test["exercises"], f"[{vp}] {tid}: toate bulinele sunt „terminat” ({dots} din {test['exercises']})")
     ready = page.evaluate("[document.querySelector('[data-testid=next], [data-testid=finish]').classList.contains('is-ready'), getComputedStyle(document.querySelector('.c-progress__dot.is-done')).animationName]")
     run.check(ready == [True, "anim-pop"], f"[{vp}] {tid}: butonul de mers mai departe se anunță și bulina terminată face pop ({ready})")
+    page.evaluate(f"window.__dbg.resetBreaks(); window.__dbg.goto({easy - 1})")
+    expect(page.locator(".c-progress__dot.is-current")).to_have_text(str(easy))
+    page.get_by_test_id("next").click()
+    page.wait_for_selector("[data-testid=level-break]")
+    brk = page.get_by_test_id("level-break")
+    run.check(brk.get_attribute("data-variant") == "bravo" and page.locator(".ex-break__icon").count() == 1 and page.locator(".anim-confetti").count() == 1, f"[{vp}] {tid}: cu nivelul ușor terminat, pauza sărbătorește cu iconița nivelului următor și confetti")
+    page.get_by_test_id("continue").click()
+    page.wait_for_selector(".ex-card")
     page.reload()
     page.wait_for_selector(".ex-card")
     run.check(page.locator(".c-progress__dot.is-done").count() == dots, f"[{vp}] {tid}: ciorna se păstrează după reîncărcare")
     # cronometrul discret: pornește de la 45:00, se golește cu timpul lucrat, avertizează la 5 minute, se oprește la 0 fără să trimită
-    shown = page.get_by_test_id("countdown").inner_text().split("\n")[0].strip()
-    page.evaluate("window.__dbg.elapse(41 * 60000)")
-    low = "is-low" in (page.get_by_test_id("countdown").get_attribute("class") or "")
+    countdown = page.get_by_test_id("countdown")
+    live = countdown.locator("[aria-live]")
+    shown = countdown.inner_text().split("\n")[0].strip()
+    mm, ss = map(int, shown.split(":"))
+    page.evaluate(f"window.__dbg.elapse({(mm * 60 + ss) * 1000 - 5 * 60000 - 3000})")  # 5:03 (marjă pentru secundele care trec între pași)
+    early = "is-low" not in (countdown.get_attribute("class") or "") and live.inner_text() == ""
+    page.evaluate("window.__dbg.elapse(3000)")  # 5:00
+    low = "is-low" in (countdown.get_attribute("class") or "") and live.inner_text() == "Mai ai 5 minute."
     page.evaluate("window.__dbg.elapse(5 * 60000)")
-    over = page.get_by_test_id("countdown")
-    run.check(re.match(r"^4[45]:\d\d$", shown) is not None and low and "is-over" in (over.get_attribute("class") or "") and over.inner_text().startswith("0:00") and page.locator(".ex-card").count() == 1, f"[{vp}] {tid}: cronometrul pornește de la {shown}, avertizează la 5 minute și se oprește la 0:00 fără să trimită testul")
+    over = "is-over" in (countdown.get_attribute("class") or "") and countdown.inner_text().startswith("0:00") and live.inner_text().startswith("Timpul estimat a trecut")
+    run.check(re.match(r"^4[45]:\d\d$", shown) is not None and early and low and over and page.locator(".ex-card").count() == 1, f"[{vp}] {tid}: cronometrul pornește de la {shown}, anunță exact la 5:00 și la 0:00 și nu trimite testul ({early}, {low}, {over})")
     page.get_by_test_id("finish-top").click()
     page.wait_for_selector("[data-testid=score]")
     expect(page.get_by_test_id("score")).to_have_text(re.compile(r"^100\s*/\s*100$"))

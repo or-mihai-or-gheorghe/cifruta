@@ -344,7 +344,6 @@
 .c-countdown__note:empty { display: none; }
 .c-countdown.is-low { color: var(--c-warn); }
 .c-countdown.is-low .c-countdown__fill { stroke: var(--c-warn); }
-.c-countdown.is-low .c-countdown__ring { animation: anim-breathe 2s ease-in-out infinite; }
 .c-countdown.is-over { color: var(--c-ink-soft); }
 .c-countdown.is-over .c-countdown__fill { stroke: var(--c-line-strong); }
 
