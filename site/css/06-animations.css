@@ -9,11 +9,6 @@
   45% { transform: scale(1.1); }
   100% { transform: scale(1); }
 }
-@keyframes anim-shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
-}
 @keyframes anim-bounce-in {
   0% { opacity: 0; transform: scale(0.6); }
   60% { opacity: 1; transform: scale(1.08); }
@@ -33,12 +28,12 @@
 }
 @keyframes anim-confetti {
   0% { opacity: 1; transform: translate3d(0, -10vh, 0) rotate(0deg); }
-  100% { opacity: 0.9; transform: translate3d(var(--dx, 0), 105vh, 0) rotate(var(--rot, 540deg)); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(var(--dx, 0), 105vh, 0) rotate(var(--rot, 540deg)); }
 }
 
 .anim-fade-up { animation: anim-fade-up var(--dur-3) var(--ease-out) both; }
 .anim-pop { animation: anim-pop var(--dur-3) var(--ease-spring); }
-.anim-shake { animation: anim-shake var(--dur-3) ease-in-out 2; }
 .anim-bounce-in { animation: anim-bounce-in 450ms var(--ease-spring) both; }
 .anim-float { animation: anim-float 3s ease-in-out infinite; }
 .anim-flip-in { animation: anim-flip-in 400ms var(--ease-out) both; }
@@ -66,3 +61,9 @@
   border-radius: 2px;
   animation: anim-confetti var(--fall, 1.6s) cubic-bezier(0.3, 0.6, 0.6, 1) var(--delay, 0s) both;
 }
+.anim-confetti i:nth-child(6n + 1) { background: var(--c-accent); }
+.anim-confetti i:nth-child(6n + 2) { background: var(--c-brand); }
+.anim-confetti i:nth-child(6n + 3) { background: var(--v-red); }
+.anim-confetti i:nth-child(6n + 4) { background: var(--v-green); }
+.anim-confetti i:nth-child(6n + 5) { background: var(--v-blue); }
+.anim-confetti i:nth-child(6n) { background: var(--v-orange); }

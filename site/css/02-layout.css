@@ -24,18 +24,11 @@
 }
 .l-cluster--between { justify-content: space-between; }
 .l-cluster--center { justify-content: center; }
-.l-cluster--end { justify-content: flex-end; }
 
 .l-grid {
   display: grid;
   gap: var(--grid-gap, var(--sp-5));
   grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--grid-min, 16rem)), 1fr));
-}
-
-.l-center {
-  display: grid;
-  place-items: center;
-  text-align: center;
 }
 
 /* ——— Scheletul aplicației ——— */

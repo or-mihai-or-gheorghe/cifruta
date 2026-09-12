@@ -7,9 +7,3 @@
 
 .v-inline { display: inline-block; vertical-align: middle; width: 2.6em; margin-inline: 0.1em; }
 .v-inline .v-svg { width: 100%; }
-
-/* mărimi uzuale pentru desene așezate în pagină */
-.v-box { width: var(--v-size, 6rem); flex: none; }
-.v-box--sm { --v-size: 3.5rem; }
-.v-box--lg { --v-size: 10rem; }
-.v-box--wide { width: 100%; max-width: 32rem; }

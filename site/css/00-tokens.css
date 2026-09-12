@@ -17,6 +17,9 @@
   --c-accent: #ffc83d;
   --c-accent-dark: #d99a00;
   --c-focus: #1c7ed6;
+  --c-paper-2: #fffdf7; /* casete goale, segmente, tava de sortat */
+  --c-note: #fff6d6; /* idei și mesaje de feedback */
+  --c-on-brand: #ffffff; /* text pe brand, nivel sau stare */
 
   /* ——— Feedback: sigur pentru daltonism și mereu însoțit de icon + text ——— */
   --c-ok: #0e8a60;
@@ -71,6 +74,27 @@
   --v-skin: #f6c9a0;
   --v-sky: #dff3ff;
   --v-grass: #9ed98a;
+  --v-grass-light: #c4ebb2;
+  --v-cream: #ffebcc;
+  --v-beet: #9b2d5e;
+  --v-coal: #4b4453;
+  --v-coal-light: #6e6778;
+  --v-oil: #3e3a46;
+  --v-space: #2b2552;
+  --v-note-1: #a9c4a2;
+  --v-note-5: #b9a3e3;
+  --v-note-10: #f29bb8;
+  --v-note-20: #f9b45c;
+  --v-note-50: #ffe066;
+  --v-note-100: #86b8ea;
+  --v-note-200: #cfa77e;
+  --v-note-500: #a7b0de;
+  --v-coin-gold: #e2c25b;
+  --v-coin-copper: #d08c5b;
+  --v-coin-silver: #c9cdd6;
+  --v-lvl-usor: var(--c-usor-bg);
+  --v-lvl-intermediar: var(--c-intermediar-bg);
+  --v-lvl-avansat: var(--c-avansat-bg);
   --v-s: var(--c-s);
   --v-z: var(--c-z);
   --v-u: var(--c-u);
@@ -88,7 +112,6 @@
   --lh-text: 1.55;
 
   /* ——— Spațiere, raze, umbre ——— */
-  --sp-1: 0.25rem;
   --sp-2: 0.5rem;
   --sp-3: 0.75rem;
   --sp-4: 1rem;
@@ -104,13 +127,14 @@
   --sh-1: 0 1px 2px rgb(46 37 66 / 0.08), 0 2px 6px rgb(46 37 66 / 0.06);
   --sh-2: 0 4px 14px rgb(46 37 66 / 0.1);
   --sh-3: 0 14px 36px rgb(46 37 66 / 0.18);
-  --sh-press: 0 4px 0;
+  --sh-edge: 0 4px 0; /* „muchia 3D” a butoanelor și a cardurilor de apăsat */
+  --sh-edge-hover: 0 5px 0;
+  --sh-edge-active: 0 1px 0;
 
   /* ——— Mișcare ——— */
   --dur-1: 120ms;
   --dur-2: 200ms;
   --dur-3: 300ms;
-  --dur-4: 700ms;
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
@@ -122,7 +146,6 @@
   --gutter: clamp(1rem, 0.6rem + 2vw, 2rem);
   --z-sticky: 10;
   --z-overlay: 50;
-  --z-modal: 100;
 }
 
 [data-theme='mare'] { --c-theme: #0a86a8; --c-theme-bg: #dcf3f8; }

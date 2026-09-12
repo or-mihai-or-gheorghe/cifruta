@@ -20,23 +20,22 @@
   font-weight: 700;
   line-height: 1.1;
   text-decoration: none;
-  box-shadow: 0 4px 0 var(--btn-edge);
+  box-shadow: var(--sh-edge) var(--btn-edge);
   transition: transform var(--dur-1) var(--ease-out), box-shadow var(--dur-1) var(--ease-out), background-color var(--dur-2);
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
-.c-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 0 var(--btn-edge); }
-.c-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--btn-edge); }
-.c-btn:disabled { opacity: 0.45; transform: none; box-shadow: 0 4px 0 var(--btn-edge); }
-.c-btn--primary { --btn-bg: var(--c-brand); --btn-fg: #fff; --btn-edge: var(--c-brand-dark); }
+.c-btn:hover { transform: translateY(-1px); box-shadow: var(--sh-edge-hover) var(--btn-edge); }
+.c-btn:active { transform: translateY(3px); box-shadow: var(--sh-edge-active) var(--btn-edge); }
+.c-btn:disabled { opacity: 0.45; transform: none; box-shadow: var(--sh-edge) var(--btn-edge); }
+.c-btn--primary { --btn-bg: var(--c-brand); --btn-fg: var(--c-on-brand); --btn-edge: var(--c-brand-dark); }
 .c-btn--accent { --btn-bg: var(--c-accent); --btn-fg: var(--c-ink); --btn-edge: var(--c-accent-dark); }
-.c-btn--ok { --btn-bg: var(--c-ok); --btn-fg: #fff; --btn-edge: #0a6547; }
+.c-btn--ok { --btn-bg: var(--c-ok); --btn-fg: var(--c-on-brand); --btn-edge: #0a6547; }
 .c-btn--ghost { --btn-edge: transparent; background: transparent; box-shadow: none; }
 .c-btn--ghost:hover, .c-btn--ghost:active { box-shadow: none; transform: none; background: var(--c-surface-2); }
 .c-btn--lg { min-height: var(--tap-lg); padding-inline: 1.9rem; font-size: var(--fs-2); }
 .c-btn--sm { min-height: 2.5rem; padding: 0.35rem 0.95rem; font-size: var(--fs-0); }
 .c-btn--icon { width: var(--tap); padding: 0; }
-.c-btn__icon { width: 1.5em; height: 1.5em; flex: none; }
 
 /* ——— Logo ——— */
 .c-logo {
@@ -70,6 +69,7 @@
   transition: transform var(--dur-2) var(--ease-out), box-shadow var(--dur-2), border-color var(--dur-2);
 }
 .c-card--link:hover { transform: translateY(-4px); box-shadow: var(--sh-2); border-color: var(--c-theme); }
+.c-card--link:active { transform: translateY(-1px); box-shadow: var(--sh-1); }
 .c-card--soon { border-style: dashed; background: color-mix(in srgb, var(--c-surface) 60%, transparent); box-shadow: none; }
 .c-card__media {
   margin: calc(-1 * var(--sp-5)) calc(-1 * var(--sp-5)) 0;
@@ -118,7 +118,7 @@
   min-width: 1.6em;
   padding: 0 0.3em;
   border-radius: 0.4em;
-  color: #fff;
+  color: var(--c-on-brand);
   font-family: var(--font-title);
   font-weight: 700;
   line-height: 1.35;
@@ -150,7 +150,7 @@
 .c-callout--ok { --callout-bg: var(--c-ok-bg); --callout-edge: var(--c-ok); }
 .c-callout--bad { --callout-bg: var(--c-bad-bg); --callout-edge: var(--c-bad); }
 .c-callout--warn { --callout-bg: var(--c-warn-bg); --callout-edge: var(--c-warn); }
-.c-callout--idea { --callout-bg: #fff6d6; --callout-edge: var(--c-accent-dark); }
+.c-callout--idea { --callout-bg: var(--c-note); --callout-edge: var(--c-accent-dark); }
 .c-callout__icon { flex: none; font-size: 1.4rem; line-height: 1.2; }
 .c-callout__icon .c-emoji { width: 1.6rem; height: 1.6rem; vertical-align: -0.35rem; }
 
@@ -204,11 +204,16 @@
   align-items: center;
   gap: 0.35rem;
   min-height: var(--tap);
+  padding-inline: 0.5rem;
+  margin-inline: -0.5rem;
+  border-radius: var(--r-pill);
   font-family: var(--font-title);
   font-weight: 700;
   text-decoration: none;
   color: var(--c-brand-dark);
+  transition: background-color var(--dur-2);
 }
+.c-back:hover { background: var(--c-surface-2); }
 
 /* ——— Harta de progres (bulinele exercițiilor) ——— */
 .c-progress { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
@@ -233,10 +238,13 @@
   font-weight: 700;
   font-size: var(--fs-0);
   transition: transform var(--dur-2) var(--ease-spring), background-color var(--dur-2);
+  -webkit-tap-highlight-color: transparent;
 }
+.c-progress__dot:hover:not(.is-current) { transform: scale(1.08); }
 .c-progress__dot.is-partial { background: linear-gradient(to top, var(--c-level-bg) 50%, var(--c-surface) 50%); }
-.c-progress__dot.is-done { background: var(--c-level); color: #fff; }
+.c-progress__dot.is-done { background: var(--c-level); color: var(--c-on-brand); }
 .c-progress__dot.is-current { transform: scale(1.12); box-shadow: 0 0 0 3px var(--c-paper), 0 0 0 5px var(--c-level); }
+.c-progress__dot:active { transform: scale(0.94); }
 
 /* ——— Fereastră (dialog nativ) ——— */
 .c-modal {
@@ -272,6 +280,7 @@
   font-size: var(--fs-2);
 }
 .c-grade[data-grade='FB'] { background: var(--c-ok-bg); color: var(--c-ok); }
+.c-grade[data-grade='S'] { background: var(--c-info-bg); color: var(--c-info); }
 .c-grade[data-grade='EX'] { background: var(--c-warn-bg); color: var(--c-warn); }
 
 /* ——— Explicații (detalii pliabile) ——— */
@@ -288,9 +297,12 @@
   padding: 0.5rem 1rem;
   font-family: var(--font-title);
   font-weight: 700;
+  border-radius: calc(var(--r-2) - 2px);
   list-style: none;
   cursor: pointer;
+  transition: background-color var(--dur-2);
 }
+.c-explain > summary:hover { background: var(--c-surface-2); }
 .c-explain > summary::-webkit-details-marker { display: none; }
 .c-explain > summary::after { content: '▸'; margin-left: auto; transition: transform var(--dur-2); }
 .c-explain[open] > summary::after { transform: rotate(90deg); }
@@ -308,10 +320,13 @@
   border: 3px solid var(--c-line);
   border-radius: 50%;
   background: var(--c-surface);
-  transition: transform var(--dur-2) var(--ease-spring), border-color var(--dur-2);
+  transition: transform var(--dur-2) var(--ease-spring), border-color var(--dur-2), background-color var(--dur-2);
+  -webkit-tap-highlight-color: transparent;
 }
 .c-feel__btn img { width: 100%; height: 100%; }
-.c-feel__btn.is-selected { border-color: var(--c-brand); background: var(--c-brand-soft); transform: scale(1.12); }
+.c-feel__btn:hover:not(.is-selected) { border-color: var(--c-line-strong); transform: scale(1.06); }
+.c-feel__btn.is-selected { border-color: var(--c-brand); background: var(--c-brand-soft); transform: scale(1.06); }
+.c-feel__btn:active { transform: scale(0.94); }
 
 /* ——— File (tab-uri) ——— */
 .c-tabs { display: flex; flex-wrap: wrap; gap: var(--sp-2); border-bottom: 2px solid var(--c-line); }
@@ -327,10 +342,8 @@
   font-family: var(--font-title);
   font-weight: 700;
   text-decoration: none;
+  transition: background-color var(--dur-2), color var(--dur-2);
 }
+.c-tab:hover:not(.is-active) { background: var(--c-surface-2); color: var(--c-ink); }
 .c-tab.is-active { border-color: var(--c-line); border-bottom-color: var(--c-paper); background: var(--c-paper); color: var(--c-brand-dark); }
 
-/* ——— Tabel simplu ——— */
-.c-table { border-collapse: collapse; width: 100%; }
-.c-table th, .c-table td { padding: 0.4rem 0.7rem; border-bottom: 1px solid var(--c-line); text-align: left; }
-.c-table th { font-family: var(--font-title); color: var(--c-ink-soft); font-weight: 700; }

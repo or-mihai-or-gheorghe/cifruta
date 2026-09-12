@@ -43,3 +43,31 @@ export const uid = (prefix = 'u') => `${prefix}${++uidCounter}`;
 
 export const prefersReducedMotion = () =>
   typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/** Rulează o animație scurtă pe element (implicit „pop”) și scoate clasa când se termină. */
+export function pop(el, cls = 'anim-pop') {
+  if (!el) return;
+  el.classList.remove(cls);
+  void el.offsetWidth; // repornește animația dacă era în curs
+  el.classList.add(cls);
+  el.addEventListener('animationend', function onEnd(e) {
+    if (e.target !== el) return; // animationend urcă și de la copii (de ex. .ex-state)
+    el.classList.remove(cls);
+    el.removeEventListener('animationend', onEnd);
+  });
+}
+
+/** Numără de la 0 la `to` în textul elementului (ease-out); sare direct la final la mișcare redusă. */
+export function countUp(el, to, ms = 700) {
+  if (prefersReducedMotion() || !(to > 0)) {
+    el.textContent = String(to);
+    return;
+  }
+  const start = performance.now();
+  const tick = (now) => {
+    const t = Math.min(1, (now - start) / ms);
+    el.textContent = String(Math.round(to * (1 - (1 - t) ** 3)));
+    if (t < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}

@@ -1,7 +1,7 @@
 // Componente mici de interfață, folosite în mai multe pagini.
 
 import config from '../../data/scoring.js';
-import { h } from '../core/dom.js';
+import { h, prefersReducedMotion } from '../core/dom.js';
 import { md } from '../core/markup.js';
 import { cantitate } from '../core/ro.js';
 import { emojiHTML } from '../visuals/emoji.js';
@@ -61,15 +61,15 @@ export function backLink(href, text) {
   return h('a', { class: 'c-back', href }, '← ', text);
 }
 
-export function confetti(container = document.body) {
-  const colors = ['#ffc83d', '#5b5bd6', '#f07167', '#6bcb77', '#5aa9e6', '#f9a03f'];
+/** Ploaie scurtă de confetti (culorile vin din CSS); nimic la mișcare redusă. */
+export function confetti({ count = 60, container = document.body } = {}) {
+  if (prefersReducedMotion()) return;
   const layer = h('div', { class: 'anim-confetti', 'aria-hidden': 'true' });
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < count; i++) {
     layer.append(
       h('i', {
         style: {
           left: `${Math.random() * 100}%`,
-          background: colors[i % colors.length],
           '--dx': `${(Math.random() - 0.5) * 30}vw`,
           '--rot': `${360 + Math.random() * 540}deg`,
           '--delay': `${Math.random() * 0.4}s`,
