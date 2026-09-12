@@ -13,7 +13,7 @@ import { play } from '../core/sound.js';
 import { clearDraft, getAttempt, isUnsaved, lastAttempt, listAttempts, updateAttempt } from '../core/storage.js';
 import { mountExercise } from '../components/exercise.js';
 import { clearHistoryButton } from '../components/history.js';
-import { art, backLink, callout, confetti, levelPill, stars } from '../components/ui.js';
+import { art, backLink, callout, chip, confetti, levelPill, stars } from '../components/ui.js';
 import { emojiHTML } from '../visuals/emoji.js';
 
 const statusOf = (fraction) => (reached(fraction, 1) ? 'correct' : reached(0, fraction) ? 'wrong' : 'partial');
@@ -234,33 +234,45 @@ export default async function review(container, [testId, attemptId]) {
     if (status !== 'correct') {
       const retryHost = h('div');
       const retryBtn = h('button', { class: 'c-btn c-btn--accent', 'data-testid': `retry-${ex.id}` }, 'Mai încerc o dată');
-      retryBtn.addEventListener('click', async () => {
-        retryBtn.remove();
+      let tries = 0;
+      // după un verdict greșit se poate încerca din nou (cu alt amestec); la reușită exercițiul primește „refăcut corect”
+      async function mountRetry() {
+        tries++;
         const box = h('div', { class: 'ex-review__retry' }, ex.explain?.idea ? callout('idea', 'idee', `<strong>Indiciu:</strong> ${md(ex.explain.idea)}`) : null);
-        retryHost.append(box);
-        const again = await mountExercise(box, ex, { seed: attempt.seed + 1 });
+        retryHost.replaceChildren(box);
+        const again = await mountExercise(box, ex, { seed: attempt.seed + tries });
         if (!container.isConnected) return again.destroy();
         controllers.push(again);
-        const verdict = h('div');
+        const verdict = h('div', { class: 'l-stack l-stack--sm' });
         const check = h('button', { class: 'c-btn c-btn--primary', 'data-testid': `retry-check-${ex.id}` }, 'Verifică');
         check.addEventListener('click', () => {
           const res = evaluateExercise(ex, again.get());
           again.mode('review');
           again.showResults(res);
           check.remove();
-          updateAttempt(attempt.id, { secondChance: { ...(lastAttempt(testId)?.secondChance ?? {}), [ex.id]: res.fraction } });
+          updateAttempt(attempt.id, { secondChance: { ...(getAttempt(attempt.id)?.secondChance ?? {}), [ex.id]: res.fraction } });
           const won = statusOf(res.fraction) === 'correct';
           const node = won
             ? callout('ok', 'bravo', 'Bravo! Acum ai rezolvat corect. Ai văzut unde era capcana.')
-            : callout('warn', 'muschi', 'Încă nu. Deschide „De ce? Cum rezolvăm” și privește rezolvarea pas cu pas.');
+            : callout('warn', 'muschi', 'Încă nu. Deschide „De ce? Cum rezolvăm” și privește rezolvarea pas cu pas, apoi mai încearcă.');
           verdict.replaceChildren(node);
           if (won) {
             pop(node);
             confetti({ count: 16 });
+            const badge = chip('refăcut corect', 'c-chip--ok', 'bravo');
+            badge.dataset.testid = `redone-${ex.id}`;
+            item.querySelector('.ex-head').append(badge);
+            pop(badge);
+          } else {
+            verdict.append(h('div', { class: 'l-cluster' }, h('button', { class: 'c-btn c-btn--accent', 'data-testid': `retry-again-${ex.id}`, onClick: mountRetry }, 'Mai încearcă o dată')));
           }
           play(won ? 'yes' : 'no');
         });
         box.append(h('div', { class: 'l-cluster' }, check), verdict);
+      }
+      retryBtn.addEventListener('click', () => {
+        retryBtn.remove();
+        mountRetry();
       });
       item.append(h('div', { class: 'ex-review__actions' }, retryBtn), retryHost);
     }

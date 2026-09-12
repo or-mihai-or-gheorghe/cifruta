@@ -432,6 +432,8 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     page.wait_for_selector(".ex-review__item")
     page.wait_for_timeout(600)
     run.shot(page, f"{vp}-{tid}-rezultate-100")
+    if page.locator(".ex-word").count():
+        run.check(page.locator(".ex-order__tag").count() == page.locator(".ex-word__letter").count(), f"[{vp}] {tid}: la rezultate, cardurile cuvântului secret își arată literele")
 
     # după trimitere ciorna nu mai există, iar testul se redeschide de la început
     draft = page.evaluate(f"localStorage.getItem('cifruta:draft:{tid}')")
@@ -474,6 +476,9 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     page.get_by_test_id(f"retry-{first}").click()
     page.get_by_test_id(f"retry-check-{first}").click()
     run.check(page.locator(f"[data-testid=review-{first}] .ex-review__retry .c-callout").count() >= 1, f"[{vp}] {tid}: „Mai încerc o dată” afișează verdictul")
+    page.get_by_test_id(f"retry-again-{first}").click()
+    page.wait_for_selector(f"[data-testid=retry-check-{first}]")
+    run.check(page.locator(f"[data-testid=retry-check-{first}]").count() == 1 and page.locator(f"[data-testid=review-{first}] .ex-review__retry").count() == 1, f"[{vp}] {tid}: după un verdict greșit, „Mai încearcă o dată” remontează exercițiul")
     solved = page.locator(".ex-card[data-mode='solution']").count()
     page.locator(".ex-review__item").first.locator("summary").click()
     page.wait_for_selector(".ex-card[data-mode='solution']")

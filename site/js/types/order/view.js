@@ -108,6 +108,11 @@ export default {
         if (part.reveal?.word) {
           parts.push(h('p', { class: 'ex-word', 'aria-label': `Cuvântul secret: ${part.reveal.word}` },
             [...part.reveal.word].map((ch, i) => h('span', { class: 'ex-word__letter anim-flip-in', style: { animationDelay: `${i * 90}ms` } }, ch))));
+          // la rezultate, fiecare card își arată litera (la rezolvare ea rămâne ascunsă, altfel s-ar ordona după cuvânt)
+          for (const [i, id] of order.entries()) {
+            cards[id].querySelector('.ex-order__tag')?.remove();
+            if (byId[id].tag) cards[id].append(h('span', { class: 'ex-order__tag anim-flip-in', 'aria-hidden': 'true', style: { animationDelay: `${i * 90}ms` } }, byId[id].tag));
+          }
         }
         reveal.replaceChildren(...parts);
       },

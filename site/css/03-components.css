@@ -110,6 +110,7 @@
   white-space: nowrap;
 }
 .c-chip--soon { background: var(--c-brand-soft); color: var(--c-brand-dark); border-color: transparent; }
+.c-chip--ok { background: var(--c-ok-bg); color: var(--c-ok-ink); border-color: transparent; }
 .c-chip__icon .c-emoji { width: 1.1em; height: 1.1em; margin: 0; vertical-align: -0.2em; }
 
 .c-level {
@@ -259,6 +260,13 @@
 .c-progress__dot.is-done { background: var(--c-level-ink); color: var(--c-on-brand); animation: anim-pop var(--dur-3) var(--ease-spring); }
 .c-progress__dot.is-current { transform: scale(1.12); box-shadow: 0 0 0 3px var(--c-paper), 0 0 0 5px var(--c-level); }
 .c-progress__dot:active { transform: scale(0.94); }
+@media (max-width: 30rem) {
+  .c-progress { gap: 0.35rem; }
+  .c-progress__group { gap: 0.25rem; padding: 0.2rem; }
+  .c-progress__dot { width: 2rem; height: 2rem; font-size: 0.8rem; }
+  .c-countdown { font-size: var(--fs-0); gap: 0.35rem; }
+  .c-countdown__ring { width: 1.8rem; height: 1.8rem; }
+}
 
 /* ——— Fereastră (dialog nativ) ——— */
 .c-modal {
