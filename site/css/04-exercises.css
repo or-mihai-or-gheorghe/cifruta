@@ -172,6 +172,7 @@
 .ex-player { display: flex; flex-direction: column; gap: var(--sp-5); }
 .ex-player__top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-3); }
 .ex-player__title { font-size: var(--fs-3); }
+.ex-player__bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-3); }
 @media (max-width: 30rem) { .ex-player__finish { min-height: 2.5rem; padding: 0.35rem 0.95rem; font-size: var(--fs-0); margin-left: auto; } }
 .ex-player__stage { min-height: 20rem; }
 .ex-nav {

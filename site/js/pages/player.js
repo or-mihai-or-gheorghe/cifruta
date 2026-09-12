@@ -1,7 +1,7 @@
 // Playerul: un exercițiu pe ecran, harta cu buline pe niveluri, ecrane între niveluri, ciornă salvată automat.
 
 import config from '../../data/scoring.js';
-import { clear, h } from '../core/dom.js';
+import { clear, h, pop } from '../core/dom.js';
 import { findTest, loadTest } from '../core/loader.js';
 import { getLogic } from '../core/registry.js';
 import { cantitate } from '../core/ro.js';
@@ -44,6 +44,40 @@ export default async function player(container, [testId]) {
   const stage = h('div', { class: 'ex-player__stage' });
   const nav = h('div', { class: 'ex-nav' });
   const finishTop = h('button', { class: 'c-btn c-btn--accent ex-player__finish', 'data-testid': 'finish-top', onClick: () => finish() }, 'Vezi rezultatele');
+
+  // cronometrul discret: numără invers minutele estimate, doar cât timp copilul lucrează la un exercițiu; la 0 nu trimite nimic
+  const totalMs = totalMin * 60000;
+  const RING = 97.4; // lungimea cercului cu raza 15.5 din inel
+  const countTime = h('span', { class: 'c-countdown__time' });
+  const countNote = h('span', { class: 'c-countdown__note u-small' });
+  const countLive = h('span', { class: 'u-visually-hidden', 'aria-live': 'polite' });
+  const countdown = h(
+    'div',
+    { class: 'c-countdown', role: 'timer', 'aria-label': `Timp rămas din cele ${totalMin} de minute`, 'data-testid': 'countdown', hidden: true },
+    h('span', { class: 'c-countdown__ring', 'aria-hidden': 'true', html: '<svg viewBox="0 0 36 36"><circle class="c-countdown__track" cx="18" cy="18" r="15.5"/><circle class="c-countdown__fill" cx="18" cy="18" r="15.5"/></svg>' }),
+    countTime,
+    countNote,
+    countLive,
+  );
+  const countFill = countdown.querySelector('.c-countdown__fill');
+  let lastMinute = -1;
+  function paintCountdown() {
+    const remaining = Math.max(0, totalMs - draft.activeMs);
+    const m = Math.floor(remaining / 60000);
+    const s = Math.floor((remaining % 60000) / 1000);
+    countTime.textContent = `${m}:${String(s).padStart(2, '0')}`;
+    countFill.style.strokeDashoffset = (RING * (1 - remaining / totalMs)).toFixed(2);
+    const over = remaining === 0;
+    countdown.classList.toggle('is-low', !over && remaining <= 5 * 60000);
+    countdown.classList.toggle('is-over', over);
+    countNote.textContent = over ? 'Timpul a trecut, dar poți continua.' : '';
+    if (m !== lastMinute) {
+      if (lastMinute >= 0) pop(countTime, 'anim-tick');
+      if (over) countLive.textContent = 'Timpul estimat a trecut. Poți continua în liniște.';
+      else if (m === 5 && lastMinute > 5) countLive.textContent = 'Mai ai 5 minute.';
+      lastMinute = m;
+    }
+  }
   container.append(
     h(
       'div',
@@ -54,7 +88,7 @@ export default async function player(container, [testId]) {
         h('div', { class: 'l-stack l-stack--sm' }, backLink(`#/sectiune/${entry.section.id}`, entry.section.title), h('h1', { class: 'ex-player__title' }, test.title)),
         finishTop,
       ),
-      map,
+      h('div', { class: 'ex-player__bar' }, map, countdown),
       stage,
       nav,
     ),
@@ -70,6 +104,7 @@ export default async function player(container, [testId]) {
     const ex = test.exercises[draft.current];
     if (ex) draft.msByExercise[ex.id] = (draft.msByExercise[ex.id] ?? 0) + 1000;
     if (draft.activeMs % 5000 === 0) save();
+    paintCountdown();
   }, 1000);
 
   // bulinele se creează o dată și se actualizează pe loc (focusul de pe o bulină nu se pierde)
@@ -110,6 +145,8 @@ export default async function player(container, [testId]) {
     resetStage();
     draft.current = index;
     finishTop.hidden = index < 0; // pe intro nu are sens „Vezi rezultatele”
+    countdown.hidden = index < 0;
+    if (index >= 0) paintCountdown();
     save();
     renderMap();
     if (index < 0) return renderIntro();
@@ -264,6 +301,11 @@ export default async function player(container, [testId]) {
         return show(Math.max(draft.current, 0));
       },
       answers: () => JSON.parse(JSON.stringify(draft.answers)),
+      elapse(ms) {
+        draft.activeMs += ms;
+        save();
+        paintCountdown();
+      },
       current: () => draft.current,
       goto: (i) => show(i),
       submit,

@@ -154,7 +154,7 @@ Mesaje gata făcute pentru greșeli frecvente (din `docs/cercetare.md`):
 - ora și jumătate: „Acul mic a trecut de 5, dar n-a ajuns la 6: e 5 și jumătate.”
 - numără bancnotele, nu valoarea: „Contează ce scrie pe bani, nu câte bucăți ai.”
 
-## 8. Timp estimat (orientativ, pentru `estMin`)
+## 8. Timp estimat (pentru `estMin`; suma pe test trebuie să fie exact 45 de minute)
 Calcule simple 20–30 s/item · cu trecere peste ordin 45–60 s/item · alegere 30–45 s · ordonare de 6–7 numere 1–1,5 min ·
 unire 4 perechi 2–3 min · problemă cu o operație 2–3 min, cu două operații 4–5 min · bani cu mai multe soluții 3–4 min.
 La începutul clasei a II-a se adaugă ~20–30 s pentru citirea fiecărui enunț. Timpul real se notează în `docs/STARE.md`.

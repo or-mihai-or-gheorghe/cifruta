@@ -78,5 +78,8 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   grupul se rotește — Chromium le strică); `transform-box` doar pe aceste grupuri, niciodată cu `*`. Ancore existente:
   `v-clock__hand--h/--m` (rotite din `clock/view.js`), `v-abacus__bead` (+ `is-new`), `v-scene__rays/cloud/boat/stars/rocket/sign/tree`
   (pornite de `--scene-play` pe intro și la hover pe card), `v-mascot__confetti`. `tests/visuals.test.js` impune regula.
+- Un test durează **exact 45 de minute** (`config.estMin`, suma `estMin` a exercițiilor; validatorul refuză altă sumă). Cronometrul din
+  player numără invers din `draft.activeMs` (doar cât e afișat un exercițiu); la 0 nu trimite nimic. Istoricul (încercări + ciorne) se
+  șterge din casetele „Pentru părinți” (`clearHistory(testIds | null)` din `core/storage.js`, `refresh()` din `core/router.js`).
 - Sunete: `play('tap'|'place'|'done'|'level'|'win'|'yes'|'no')` din `core/sound.js` (WebAudio sintetizat, fără fișiere), pornite
   la gesturi; butonul din antet ține preferința în `cifruta:sound`; implicit oprite la `prefers-reduced-motion`.

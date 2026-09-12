@@ -21,6 +21,13 @@
 @keyframes anim-fade {
   from { opacity: 0; }
 }
+@keyframes anim-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+@keyframes anim-tick {
+  50% { transform: scale(1.08); }
+}
 @keyframes anim-nudge {
   0%, 100% { transform: none; }
   50% { transform: translateY(-4px); }
@@ -67,6 +74,7 @@
 .anim-flip-in { animation: anim-flip-in 400ms var(--ease-out) both; }
 /* butonul care „se anunță” când exercițiul e gata: două săltări, niciodată la infinit */
 .c-btn.is-ready { animation: anim-nudge 700ms var(--ease-out) 2; }
+.anim-tick { animation: anim-tick var(--dur-3) var(--ease-spring); }
 
 .anim-stagger > * { animation: anim-fade-up var(--dur-3) var(--ease-out) both; }
 .anim-stagger > :nth-child(2) { animation-delay: 60ms; }
