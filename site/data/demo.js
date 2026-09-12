@@ -107,7 +107,7 @@ export default {
     {
       id: 'categorize',
       level: 'usor',
-      estMin: 3,
+      estMin: 2,
       concepts: ['med.animale.domestice-salbatice'],
       title: 'Sortează',
       type: 'categorize',
@@ -165,7 +165,7 @@ export default {
     {
       id: 'build',
       level: 'usor',
-      estMin: 3,
+      estMin: 2,
       concepts: ['mat.nr100.formare'],
       title: 'Numărătoare',
       type: 'build',
@@ -178,7 +178,7 @@ export default {
     {
       id: 'fill-table',
       level: 'intermediar',
-      estMin: 3,
+      estMin: 2,
       concepts: ['mat.log.tabel'],
       title: 'Tabel',
       type: 'fill',
@@ -266,6 +266,35 @@ export default {
       prompt: 'Du racheta la numărul cerut.',
       items: [{ id: 'i1', label: 'Numărul 48', answer: 48, tolerance: 2 }],
       explain: { idea: '48 este puțin mai mic decât 50, jumătatea drumului dintre 0 și 100.' },
+    },
+    {
+      id: 'route',
+      level: 'intermediar',
+      estMin: 3,
+      concepts: ['mat.geo.trasee', 'mat.pb.decizie'],
+      title: 'Traseu pe hartă',
+      type: 'route',
+      prompt: 'Du-te de la **Gară** la **Teatru** pe drumul cel mai scurt. Atinge stațiile în ordine.',
+      map: {
+        w: 320,
+        h: 200,
+        stops: [
+          { id: 'gara', label: 'Gara', x: 40, y: 70 },
+          { id: 'piata', label: 'Piața Mare', x: 130, y: 70 },
+          { id: 'parc', label: 'Parcul', x: 230, y: 70 },
+          { id: 'muzeu', label: 'Muzeul', x: 130, y: 20, side: 'top' },
+          { id: 'teatru', label: 'Teatrul', x: 130, y: 140 },
+          { id: 'lac', label: 'Lacul', x: 230, y: 140 },
+        ],
+        lines: [
+          { id: 'rosie', label: 'tramvaiul 3', color: 'rosie', stops: ['gara', 'piata', 'parc', 'lac'] },
+          { id: 'albastra', label: 'metroul M1', color: 'albastra', stops: ['muzeu', 'piata', 'teatru', 'lac'] },
+        ],
+      },
+      from: 'gara',
+      to: 'teatru',
+      key: ['gara', 'piata', 'teatru'],
+      explain: { idea: 'Cauți drumul cu cele mai puține stații: schimbi linia la Piața Mare.', steps: ['Gara → Piața Mare cu tramvaiul 3.', 'Piața Mare → Teatrul cu metroul M1: în total 3 stații.'], trap: 'Pe la Parcul și Lacul ajungi tot la Teatru, dar prin 5 stații.' },
     },
     {
       id: 'mark-palette',

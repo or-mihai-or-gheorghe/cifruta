@@ -175,3 +175,43 @@ test('mark: regulile de set acceptă orice selecție bună și explică prima re
   assert.ok(getLogic('mark').validate({ ...base, rules: { sum: { max: 100 } } }).some((e) => e.includes('count.min')));
   assert.ok(getLogic('mark').validate({ ...base, rules: { count: { min: 1 } }, key: ['p1'] }).some((e) => e.includes('nu se combină')));
 });
+
+test('route: drumul cerut ia tot, alt drum bun ia jumătate, drumurile rupte nimic', () => {
+  const logic = getLogic('route');
+  const part = parts['route.a'];
+  assert.deepEqual(logic.solution(part), ['gara', 'piata', 'teatru']);
+  assert.equal(evalPart('route.a', ['gara', 'piata', 'teatru']).earned, 1);
+  const long = evalPart('route.a', ['gara', 'piata', 'parc', 'lac', 'teatru']);
+  assert.equal(long.earned, 0.5);
+  assert.match(long.items[0].feedback, /mai puține stații/);
+  const broken = evalPart('route.a', ['gara', 'teatru']);
+  assert.equal(broken.earned, 0);
+  assert.match(broken.items[0].feedback, /nu e nicio linie/);
+  assert.match(evalPart('route.a', ['piata', 'teatru']).items[0].feedback, /Pornește de la stația Gara/);
+  assert.match(evalPart('route.a', ['gara', 'piata']).items[0].feedback, /nu ajunge la Teatrul/);
+  assert.equal(evalPart('route.a', ['gara', 'piata', 'gara', 'piata', 'teatru']).earned, 0);
+  assert.equal(evalPart('route.a', 'gara,piata,teatru').earned, 0);
+  assert.equal(evalPart('route.a', null).earned, 0);
+  assert.equal(logic.answered(part, ['gara']), 0);
+  assert.equal(logic.answered(part, ['gara', 'piata']), 1);
+
+  // reguli: orice drum bun ia tot
+  const rules = { ...part, key: undefined, rules: { maxStops: 5 } };
+  assert.equal(logic.validate(rules).length, 0);
+  assert.equal(logic.evaluate(rules, ['gara', 'piata', 'teatru']).earned, 1);
+  assert.equal(logic.evaluate(rules, ['gara', 'piata', 'parc', 'lac', 'teatru']).earned, 1);
+  const via = { ...rules, rules: { via: ['parc'], maxStops: 5 } };
+  assert.equal(logic.evaluate(via, ['gara', 'piata', 'parc', 'lac', 'teatru']).earned, 1);
+  assert.match(logic.evaluate(via, ['gara', 'piata', 'teatru']).items[0].feedback, /prin Parcul/);
+  assert.deepEqual(logic.solution(via), ['gara', 'piata', 'parc', 'lac', 'teatru']);
+  const avoid = { ...rules, rules: { avoid: ['piata'] } };
+  assert.ok(logic.validate(avoid).some((e) => e.includes('niciun drum')));
+  const noChange = { ...rules, rules: { maxChanges: 0 } };
+  assert.ok(logic.validate(noChange).some((e) => e.includes('niciun drum'))); // Gara e doar pe tramvai, Teatrul doar pe metrou
+
+  // validator: cheia trebuie să fie singurul drum cel mai scurt
+  assert.ok(logic.validate({ ...part, key: ['gara', 'piata', 'parc', 'lac', 'teatru'] }).some((e) => e.includes('mai scurt')));
+  assert.ok(logic.validate({ ...part, key: ['gara', 'teatru'] }).some((e) => e.includes('nicio linie')));
+  assert.ok(logic.validate({ ...part, key: undefined }).some((e) => e.includes('exact unul')));
+  assert.ok(logic.validate({ ...part, to: 'gara' }).some((e) => e.includes('diferite')));
+});

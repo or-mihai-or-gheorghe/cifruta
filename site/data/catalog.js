@@ -100,7 +100,7 @@ export default {
         {
           id: 'demo',
           title: 'Toate tipurile de exerciții',
-          tests: [{ id: 'demo', file: 'demo.js', version: 1, theme: 'mare', title: 'Toate tipurile de exerciții', subtitle: 'Pagina de atelier pentru autori', estMin: 45, exercises: 17 }],
+          tests: [{ id: 'demo', file: 'demo.js', version: 1, theme: 'mare', title: 'Toate tipurile de exerciții', subtitle: 'Pagina de atelier pentru autori', estMin: 45, exercises: 18 }],
         },
       ],
     },

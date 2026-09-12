@@ -9,10 +9,11 @@ import mark from '../types/mark/logic.js';
 import match from '../types/match/logic.js';
 import money from '../types/money/logic.js';
 import order from '../types/order/logic.js';
+import route from '../types/route/logic.js';
 import slider from '../types/slider/logic.js';
 import truefalse from '../types/truefalse/logic.js';
 
-const LOGIC = { choice, truefalse, fill, slider, match, order, categorize, mark, build, clock, money };
+const LOGIC = { choice, truefalse, fill, slider, match, order, categorize, mark, build, clock, money, route };
 
 export const TYPE_NAMES = Object.keys(LOGIC);
 
