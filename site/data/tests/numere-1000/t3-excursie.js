@@ -187,13 +187,11 @@ export default {
       title: 'Cât durează fiecare tren?',
       context: { text: 'Irina compară trenurile din orar.', visual: ORAR, size: 'lg' },
       type: 'fill',
-      layout: 'table',
       prompt: 'Alege durata fiecărui drum.',
-      head: ['Tren', 'Pleacă', 'Ajunge', 'Durata'],
       rows: [
-        ['Tren 1', '8:00', '10:30', '[[a]]'],
-        ['Tren 2', '9:15', '11:15', '[[b]]'],
-        ['Tren 3', '10:45', '12:00', '[[c]]'],
+        'Tren 1, de la 8:00 la 10:30: [[a]]',
+        'Tren 2, de la 9:15 la 11:15: [[b]]',
+        'Tren 3, de la 10:45 la 12:00: [[c]]',
       ],
       blanks: {
         a: { kind: 'select', options: ['o oră și un sfert', '2 ore', '2 ore și jumătate'], answer: '2 ore și jumătate' },
