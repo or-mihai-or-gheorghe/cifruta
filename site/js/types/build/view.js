@@ -32,10 +32,12 @@ export default {
     function bump(id, place, delta) {
       if (isLocked(mode)) return;
       const beads = { ...Object.fromEntries(places.map((p) => [p, 0])), ...(answer[id] ?? {}) };
+      const was = beads[place];
       beads[place] = Math.max(0, Math.min(9, beads[place] + delta));
       answer = { ...answer, [id]: beads };
       if (places.every((p) => beads[p] === 0)) delete answer[id]; // toate bilele scoase: la fel ca neatinsă
       paint(id);
+      if (beads[place] > was) rows[id].pic.querySelector(`.v-abacus__bead[data-rod="${place}"][data-i="${beads[place] - 1}"]`)?.classList.add('is-new'); // bila nouă cade pe tijă
       ctx.onChange(answer);
     }
 

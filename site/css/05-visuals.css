@@ -7,3 +7,8 @@
 
 .v-inline { display: inline-block; vertical-align: middle; width: 2.6em; margin-inline: 0.1em; }
 .v-inline .v-svg { width: 100%; }
+
+/* Părți animate ale desenelor. Regulă: nici grupul animat, nici copiii lui nu poartă atributul `transform`
+   (Chromium le-ar strica), iar `transform-box` se pune doar pe aceste grupuri. */
+.v-clock__hand { transform-box: view-box; transform-origin: 50px 50px; transition: transform 400ms var(--ease-out); }
+.v-abacus__bead.is-new { transform-box: fill-box; animation: anim-drop 250ms var(--ease-out) both; }

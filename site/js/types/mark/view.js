@@ -1,6 +1,6 @@
 // mark — atinge (colorează) elementele potrivite; cu paletă: alege întâi culoarea.
 
-import { h } from '../../core/dom.js';
+import { h, pop } from '../../core/dom.js';
 import { md, plain } from '../../core/markup.js';
 import { hasVisual, visualSVG } from '../../visuals/index.js';
 import { isLocked, itemFace, setState } from '../_view.js';
@@ -27,13 +27,14 @@ export default {
             'aria-checked': String(p.id === brush),
             'data-color': p.id,
             'data-testid': `brush-${p.id}`,
-            onClick: () => {
+            onClick: (e) => {
               brush = p.id;
               for (const b of palette.children) {
                 const on = b.dataset.color === brush;
                 b.classList.toggle('is-selected', on);
                 b.setAttribute('aria-checked', String(on));
               }
+              pop(e.currentTarget);
             },
           }, h('span', { class: 'ex-palette__swatch', 'aria-hidden': 'true' }, shapeOf(p.id)), h('span', { html: md(p.label) }))))
       : null;
@@ -62,8 +63,7 @@ export default {
         ctx.onChange([...marked]);
       }
       paint();
-      items[id].classList.add('anim-pop');
-      setTimeout(() => items[id].classList.remove('anim-pop'), 320);
+      pop(items[id]);
     }
 
     function paint() {

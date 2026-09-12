@@ -1,7 +1,7 @@
 // order — carduri care se mută: atinge un card, apoi locul unde îl vrei (sau trage-l).
 
 import { createDnd } from '../../core/dnd.js';
-import { h } from '../../core/dom.js';
+import { h, pop } from '../../core/dom.js';
 import { plain } from '../../core/markup.js';
 import { shuffled } from '../../core/rng.js';
 import { hasVisual, visualSVG } from '../../visuals/index.js';
@@ -54,15 +54,29 @@ export default {
         const to = order.indexOf(zone.dataset.id);
         if (from < 0 || to < 0 || from === to) return;
         const keepFocus = row.contains(document.activeElement);
+        const before = Object.fromEntries(order.map((id) => [id, cards[id].getBoundingClientRect()]));
         order.splice(from, 1);
         order.splice(to, 0, item.dataset.id);
         touched = true;
-        // mută doar cardul ales (celelalte rămân pe loc) și păstrează focusul pe el, pentru tastatură
+        // mută doar cardul ales și păstrează focusul pe el (tastatură); vecinii alunecă spre locul nou (FLIP)
         row.insertBefore(slots[item.dataset.id], slots[order[to + 1]] ?? null);
         label();
+        for (const id of order) {
+          if (id === item.dataset.id) continue;
+          const now = cards[id].getBoundingClientRect();
+          const dx = before[id].left - now.left;
+          const dy = before[id].top - now.top;
+          if (!dx && !dy) continue;
+          cards[id].style.transition = 'none';
+          cards[id].style.transform = `translate(${dx}px, ${dy}px)`;
+        }
+        void row.offsetWidth; // reflow: pornim de la vechea poziție…
+        for (const id of order) {
+          cards[id].style.transition = '';
+          cards[id].style.transform = ''; // …și tranziția din CSS îi aduce la locul nou
+        }
         if (keepFocus) item.focus();
-        item.classList.add('anim-pop');
-        setTimeout(() => item.classList.remove('anim-pop'), 320);
+        pop(item);
         ctx.onChange([...order]);
       },
     });

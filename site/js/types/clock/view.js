@@ -2,7 +2,7 @@
 
 import { h } from '../../core/dom.js';
 import { md } from '../../core/markup.js';
-import { visualSVG } from '../../visuals/index.js';
+import { visualLabel, visualSVG } from '../../visuals/index.js';
 import { isLocked, setState } from '../_view.js';
 import { timeText } from './logic.js';
 
@@ -14,6 +14,7 @@ export default {
     let answer = {};
     let mode = 'solve';
     const rows = {};
+    const rot = {}; // rotația acumulată a acelor (grade): acul se rotește mereu în direcția butonului, fără salt peste 12
 
     for (const item of part.items) {
       const face = h('div', { class: 'ex-clock__face' });
@@ -40,14 +41,27 @@ export default {
       const t = answer[id] ?? { h: 12, m: 0 };
       const total = (((t.h % 12) * 60 + t.m + minutes) % 720 + 720) % 720;
       answer = { ...answer, [id]: { h: Math.floor(total / 60) === 0 ? 12 : Math.floor(total / 60), m: total % 60 } };
-      paint(id);
+      const hour = rows[id].face.querySelector('.v-clock__hand--h');
+      const minute = rows[id].face.querySelector('.v-clock__hand--m');
+      if (rot[id] && hour && minute) {
+        // doar acele se rotesc (tranziție CSS); desenul rămâne același
+        rot[id].h += minutes * 0.5;
+        rot[id].m += minutes * 6;
+        hour.style.transform = `rotate(${rot[id].h}deg)`;
+        minute.style.transform = `rotate(${rot[id].m}deg)`;
+        rows[id].row.classList.remove('is-untouched');
+        rows[id].face.querySelector('svg')?.setAttribute('aria-label', visualLabel({ v: 'clock', ...answer[id] }));
+      } else {
+        paint(id);
+      }
       ctx.onChange(answer);
     }
 
     function paint(id) {
-      const t = answer[id];
-      rows[id].row.classList.toggle('is-untouched', !t);
-      rows[id].face.innerHTML = visualSVG({ v: 'clock', ...(t ? { h: t.h, m: t.m } : { h: 12, m: 0 }) });
+      const t = answer[id] ?? { h: 12, m: 0 };
+      rows[id].row.classList.toggle('is-untouched', !answer[id]);
+      rot[id] = { h: (t.h % 12) * 30 + t.m * 0.5, m: t.m * 6 };
+      rows[id].face.innerHTML = visualSVG({ v: 'clock', h: t.h, m: t.m });
     }
     for (const id of Object.keys(rows)) paint(id);
 

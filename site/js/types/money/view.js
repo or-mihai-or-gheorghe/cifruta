@@ -1,6 +1,6 @@
 // money — alege portofelul, apoi atinge bancnotele ca să le pui; atinge o bancnotă din portofel ca s-o scoți.
 
-import { h } from '../../core/dom.js';
+import { h, pop } from '../../core/dom.js';
 import { md } from '../../core/markup.js';
 import { cantitate } from '../../core/ro.js';
 import { moneySum } from '../../core/rules.js';
@@ -67,6 +67,9 @@ export default {
       combo[value] = (combo[value] ?? 0) + 1;
       answer = { ...answer, [active]: combo };
       paint();
+      const w = wallets[active];
+      pop(w.pieces.querySelector(`.ex-piece[data-value="${value}"]`)); // bancnota nou pusă
+      pop(w.sum);
       ctx.onChange(answer);
     }
 
@@ -92,6 +95,7 @@ export default {
           ? notes.map((value) => h('button', {
               type: 'button',
               class: 'ex-piece',
+              'data-value': value,
               'aria-label': `scoate ${cantitate(value, 'leu', 'lei')}`,
               html: visualSVG({ v: 'banknote', value }),
               onClick: (e) => {

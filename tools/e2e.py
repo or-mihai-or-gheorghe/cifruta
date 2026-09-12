@@ -106,6 +106,15 @@ def smoke(run: Run, page: Page, vp: str):
     run.check(fonts, f"[{vp}] fonturile Andika și Baloo 2 sunt încărcate")
 
 
+def watch_pops(page: Page, selector: str):
+    """Numără de câte ori un element de sub `selector` primește clasa anim-pop (clasa ține doar ~300 ms)."""
+    page.evaluate(
+        """(sel) => { window.__pops = 0; new MutationObserver((ms) => { for (const m of ms) if (m.target.classList.contains('anim-pop')) window.__pops++; })
+          .observe(document.querySelector(sel), { attributes: true, attributeFilter: ['class'], subtree: true }); }""",
+        selector,
+    )
+
+
 def types_flow(run: Run, page: Page, vp: str):
     """Gesturi reale pe fiecare tip din #/atelier/tipuri; verifică evaluarea cu __dbg."""
     run.goto(page, "atelier/tipuri", debug=True)
@@ -113,6 +122,8 @@ def types_flow(run: Run, page: Page, vp: str):
     touch = VIEWPORTS[vp].get("has_touch", False)
     tap = (lambda sel: page.locator(sel).first.tap()) if touch else (lambda sel: page.locator(sel).first.click())
     tid = lambda t: f"[data-testid='{t}']"
+    pops = lambda: page.evaluate("window.__pops")
+    no_pop_class = re.compile(r"\banim-pop\b")
 
     def typing(ex, values):
         box = page.locator(tid(f"demo-{ex}"))
@@ -140,6 +151,7 @@ def types_flow(run: Run, page: Page, vp: str):
 
     typing("fill-tree", {"a": 40, "b": 7, "c": 80, "d": 0}); ok("fill-tree")
 
+    watch_pops(page, tid("demo-categorize"))
     tap(tid("item-vaca")); tap(tid("bin-dom"))
     if touch:
         tap(tid("item-lup")); tap(tid("bin-sal"))
@@ -148,6 +160,9 @@ def types_flow(run: Run, page: Page, vp: str):
     tap(tid("item-oaie")); tap(tid("bin-dom"))
     tap(tid("item-urs")); tap(tid("bin-sal"))
     ok("categorize")
+    run.check(pops() >= 4, f"[{vp}] sortare: fiecare element pus în coș face pop ({pops()} pop-uri)")
+    expect(page.locator(tid("item-vaca"))).not_to_have_class(no_pop_class)
+    run.check(True, f"[{vp}] sortare: clasa anim-pop dispare după animație")
 
     for s in ("s1", "s3", "s5"):
         tap(tid(f"mark-{s}"))
@@ -158,6 +173,13 @@ def types_flow(run: Run, page: Page, vp: str):
     for _ in range(6):
         tap(tid("abacus-i1-U-plus"))
     ok("build")
+    beads = page.evaluate("""() => {
+      const pic = document.querySelector("[data-testid='demo-build'] .ex-abacus__art");
+      const fresh = pic.querySelector('.v-abacus__bead.is-new');
+      return { z: pic.querySelectorAll('.v-abacus__bead[data-rod=Z]').length, u: pic.querySelectorAll('.v-abacus__bead[data-rod=U]').length,
+               fresh: fresh && [fresh.dataset.rod, fresh.dataset.i, getComputedStyle(fresh).animationName] };
+    }""")
+    run.check(beads == {"z": 4, "u": 6, "fresh": ["U", "5", "anim-drop"]}, f"[{vp}] numărătoare: 4 și 6 bile, ultima bilă cade pe tijă ({beads})")
 
     typing("fill-table", {"a": 61}); ok("fill-table")
     typing("fill-chain", {"a": 43, "b": 34, "c": 34}); ok("fill-chain")
@@ -216,12 +238,16 @@ def types_flow(run: Run, page: Page, vp: str):
     for _ in range(3):
         tap(tid("clock-i1-h-minus"))
     tap(tid("clock-i1-m-plus"))
+    hands = page.evaluate("[...document.querySelectorAll(\"[data-testid='demo-clock'] .v-clock__hand\")].map((g) => g.style.transform)")
+    run.check(hands == ["rotate(-75deg)", "rotate(-900deg)"], f"[{vp}] ceas: acele se rotesc pe loc, în direcția butonului ({hands})")
     ok("clock")
 
     typing("fill-steps", {"a": 12, "b": 18, "c": 30, "d": 30, "e": 15, "f": 15}); ok("fill-steps")
 
+    watch_pops(page, tid("wallet-f1"))
     for note in (10, 1, 1):
         tap(tid(f"note-{note}"))
+    run.check(pops() >= 6, f"[{vp}] bani: bancnota pusă și suma fac pop ({pops()} pop-uri)")
     page.locator(tid("wallet-f2")).click(position={"x": 20, "y": 20})
     for note in (5, 5, 1, 1):
         tap(tid(f"note-{note}"))
@@ -376,6 +402,8 @@ def keyboard_flow(run: Run, browser, base: str):
     key("[data-testid=tray]", "Enter")
     back = (answer("categorize") or {}).get("vaca")
     run.check(in_bin == "dom" and back is None, f"[tastatură] un element intră în coș și se scoate înapoi pe tavă ({in_bin} → {back})")
+    expect(page.locator("[data-testid=item-vaca]")).not_to_have_class(re.compile(r"\banim-pop\b"))
+    run.check(True, "[tastatură] la mișcare redusă clasa anim-pop tot dispare")
 
     key("[data-testid=note-10]", "Enter")
     added = (answer("money") or {}).get("f1", {}).get("10")

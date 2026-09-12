@@ -18,6 +18,10 @@
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
 }
+@keyframes anim-drop {
+  from { opacity: 0.4; transform: translateY(-40px); }
+  to { opacity: 1; transform: none; }
+}
 @keyframes anim-flip-in {
   from { opacity: 0; transform: rotateX(90deg); }
   to { opacity: 1; transform: none; }

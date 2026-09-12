@@ -1,7 +1,7 @@
 // match — unește cu săgeți: atinge un element din stânga, apoi perechea lui din dreapta (sau trage).
 
 import { createDnd } from '../../core/dnd.js';
-import { h } from '../../core/dom.js';
+import { h, pop } from '../../core/dom.js';
 import { plain } from '../../core/markup.js';
 import { shuffled } from '../../core/rng.js';
 import { feedbackBox, isLocked, itemFace, setState } from '../_view.js';
@@ -93,10 +93,15 @@ export default {
       onDrop(item, zone) {
         const l = item.dataset.id;
         const r = zone.dataset.id;
+        const linking = answer[l] !== r;
         answer = { ...answer };
-        if (answer[l] === r) delete answer[l];
-        else answer[l] = r;
+        if (linking) answer[l] = r;
+        else delete answer[l];
         paint();
+        if (linking) {
+          pop(item);
+          pop(zone);
+        }
         ctx.onChange(answer);
       },
     });

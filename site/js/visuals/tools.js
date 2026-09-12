@@ -24,7 +24,7 @@ registerVisual('abacus', {
       const count = Math.max(0, Math.min(9, num(p[k], 0)));
       out += `<line x1="${x}" y1="12" x2="${x}" y2="116" stroke="${C.gray}" stroke-width="4" stroke-linecap="round"/>`;
       for (let b = 0; b < count; b++) {
-        out += `<ellipse cx="${x}" cy="${110 - 11 * b}" rx="16" ry="5.5" fill="${PLACE[k].color}" ${st(1.5)}/>`;
+        out += `<ellipse class="v-abacus__bead" data-rod="${k}" data-i="${b}" cx="${x}" cy="${110 - 11 * b}" rx="16" ry="5.5" fill="${PLACE[k].color}" ${st(1.5)}/>`;
       }
       out += `<rect x="${x - 13}" y="126" width="26" height="15" rx="3" fill="${PLACE[k].color}" ${st(1.5)}/>`;
       out += txt(x, 134, k, { size: 11, fill: C.white });
@@ -203,8 +203,10 @@ registerVisual('clock', {
     if (has(p.h)) {
       const h = num(p.h, 0);
       const m = num(p.m, 0);
-      out += `<line x1="50" y1="50" x2="50" y2="31" stroke="${C.ink}" stroke-width="5" stroke-linecap="round" transform="rotate(${(h % 12) * 30 + m * 0.5} 50 50)"/>`;
-      out += `<line x1="50" y1="50" x2="50" y2="22" stroke="${C.blueDark}" stroke-width="3" stroke-linecap="round" transform="rotate(${m * 6} 50 50)"/>`;
+      // acele stau în grupuri cu clasă, rotite prin CSS (nu prin atributul transform), ca vederea să le poată roti lin
+      const hand = (k, len, color, w, deg) =>
+        `<g class="v-clock__hand v-clock__hand--${k}" style="transform: rotate(${deg}deg)"><line x1="50" y1="50" x2="50" y2="${len}" stroke="${color}" stroke-width="${w}" stroke-linecap="round"/></g>`;
+      out += hand('h', 31, C.ink, 5, (h % 12) * 30 + m * 0.5) + hand('m', 22, C.blueDark, 3, m * 6);
     }
     return `${out}<circle cx="50" cy="50" r="3.5" fill="${C.ink}"/>`;
   },

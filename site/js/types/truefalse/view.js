@@ -1,6 +1,6 @@
 // truefalse — fiecare afirmație are butoanele A (adevărat) și F (fals).
 
-import { h } from '../../core/dom.js';
+import { h, pop } from '../../core/dom.js';
 import { md } from '../../core/markup.js';
 import { feedbackBox, isLocked, setState } from '../_view.js';
 
@@ -43,6 +43,7 @@ export default {
       if (isLocked(mode)) return;
       answer = { ...answer, [id]: value };
       paint();
+      pop(rows[id].querySelector('.ex-tf__btn.is-selected'));
       ctx.onChange(answer);
     }
 

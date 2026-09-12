@@ -1,7 +1,7 @@
 // categorize — pune fiecare element în coșul potrivit (atinge elementul, apoi coșul; sau trage-l).
 
 import { createDnd } from '../../core/dnd.js';
-import { h } from '../../core/dom.js';
+import { h, pop } from '../../core/dom.js';
 import { md, plain } from '../../core/markup.js';
 import { shuffled } from '../../core/rng.js';
 import { hasVisual, visualSVG } from '../../visuals/index.js';
@@ -68,6 +68,7 @@ export default {
           delete answer[id];
         }
         paint();
+        pop(item); // elementul „aterizează” la locul nou
         ctx.onChange(answer);
       },
     });

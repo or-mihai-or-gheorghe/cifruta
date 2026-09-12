@@ -1,6 +1,6 @@
 // fill — casete de completat în șabloane; layout-uri inline, steps, table, tree, chain.
 
-import { h } from '../../core/dom.js';
+import { h, pop } from '../../core/dom.js';
 import { md } from '../../core/markup.js';
 import { feedbackBox, isLocked, setState } from '../_view.js';
 import { keyOf, kindOf } from './logic.js';
@@ -87,10 +87,11 @@ export default {
             'aria-label': SEGMENT_LABELS[v] ?? v,
             'data-testid': `seg-${id}-${v}`,
             'data-value': v,
-            onClick: () => {
+            onClick: (e) => {
               if (isLocked(mode)) return;
               const selected = group.dataset.value === v ? '' : v;
               paint(selected);
+              if (selected) pop(e.currentTarget);
               change(id, selected);
             },
           },
