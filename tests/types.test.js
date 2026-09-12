@@ -146,3 +146,32 @@ test('fill: eticheta casetei vine din șablon (pentru cititorul de ecran)', () =
   assert.equal(blankLabel(chain, 'x'), '25 +18 = …');
   assert.equal(blankLabel(chain, 'y'), '… -3 = …');
 });
+
+test('mark: regulile de set acceptă orice selecție bună și explică prima regulă încălcată', () => {
+  const ok = evalPart('mark-rules.a', ['p1', 'p2', 'p4']); // 30 + 45 + 20 = 95
+  assert.equal(ok.earned, 1);
+  assert.equal(ok.feedback, null);
+  assert.match(ok.summary, /3 jucării, împreună 95 de lei/);
+  assert.equal(evalPart('mark-rules.a', ['p4', 'p6']).earned, 1); // 25 de lei
+  const few = evalPart('mark-rules.a', ['p3']);
+  assert.equal(few.earned, 0);
+  assert.match(few.feedback, /Ai ales 1 jucărie; trebuie cel puțin 2 jucării/);
+  const much = evalPart('mark-rules.a', ['p3', 'p5']); // 140
+  assert.equal(much.earned, 0);
+  assert.match(much.feedback, /140 de lei, mai mult decât 100 de lei/);
+  assert.equal(evalPart('mark-rules.a', []).earned, 0);
+  assert.equal(evalPart('mark-rules.a', 'p1,p2').earned, 0); // formă greșită
+  assert.equal(evalPart('mark-rules.a', ['p1', 'p1', 'p4', 'x']).earned, 1); // dublurile și id-urile străine se ignoră
+  const sol = getLogic('mark').solution(parts['mark-rules.a']);
+  assert.equal(evalPart('mark-rules.a', sol).earned, 1);
+  assert.equal(sol.length, 2); // cea mai scurtă selecție bună
+
+  const base = parts['mark-rules.a'];
+  const withInclude = { ...base, rules: { ...base.rules, include: ['p3'], exclude: ['p6'] } };
+  assert.match(getLogic('mark').evaluate(withInclude, ['p1', 'p2']).feedback, /Trebuie să alegi și „robot/);
+  assert.match(getLogic('mark').evaluate(withInclude, ['p3', 'p6']).feedback, /nu are voie/);
+  assert.equal(getLogic('mark').evaluate(withInclude, ['p3', 'p4']).earned, 1);
+  assert.ok(getLogic('mark').validate({ ...base, rules: { count: { min: 2 }, sum: { max: 10 } } }).some((e) => e.includes('nicio selecție')));
+  assert.ok(getLogic('mark').validate({ ...base, rules: { sum: { max: 100 } } }).some((e) => e.includes('count.min')));
+  assert.ok(getLogic('mark').validate({ ...base, rules: { count: { min: 1 } }, key: ['p1'] }).some((e) => e.includes('nu se combină')));
+});

@@ -57,7 +57,7 @@ export default {
     {
       id: 'truefalse',
       level: 'usor',
-      estMin: 3,
+      estMin: 2,
       concepts: ['med.soare'],
       title: 'Adevărat sau fals',
       context: { visual: { v: 'sky-body', name: 'soare' }, text: 'Privește cerul și gândește-te ce e adevărat.' },
@@ -72,7 +72,7 @@ export default {
     {
       id: 'fill',
       level: 'usor',
-      estMin: 3,
+      estMin: 2,
       concepts: ['mat.op.cu-trecere', 'mat.op.necunoscut', 'mat.nr100.comparare', 'mat.op.semne'],
       title: 'Completează căsuțele',
       type: 'fill',
@@ -142,6 +142,25 @@ export default {
       ],
       rule: { rule: 'parity', even: true },
       explain: { idea: 'Un număr este par dacă cifra unităților este 0, 2, 4, 6 sau 8.' },
+    },
+    {
+      id: 'mark-rules',
+      level: 'usor',
+      estMin: 2,
+      concepts: ['mat.mas.buget', 'mat.pb.decizie'],
+      title: 'Alege după reguli',
+      type: 'mark',
+      prompt: 'Alege **cel puțin 2** jucării, dar să plătești **cel mult 100 de lei**.',
+      items: [
+        { id: 'p1', text: 'carte, 30 de lei', emoji: 'carte', n: 30 },
+        { id: 'p2', text: 'minge, 45 de lei', emoji: 'minge', n: 45 },
+        { id: 'p3', text: 'robot, 80 de lei', emoji: 'robot', n: 80 },
+        { id: 'p4', text: 'cană, 20 de lei', emoji: 'cana', n: 20 },
+        { id: 'p5', text: 'puzzle, 60 de lei', emoji: 'puzzle', n: 60 },
+        { id: 'p6', text: 'creion, 5 lei', emoji: 'creion', n: 5 },
+      ],
+      rules: { count: { min: 2 }, sum: { max: 100 }, noun: ['jucărie', 'jucării'] },
+      explain: { idea: 'Sunt mai multe răspunsuri bune: adună prețurile și oprește-te înainte de 100 de lei.', steps: ['De exemplu: cană 20 + creion 5 = 25 de lei.', 'Sau: carte 30 + minge 45 + cană 20 = 95 de lei.'] },
     },
     {
       id: 'build',

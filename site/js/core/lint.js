@@ -19,7 +19,8 @@ export function lintText(s) {
 // câmpuri care conțin identificatori, nu text pentru copii. Se sar doar când au valori simple:
 // `constraints[].a` e un id, dar `blanks.a` e o casetă cu mesaje care trebuie verificate. `key` se sare mereu.
 const ID_KEYS = new Set(['id', 'type', 'layout', 'kind', 'level', 'v', 'bin', 'color', 'skin', 'rule', 'direction',
-  'concepts', 'a', 'b', 'of', 'theme', 'places', 'tool', 'file', 'expr', 'calc', 'checks', 'correct', 'if', 'name', 'style']);
+  'concepts', 'a', 'b', 'of', 'theme', 'places', 'tool', 'file', 'expr', 'calc', 'checks', 'correct', 'if', 'name', 'style',
+  'from', 'to', 'via', 'avoid', 'stops', 'include', 'exclude', 'lines', 'ids', 'hide', 'emoji', 'emojis', 'icon', 'path']);
 
 const isScalar = (v) => v === null || typeof v !== 'object';
 const skipped = (k, v) => k === 'key' || (ID_KEYS.has(k) && (isScalar(v) || (Array.isArray(v) && v.every(isScalar))));

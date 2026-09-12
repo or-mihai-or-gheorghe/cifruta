@@ -4,7 +4,7 @@ import { h, pop } from '../../core/dom.js';
 import { play } from '../../core/sound.js';
 import { md, plain } from '../../core/markup.js';
 import { hasVisual, visualSVG } from '../../visuals/index.js';
-import { isLocked, itemFace, setState } from '../_view.js';
+import { feedbackBox, isLocked, itemFace, setState } from '../_view.js';
 
 const SHAPES = ['●', '▲', '■', '◆']; // fiecare culoare din paletă are și o formă, pentru cine nu deosebește culorile
 
@@ -51,7 +51,8 @@ export default {
         part.palette ? h('span', { class: 'ex-mark__tag' }) : null);
       return items[it.id];
     }));
-    el.append(...[palette, grid].filter(Boolean));
+    const notes = h('div', { class: 'l-stack l-stack--sm' }); // rezumatul selecției și regula încălcată (reguli de set)
+    el.append(...[palette, grid, notes].filter(Boolean));
 
     function tap(id) {
       if (isLocked(mode)) return;
@@ -94,10 +95,12 @@ export default {
       showResult(res) {
         for (const r of res.items) {
           const btn = items[r.id];
+          if (!btn) continue;
           if (part.palette) setState(btn, r.given === null && r.expected === null ? null : r.ok ? 'correct' : 'wrong');
           else if (r.given) setState(btn, r.ok ? 'correct' : 'wrong');
           else setState(btn, r.expected ? 'missed' : null);
         }
+        notes.replaceChildren(...[res.summary, res.feedback].filter(Boolean).map((t) => feedbackBox(t)));
       },
       destroy() {},
     };

@@ -76,8 +76,11 @@ export function validateTest(raw, { concepts } = {}) {
       }
       checkVisual(part.visual, `${pw}.visual`);
       checkVisual(part.itemVisual, `${pw}.itemVisual`);
-      for (const list of ['items', 'bins', 'left', 'right']) {
+      for (const list of ['items', 'bins', 'left', 'right', 'categories']) {
         for (const it of Array.isArray(part[list]) ? part[list] : []) checkVisual(it?.visual, `${pw}.${list}.${it?.id}.visual`);
+      }
+      for (const it of Array.isArray(part.items) ? part.items : []) {
+        for (const o of Array.isArray(it?.options) ? it.options : []) checkVisual(o?.visual, `${pw}.${it.id}.${o?.id}.visual`);
       }
       const logic = getLogic(part.type);
       let partErrors;
