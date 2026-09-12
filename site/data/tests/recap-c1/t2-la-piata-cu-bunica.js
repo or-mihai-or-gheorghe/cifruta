@@ -11,7 +11,7 @@ const UNITS = [
 export default {
   schema: 1,
   id: 'recap-c1-t2',
-  version: 1,
+  version: 2,
   theme: 'piata',
   title: 'La piață cu bunica',
   subtitle: 'Adunări și scăderi cu trecere peste ordin · măsurări · plantele',
@@ -52,7 +52,7 @@ export default {
       explain: {
         idea: 'Numărăm din 10 în 10 cofrajele pline, apoi adăugăm ouăle rămase.',
         steps: ['3 cofraje: 10 + 10 + 10 = 30, plus 7 ouă → 37.', '5 cofraje: 10, 20, 30, 40, 50, plus 2 ouă → 52.'],
-        trap: 'Nu număra ouăle unul câte unul — e ușor să greșești. Grupează-le câte 10!',
+        trap: 'Cofrajul început nu e plin: numără ouăle din el unul câte unul, apoi adaugă-le la zecile pline.',
       },
     },
     {
@@ -69,9 +69,9 @@ export default {
           prompt: 'Alege unitatea de măsură potrivită.',
           items: [
             { id: 'i1', q: 'lungimea creionului', options: UNITS, correct: 'cm' },
-            { id: 'i2', q: 'câtă apă este în sticlă', options: UNITS, correct: 'l' },
-            { id: 'i3', q: 'cât costă merele', options: UNITS, correct: 'lei' },
-            { id: 'i4', q: 'cât durează drumul până la piață', options: UNITS, correct: 'ora' },
+            { id: 'i2', q: 'cât costă merele', options: UNITS, correct: 'lei' },
+            { id: 'i3', q: 'cât durează drumul până la piață', options: UNITS, correct: 'ora' },
+            { id: 'i4', q: 'câtă apă este în sticlă', options: UNITS, correct: 'l' },
           ],
         },
         {
@@ -88,9 +88,9 @@ export default {
         idea: 'Fiecare mărime are unitatea ei: lungimea în **centimetri**, lichidele în **litri**, prețul în **lei**, timpul în **ore**.',
         steps: [
           'Creionul se măsoară cu rigla, în centimetri.',
-          'Apa din sticlă se măsoară în litri.',
           'Prețul merelor se spune în lei.',
           'Durata drumului se măsoară în ore (sau minute).',
+          'Apa din sticlă se măsoară în litri.',
           'Creionul pornește de la 0 și ajunge la 7 → are 7 centimetri.',
         ],
         trap: 'Pe riglă pornim de la **0**, nu de la 1.',
@@ -170,12 +170,13 @@ export default {
           id: 'b',
           concepts: ['mat.op.greseala'],
           type: 'choice',
-          prompt: 'Radu a calculat **58 + 26 = 74**. Ce a greșit?',
+          shuffle: true,
+          prompt: 'Radu a calculat **47 + 35 = 72**. Ce a greșit?',
           items: [
             {
               id: 'i1',
               options: [
-                { id: 'zece', text: 'A uitat zecea nouă din 8 + 6 = 14.' },
+                { id: 'zece', text: 'A uitat zecea nouă din 7 + 5 = 12.' },
                 { id: 'scadere', text: 'A scăzut în loc să adune.' },
                 { id: 'zeci', text: 'A adunat doar zecile.' },
               ],
@@ -186,7 +187,7 @@ export default {
       ],
       explain: {
         idea: 'Când unitățile adunate trec de 9, se formează **o zece nouă**, pe care o adăugăm la zeci.',
-        steps: ['27 + 15: 7 + 5 = 12 → o zece nouă → 42.', '36 + 18 = 54.', '45 + 19 = 64.', '58 + 26: 8 + 6 = 14 → 7 zeci + o zece nouă = 8 zeci → 84.'],
+        steps: ['27 + 15: 7 + 5 = 12 → o zece nouă → 42.', '36 + 18 = 54.', '45 + 19 = 64.', '58 + 26: 8 + 6 = 14 → 7 zeci + o zece nouă = 8 zeci → 84.', 'Radu: 47 + 35 → 7 + 5 = 12, o zece nouă → 82, nu 72.'],
         trap: 'Eticheta cu 74 este capcana pentru cine uită zecea nouă.',
       },
     },
@@ -236,13 +237,13 @@ export default {
           prompt: 'Citește tabelul, apoi completează ultimul rând.',
           head: ['Ziua', 'Pepeni vânduți'],
           rows: [
-            ['vineri', '26'],
+            ['vineri', '24'],
             ['sâmbătă', '52'],
             ['duminică', '35'],
             ['vineri și duminică împreună', '[[a]]'],
           ],
-          checks: ['26 + 35 = [[a]]'],
-          blanks: { a: { answer: 61, feedback: [{ if: 51, text: '6 + 5 = 11: nu uita zecea nouă!' }] } },
+          checks: ['24 + 35 = [[a]]'],
+          blanks: { a: { answer: 59, feedback: [{ if: 87, text: '„Vineri și duminică împreună” înseamnă doar cele două zile, nu toate trei.' }] } },
         },
         {
           id: 'b',
@@ -267,14 +268,14 @@ export default {
           type: 'fill',
           prompt: 'Cu câți pepeni a vândut **mai mulți** sâmbătă decât vineri?',
           rows: ['Diferența: [[a]]'],
-          checks: ['52 - 26 = [[a]]'],
-          blanks: { a: { answer: 26, feedback: [{ if: 78, text: '„Cu câți mai mulți” înseamnă **diferența**: scădem 52 − 26.' }, { if: 34, text: 'Din 2 nu putem lua 6: desfacem o zece. 12 − 6 = 6, iar 4 − 2 = 2 → 26.' }] } },
+          checks: ['52 - 24 = [[a]]'],
+          blanks: { a: { answer: 28, feedback: [{ if: 76, text: '„Cu câți mai mulți” înseamnă **diferența**: scădem 52 − 24.' }, { if: 32, text: 'Din 2 nu putem lua 4: desfacem o zece. 12 − 4 = 8, iar 4 − 2 = 2 → 28.' }] } },
         },
       ],
       explain: {
         idea: 'Tabelul ne arată datele. „Împreună” înseamnă adunare; „cu câți mai mulți” înseamnă scădere.',
-        steps: ['26 + 35 = 61.', 'Cel mai mare număr din tabel este 52 → sâmbătă.', '52 − 26 = 26.'],
-        check: '26 + 26 = 52',
+        steps: ['24 + 35 = 59.', 'Dintre cele trei zile, cel mai mare număr este 52 → sâmbătă.', '52 − 24 = 28.'],
+        check: '28 + 24 = 52',
       },
     },
     {
@@ -314,6 +315,7 @@ export default {
           id: 'c',
           concepts: ['mat.mas.ceas', 'mat.mas.durata'],
           type: 'choice',
+          shuffle: true,
           prompt: 'Bunica stă la piață **2 ore**. La ce oră pleacă?',
           items: [
             {
@@ -396,7 +398,7 @@ export default {
           prompt: 'Câte ouă i-au rămas? Rezolvă în **primul mod**.',
           rows: [
             { label: 'Câte ouă au rămas după dimineață?', t: '45 − [[a]] = [[b]]' },
-            { label: 'Câte ouă au rămas seara?', t: '[[c]] − 12 = [[d]]' },
+            { label: 'Câte ouă au rămas după-amiază?', t: '[[c]] − 12 = [[d]]' },
           ],
           blanks: { a: { answer: 18 }, b: { answer: 27 }, c: { answer: 27 }, d: { answer: 15 } },
         },
@@ -416,12 +418,13 @@ export default {
           id: 'c',
           concepts: ['mat.pb.doua-moduri'],
           type: 'choice',
+          shuffle: true,
           prompt: 'De ce este mai ușor al doilea mod?',
           items: [
             {
               id: 'i1',
               options: [
-                { id: 'rotund', text: 'Pentru că 18 + 12 = 30, un număr rotund, ușor de scăzut.' },
+                { id: 'rotund', text: 'Pentru că suma vândută e un număr rotund, ușor de scăzut.' },
                 { id: 'rezultat', text: 'Pentru că dă alt rezultat.' },
                 { id: 'scurt', text: 'Pentru că are un singur calcul.' },
               ],

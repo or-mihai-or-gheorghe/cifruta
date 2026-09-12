@@ -52,7 +52,7 @@ export default {
           ],
         },
       ],
-      explain: { idea: 'Adunăm zecile cu zecile: 3 zeci + 2 zeci = 5 zeci, adică 50.' },
+      explain: { idea: 'Adunăm zecile cu zecile: 3 zeci + 2 zeci = 5 zeci, adică 50.', steps: ['30 + 20 = 50.', 'Racheta are un vârf **triunghi** și un hublou **cerc**; nu are niciun pătrat.'] },
     },
     {
       id: 'truefalse',

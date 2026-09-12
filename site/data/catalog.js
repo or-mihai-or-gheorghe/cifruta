@@ -27,7 +27,7 @@ export default {
             {
               id: 'recap-c1-t2',
               file: 'tests/recap-c1/t2-la-piata-cu-bunica.js',
-              version: 1,
+              version: 2,
               theme: 'piata',
               title: 'La piață cu bunica',
               subtitle: 'Adunări și scăderi cu trecere peste ordin · măsurări · plantele',
@@ -37,7 +37,7 @@ export default {
             {
               id: 'recap-c1-t3',
               file: 'tests/recap-c1/t3-calatorie-in-spatiu.js',
-              version: 1,
+              version: 2,
               theme: 'spatiu',
               title: 'Călătorie în spațiu',
               subtitle: 'Șiruri · termenul necunoscut · axa numerelor · figuri și corpuri',
@@ -47,7 +47,7 @@ export default {
             {
               id: 'recap-c1-t4',
               file: 'tests/recap-c1/t4-o-zi-la-ferma.js',
-              version: 1,
+              version: 2,
               theme: 'ferma',
               title: 'O zi la fermă',
               subtitle: 'Test de sinteză: numere, operații, probleme, măsurări și natură',

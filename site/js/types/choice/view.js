@@ -19,7 +19,7 @@ export default {
     const feedback = {};
 
     const rows = part.items.map((item, idx) => {
-      const opts = part.shuffle ? shuffled(item.options, ctx.seed + idx) : item.options;
+      const opts = (item.shuffle ?? part.shuffle) ? shuffled(item.options, ctx.seed + idx) : item.options;
       buttons[item.id] = {};
       const list = h(
         'div',

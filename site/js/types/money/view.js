@@ -108,7 +108,10 @@ export default {
               },
             }))
           : [h('span', { class: 'ex-wallet__empty' }, 'Gol')]));
-        w.sum.textContent = `Ai pus: ${cantitate(moneySum(combo), 'leu', 'lei')}`;
+        // în timpul rezolvării se vede doar numărul de bancnote (suma ar da răspunsul); suma apare la rezultate și la rezolvare
+        w.sum.textContent = isLocked(mode)
+          ? `Ai pus: ${cantitate(moneySum(combo), 'leu', 'lei')} (${cantitate(notes.length, 'bancnotă', 'bancnote')})`
+          : cantitate(notes.length, 'bancnotă', 'bancnote');
       }
     }
     paint();
@@ -123,6 +126,7 @@ export default {
       mode(m) {
         mode = m;
         for (const b of el.querySelectorAll('button')) b.disabled = isLocked(m);
+        paint(); // la rezultate apare și suma
         for (const w of Object.values(wallets)) {
           w.wallet.tabIndex = isLocked(m) ? -1 : 0;
           if (isLocked(m)) w.wallet.classList.remove('is-active');

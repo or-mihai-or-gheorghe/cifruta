@@ -263,7 +263,7 @@ nu îl edita de mână.
 | `mat.op.proprietati` | 6 | — | — | — |
 | `mat.op.necunoscut` | — | 11 | 6 | — |
 | `mat.op.balanta` | — | — | 6 | — |
-| `mat.op.proba` | — | — | 6, 11 | 6 |
+| `mat.op.proba` | — | — | 6 | 6 |
 | `mat.op.lanturi` | — | — | 9 | — |
 | `mat.op.semne` | — | — | — | 8 |
 | `mat.op.comparare-expresii` | 6 | — | — | — |

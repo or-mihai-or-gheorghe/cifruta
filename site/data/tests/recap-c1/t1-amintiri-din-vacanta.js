@@ -43,7 +43,7 @@ export default {
       estMin: 3,
       concepts: ['mat.nr100.formare', 'mat.nr100.valoare-pozitionala'],
       title: 'Numerele din valiză',
-      context: { text: 'Andrei își face bagajul: fiecare număr se desface în zeci și unități.', visual: { v: 'suitcase' } },
+      context: { text: 'Andrei își face bagajul: fiecare număr se desface în zeci și unități, ca 62 = 60 + 2.', visual: { v: 'suitcase' } },
       type: 'fill',
       layout: 'tree',
       labels: ['zeci', 'unități'],
@@ -109,7 +109,7 @@ export default {
       type: 'choice',
       style: 'circles',
       shuffle: true,
-      prompt: 'Colorează rezultatul corect. {{e:inghetata}}',
+      prompt: 'Alege rezultatul corect. {{e:inghetata}}',
       items: [
         {
           id: 'i1',
@@ -204,7 +204,7 @@ export default {
         f: { kind: 'relation', feedback: [{ if: '>', text: 'Amândouă încep cu 45. Adunăm 12 sau 21: care este mai mult?' }] },
       },
       explain: {
-        idea: 'Poți compara **fără să calculezi** atunci când expresiile seamănă între ele.',
+        idea: 'Unde poți, compară **fără să calculezi**: când expresiile seamănă, vezi doar ce diferă. Altfel, calculează.',
         steps: [
           '47 < 74: 4 zeci sunt mai puține decât 7 zeci.',
           '7 zeci = 70.',

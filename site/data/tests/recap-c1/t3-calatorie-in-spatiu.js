@@ -11,7 +11,7 @@ const SOLIDS = [
 export default {
   schema: 1,
   id: 'recap-c1-t3',
-  version: 1,
+  version: 2,
   theme: 'spatiu',
   title: 'Călătorie în spațiu',
   subtitle: 'Șiruri · termenul necunoscut · axa numerelor · figuri și corpuri',
@@ -142,7 +142,7 @@ export default {
       explain: {
         idea: '**Descrescător** înseamnă de la cel mai mare la cel mai mic. Comparăm întâi zecile, apoi unitățile.',
         steps: ['96 > 91: amândouă au 9 zeci, dar 6 unități > 1 unitate.', '69 > 64 > 46.', '19 > 16.', 'Ordinea: 96, 91, 69, 64, 46, 19, 16 → **PLANETĂ**.'],
-        trap: 'Perechile 46 și 64, 69 și 96, 16 și 19 au aceleași cifre. Contează locul fiecărei cifre!',
+        trap: 'Perechile 46 și 64, 69 și 96 au aceleași cifre, dar în alt loc. Iar 16 și 19 au aceleași zeci: le compari unitățile.',
       },
     },
     {
@@ -237,7 +237,7 @@ export default {
       bins: SOLIDS,
       items: [
         { id: 'zar', text: 'zar', emoji: 'zar', bin: 'cub' },
-        { id: 'gheata', text: 'cub de gheață', emoji: 'gheata', bin: 'cub' },
+        { id: 'gheata', text: 'gheață', emoji: 'gheata', bin: 'cub' },
         { id: 'minge', text: 'minge', emoji: 'minge', bin: 'sfera' },
         { id: 'glob', text: 'glob', emoji: 'glob', bin: 'sfera' },
         { id: 'conserva', text: 'conservă', emoji: 'conserva', bin: 'cilindru' },
@@ -326,7 +326,7 @@ export default {
       id: 'e11',
       level: 'avansat',
       estMin: 6,
-      concepts: ['mat.pb.mersul-invers', 'mat.op.proba'],
+      concepts: ['mat.pb.mersul-invers'],
       title: 'Numărul la care m-am gândit',
       context: { text: 'Mergem înapoi, pas cu pas, până la numărul ascuns.', visual: { v: 'planet', n: '?' } },
       parts: [
@@ -336,14 +336,15 @@ export default {
           layout: 'steps',
           prompt: 'Ana s-a gândit la un număr. A adunat **15**, apoi a scăzut **8** și a obținut **40**. La ce număr s-a gândit?',
           rows: [
-            { label: 'Mergem înapoi: anulăm „a scăzut 8”.', t: '40 + [[a]] = [[b]]' },
-            { label: 'Anulăm „a adunat 15”.', t: '[[c]] − 15 = [[d]]' },
+            { label: 'Mergem înapoi: anulăm „a scăzut 8”. Alege semnul.', t: '40 [[s]] 8 = [[b]]' },
+            { label: 'Anulăm „a adunat 15”.', t: '[[c]] [[t]] 15 = [[d]]' },
             { label: 'Răspuns', t: 'Ana s-a gândit la [[e]].' },
           ],
           blanks: {
-            a: { answer: 8 },
+            s: { kind: 'sign', answer: '+', feedback: [{ if: '-', text: 'Mergând înapoi, „a scăzut 8” se anulează cu **+ 8**.' }] },
             b: { answer: 48 },
             c: { answer: 48 },
+            t: { kind: 'sign', answer: '-' },
             d: { answer: 33 },
             e: { answer: 33, feedback: [{ if: 47, text: 'Ai făcut operațiile în aceeași direcție. Mergând înapoi, + devine − și − devine +.' }] },
           },
@@ -354,11 +355,11 @@ export default {
           layout: 'steps',
           prompt: 'Robotul Bip s-a gândit la alt număr. A scăzut **20**, apoi a adunat **7** și a obținut **50**. La ce număr s-a gândit?',
           rows: [
-            { label: 'Anulăm „a adunat 7”.', t: '50 − [[a]] = [[b]]' },
-            { label: 'Anulăm „a scăzut 20”.', t: '[[c]] + 20 = [[d]]' },
+            { label: 'Anulăm „a adunat 7”. Alege semnul.', t: '50 [[s]] 7 = [[b]]' },
+            { label: 'Anulăm „a scăzut 20”.', t: '[[c]] [[t]] 20 = [[d]]' },
             { label: 'Răspuns', t: 'Robotul s-a gândit la [[e]].' },
           ],
-          blanks: { a: { answer: 7 }, b: { answer: 43 }, c: { answer: 43 }, d: { answer: 63 }, e: { answer: 63 } },
+          blanks: { s: { kind: 'sign', answer: '-' }, b: { answer: 43 }, c: { answer: 43 }, t: { kind: 'sign', answer: '+' }, d: { answer: 63 }, e: { answer: 63 } },
         },
       ],
       explain: {
