@@ -18,6 +18,7 @@ export default {
       parts: [
         {
           id: 'a',
+          concepts: ['mat.op.fara-trecere'],
           type: 'choice',
           prompt: 'Alege rezultatul corect.',
           items: [
@@ -33,6 +34,7 @@ export default {
         },
         {
           id: 'b',
+          concepts: ['mat.geo.figuri'],
           type: 'choice',
           visual: { v: 'rocket-shapes' },
           prompt: 'Ce figuri vezi în desenul rachetei? Alege toate variantele potrivite.',

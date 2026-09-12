@@ -66,6 +66,10 @@ export function validateTest(raw, { concepts } = {}) {
       if (!part.id || partIds.has(part.id)) errors.push(`${pw}: id lipsă sau duplicat`);
       partIds.add(part.id);
       if (part.weight !== undefined && !(typeof part.weight === 'number' && part.weight > 0)) errors.push(`${pw}: weight trebuie să fie un număr pozitiv`);
+      if (part.concepts !== undefined) {
+        if (!Array.isArray(part.concepts) || !part.concepts.length) errors.push(`${pw}: concepts trebuie să fie o listă nevidă`);
+        else for (const c of part.concepts) if (!ex.concepts?.includes(c)) errors.push(`${pw}: conceptul „${c}” nu e printre conceptele exercițiului`);
+      }
       if (!hasType(part.type)) {
         errors.push(`${pw}: tip necunoscut „${part.type}”`);
         continue;
@@ -102,6 +106,12 @@ export function validateTest(raw, { concepts } = {}) {
       if (part.type === 'truefalse') {
         for (const it of part.items) if (NEGATION.test(it.text)) warnings.push(`${pw}.${it.id}: evită negațiile în afirmațiile A/F`);
       }
+    }
+
+    // când subpunctele își declară conceptele, fiecare concept al exercițiului trebuie să fie exersat de cel puțin unul
+    if (ex.parts.some((p) => Array.isArray(p.concepts))) {
+      const covered = new Set(ex.parts.flatMap((p) => p.concepts ?? ex.concepts ?? []));
+      for (const c of ex.concepts ?? []) if (!covered.has(c)) errors.push(`${where}: conceptul „${c}” nu e exersat de niciun subpunct`);
     }
 
     const tagged = (ids) => ids.some((c) => ex.concepts?.includes(c));

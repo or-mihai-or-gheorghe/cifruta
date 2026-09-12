@@ -198,3 +198,29 @@ test('scoring: subpunctele valorează egal, `weight` schimbă ponderea, steaua l
   const zero = { ...demo, exercises: [{ ...first, parts: [{ ...first.parts[0], weight: 0 }, ...first.parts.slice(1)] }] };
   assert.equal(validateTest(zero).errors.filter((e) => e.includes('weight')).length, 1);
 });
+
+test('scoring: conceptele se creditează pe subpunct (part.concepts)', () => {
+  const pick = (correct) => ({ type: 'choice', items: [{ id: 'i1', options: ['40', '50'], correct }] });
+  const ex = {
+    id: 'e1',
+    level: 'usor',
+    estMin: 45,
+    title: 'T',
+    concepts: ['mat.mas.termometru', 'mat.op.fara-trecere'],
+    parts: [
+      { id: 'a', concepts: ['mat.mas.termometru'], ...pick('50') },
+      { id: 'b', concepts: ['mat.op.fara-trecere'], ...pick('40') },
+    ],
+  };
+  const t = { schema: 1, id: 't', title: 'T', version: 1, exercises: [ex] };
+  assert.deepEqual(validateTest(t).errors.filter((e) => e.includes('concept')), []);
+  const r = scoreTest(t, { e1: { a: { i1: '50' }, b: { i1: '50' } } }); // a corect, b greșit
+  assert.equal(r.concepts['mat.mas.termometru'].earned, r.concepts['mat.mas.termometru'].total);
+  assert.equal(r.concepts['mat.op.fara-trecere'].earned, 0);
+  assert.equal(r.concepts['mat.mas.termometru'].total + r.concepts['mat.op.fara-trecere'].total, r.totalPoints);
+
+  const bad = { ...t, exercises: [{ ...ex, parts: [{ ...ex.parts[0], concepts: ['mat.nr100.axa'] }, ex.parts[1]] }] };
+  const errs = validateTest(bad).errors;
+  assert.ok(errs.some((e) => e.includes('nu e printre conceptele exercițiului')));
+  assert.ok(errs.some((e) => e.includes('nu e exersat de niciun subpunct')));
+});

@@ -151,6 +151,7 @@ export default {
       parts: [
         {
           id: 'a',
+          concepts: ['mat.log.tabel', 'mat.op.cu-trecere'],
           type: 'fill',
           layout: 'table',
           prompt: 'Unchiul a numărat păsările. Completează ultimul rând.',
@@ -166,6 +167,7 @@ export default {
         },
         {
           id: 'b',
+          concepts: ['mat.op.cu-trecere', 'mat.pb.mai-mult-mai-putin'],
           type: 'fill',
           prompt: 'Cu câte găini sunt **mai multe** decât gâște?',
           rows: ['Diferența: [[a]]'],
@@ -182,6 +184,7 @@ export default {
         },
         {
           id: 'c',
+          concepts: ['mat.log.tabel'],
           type: 'choice',
           prompt: 'Care păsări sunt **cele mai puține**?',
           items: [
@@ -293,6 +296,7 @@ export default {
       parts: [
         {
           id: 'a',
+          concepts: ['mat.pb.doua-operatii', 'mat.pb.mai-mult-mai-putin'],
           type: 'fill',
           layout: 'steps',
           visual: { v: 'bar-model', parts: '38,?', total: '?' },
@@ -311,6 +315,7 @@ export default {
         },
         {
           id: 'b',
+          concepts: ['mat.pb.capcana-limbaj'],
           type: 'choice',
           weight: 0.5, // doar două variante: ghicitul nu trebuie să valoreze cât un calcul
           prompt: 'Gâștele sunt **27**, cu **8 mai puține decât** curcanii. Cine sunt mai mulți?',
@@ -327,6 +332,7 @@ export default {
         },
         {
           id: 'c',
+          concepts: ['mat.pb.capcana-limbaj', 'mat.pb.mai-mult-mai-putin'],
           type: 'fill',
           prompt: 'Câți curcani sunt? Alege semnul și calculează.',
           rows: ['27 [[s]] 8 = [[a]]'],
@@ -353,6 +359,7 @@ export default {
       parts: [
         {
           id: 'a',
+          concepts: ['mat.mas.buget', 'mat.pb.decizie'],
           type: 'choice',
           prompt: 'Îi ajung banii mamei? Alege răspunsul cu motivul potrivit.',
           items: [
@@ -370,6 +377,7 @@ export default {
         },
         {
           id: 'b',
+          concepts: ['mat.mas.buget'],
           type: 'fill',
           prompt: 'Cât costă cumpărăturile și cât rest primește mama?',
           rows: ['Cost (lei): [[a]]', 'Rest (lei): [[b]]'],
@@ -381,6 +389,7 @@ export default {
         },
         {
           id: 'c',
+          concepts: ['mat.mas.bani'],
           type: 'money',
           allowed: [1, 5, 10, 20, 50],
           target: 35,

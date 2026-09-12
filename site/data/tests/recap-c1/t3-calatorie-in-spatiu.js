@@ -188,6 +188,7 @@ export default {
       parts: [
         {
           id: 'a',
+          concepts: ['mat.nr100.axa', 'mat.nr100.estimare'],
           type: 'slider',
           skin: 'line',
           min: 0,
@@ -202,6 +203,7 @@ export default {
         },
         {
           id: 'b',
+          concepts: ['mat.nr100.rotunjire'],
           type: 'choice',
           weight: 0.5, // doar două variante: ghicitul nu trebuie să valoreze cât poziționarea pe axă
           prompt: 'Numărul 48 este mai aproape de…',

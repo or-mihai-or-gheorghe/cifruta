@@ -64,6 +64,7 @@ export default {
       parts: [
         {
           id: 'a',
+          concepts: ['mat.mas.unitati'],
           type: 'choice',
           prompt: 'Alege unitatea de măsură potrivită.',
           items: [
@@ -75,6 +76,7 @@ export default {
         },
         {
           id: 'b',
+          concepts: ['mat.mas.lungime'],
           type: 'fill',
           visual: { v: 'ruler', length: 10, from: 0, to: 7 },
           prompt: 'Cât de lung este creionul bunicii?',
@@ -146,6 +148,7 @@ export default {
       parts: [
         {
           id: 'a',
+          concepts: ['mat.op.cu-trecere'],
           type: 'match',
           prompt: 'Unește fiecare coș cu eticheta de preț potrivită.',
           left: [
@@ -165,6 +168,7 @@ export default {
         },
         {
           id: 'b',
+          concepts: ['mat.op.greseala'],
           type: 'choice',
           prompt: 'Radu a calculat **58 + 26 = 74**. Ce a greșit?',
           items: [
@@ -226,6 +230,7 @@ export default {
       parts: [
         {
           id: 'a',
+          concepts: ['mat.log.tabel'],
           type: 'fill',
           layout: 'table',
           prompt: 'Citește tabelul, apoi completează ultimul rând.',
@@ -241,6 +246,7 @@ export default {
         },
         {
           id: 'b',
+          concepts: ['mat.log.tabel'],
           type: 'choice',
           prompt: 'În ce zi a vândut **cei mai mulți** pepeni?',
           items: [
@@ -257,6 +263,7 @@ export default {
         },
         {
           id: 'c',
+          concepts: ['mat.op.cu-trecere', 'mat.pb.mai-mult-mai-putin'],
           type: 'fill',
           prompt: 'Cu câți pepeni a vândut **mai mulți** sâmbătă decât vineri?',
           rows: ['Diferența: [[a]]'],
@@ -280,6 +287,7 @@ export default {
       parts: [
         {
           id: 'a',
+          concepts: ['mat.mas.ceas'],
           type: 'clock',
           step: 30,
           prompt: 'Arată pe ceas ora la care ajunge bunica.',
@@ -287,6 +295,7 @@ export default {
         },
         {
           id: 'b',
+          concepts: ['mat.mas.durata'],
           type: 'fill',
           prompt: 'Câte ore este deschisă piața?',
           rows: ['Numărul de ore: [[a]]'],
@@ -303,6 +312,7 @@ export default {
         },
         {
           id: 'c',
+          concepts: ['mat.mas.ceas', 'mat.mas.durata'],
           type: 'choice',
           prompt: 'Bunica stă la piață **2 ore**. La ce oră pleacă?',
           items: [
@@ -334,6 +344,7 @@ export default {
       parts: [
         {
           id: 'a',
+          concepts: ['mat.pb.doua-operatii', 'mat.op.cu-trecere'],
           type: 'fill',
           prompt: 'Cât costă cumpărăturile?',
           rows: ['Total (lei): [[a]]'],
@@ -342,6 +353,7 @@ export default {
         },
         {
           id: 'b',
+          concepts: ['mat.pb.doua-operatii', 'mat.op.cu-trecere'],
           type: 'fill',
           prompt: 'Cât primește bunica **rest**?',
           rows: ['Rest (lei): [[a]]'],
@@ -350,6 +362,7 @@ export default {
         },
         {
           id: 'c',
+          concepts: ['mat.mas.bani'],
           type: 'money',
           allowed: [1, 5, 10],
           target: 19,
@@ -377,6 +390,7 @@ export default {
       parts: [
         {
           id: 'a',
+          concepts: ['mat.pb.doua-operatii', 'mat.pb.plan'],
           type: 'fill',
           layout: 'steps',
           prompt: 'Câte ouă i-au rămas? Rezolvă în **primul mod**.',
@@ -388,6 +402,7 @@ export default {
         },
         {
           id: 'b',
+          concepts: ['mat.pb.doua-operatii', 'mat.pb.doua-moduri'],
           type: 'fill',
           layout: 'steps',
           prompt: 'Rezolvă acum în **al doilea mod**.',
@@ -399,6 +414,7 @@ export default {
         },
         {
           id: 'c',
+          concepts: ['mat.pb.doua-moduri'],
           type: 'choice',
           prompt: 'De ce este mai ușor al doilea mod?',
           items: [

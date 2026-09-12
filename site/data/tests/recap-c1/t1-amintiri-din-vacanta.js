@@ -254,6 +254,7 @@ export default {
       parts: [
         {
           id: 'a',
+          concepts: ['mat.mas.termometru'],
           type: 'slider',
           skin: 'thermometer',
           min: 0,
@@ -269,6 +270,7 @@ export default {
         },
         {
           id: 'b',
+          concepts: ['mat.op.fara-trecere', 'mat.pb.mai-mult-mai-putin'],
           type: 'fill',
           prompt: 'Cu câte grade s-a răcit apa până seara?',
           rows: ['Apa s-a răcit cu: [[a]]'],
@@ -292,6 +294,7 @@ export default {
       parts: [
         {
           id: 'a',
+          concepts: ['mat.pb.o-operatie', 'mat.pb.mai-mult-mai-putin'],
           type: 'fill',
           prompt: 'Cu câți ani este bunicul **mai mare** decât Andrei?',
           rows: ['Diferența de vârstă: [[a]]'],
@@ -300,6 +303,7 @@ export default {
         },
         {
           id: 'b',
+          concepts: ['mat.pb.o-operatie'],
           type: 'fill',
           prompt: 'Ce vârstă va avea fiecare **peste 10 ani**?',
           rows: ['Bunicul: [[a]]', 'Andrei: [[b]]'],
@@ -308,6 +312,7 @@ export default {
         },
         {
           id: 'c',
+          concepts: ['mat.pb.decizie'],
           type: 'choice',
           prompt: 'Peste 10 ani, diferența de vârstă dintre ei va fi…',
           items: [
@@ -343,6 +348,7 @@ export default {
       parts: [
         {
           id: 'a',
+          concepts: ['mat.op.fara-trecere', 'mat.pb.o-operatie'],
           type: 'fill',
           prompt: 'Cât plătește Andrei **în total**?',
           rows: ['Total de plată (lei): [[a]]'],
@@ -351,6 +357,7 @@ export default {
         },
         {
           id: 'b',
+          concepts: ['mat.mas.bani'],
           type: 'money',
           allowed: [1, 5, 10],
           target: 18,

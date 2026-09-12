@@ -122,7 +122,7 @@ export default async function review(container, [testId]) {
       'div',
       { class: 'c-explain__body' },
       h('p', {}, `Timp de lucru: ${minutes(attempt.activeMs ?? 0)}${levelTimes.length ? ` (${levelTimes.join(' · ')})` : ''}. Estimare pentru un elev mediu: ${cantitate(test.exercises.reduce((s, e) => s + e.estMin, 0), 'minut', 'minute')}.`),
-      h('p', {}, practice.length ? `De exersat: ${practice.join('; ')}.` : 'Toate conceptele din test au fost stăpânite (peste 70%).'),
+      h('p', {}, practice.length ? `De exersat: ${practice.join('; ')}.` : 'Niciun concept nu a rămas sub 70%.'),
       h('div', { class: 'l-cluster' }, clearHistoryButton({
         label: 'Șterge rezultatele acestui test',
         text: `Se șterg toate încercările la „${test.title}” și ciorna începută.`,

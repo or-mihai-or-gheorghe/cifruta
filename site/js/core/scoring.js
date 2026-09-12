@@ -1,5 +1,5 @@
 // Punctajul: fiecare exercițiu are puncte (implicit după nivel); credit parțial pe item;
-// subpunctele unui exercițiu valorează egal (sau după `weight`), oricâte casete ar avea fiecare;
+// subpunctele unui exercițiu valorează egal (sau după `weight`), oricâte casete ar avea fiecare; conceptele se creditează pe subpunct;
 // scor final = 10 din oficiu + 90 × puncte obținute / puncte totale.
 
 import config from '../../data/scoring.js';
@@ -45,10 +45,18 @@ export function scoreTest(test, answers = {}) {
     const lvl = (levels[ex.level] ??= { earned: 0, total: 0 });
     lvl.earned += r.earnedPoints;
     lvl.total += r.points;
-    for (const c of ex.concepts ?? []) {
-      const con = (concepts[c] ??= { earned: 0, total: 0 });
-      con.earned += r.earnedPoints;
-      con.total += r.points;
+    // conceptele se creditează pe subpunct (part.concepts, altfel cele ale exercițiului), cu partea lui din puncte
+    const weights = ex.parts.map((p) => p.weight ?? 1);
+    const sumW = weights.reduce((s, w) => s + w, 0);
+    for (const [i, part] of ex.parts.entries()) {
+      const pr = r.parts[part.id];
+      const points = r.points * (weights[i] / sumW);
+      const earned = points * (pr.total ? pr.earned / pr.total : 0);
+      for (const c of part.concepts ?? ex.concepts ?? []) {
+        const con = (concepts[c] ??= { earned: 0, total: 0 });
+        con.earned += earned;
+        con.total += points;
+      }
     }
   }
   for (const lvl of Object.values(levels)) {
