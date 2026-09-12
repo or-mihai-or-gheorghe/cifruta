@@ -4,7 +4,7 @@
 
 import concepts from '../../data/concepts.js';
 import config from '../../data/scoring.js';
-import { h } from '../core/dom.js';
+import { countUp, h, pop } from '../core/dom.js';
 import { md } from '../core/markup.js';
 import { findTest, loadTest } from '../core/loader.js';
 import { cantitate, formatNumber } from '../core/ro.js';
@@ -71,6 +71,7 @@ export default async function review(container, [testId]) {
           b.classList.toggle('is-selected', b === e.currentTarget);
           b.setAttribute('aria-pressed', String(b === e.currentTarget));
         }
+        pop(e.currentTarget);
       },
     }),
   );
@@ -86,6 +87,7 @@ export default async function review(container, [testId]) {
     })
     .filter(Boolean);
 
+  const scoreNum = h('span', {}, String(attempt.score)); // numără de la 0 după montare
   const summary = h(
     'section',
     { class: 'ex-summary anim-fade-up', 'data-testid': 'summary' },
@@ -97,13 +99,13 @@ export default async function review(container, [testId]) {
       h(
         'div',
         { class: 'l-cluster' },
-        h('p', { class: 'c-score', 'data-testid': 'score', 'aria-live': 'polite' }, String(attempt.score), h('small', {}, ' / 100')),
+        h('p', { class: 'c-score', 'data-testid': 'score', 'data-value': String(attempt.score) }, scoreNum, h('small', {}, ' / 100')),
         h('span', { class: 'c-grade', 'data-grade': grade.code }, grade.code === 'EX' ? '' : `${grade.code} · `, grade.label),
       ),
       h('p', { class: 'u-big' }, grade.message),
       h(
         'div',
-        { class: 'ex-levels' },
+        { class: 'ex-levels anim-stagger' },
         levels.map((l) => h('span', { class: 'ex-level-result', 'data-level': l.id }, levelPill(l.id), stars(attempt.levels[l.id].star ? 1 : 0, 1, { label: attempt.levels[l.id].star ? 'stea câștigată' : 'fără stea' }))),
       ),
       h('p', { class: 'u-muted' }, `Ai câștigat ${starCount} din ${cantitate(levels.length, 'stea', 'stele')}. O stea înseamnă cel puțin 80% dintr-un nivel.`),
@@ -158,7 +160,9 @@ export default async function review(container, [testId]) {
     ),
   );
 
-  if (attempt.score >= config.confettiAt) confetti();
+  countUp(scoreNum, attempt.score);
+  // confetti-ul vine după ce scorul a terminat de numărat
+  if (attempt.score >= config.confettiAt) setTimeout(() => container.isConnected && confetti(), 650);
 
   const cleanup = () => controllers.forEach((c) => c.destroy());
   if (!sameVersion) return cleanup;
@@ -171,6 +175,7 @@ export default async function review(container, [testId]) {
     const ctl = await mountExercise(item, ex, { number: i + 1, answers: attempt.answers?.[ex.id] ?? {}, mode: 'review', seed: attempt.seed });
     controllers.push(ctl);
     if (!container.isConnected) break; // pagina a fost părăsită în timpul montării
+    ctl.el.style.animationDelay = `${Math.min(i, 5) * 60}ms`; // cardurile apar pe rând, nu după cât durează montarea
     ctl.showResults(r);
     ctl.el.querySelector('.ex-head').append(
       h('span', { class: `ex-review__score is-${status}` }, STATUS_ICON[status], ` ${formatNumber(r.earnedPoints)} din ${cantitate(r.points, 'punct', 'puncte')}`),
@@ -214,11 +219,15 @@ export default async function review(container, [testId]) {
           again.showResults(res);
           check.remove();
           updateAttempt(attempt.id, { secondChance: { ...(lastAttempt(testId)?.secondChance ?? {}), [ex.id]: res.fraction } });
-          verdict.replaceChildren(
-            statusOf(res.fraction) === 'correct'
-              ? callout('ok', 'bravo', 'Bravo! Acum ai rezolvat corect. Ai văzut unde era capcana.')
-              : callout('warn', 'muschi', 'Încă nu. Deschide „De ce? Cum rezolvăm” și privește rezolvarea pas cu pas.'),
-          );
+          const won = statusOf(res.fraction) === 'correct';
+          const node = won
+            ? callout('ok', 'bravo', 'Bravo! Acum ai rezolvat corect. Ai văzut unde era capcana.')
+            : callout('warn', 'muschi', 'Încă nu. Deschide „De ce? Cum rezolvăm” și privește rezolvarea pas cu pas.');
+          verdict.replaceChildren(node);
+          if (won) {
+            pop(node);
+            confetti({ count: 16 });
+          }
         });
         box.append(h('div', { class: 'l-cluster' }, check), verdict);
       });

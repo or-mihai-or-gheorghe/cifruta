@@ -12,6 +12,8 @@
   border-radius: var(--r-4);
   box-shadow: var(--sh-1);
 }
+/* „Rezolvarea” se deosebește de „ce ai făcut tu” */
+.ex-card[data-mode='solution'] { border-top-color: var(--c-ok); background: color-mix(in srgb, var(--c-ok-bg) 30%, var(--c-surface)); box-shadow: none; }
 .ex-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
 .ex-num {
   display: grid;
@@ -219,6 +221,10 @@
 .ex-levels { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
 .ex-level-result { display: flex; align-items: center; gap: var(--sp-2); padding: 0.3rem 0.8rem; border-radius: var(--r-pill); background: var(--c-level-bg); }
 .ex-level-result .c-star { width: 1.6rem; height: 1.6rem; }
+/* stelele câștigate apar pe rând, după ce scorul a numărat */
+.ex-level-result .c-star.is-on { animation: anim-bounce-in 450ms var(--ease-spring) both; animation-delay: 500ms; }
+.ex-level-result:nth-child(2) .c-star.is-on { animation-delay: 750ms; }
+.ex-level-result:nth-child(3) .c-star.is-on { animation-delay: 1000ms; }
 
 .ex-review { display: grid; gap: var(--sp-5); }
 .ex-review__item { display: grid; gap: var(--sp-3); }

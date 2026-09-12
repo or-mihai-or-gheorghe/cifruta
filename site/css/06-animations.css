@@ -18,6 +18,9 @@
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
 }
+@keyframes anim-fade {
+  from { opacity: 0; }
+}
 @keyframes anim-nudge {
   0%, 100% { transform: none; }
   50% { transform: translateY(-4px); }

@@ -42,7 +42,7 @@ export function mascot(mood, message, { center = false } = {}) {
     'div',
     { class: `c-mascot${center ? ' c-mascot--center' : ''}` },
     art({ v: 'mascot', mood, decorative: true }, { fallbackEmoji: 'veverita', cls: 'c-mascot__art anim-float' }),
-    message ? h('div', { class: 'c-bubble', html: md(message) }) : null,
+    message ? h('div', { class: 'c-bubble anim-fade-up', style: { animationDelay: '150ms' }, html: md(message) }) : null,
   );
 }
 

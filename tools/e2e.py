@@ -277,8 +277,8 @@ def pages_flow(run: Run, page: Page, test: dict, vp: str):
     page.evaluate("a => localStorage.setItem('cifruta:attempts', JSON.stringify([a]))", old)
     run.goto(page, f"rezultate/{tid}")
     page.wait_for_selector("[data-testid=score]")
-    score = page.get_by_test_id("score").inner_text()
-    run.check(re.match(r"^77\s*/\s*100$", score) is not None, f"[{vp}] {tid}: versiune veche → scorul salvat (primit {score!r})")
+    expect(page.get_by_test_id("score")).to_have_text(re.compile(r"^77\s*/\s*100$"))
+    run.check(page.get_by_test_id("score").get_attribute("data-value") == "77", f"[{vp}] {tid}: versiune veche → scorul salvat (77)")
     run.check(page.get_by_test_id("old-version").is_visible() and page.get_by_test_id("review-list").count() == 0, f"[{vp}] {tid}: versiune veche → mesajul de actualizare, fără lista pe exerciții")
     run.shot(page, f"{vp}-{tid}-versiune-veche")
 
@@ -332,8 +332,10 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     run.check(page.locator(".c-progress__dot.is-done").count() == dots, f"[{vp}] {tid}: ciorna se păstrează după reîncărcare")
     page.get_by_test_id("finish-top").click()
     page.wait_for_selector("[data-testid=score]")
-    score = page.get_by_test_id("score").inner_text()
-    run.check(score.startswith("100"), f"[{vp}] {tid}: toate corecte → scor 100 (primit {score!r})")
+    expect(page.get_by_test_id("score")).to_have_text(re.compile(r"^100\s*/\s*100$"))
+    run.check(page.get_by_test_id("score").get_attribute("data-value") == "100", f"[{vp}] {tid}: toate corecte → scor 100 (numărat până la final)")
+    expect(page.locator(".anim-confetti")).to_have_count(1)
+    run.check(True, f"[{vp}] {tid}: confetti la scor mare")
     page.wait_for_selector(".ex-review__item")
     page.wait_for_timeout(600)
     run.shot(page, f"{vp}-{tid}-rezultate-100")
@@ -357,8 +359,8 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     run.shot(page, f"{vp}-{tid}-fereastra")
     page.get_by_test_id("modal-confirm").click()
     page.wait_for_selector("[data-testid=score]")
-    score = page.get_by_test_id("score").inner_text()
-    run.check(re.match(r"^10\s*/\s*100$", score) is not None, f"[{vp}] {tid}: fără răspunsuri → scor 10 (primit {score!r})")
+    expect(page.get_by_test_id("score")).to_have_text(re.compile(r"^10\s*/\s*100$"))
+    run.check(page.get_by_test_id("score").get_attribute("data-value") == "10", f"[{vp}] {tid}: fără răspunsuri → scor 10")
     page.wait_for_selector(".ex-review__item")
     if page.locator(".ex-tf__row").count():
         row = page.locator(".ex-tf__row").first
@@ -369,6 +371,10 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     page.get_by_test_id(f"retry-{first}").click()
     page.get_by_test_id(f"retry-check-{first}").click()
     run.check(page.locator(f"[data-testid=review-{first}] .ex-review__retry .c-callout").count() >= 1, f"[{vp}] {tid}: „Mai încerc o dată” afișează verdictul")
+    solved = page.locator(".ex-card[data-mode='solution']").count()
+    page.locator(".ex-review__item").first.locator("summary").click()
+    page.wait_for_selector(".ex-card[data-mode='solution']")
+    run.check(solved == 0 and page.locator(".ex-card[data-mode='solution']").count() == 1, f"[{vp}] {tid}: „Rezolvarea” se montează la deschidere, cu aspect propriu")
     run.layout_ok(page, f"[{vp}] {tid} rezultate")
 
 
@@ -381,7 +387,7 @@ def keyboard_flow(run: Run, browser, base: str):
     if not tests:
         context.close()
         return
-    page.goto(f"{base}#/test/{tests[0]['id']}")
+    page.goto(f"{base}?debug=1#/test/{tests[0]['id']}")
     page.wait_for_selector("[data-testid=start]")
     page.get_by_test_id("start").focus()
     page.keyboard.press("Enter")
@@ -393,6 +399,17 @@ def keyboard_flow(run: Run, browser, base: str):
     run.check(bool(pressed), "[tastatură] un element se poate alege cu Space")
     duration = page.evaluate("getComputedStyle(document.querySelector('.ex-card')).animationDuration")
     run.check(duration in ("0.001s", "1e-06s", "0s"), f"[tastatură] animațiile sunt reduse (durată {duration})")
+    # la mișcare redusă scorul e final imediat și nu cade confetti
+    page.evaluate("window.__dbg.fillCorrect()")
+    page.wait_for_timeout(200)
+    page.get_by_test_id("finish-top").click()
+    page.wait_for_selector("[data-testid=score]")
+    score = page.get_by_test_id("score").inner_text()
+    page.wait_for_timeout(800)
+    run.check(re.match(r"^100\s*/\s*100$", score) is not None and page.locator(".anim-confetti").count() == 0, f"[tastatură] la mișcare redusă scorul e final imediat ({score!r}) și fără confetti")
+    watch_pops(page, ".c-feel")
+    page.get_by_test_id("feel-vesel").click()
+    run.check(page.evaluate("window.__pops") >= 1, "[tastatură] „Cum te-ai simțit?” face pop la alegere")
 
     # în atelier: un element iese din coș, o bancnotă iese din portofel, cardul mutat păstrează focusul
     page.goto(f"{base}?debug=1#/atelier/tipuri")

@@ -22,7 +22,7 @@ const placeholderView = {
  * → { get(), set(answers), mode(m), showResults(evaluation), showSolution(), destroy() }
  */
 export async function mountExercise(host, exercise, { number, answers = {}, onChange, seed = 1, mode = 'solve' } = {}) {
-  const card = h('article', { class: 'ex-card anim-fade-up', 'data-level': exercise.level, 'data-testid': `exercise-${exercise.id}` });
+  const card = h('article', { class: 'ex-card anim-fade-up', 'data-level': exercise.level, 'data-mode': mode, 'data-testid': `exercise-${exercise.id}` });
   card.append(
     h(
       'header',
