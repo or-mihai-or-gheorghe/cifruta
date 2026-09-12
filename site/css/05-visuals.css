@@ -25,6 +25,9 @@
 .v-scene__stars circle:nth-child(3n) { animation-delay: -0.9s; }
 .v-scene__sign { transform-box: fill-box; transform-origin: top; animation: anim-swing 4s ease-in-out infinite alternate; }
 .v-scene__tree { transform-box: fill-box; transform-origin: bottom; animation: anim-swing 5s ease-in-out infinite alternate; }
+.v-scene__tram { animation: anim-drift 7s ease-in-out infinite alternate; }
+.v-scene__flag { transform-box: fill-box; transform-origin: left center; animation: anim-swing 3s ease-in-out infinite alternate; }
+.v-scene__ball { transform-box: fill-box; transform-origin: center; animation: anim-bob 2s ease-in-out infinite; }
 /* ultima regulă: shorthand-ul `animation` de mai sus ar reseta play-state */
 .v-scene [class^='v-scene__'], .v-scene__stars circle { animation-play-state: var(--scene-play, paused); }
 .ex-intro__scene, .c-card--link:hover { --scene-play: running; }

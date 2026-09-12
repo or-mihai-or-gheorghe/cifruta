@@ -102,6 +102,88 @@ const SCENES = {
         <circle cx="273" cy="62" r="17" fill="${C.greenDark}" ${st(2)}/></g>`;
     },
   },
+  magazin: {
+    label: 'magazinul',
+    draw: () => {
+      const scallops = Array.from({ length: 9 }, (_, i) => `Q${70 + i * 20} 58 ${80 + i * 20} 46`).join(' ');
+      const apples = [88, 100, 112, 94, 106].map((x, i) => `<circle cx="${x}" cy="${i < 3 ? 84 : 76}" r="5" fill="${C.red}" ${st(1.5)}/>`).join('');
+      return `
+        <rect width="300" height="120" fill="${C.sky}"/>
+        <rect y="100" width="300" height="20" fill="${C.grayLight}"/>
+        <rect x="60" y="34" width="180" height="68" fill="${C.cream}" ${st(2)}/>
+        <rect x="60" y="34" width="180" height="12" fill="${C.red}" ${st(2)}/>
+        <path d="M60 46 ${scallops} Z" fill="${C.red}" ${st(2)}/>
+        <rect x="78" y="60" width="66" height="34" fill="${C.blueLight}" ${st(2)}/>
+        <rect x="80" y="88" width="62" height="6" fill="${C.brownLight}"/>
+        ${apples}
+        <rect x="120" y="64" width="18" height="14" fill="${C.yellow}" ${st(1.5)}/>
+        <rect x="166" y="58" width="36" height="44" fill="${C.brown}" ${st(2)}/>
+        <circle cx="196" cy="82" r="2.2" fill="${C.yellow}"/>
+        <g class="v-scene__sign"><rect x="105" y="8" width="90" height="20" rx="5" fill="${C.yellow}" ${st(2)}/>${txt(150, 18, 'MAGAZIN', { size: 11, weight: 800 })}</g>
+        <path d="M250 74 H286 L280 96 H256 Z" fill="${C.white}" ${st(2)}/>
+        <line x1="286" y1="74" x2="294" y2="62" stroke="${C.ink}" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="260" cy="103" r="4" fill="${C.ink}"/><circle cx="278" cy="103" r="4" fill="${C.ink}"/>`;
+    },
+  },
+  oras: {
+    label: 'orașul cu tramvai',
+    draw: () => {
+      const windows = (x, y, w, h, cols, rows) =>
+        Array.from({ length: cols * rows }, (_, i) => `<rect x="${x + 6 + (i % cols) * ((w - 12) / cols)}" y="${y + 6 + Math.floor(i / cols) * ((h - 12) / rows)}" width="${(w - 12) / cols - 4}" height="${(h - 12) / rows - 4}" rx="1" fill="${C.yellow}"/>`).join('');
+      return `
+        <rect width="300" height="120" fill="${C.sky}"/>
+        ${cloud(200, 8, 0.8)}
+        <rect x="20" y="44" width="42" height="56" fill="${C.grayLight}" ${st(2)}/>${windows(20, 44, 42, 56, 2, 3)}
+        <rect x="70" y="24" width="52" height="76" fill="${C.blueLight}" ${st(2)}/>${windows(70, 24, 52, 76, 2, 4)}
+        <rect x="130" y="50" width="38" height="50" fill="${C.pink}" ${st(2)}/>${windows(130, 50, 38, 50, 2, 2)}
+        <rect x="176" y="32" width="56" height="68" fill="${C.cream}" ${st(2)}/>${windows(176, 32, 56, 68, 3, 3)}
+        <rect x="240" y="56" width="44" height="44" fill="${C.grayLight}" ${st(2)}/>${windows(240, 56, 44, 44, 2, 2)}
+        <rect y="100" width="300" height="20" fill="${C.gray}"/>
+        <line x1="0" y1="110" x2="300" y2="110" stroke="${C.white}" stroke-width="2" stroke-dasharray="12 10"/>
+        <g class="v-scene__tram">
+          <line x1="150" y1="72" x2="150" y2="62" stroke="${C.ink}" stroke-width="2"/>
+          <rect x="104" y="72" width="92" height="28" rx="6" fill="${C.red}" ${st(2)}/>
+          <rect x="112" y="78" width="16" height="12" rx="2" fill="${C.blueLight}" ${st(1.5)}/>
+          <rect x="134" y="78" width="16" height="12" rx="2" fill="${C.blueLight}" ${st(1.5)}/>
+          <rect x="156" y="78" width="16" height="12" rx="2" fill="${C.blueLight}" ${st(1.5)}/>
+          <rect x="178" y="78" width="10" height="12" rx="2" fill="${C.blueLight}" ${st(1.5)}/>
+          <circle cx="120" cy="101" r="4" fill="${C.ink}"/><circle cx="180" cy="101" r="4" fill="${C.ink}"/>
+        </g>`;
+    },
+  },
+  scoala: {
+    label: 'școala',
+    draw: () => `
+      <rect width="300" height="120" fill="${C.sky}"/>
+      ${sunRays(40, 28, 14)}${cloud(200, 8, 0.8)}
+      <rect y="96" width="300" height="24" fill="${C.grass}"/>
+      <rect x="70" y="42" width="160" height="54" fill="${C.cream}" ${st(2)}/>
+      <path d="M62 44 L150 16 L238 44 Z" fill="${C.red}" ${st(2)}/>
+      <circle cx="150" cy="34" r="7" fill="${C.white}" ${st(1.5)}/>
+      <path d="M150 34 V29 M150 34 H154" stroke="${C.ink}" stroke-width="1.5" stroke-linecap="round"/>
+      <rect x="84" y="54" width="18" height="14" fill="${C.blueLight}" ${st(1.5)}/><rect x="110" y="54" width="18" height="14" fill="${C.blueLight}" ${st(1.5)}/>
+      <rect x="172" y="54" width="18" height="14" fill="${C.blueLight}" ${st(1.5)}/><rect x="198" y="54" width="18" height="14" fill="${C.blueLight}" ${st(1.5)}/>
+      <rect x="138" y="68" width="24" height="28" fill="${C.brown}" ${st(2)}/>
+      <line x1="256" y1="96" x2="256" y2="30" stroke="${C.ink}" stroke-width="2.5" stroke-linecap="round"/>
+      <g class="v-scene__flag"><path d="M258 32 L290 40 L258 48 Z" fill="${C.red}" ${st(1.5)}/></g>
+      <circle cx="30" cy="84" r="12" fill="${C.greenDark}" ${st(2)}/><rect x="27" y="90" width="6" height="10" fill="${C.brown}"/>`,
+  },
+  stadion: {
+    label: 'stadionul',
+    draw: () => {
+      const seats = Array.from({ length: 60 }, (_, i) => `<circle cx="${8 + (i % 20) * 15}" cy="${42 + Math.floor(i / 20) * 9}" r="3" fill="${[C.red, C.blue, C.yellow][(i + Math.floor(i / 20)) % 3]}"/>`).join('');
+      return `
+        <rect width="300" height="120" fill="${C.sky}"/>
+        <rect y="36" width="300" height="32" fill="${C.grayLight}" ${st(2)}/>${seats}
+        <ellipse cx="150" cy="96" rx="146" ry="28" fill="${C.orange}" ${st(2)}/>
+        <ellipse cx="150" cy="96" rx="112" ry="17" fill="${C.grass}" ${st(2)}/>
+        <line x1="150" y1="79" x2="150" y2="113" stroke="${C.white}" stroke-width="2"/>
+        <rect x="232" y="84" width="24" height="18" fill="${C.white}" ${st(1.5)}/>
+        <path d="M240 84 V102 M248 84 V102 M232 90 H256 M232 96 H256" stroke="${C.gray}" stroke-width="1"/>
+        <rect x="40" y="82" width="8" height="20" fill="${C.white}" ${st(1.5)}/><rect x="40" y="82" width="4" height="10" fill="${C.ink}"/><rect x="44" y="92" width="4" height="10" fill="${C.ink}"/>
+        <g class="v-scene__ball"><circle cx="150" cy="96" r="9" fill="${C.white}" ${st(2)}/><path d="M150 90 L155 94 L153 100 H147 L145 94 Z" fill="${C.ink}"/></g>`;
+    },
+  },
 };
 
 registerVisual('scene', {

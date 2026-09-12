@@ -161,6 +161,10 @@
 [data-theme='piata'] { --c-theme: #c46a00; --c-theme-bg: #fdefd9; }
 [data-theme='spatiu'] { --c-theme: #4338ca; --c-theme-bg: #e5e4fa; }
 [data-theme='ferma'] { --c-theme: #4d7c0f; --c-theme-bg: #e8f3d6; }
+[data-theme='magazin'] { --c-theme: #b3261e; --c-theme-bg: #fde7e4; }
+[data-theme='oras'] { --c-theme: #1d4ed8; --c-theme-bg: #e0e9fb; }
+[data-theme='scoala'] { --c-theme: #a16207; --c-theme-bg: #fdf3d0; }
+[data-theme='stadion'] { --c-theme: #15803d; --c-theme-bg: #dcf5e3; }
 
 [data-level='usor'] { --c-level: var(--c-usor); --c-level-bg: var(--c-usor-bg); --c-level-ink: var(--c-usor-ink); }
 [data-level='intermediar'] { --c-level: var(--c-intermediar); --c-level-bg: var(--c-intermediar-bg); --c-level-ink: var(--c-intermediar-ink); }

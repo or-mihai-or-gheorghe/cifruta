@@ -44,6 +44,13 @@ export default {
   'mat.nr1000.paritate': { domain: 'mat', title: 'Numere pare și impare până la 1000', grade: 2, competencies: ['1.1'], source: ['manual', 'auxiliar'] },
   'mat.nr1000.rotunjire': { domain: 'mat', title: 'Rotunjirea la sute', grade: 2, competencies: ['1.3'], source: ['manual', 'auxiliar', 'programa'] },
   'mat.nr1000.rasturnat': { domain: 'mat', title: 'Răsturnatul unui număr (opțional)', grade: 2, competencies: ['1.1'], source: ['auxiliar', 'imbogatire'] },
+  'mat.nr1000.vecini': { domain: 'mat', title: 'Vecinii numerelor până la 1000', grade: 2, competencies: ['1.1', '1.3'], source: ['manual', 'auxiliar'] },
+  'mat.nr1000.consecutive': { domain: 'mat', title: 'Numere consecutive până la 1000', grade: 2, competencies: ['1.3'], source: ['manual', 'auxiliar'] },
+  'mat.nr1000.siruri': { domain: 'mat', title: 'Șiruri cu pas (+3, −5, +10, +100) până la 1000', grade: 2, competencies: ['1.3', '3.1'], source: ['manual', 'auxiliar', 'programa'] },
+  'mat.nr1000.axa': { domain: 'mat', title: 'Axa numerelor 0–1000: poziționare și estimare', grade: 2, competencies: ['1.3'], source: ['manual', 'programa'] },
+  'mat.nr1000.conditii': { domain: 'mat', title: 'Numere care îndeplinesc condiții (cifre, intervale)', grade: 2, competencies: ['1.2', '4.1'], source: ['manual', 'auxiliar'] },
+  'mat.nr1000.valoare-pozitionala': { domain: 'mat', title: 'Valoarea cifrei după loc (403: zecile sunt 0)', grade: 2, competencies: ['1.1'], source: ['manual', 'imbogatire'] },
+  'mat.fractii.jumatate-sfert': { domain: 'mat', title: 'Jumătatea și sfertul (felii egale)', grade: 2, competencies: ['1.1'], source: ['programa'] },
 
   // ——— 2. Adunare și scădere ———
   'mat.op.fara-trecere': { domain: 'mat', title: 'Adunări și scăderi până la 100, fără trecere peste ordin', grade: 1, competencies: ['1.4'], source: ['manual', 'auxiliar', 'programa', 'standarde'] },
@@ -99,10 +106,14 @@ export default {
   'mat.mas.bani': { domain: 'mat', title: 'Banii: bancnote, monede, plata exactă și restul', grade: 1, competencies: ['6.3'], source: ['manual', 'auxiliar', 'programa'] },
   'mat.mas.buget': { domain: 'mat', title: 'Buget și decizii de cumpărare („Îmi ajung banii?”)', grade: 1, competencies: ['6.3', '5.2'], source: ['programa', 'en2'] },
   'mat.mas.minute': { domain: 'mat', title: 'Minutele și sfertul de oră', grade: 2, competencies: ['6.2'], source: ['programa'] },
+  'mat.mas.bani-mari': { domain: 'mat', title: 'Bancnotele de 100, 200 și 500 de lei', grade: 2, competencies: ['6.3'], source: ['programa'] },
+  'mat.mas.distanta': { domain: 'mat', title: 'Distanțe în kilometri', grade: 2, competencies: ['6.4'], source: ['programa', 'imbogatire'] },
+  'mat.mas.orar': { domain: 'mat', title: 'Orare și mersul trenurilor (plecare, sosire, durată)', grade: 2, competencies: ['6.2'], source: ['programa', 'imbogatire'] },
 
   // ——— 6. Date și logică ———
   'mat.log.tabel': { domain: 'mat', title: 'Citirea datelor dintr-un tabel', grade: 1, competencies: ['5.1'], source: ['manual', 'programa', 'en2'] },
   'mat.log.grafic-bare': { domain: 'mat', title: 'Grafice cu bare', grade: 2, competencies: ['5.1'], source: ['programa'] },
+  'mat.log.pictograma': { domain: 'mat', title: 'Pictograme cu legendă (1 simbol = 2, 5, 10)', grade: 2, competencies: ['5.1'], source: ['programa', 'imbogatire'] },
   'mat.log.ghicitori': { domain: 'mat', title: 'Ghicitori cu numere („Cine sunt eu?”)', grade: 1, competencies: ['4.1', '1.2'], source: ['auxiliar', 'imbogatire'] },
   'mat.log.simboluri': { domain: 'mat', title: 'Simboluri cu valori (fructe, stele)', grade: 1, competencies: ['1.4', '4.1'], source: ['auxiliar'] },
   'mat.log.ordonare-indicii': { domain: 'mat', title: 'Ordonare după indicii („înainte”, „după”)', grade: 1, competencies: ['4.1'], source: ['imbogatire'] },
@@ -116,6 +127,7 @@ export default {
   'med.corp.organe': { domain: 'med', title: 'Organele interne și rolul lor', grade: 1, competencies: ['3.1'], source: ['manual', 'auxiliar', 'programa'] },
   'med.corp.simturi': { domain: 'med', title: 'Simțurile', grade: 0, competencies: ['3.1'], source: ['programa'] },
   'med.corp.igiena': { domain: 'med', title: 'Igiena și sănătatea', grade: 0, competencies: ['3.2'], source: ['manual', 'programa'] },
+  'med.corp.miscare-odihna': { domain: 'med', title: 'Mișcare, odihnă și somn', grade: 2, competencies: ['3.2'], source: ['manual', 'programa'] },
   'med.plante.parti': { domain: 'med', title: 'Părțile plantei și rolul lor', grade: 1, competencies: ['3.1'], source: ['manual', 'programa'] },
   'med.plante.nevoi': { domain: 'med', title: 'De ce au nevoie plantele ca să crească', grade: 0, competencies: ['3.1'], source: ['auxiliar', 'programa'] },
   'med.soare': { domain: 'med', title: 'Soarele: sursă de lumină și căldură', grade: 1, competencies: ['3.1', '4.2'], source: ['programa'] },
