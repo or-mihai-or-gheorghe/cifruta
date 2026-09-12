@@ -181,6 +181,36 @@ def types_flow(run: Run, page: Page, vp: str):
         tap(tid(f"mark-{s}"))
     ok("mark")
 
+    answer = lambda ex: page.evaluate(f"window.__dbg.answer('{ex}').a ?? null")
+    # reguli de set: orice selecție bună (≥ 2 jucării, cel mult 100 de lei) ia tot creditul
+    for s in ("p1", "p2", "p4"):
+        tap(tid(f"mark-{s}"))
+    ok("mark-rules")
+
+    # traseu: o stație neadiacentă e refuzată, apoi Gara → Piața Mare → Teatrul; „o stație înapoi” scoate ultima
+    tap(tid("stop-parc"))
+    tap(tid("stop-piata")); tap(tid("stop-teatru"))
+    page.wait_for_timeout(150)
+    pressed = page.locator(tid("stop-teatru")).get_attribute("aria-pressed") == "true"
+    full = answer("route")
+    tap(tid("route-undo"))
+    page.wait_for_timeout(150)
+    shorter = answer("route")
+    run.check(pressed and full == ["gara", "piata", "teatru"] and shorter == ["gara", "piata"], f"[{vp}] traseu: stațiile atinse în ordine dau {full}, iar „o stație înapoi” lasă {shorter}")
+    tap(tid("stop-teatru"))
+    ok("route")
+
+    # grafic construit: barele urcă cu +, valoarea e anunțată prin aria-valuenow
+    for _ in range(3):
+        tap(tid("bar-mere-plus"))
+    for _ in range(2):
+        tap(tid("bar-pere-plus"))
+    for _ in range(5):
+        tap(tid("bar-banane-plus"))
+    tap(tid("bar-banane-minus"))
+    run.check(page.locator(tid("bar-banane")).get_attribute("aria-valuenow") == "4", f"[{vp}] grafic: + și − schimbă bara și aria-valuenow")
+    ok("chart")
+
     for _ in range(4):
         tap(tid("abacus-i1-Z-plus"))
     for _ in range(6):
@@ -269,7 +299,7 @@ def types_flow(run: Run, page: Page, vp: str):
         tap(tid(f"note-{note}"))
     ok("money")
 
-    for ex in ("choice", "match", "order", "money"):
+    for ex in ("choice", "match", "order", "money", "mark-rules", "route", "chart"):
         page.locator(tid(f"demo-check-{ex}")).click()
     page.wait_for_timeout(500)
     run.shot(page, f"{vp}-atelier-tipuri-rezolvat")
@@ -567,6 +597,14 @@ def keyboard_flow(run: Run, browser, base: str):
     key(f"[data-testid=order-{third}]", "Space")
     focused = page.evaluate("document.activeElement?.dataset.id ?? null")
     run.check(cards().index(first) == 2 and focused == first, f"[tastatură] cardul mutat ajunge pe locul 3 și păstrează focusul (focus pe {focused})")
+
+    key("[data-testid=stop-piata]", "Space")
+    focused = page.evaluate("document.activeElement?.dataset.testid")
+    key("[data-testid=stop-teatru]", "Enter")
+    run.check(answer("route") == ["gara", "piata", "teatru"] and focused == "stop-piata", f"[tastatură] stațiile se ating cu Space/Enter și focusul rămâne pe stație ({answer('route')})")
+    key("[data-testid=bar-mere-plus]", "Enter")
+    key("[data-testid=bar-mere-plus]", "Space")
+    run.check((answer("chart") or {}).get("mere") == 2 and page.locator("[data-testid=bar-mere]").get_attribute("aria-valuenow") == "2", f"[tastatură] bara urcă cu Enter/Space ({answer('chart')})")
     context.close()
 
 

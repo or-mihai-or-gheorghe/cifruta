@@ -302,7 +302,7 @@ export default {
       estMin: 3,
       concepts: ['mat.log.grafic-bare', 'mat.log.tabel'],
       title: 'Construiește graficul',
-      context: { text: 'Fructele preferate în clasă: mere 3, pere 2, banane 4.', visual: { v: 'data-table', head: 'Fruct|Copii', rows: 'mere|3;pere|2;banane|4' } },
+      context: { text: 'Fructele preferate în clasă: mere 3, pere 2, banane 4.', visual: { v: 'data-table', head: 'Fruct|Copii', rows: 'mere|3;pere|2;banane|4' }, size: 'lg' },
       type: 'chart',
       prompt: 'Ridică fiecare bară cât arată tabelul.',
       categories: [
