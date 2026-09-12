@@ -329,6 +329,35 @@ def pages_flow(run: Run, page: Page, test: dict, vp: str):
     page.reload()  # readuce setItem
     page.evaluate("localStorage.clear()")
 
+    # intro-ul e punctul de plecare: părinții văd ciorna pe pagina secțiunii, iar „Reîncepe de la zero” o șterge
+    run.goto(page, f"test/{tid}", debug=True)
+    page.get_by_test_id("start").click()
+    page.wait_for_selector(".ex-card")
+    page.evaluate("window.__dbg.fillCorrect()")
+    page.wait_for_timeout(200)
+    run.goto(page, f"sectiune/{sid}")
+    page.wait_for_selector("[data-testid=parents]")
+    page.locator("[data-testid=parents] summary").click()
+    had_draft = page.get_by_test_id(f"draft-{tid}").is_visible()
+    page.get_by_test_id(f"clear-draft-{tid}").click()
+    expect(page.get_by_test_id("modal-confirm")).to_be_visible()
+    page.get_by_test_id("modal-confirm").click()
+    page.wait_for_timeout(300)
+    run.check(had_draft and page.evaluate(f"localStorage.getItem('cifruta:draft:{tid}')") is None and page.get_by_test_id(f"draft-{tid}").count() == 0, f"[{vp}] {tid}: ciorna apare în „Pentru părinți” pe pagina secțiunii și se poate șterge separat")
+    run.goto(page, f"test/{tid}", debug=True)
+    page.get_by_test_id("start").click()
+    page.wait_for_selector(".ex-card")
+    page.evaluate("window.__dbg.fillCorrect()")
+    page.wait_for_timeout(200)
+    page.reload()
+    page.wait_for_selector("[data-testid=restart]")
+    page.get_by_test_id("restart").click()
+    expect(page.get_by_test_id("modal-confirm")).to_be_visible()
+    page.get_by_test_id("modal-confirm").click()
+    page.wait_for_selector(".ex-card")
+    run.check(page.locator(".c-progress__dot.is-done").count() == 0 and page.locator(".c-progress__dot.is-current").inner_text() == "1" and page.evaluate("Object.keys(window.__dbg.answers()).length") == 0, f"[{vp}] {tid}: „Reîncepe de la zero” pornește o ciornă nouă de la exercițiul 1")
+    page.evaluate("localStorage.clear()")
+
 
 def test_flow(run: Run, page: Page, test: dict, vp: str):
     tid = test["id"]
@@ -371,9 +400,14 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     run.check(brk.get_attribute("data-variant") == "bravo" and page.locator(".ex-break__icon").count() == 1 and page.locator(".anim-confetti").count() == 1, f"[{vp}] {tid}: cu nivelul ușor terminat, pauza sărbătorește cu iconița nivelului următor și confetti")
     page.get_by_test_id("continue").click()
     page.wait_for_selector(".ex-card")
+    cur = page.locator(".c-progress__dot.is-current").inner_text()
     page.reload()
+    page.wait_for_selector("[data-testid=start]")
+    resumed = page.get_by_test_id("start").inner_text().strip() == "Continuă testul" and page.get_by_test_id("restart").count() == 1
+    run.shot(page, f"{vp}-{tid}-intro-reluare")
+    page.get_by_test_id("start").click()
     page.wait_for_selector(".ex-card")
-    run.check(page.locator(".c-progress__dot.is-done").count() == dots, f"[{vp}] {tid}: ciorna se păstrează după reîncărcare")
+    run.check(resumed and page.locator(".c-progress__dot.is-done").count() == dots and page.locator(".c-progress__dot.is-current").inner_text() == cur, f"[{vp}] {tid}: după reîncărcare, intro-ul oferă „Continuă testul” și reia de la exercițiul {cur}, cu ciorna păstrată")
     # cronometrul discret: pornește de la 45:00, se golește cu timpul lucrat, avertizează la 5 minute, se oprește la 0 fără să trimită
     countdown = page.get_by_test_id("countdown")
     live = countdown.locator("[aria-live]")
@@ -401,9 +435,10 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     run.check(draft is None, f"[{vp}] {tid}: ciorna e ștearsă după trimitere")
     run.goto(page, f"test/{tid}", debug=True)
     page.wait_for_selector("[data-testid=start], .ex-card")
-    run.check(page.get_by_test_id("start").count() == 1 and page.locator(".ex-card").count() == 0, f"[{vp}] {tid}: redeschis după trimitere, testul pornește de la intro")
-    run.goto(page, f"rezultate/{tid}", debug=True)
+    run.check(page.get_by_test_id("start").count() == 1 and page.locator(".ex-card").count() == 0 and page.get_by_test_id("restart").count() == 0, f"[{vp}] {tid}: redeschis după trimitere, testul pornește de la intro")
+    page.get_by_test_id("see-results").click()
     page.wait_for_selector("[data-testid=retake]")
+    run.check(page.get_by_test_id("score").get_attribute("data-value") == "100", f"[{vp}] {tid}: „Vezi rezultatele ultimei încercări” de pe intro deschide rezultatele")
 
     # gol → fereastra de confirmare → 10
     page.get_by_test_id("retake").click()
@@ -421,6 +456,15 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     if page.locator(".ex-tf__row").count():
         row = page.locator(".ex-tf__row").first
         run.check("is-wrong" in (row.get_attribute("class") or "") and "Nu ai ales" in row.inner_text(), f"[{vp}] {tid}: afirmația A/F sărită apare greșită, cu „Nu ai ales.”")
+
+    # lista încercărilor din „Pentru părinți”: fiecare se poate deschide pe ruta ei
+    page.locator("[data-testid=parents] summary").click()
+    rows = page.locator("[data-testid^=attempt-]").count()
+    page.locator("[data-testid^=see-attempt-]").first.click()
+    page.wait_for_selector("[data-testid=score]")
+    run.check(rows == 2 and page.get_by_test_id("score").get_attribute("data-value") == "100", f"[{vp}] {tid}: lista încercărilor are {rows} rânduri, iar „Vezi” deschide încercarea cu 100")
+    run.goto(page, f"rezultate/{tid}", debug=True)
+    page.wait_for_selector(".ex-review__item")
 
     # „Mai încerc o dată” pe primul exercițiu
     first = page.locator(".ex-review__item").first.get_attribute("data-testid").replace("review-", "")

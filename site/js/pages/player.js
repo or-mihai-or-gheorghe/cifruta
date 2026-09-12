@@ -8,7 +8,7 @@ import { cantitate } from '../core/ro.js';
 import { newSeed } from '../core/rng.js';
 import { play } from '../core/sound.js';
 import { progressOf, scoreTest } from '../core/scoring.js';
-import { addAttempt, clearDraft, getDraft, saveDraft } from '../core/storage.js';
+import { addAttempt, clearDraft, getDraft, lastAttempt, saveDraft } from '../core/storage.js';
 import { mountExercise } from '../components/exercise.js';
 import { confirmModal } from '../components/modal.js';
 import { art, backLink, confetti, levelInfo, levelPill, mascot } from '../components/ui.js';
@@ -28,10 +28,10 @@ export default async function player(container, [testId]) {
   if (!container.isConnected) return; // s-a navigat în altă parte cât se încărca testul
   document.title = `${test.title} — Cifruța`;
 
+  const freshDraft = () => ({ testId, version: test.version, seed: newSeed(), current: -1, answers: {}, activeMs: 0, msByExercise: {}, seenBreaks: [], startedAt: new Date().toISOString() });
   let draft = getDraft(testId);
-  if (!draft || draft.version !== test.version) {
-    draft = { testId, version: test.version, seed: newSeed(), current: -1, answers: {}, activeMs: 0, msByExercise: {}, seenBreaks: [], startedAt: new Date().toISOString() };
-  }
+  if (!draft || draft.version !== test.version) draft = freshDraft();
+  let resumeAt = draft.current; // pagina de început e punctul de plecare: „Continuă testul” reia de aici
   let submitted = false; // după trimitere, ciorna nu mai trebuie salvată (altfel reapare la redeschidere)
   // ciorna există doar după „Începe testul” (altfel cardul ar arăta „început” la simpla deschidere)
   const save = () => {
@@ -189,6 +189,18 @@ export default async function player(container, [testId]) {
     title.focus({ preventScroll: true });
   }
 
+  async function restart() {
+    const ok = await confirmModal({ title: 'Reîncepi de la zero?', text: 'Răspunsurile date până acum se șterg. Nu se poate anula.', confirm: 'Reîncep', cancel: 'Păstrează' });
+    if (!ok) return;
+    clearDraft(testId);
+    draft = freshDraft();
+    resumeAt = -1;
+    lastMinute = -1;
+    warned = false;
+    ended = false;
+    show(0);
+  }
+
   function renderIntro() {
     const levels = config.levels
       .map((l) => {
@@ -196,16 +208,23 @@ export default async function player(container, [testId]) {
         return count ? h('span', { class: 'l-cluster' }, levelPill(l.id), h('span', { class: 'u-small u-muted' }, cantitate(count, 'exercițiu', 'exerciții'))) : null;
       })
       .filter(Boolean);
+    const resumable = resumeAt >= 0;
     stage.append(
       h(
         'section',
         { class: 'ex-intro anim-fade-up' },
         h('div', { class: 'ex-intro__scene' }, art({ v: 'scene', theme: test.theme, decorative: true })),
         test.subtitle ? h('p', { class: 'u-big u-muted' }, test.subtitle) : null,
-        test.story ? mascot('vesela', test.story) : null,
+        resumable ? mascot('vesela', `Bine ai revenit! Ai ajuns la **exercițiul ${resumeAt + 1} din ${total}**.`) : test.story ? mascot('vesela', test.story) : null,
         h('div', { class: 'ex-intro__levels' }, levels),
         h('p', { class: 'u-muted' }, `Durează cam ${cantitate(totalMin, 'minut', 'minute')}. Poți sări peste un exercițiu și poți reveni oricând. Rezultatele și explicațiile le vezi la final.`),
-        h('button', { class: 'c-btn c-btn--primary c-btn--lg', 'data-testid': 'start', onClick: () => show(0) }, Object.keys(draft.answers).length ? 'Continuă testul' : 'Începe testul'),
+        h(
+          'div',
+          { class: 'l-cluster l-cluster--center' },
+          h('button', { class: 'c-btn c-btn--primary c-btn--lg', 'data-testid': 'start', onClick: () => show(resumable ? resumeAt : 0) }, resumable ? 'Continuă testul' : 'Începe testul'),
+          resumable ? h('button', { class: 'c-btn c-btn--lg', 'data-testid': 'restart', onClick: restart }, 'Reîncepe de la zero') : null,
+          lastAttempt(testId) ? h('a', { class: 'c-btn c-btn--lg', href: `#/rezultate/${testId}`, 'data-testid': 'see-results' }, 'Vezi rezultatele ultimei încercări') : null,
+        ),
       ),
     );
   }
@@ -340,7 +359,7 @@ export default async function player(container, [testId]) {
     };
   }
 
-  await show(draft.current);
+  await show(-1);
 
   return () => {
     clearInterval(timer);

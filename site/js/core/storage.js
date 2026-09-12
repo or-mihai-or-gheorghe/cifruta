@@ -25,6 +25,20 @@ export const getPref = (key, fallback = null) => read(key, fallback);
 export const setPref = (key, value) => write(key, value);
 
 export const getDraft = (testId) => read(`draft:${testId}`, null);
+const draftIds = () => {
+  try {
+    const ids = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k?.startsWith(`${PREFIX}draft:`)) ids.push(k.slice(PREFIX.length + 'draft:'.length));
+    }
+    return ids;
+  } catch {
+    return [];
+  }
+};
+/** Ciornele începute (testele deschise și neterminate), ca { testId, draft }. */
+export const listDrafts = () => draftIds().map((testId) => ({ testId, draft: getDraft(testId) })).filter((d) => d.draft);
 export const saveDraft = (testId, draft) => write(`draft:${testId}`, draft);
 export const clearDraft = (testId) => {
   try {
@@ -73,15 +87,7 @@ export function updateAttempt(id, changes) {
 export function clearHistory(testIds = null) {
   write('attempts', testIds ? read('attempts', []).filter((a) => !testIds.includes(a.testId)) : []);
   if (unsaved && (!testIds || testIds.includes(unsaved.testId))) unsaved = null;
-  let ids = testIds;
-  if (!ids) {
-    try {
-      ids = Object.keys(localStorage).filter((k) => k.startsWith(`${PREFIX}draft:`)).map((k) => k.slice(PREFIX.length + 'draft:'.length));
-    } catch {
-      ids = [];
-    }
-  }
-  for (const id of ids) clearDraft(id);
+  for (const id of testIds ?? draftIds()) clearDraft(id);
 }
 
 export const bestScore = (testId) =>

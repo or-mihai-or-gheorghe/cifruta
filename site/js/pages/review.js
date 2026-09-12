@@ -7,10 +7,10 @@ import config from '../../data/scoring.js';
 import { countUp, h, pop } from '../core/dom.js';
 import { md } from '../core/markup.js';
 import { findTest, loadTest } from '../core/loader.js';
-import { cantitate, formatNumber } from '../core/ro.js';
+import { cantitate, formatDateTime, formatNumber } from '../core/ro.js';
 import { evaluateExercise, gradeFor, reached } from '../core/scoring.js';
 import { play } from '../core/sound.js';
-import { clearDraft, isUnsaved, lastAttempt, updateAttempt } from '../core/storage.js';
+import { clearDraft, getAttempt, isUnsaved, lastAttempt, listAttempts, updateAttempt } from '../core/storage.js';
 import { mountExercise } from '../components/exercise.js';
 import { clearHistoryButton } from '../components/history.js';
 import { art, backLink, callout, confetti, levelPill, stars } from '../components/ui.js';
@@ -33,7 +33,8 @@ function explanation(ex) {
   );
 }
 
-export default async function review(container, [testId]) {
+// #/rezultate/<test> arată ultima încercare; #/rezultate/<test>/<încercare> pe cea cerută (din lista pentru părinți).
+export default async function review(container, [testId, attemptId]) {
   const entry = findTest(testId);
   if (!entry) {
     location.hash = '#/nu-exista';
@@ -41,9 +42,9 @@ export default async function review(container, [testId]) {
   }
   const test = await loadTest(testId);
   if (!container.isConnected) return; // s-a navigat în altă parte cât se încărca testul
-  const attempt = lastAttempt(testId);
-  if (!attempt) {
-    location.hash = `#/test/${testId}`;
+  const attempt = attemptId ? getAttempt(attemptId) : lastAttempt(testId);
+  if (!attempt || attempt.testId !== testId) {
+    location.hash = attemptId ? '#/nu-exista' : `#/test/${testId}`;
     return;
   }
   document.title = `Rezultate: ${test.title} — Cifruța`;
@@ -123,6 +124,22 @@ export default async function review(container, [testId]) {
       { class: 'c-explain__body' },
       h('p', {}, `Timp de lucru: ${minutes(attempt.activeMs ?? 0)}${levelTimes.length ? ` (${levelTimes.join(' · ')})` : ''}. Estimare pentru un elev mediu: ${cantitate(test.exercises.reduce((s, e) => s + e.estMin, 0), 'minut', 'minute')}.`),
       h('p', {}, practice.length ? `De exersat: ${practice.join('; ')}.` : 'Niciun concept nu a rămas sub 70%.'),
+      h('p', { class: 'u-small u-muted' }, 'Încercările salvate la acest test (cea mai nouă prima):'),
+      h(
+        'ul',
+        { class: 'c-history' },
+        listAttempts(testId)
+          .slice()
+          .reverse()
+          .map((a) =>
+            h(
+              'li',
+              { class: 'c-history__row', 'data-testid': `attempt-${a.id}` },
+              h('span', {}, `${formatDateTime(a.submittedAt)} · ${a.score} din 100 · ${gradeFor(a.score).label}`, a.id === attempt.id ? h('em', { class: 'u-muted' }, ' (aceasta)') : null),
+              a.id === attempt.id ? null : h('a', { class: 'c-btn c-btn--sm c-btn--ghost', href: `#/rezultate/${testId}/${a.id}`, 'data-testid': `see-attempt-${a.id}` }, 'Vezi'),
+            ),
+          ),
+      ),
       h('div', { class: 'l-cluster' }, clearHistoryButton({
         label: 'Șterge rezultatele acestui test',
         text: `Se șterg toate încercările la „${test.title}” și ciorna începută.`,

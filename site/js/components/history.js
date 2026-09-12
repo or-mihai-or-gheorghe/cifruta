@@ -3,11 +3,11 @@
 import { h } from '../core/dom.js';
 import { cantitate } from '../core/ro.js';
 import { refresh } from '../core/router.js';
-import { clearHistory, listAttempts } from '../core/storage.js';
+import { clearDraft, clearHistory, getDraft, listAttempts } from '../core/storage.js';
 import { confirmModal } from './modal.js';
 
 /** Buton care cere confirmare, apoi șterge istoricul testelor date (null = toate) și reîmprospătează pagina. */
-export function clearHistoryButton({ label, text, testIds, testid, cls = 'c-btn c-btn--sm', after = refresh }) {
+export function clearHistoryButton({ label, text, testIds, testid, cls = 'c-btn c-btn--sm', title = 'Ștergi rezultatele?', action = () => clearHistory(testIds), after = refresh }) {
   return h(
     'button',
     {
@@ -15,9 +15,9 @@ export function clearHistoryButton({ label, text, testIds, testid, cls = 'c-btn 
       class: cls,
       'data-testid': testid,
       onClick: async () => {
-        const ok = await confirmModal({ title: 'Ștergi rezultatele?', text: `${text} Nu se poate anula.`, confirm: 'Șterge', cancel: 'Păstrează' });
+        const ok = await confirmModal({ title, text: `${text} Nu se poate anula.`, confirm: 'Șterge', cancel: 'Păstrează' });
         if (!ok) return;
-        clearHistory(testIds);
+        action();
         after();
       },
     },
@@ -25,10 +25,12 @@ export function clearHistoryButton({ label, text, testIds, testid, cls = 'c-btn 
   );
 }
 
-/** Caseta „Pentru părinți”: încercările salvate pentru testele date, cu ștergere pe test și pe tot ansamblul. */
+/** Caseta „Pentru părinți”: încercările salvate și ciornele începute pentru testele date, cu ștergere pe test și pe tot ansamblul. */
 export function historyBox(tests, scope) {
   const rows = tests.map((t) => ({ t, attempts: listAttempts(t.id) })).filter((r) => r.attempts.length);
-  const list = rows.length
+  const drafts = tests.map((t) => ({ t, draft: getDraft(t.id) })).filter(({ t, draft }) => draft?.version === t.version && draft.current >= 0);
+  const ghost = 'c-btn c-btn--sm c-btn--ghost';
+  const list = rows.length || drafts.length
     ? h(
         'ul',
         { class: 'c-history' },
@@ -37,7 +39,20 @@ export function historyBox(tests, scope) {
             'li',
             { class: 'c-history__row' },
             h('span', {}, h('strong', {}, t.title), ` — ${cantitate(attempts.length, 'încercare', 'încercări')} · cel mai bun scor ${Math.max(...attempts.map((a) => a.score))}`),
-            clearHistoryButton({ label: 'Șterge', text: `Se șterg toate încercările la „${t.title}” și ciorna începută.`, testIds: [t.id], testid: `clear-test-${t.id}`, cls: 'c-btn c-btn--sm c-btn--ghost' }),
+            h(
+              'span',
+              { class: 'l-cluster' },
+              h('a', { class: ghost, href: `#/rezultate/${t.id}`, 'data-testid': `see-results-${t.id}` }, 'Vezi'),
+              clearHistoryButton({ label: 'Șterge', text: `Se șterg toate încercările la „${t.title}” și ciorna începută.`, testIds: [t.id], testid: `clear-test-${t.id}`, cls: ghost }),
+            ),
+          ),
+        ),
+        drafts.map(({ t, draft }) =>
+          h(
+            'li',
+            { class: 'c-history__row', 'data-testid': `draft-${t.id}` },
+            h('span', {}, h('strong', {}, t.title), ` — început, la exercițiul ${draft.current + 1} din ${t.exercises}`),
+            clearHistoryButton({ label: 'Șterge ciorna', title: 'Ștergi ciorna?', text: `Se șterg răspunsurile date până acum la „${t.title}”.`, testid: `clear-draft-${t.id}`, cls: ghost, action: () => clearDraft(t.id) }),
           ),
         ),
       )

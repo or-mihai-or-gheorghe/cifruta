@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { addAttempt, clearHistory, getAttempt, isUnsaved, lastAttempt, listAttempts, updateAttempt } from '../site/js/core/storage.js';
+import { addAttempt, clearHistory, getAttempt, isUnsaved, lastAttempt, listAttempts, listDrafts, saveDraft, updateAttempt } from '../site/js/core/storage.js';
+import { formatDateTime } from '../site/js/core/ro.js';
 
 /** Un localStorage de test; cu `full: true` orice scriere aruncă (spațiu plin sau stocare blocată). */
 function fakeStorage({ full = false } = {}) {
@@ -37,4 +38,22 @@ test('storage: încercarea rămâne în memorie când stocarea nu scrie', () => 
   clearHistory(['t']);
   assert.equal(lastAttempt('t'), null);
   delete globalThis.localStorage;
+});
+
+test('storage: ciornele se listează și se șterg odată cu istoricul', () => {
+  globalThis.localStorage = fakeStorage();
+  saveDraft('t1', { testId: 't1', current: 2 });
+  saveDraft('t2', { testId: 't2', current: 0 });
+  assert.deepEqual(listDrafts().map((d) => d.testId).sort(), ['t1', 't2']);
+  clearHistory(['t1']);
+  assert.deepEqual(listDrafts().map((d) => d.testId), ['t2']);
+  clearHistory();
+  assert.deepEqual(listDrafts(), []);
+  delete globalThis.localStorage;
+});
+
+test('ro: formatDateTime', () => {
+  const s = formatDateTime('2026-09-12T14:05:00');
+  assert.ok(s.includes('2026') && s.includes('14:05'), s);
+  assert.equal(formatDateTime('nu-e-dată'), '');
 });

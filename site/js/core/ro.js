@@ -66,5 +66,12 @@ export function numberToWords(n) {
   return r ? `${HUNDREDS[h]} ${below100(r)}` : HUNDREDS[h];
 }
 
+/** Data și ora, scurt, românește: „12 sept. 2026, 14:05”. */
+export function formatDateTime(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(d);
+}
+
 /** Numărul de cuvinte dintr-un text simplu. */
 export const wordCount = (s) => nfc(s).trim().split(/\s+/).filter(Boolean).length;
