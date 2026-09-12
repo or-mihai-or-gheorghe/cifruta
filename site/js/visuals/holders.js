@@ -2,7 +2,7 @@
 
 import { cantitate, singularOf } from '../core/ro.js';
 import { registerVisual, svgText } from './index.js';
-import { C, fit, has, numberBadge, ST, st, txt } from './palette.js';
+import { C, fit, has, num, numberBadge, ST, st, txt } from './palette.js';
 
 const GROUP = 'Suporturi pentru numere';
 const withNumber = (name) => (p) => (has(p.n) ? `${name} cu numărul ${p.n}` : name);
@@ -153,4 +153,23 @@ registerVisual('tag', {
     <circle cx="24" cy="32" r="5" fill="${C.white}" ${st(2)}/>
     ${svgText(72, 32, has(p.n) ? cantitate(Number(p.n), singularOf(p.unit), p.unit) : p.unit, { size: has(p.n) && Number(p.n) % 100 >= 20 ? 15 : 20 })}`,
   demos: [{ n: 18 }, { n: 42 }],
+});
+
+// ——— Medalie cu număr (locul 1, 2, 3) ———
+const MEDAL = { 1: { fill: C.yellow, name: 'aur' }, 2: { fill: C.grayLight, name: 'argint' }, 3: { fill: C.orangeDark, name: 'bronz' } };
+registerVisual('medal', {
+  group: GROUP,
+  defaults: { rank: 1 },
+  viewBox: '0 0 100 100',
+  label: (p) => `medalie de ${(MEDAL[num(p.rank, 1)] ?? MEDAL[1]).name}${has(p.n) ? ` cu numărul ${p.n}` : ''}`,
+  render: (p) => {
+    const m = MEDAL[num(p.rank, 1)] ?? MEDAL[1];
+    return `
+    <path d="M36 4 L50 40 L64 4 Z" fill="${C.red}" ${st(2)}/>
+    <path d="M40 4 L50 28 L60 4" fill="${C.blue}" ${st(1.5)}/>
+    <circle cx="50" cy="62" r="32" fill="${m.fill}" ${st(2.5)}/>
+    <circle cx="50" cy="62" r="24" fill="none" stroke="${C.ink}" stroke-width="1.5" opacity=".5"/>
+    ${has(p.n) ? svgText(50, 63, String(p.n), { size: fit(p.n, 26) }) : svgText(50, 63, String(num(p.rank, 1)), { size: 28 })}`;
+  },
+  demos: [{ n: 470, rank: 1 }, { n: 461, rank: 2 }, { rank: 3 }],
 });

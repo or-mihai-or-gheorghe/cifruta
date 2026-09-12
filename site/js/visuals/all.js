@@ -6,3 +6,6 @@ import './geometry.js';
 import './nature.js';
 import './mascot.js';
 import './scenes.js';
+import './charts.js';
+import './city.js';
+import './shop.js';

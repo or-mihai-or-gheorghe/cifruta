@@ -36,7 +36,7 @@ registerVisual('banknote', {
       ${txt(58, 58, v === 1 ? 'LEU' : 'LEI', { size: 12, weight: 800 })}
       ${txt(120, 40, v, { size: 13, weight: 800 })}`;
   },
-  demos: [1, 5, 10, 20, 50, 100].map((value) => ({ value })),
+  demos: [1, 5, 10, 20, 50, 100, 200, 500].map((value) => ({ value })),
 });
 
 const COIN_COLORS = {

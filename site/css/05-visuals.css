@@ -12,6 +12,7 @@
    (Chromium le-ar strica), iar `transform-box` se pune doar pe aceste grupuri. */
 .v-clock__hand { transform-box: view-box; transform-origin: 50px 50px; transition: transform 400ms var(--ease-out); }
 .v-abacus__bead.is-new { transform-box: fill-box; animation: anim-drop 250ms var(--ease-out) both; }
+.v-bar-chart__bar { transform-box: fill-box; transform-origin: bottom; }
 .ex-break .v-mascot__confetti, .ex-summary__art .v-mascot__confetti { animation: anim-twinkle 1.4s ease-in-out infinite alternate; }
 .ex-break .v-mascot__confetti:nth-of-type(2n), .ex-summary__art .v-mascot__confetti:nth-of-type(2n) { animation-delay: -0.7s; }
 

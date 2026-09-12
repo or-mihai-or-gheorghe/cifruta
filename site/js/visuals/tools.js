@@ -2,7 +2,8 @@
 
 import { cantitate } from '../core/ro.js';
 import { registerVisual } from './index.js';
-import { C, has, list, num, st, txt } from './palette.js';
+import { C, emojiImage, has, list, num, st, txt } from './palette.js';
+import { hasEmoji } from './emoji.js';
 
 const GROUP = 'Unelte de matematică';
 const PLACE = { S: { color: C.s, one: 'sută', name: 'sute' }, Z: { color: C.z, one: 'zece', name: 'zeci' }, U: { color: C.u, one: 'unitate', name: 'unități' } };
@@ -113,13 +114,13 @@ registerVisual('number-line', {
     for (const v of labels) out += txt(x(v), 64, v, { size: 12 });
     if (has(p.marker)) {
       const mx = x(num(p.marker, min));
-      out += p.icon === 'racheta'
-        ? `<image href="assets/emoji/1f680.svg" x="${mx - 11}" y="4" width="22" height="22"/><path d="M${mx - 5} 28 L${mx + 5} 28 L${mx} 36 Z" fill="${C.red}"/>`
+      out += has(p.icon) && hasEmoji(p.icon)
+        ? `${emojiImage(p.icon, mx - 11, 4, 22)}<path d="M${mx - 5} 28 L${mx + 5} 28 L${mx} 36 Z" fill="${C.red}"/>`
         : `<circle cx="${mx}" cy="18" r="9" fill="${C.red}" ${st(2)}/><path d="M${mx - 5} 26 L${mx + 5} 26 L${mx} 36 Z" fill="${C.red}" ${st(1.5)}/>`;
     }
     return out;
   },
-  demos: [{ marker: 48, icon: 'racheta' }, { min: 20, max: 100, minor: 5, labels: '20,40,60,80,100' }],
+  demos: [{ marker: 48, icon: 'racheta' }, { min: 20, max: 100, minor: 5, labels: '20,40,60,80,100' }, { min: 0, max: 1000, minor: 100, labels: '0,500,1000', marker: 460, icon: 'masina' }],
 });
 
 // ——— Termometrul ———
@@ -269,3 +270,55 @@ registerVisual('bar-model', {
   demos: [{ parts: '18,12', total: '?' }, { parts: '45,?', total: '60' }],
 });
 
+
+// ——— Tabelul de poziție S | Z | U ———
+const digit = (v) => (has(v) ? String(v) : '?');
+registerVisual('place-value', {
+  group: GROUP,
+  viewBox: '0 0 150 70',
+  label: (p) => `tabel de poziție cu ${['s', 'z', 'u'].map((k) => `${digit(p[k]) === '?' ? 'necunoscut' : digit(p[k])} ${PLACE[k.toUpperCase()].name}`).join(', ')}`,
+  render: (p) =>
+    ['S', 'Z', 'U']
+      .map((k, i) => {
+        const x = 5 + i * 47;
+        const v = digit(p[k.toLowerCase()]);
+        return `<rect x="${x}" y="4" width="46" height="26" fill="${PLACE[k].color}" ${st(2)}/>${txt(x + 23, 17, k, { size: 14, fill: C.white })}` +
+          `<rect x="${x}" y="30" width="46" height="36" fill="${C.white}" ${st(2)}/>${txt(x + 23, 48, v, { size: 22, cls: 'v-num' })}`;
+      })
+      .join(''),
+  demos: [{ s: 4, z: 0, u: 3 }, { s: '?', z: 5, u: 0 }],
+});
+
+// ——— Cuburi de 1, bare de 10, plăci de 100 ———
+const parts1000 = (n) => ({ h: Math.floor(n / 100), t: Math.floor((n % 100) / 10), u: n % 10 });
+registerVisual('base-ten', {
+  group: GROUP,
+  defaults: { n: 245 },
+  viewBox: (p) => {
+    const { h, t, u } = parts1000(Math.max(0, Math.min(999, num(p.n, 0))));
+    return `0 0 ${Math.max(110, 10 + h * 46, 10 + t * 14, 10 + u * 14)} ${10 + (h ? 48 : 0) + (t ? 48 : 0) + (u ? 16 : 0)}`;
+  },
+  label: (p) => {
+    const n = Math.max(0, Math.min(999, num(p.n, 0)));
+    const { h, t, u } = parts1000(n);
+    return `${cantitate(h, 'placă de 100', 'plăci de 100')}, ${cantitate(t, 'bară de 10', 'bare de 10')}, ${cantitate(u, 'cub de 1', 'cuburi de 1')}: ${n}`;
+  },
+  render: (p) => {
+    const { h, t, u } = parts1000(Math.max(0, Math.min(999, num(p.n, 0))));
+    let out = '';
+    let y = 6;
+    const grid = (x, yy, w, hh, cols, rows) => {
+      let g = `<rect x="${x}" y="${yy}" width="${w}" height="${hh}" fill="${C.s}" ${st(1.5)}/>`;
+      for (let i = 1; i < cols; i++) g += `<line x1="${x + (w / cols) * i}" y1="${yy}" x2="${x + (w / cols) * i}" y2="${yy + hh}" stroke="${C.ink}" stroke-width=".6"/>`;
+      for (let j = 1; j < rows; j++) g += `<line x1="${x}" y1="${yy + (hh / rows) * j}" x2="${x + w}" y2="${yy + (hh / rows) * j}" stroke="${C.ink}" stroke-width=".6"/>`;
+      return g;
+    };
+    for (let i = 0; i < h; i++) out += grid(6 + i * 46, y, 40, 40, 10, 10);
+    if (h) y += 48;
+    for (let i = 0; i < t; i++) out += `<rect x="${6 + i * 14}" y="${y}" width="8" height="40" fill="${C.z}" ${st(1.5)}/>` + Array.from({ length: 9 }, (_, j) => `<line x1="${6 + i * 14}" y1="${y + 4 * (j + 1)}" x2="${14 + i * 14}" y2="${y + 4 * (j + 1)}" stroke="${C.ink}" stroke-width=".6"/>`).join('');
+    if (t) y += 48;
+    for (let i = 0; i < u; i++) out += `<rect x="${6 + i * 14}" y="${y}" width="8" height="8" fill="${C.u}" ${st(1.5)}/>`;
+    return out;
+  },
+  demos: [{ n: 245 }, { n: 416 }, { n: 7 }],
+});
