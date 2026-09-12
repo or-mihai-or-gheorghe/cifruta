@@ -8,9 +8,13 @@ explicații pe înțelesul copiilor. Mascota site-ului este **Veverița Cifruța
 ## Ce conține
 - **Recapitulare: clasa I** — 4 teste de câte ~45 de minute, fiecare cu 11 exerciții pe trei niveluri
   (ușor → intermediar → avansat): *Amintiri din vacanță*, *La piață cu bunica*, *Călătorie în spațiu*, *O zi la fermă*.
-- 11 tipuri de exerciții: alegere, adevărat/fals, casete de completat (rânduri, tabele, arbori, lanțuri, probleme cu
-  plan), axa numerelor și termometrul, unire cu săgeți, ordonare cu cuvânt secret, sortare în coșuri, colorare,
-  numărătoare, ceas, bani.
+- **Numerele de la 0 la 1000** — 6 teste tematice: *Lista de cumpărături*, *Prin oraș: tramvai, metrou, autobuz*,
+  *Excursie cu trenul și cu mașina*, *Sondajul clasei*, *Concursul sportiv al școlii*, *Corpul meu în numere* — cu grafice,
+  pictograme, hărți de linii, orare, bani de 100–500 de lei și corpul omenesc; la nivelul avansat, probleme în mai mulți pași
+  și sarcini deschise cu mai multe răspunsuri bune.
+- 13 tipuri de exerciții: alegere, adevărat/fals, casete de completat (rânduri, tabele, arbori, lanțuri, probleme cu
+  plan), axa numerelor și termometrul, unire cu săgeți, ordonare cu cuvânt secret, sortare în coșuri, colorare (și cu reguli
+  de buget), numărătoare, ceas, bani, traseu pe harta liniilor, grafic cu bare construit de copil.
 - La final: scor, calificativ, stele pe niveluri, explicații pas cu pas, rezolvarea completă și „Mai încerc o dată”.
 - Funcționează pe telefon, tabletă și calculator; progresul se salvează în browser.
 

@@ -64,10 +64,12 @@ export default {
 | `match` | `left: [{ id, text, visual?, calc?, feedback? }]`, `right: [{ id, text?, label?, visual?, calc? }]`, `key: { leftId: rightId }` | `{ leftId: rightId }` |
 | `order` | `items: [{ id, text, tag?, emoji? }]`, `direction: 'asc'\|'desc'` sau `key` + `constraints`, `itemVisual?`, `reveal: { word }` | `[id, …]` |
 | `categorize` | `bins: [{ id, label, visual? }]`, `items: [{ id, text, emoji?, visual?, bin }]` | `{ itemId: binId }` |
-| `mark` | `items: [{ id, n? , text?, visual? }]`, `itemVisual?`, `rule` sau `key`; cu paletă: `palette: [{ id: 'verde', label }]` + `item.color` | `[id, …]` sau `{ id: culoare }` |
+| `mark` | `items: [{ id, n? , text?, visual? }]`, `itemVisual?`, `rule` sau `key`; cu paletă: `palette: [{ id: 'verde', label }]` + `item.color`; **sarcină deschisă:** `rules: { count?: n \| {min,max}, sum?: {min,max} (pe `item.n`), include?, exclude?, noun?: ['produs','produse'], unit?: 'lei' }` — orice selecție bună ia tot creditul | `[id, …]` sau `{ id: culoare }` |
 | `build` | `tool: 'abacus'`, `places: ['Z','U']` (sau `['S','Z','U']`), `items: [{ id, label, target }]` | `{ itemId: { Z, U } }` |
 | `clock` | `step: 30`, `items: [{ id, label?, answer: { h, m } }]` | `{ itemId: { h, m } }` |
 | `money` | `allowed: [1, 5, 10, 20, 50]`, `target`, `items: [{ id, label }]`, `distinct?` (feluri diferite), `fewest?` (cele mai puține bancnote) | `{ itemId: { '10': 1, '1': 2 } }` |
+| `route` | `map: { w, h, stops: [{ id, label, x, y, side? }], lines: [{ id, label, color: 'rosie'\|'albastra'\|'verde'\|…, stops: [ids] }] }` (definită o dată în fișier și refolosită de desenul `route-map`), `from`, `to`, `key: [ids]` (trebuie să fie **singurul** drum cel mai scurt; alt drum bun ia jumătate) sau `rules: { via?, avoid?, maxStops?, maxChanges?, lines? }` | `[stopId, …]` |
+| `chart` | `categories: [{ id, label, emoji? }]`, `max`, `step` (1/2/5/10), `key: { id: valoare }` (credit pe bară; fără 0) sau `rules: [{ rule: 'total', value }, { rule: 'more'\|'equal', a, b }, { rule: 'most'\|'least', a }, { rule: 'range', a, min?, max? }, { rule: 'each', min?, max? }]`, `given?: { id: valoare }` (bare gata desenate, blocate) | `{ id: valoare }` |
 
 ### `fill` în detaliu
 - **Layout-uri:** `inline` (`rows: ['27 + 42 = [[a]]', …]`), `steps` (rânduri cu `label`, pentru probleme cu plan),
@@ -118,12 +120,15 @@ export default {
 HTML nu este permis (se afișează ca text).
 
 ## 5. Banca vizuală (`visual: { v: 'nume', …parametri }`)
-- **Suporturi pentru numere:** `shell` · `star` · `flower {color}` · `suitcase {tag}` · `apple {color}` · `leaf` · `balloon {color}` · `planet {color}` · `rocket` · `basket {label}` · `tag {n, unit}` — toate cu `n`.
-- **Unelte:** `abacus {places, S, Z, U}` · `egg-carton {full, loose}` · `ten-frame {n}` · `number-line {min, max, minor, labels, marker, icon}` · `thermometer {min, max, minor, major, value}` · `ruler {length, from, to}` · `clock {h, m}` · `balance {left, right}` · `bar-model {parts, total}`.
-- **Bani:** `banknote {value: 1|5|10|20|50|100}` · `coin {value: 1|5|10|50}` (bani).
+- **Suporturi pentru numere:** `shell` · `star` · `flower {color}` · `suitcase {tag}` · `apple {color}` · `leaf` · `balloon {color}` · `planet {color}` · `rocket` · `basket {label}` · `tag {n, unit}` · `medal {n, rank}` — toate cu `n`.
+- **Date și grafice:** `bar-chart {labels, values, emojis?, step, max?, hide?, numbers?}` · `pictogram {labels, values, emoji, each, unit}` · `tally {labels, values}` · `pie {slices, filled, labels?}` · `data-table {head: 'A|B', rows: 'x|1;y|2', highlight?}` · `podium {names, values?}`.
+- **Oraș și transport:** `route-map {stops, lines, path?, from?, to?, w, h}` (liste de obiecte → doar din date, nu din `{{v:}}`) · `signpost {label, n, unit}`.
+- **Magazin:** `shelf {products: 'minge:120,carte:60'}` · `receipt {title, lines: 'Ghete|230,Rucsac|128', total?}` (`total` poate fi greșit intenționat sau `'?'`) · `note-list {title, lines, checked?}`.
+- **Unelte:** `abacus {places, S, Z, U}` · `egg-carton {full, loose}` · `ten-frame {n}` · `number-line {min, max, minor, labels, marker, icon}` (`icon` = orice emoji) · `thermometer {min, max, minor, major, value}` · `ruler {length, from, to}` · `clock {h, m}` · `balance {left, right}` · `bar-model {parts, total}` · `place-value {s, z, u}` (cifră sau `?`) · `base-ten {n}` (plăci de 100, bare de 10, cuburi).
+- **Bani:** `banknote {value: 1|5|10|20|50|100|200|500}` · `coin {value: 1|5|10|50}` (bani).
 - **Geometrie:** `shape {name: triunghi|patrat|dreptunghi|cerc}` · `solid {name: cub|cuboid|cilindru|sfera|con}` · `rocket-shapes` · `triangle-fan {cuts}` · `square-grid {n}`.
 - **Natură și corp:** `organ {name: inima|plamanii|creierul|stomacul|rinichii}` · `plant` · `vegetable {name: morcov|ridiche|sfecla|salata|spanac|varza|rosie|ardei|castravete}` · `energy {name: soare|vant|apa|carbune|petrol|gaze}` · `sky-body {name: soare|pamant|luna}` · `farm-grid {cells, labels}`.
-- **Mascotă și decor:** `mascot {mood: vesela|ganditoare|sarbatoreste|incurajeaza}` · `level-icon {level}` · `scene {theme}`.
+- **Mascotă și decor:** `mascot {mood: vesela|ganditoare|sarbatoreste|incurajeaza}` · `level-icon {level}` · `scene {theme: mare|piata|spatiu|ferma|magazin|oras|scoala|stadion}` (o temă nouă cere și tokenii `[data-theme]` din `00-tokens.css`).
 
 Toate apar cu exemple la `#/atelier/vizualuri`. **Desen nou:** `registerVisual('nume', { group, defaults, label, render, viewBox, demos })`
 într-un modul din `site/js/visuals/`; culori doar din variabile `--v-*` (vezi `css/00-tokens.css`), contur
@@ -144,6 +149,10 @@ schimbă doar rotația), bila nouă de pe numărătoare, confetti-ul mascotei (d
   mai multe soluții, verificarea rezultatului, „găsește greșeala”, mersul invers.
 - Diacritice corecte (ș, ț cu virgulă). Acordul cu numeralul: **1 leu**, 19 lei, **20 de lei**, 101 lei, **1 grad**,
   **22 de grade** (în șabloane cu casete folosește formulări neutre: „Rest (lei): [[a]]”). În cod: `cantitate(n, 'leu', 'lei')`.
+- **Sarcini deschise și pași mulți (gândirea creativă):** la nivelul avansat, cel puțin o sarcină cu **mai multe răspunsuri bune**
+  verificate prin reguli (`mark.rules`, `route.rules`, `chart.rules`, `money.distinct`), o problemă în **3+ pași** (`fill` cu
+  `layout: 'steps'`, plan → calcul → verificare) și un puzzle (ghicitoare cu `search`, cifre ascunse, mers invers, greșeala din
+  bon sau tabel). La intermediar, două probleme în 2 pași.
 - **Răspunsul nu stă la vedere:** variantele nu repetă pictograma sau textul din desen (țarcurile → doar numele animalelor),
   o variantă corectă nu spune rezultatul altui subpunct (T4-e10: a) estimează, b) calculează), contextul nu dă prima pereche
   din exercițiu, iar suma din portofel nu se vede în timpul rezolvării. Amestecă variantele (`shuffle: true`) când n-au o ordine

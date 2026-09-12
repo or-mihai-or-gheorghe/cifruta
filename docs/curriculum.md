@@ -237,7 +237,7 @@ D1 În formare, D2 În dificultate) nu au o corespondență oficială cu FB/B/S/
 termen necunoscut, probleme (26–39) · teste (40–41). Testele de evaluare au 10 p pe item + 10 p din oficiu:
 S 50–70, B 70–90, FB 90–100.
 
-## Tabel de acoperire: teste × concepte (recapitularea clasei I)
+## Tabel de acoperire: teste × concepte
 
 <!-- acoperire:start -->
 T1 „Amintiri din vacanță” · T2 „La piață cu bunica” · T3 „Călătorie în spațiu” · T4 „O zi la fermă” · T5 „Lista de cumpărături” · T6 „Prin oraș: tramvai, metrou, autobuz” · T7 „Excursie cu trenul și cu mașina” · T8 „Sondajul clasei” · T9 „Concursul sportiv al școlii” · T10 „Corpul meu în numere”.

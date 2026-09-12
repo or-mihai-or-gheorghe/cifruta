@@ -1,16 +1,20 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-12 · **Versiune:** 0.5.0
+- **Data:** 2026-09-12 · **Versiune:** 0.6.0
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
   rezultate (scor, calificativ, stele, confetti, autoevaluare, zona pentru părinți cu lista încercărilor și concepte pe subpunct,
-  revizuire cu explicații, rezolvare, „Mai încerc o dată” repetabil), 11 tipuri de exerciții, banca vizuală (36 de desene,
-  peisaje și ceas animate), sunete discrete cu buton de oprire, atelier pentru autori. Conținut: **4 teste de recapitulare a
-  clasei I** (T1–T4 v2), toate exercițiile cu desen sau emoji, fără răspunsuri „la vedere”. Calitate: 32 de teste Node (plus
-  validarea conținutului, a tabelului de acoperire și a contrastului), E2E 541 de verificări pe 3 ecrane + tastatură.
-- **Următorul pas:** copilul rezolvă T1–T4 → notăm timpii reali și dificultatea; apoi secțiunile U1 (numere 0–1000) și U2.
+  revizuire cu explicații, rezolvare, „Mai încerc o dată” repetabil), 13 tipuri de exerciții (cu traseu pe harta liniilor și
+  grafic cu bare construit; `mark` cu reguli de set pentru sarcini deschise), banca vizuală (50 de desene: și grafice, pictograme,
+  bețișoare, felii, tabele, podium, hartă de linii, indicator, raft, bon, listă, tabel de poziție, cuburi, medalie; 8 peisaje
+  animate), sunete discrete cu buton de oprire, atelier pentru autori. Conținut: **4 teste de recapitulare a clasei I** (T1–T4 v2)
+  și **6 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc), toate
+  exercițiile cu desen sau emoji, fără răspunsuri „la vedere”, cu probleme în mai mulți pași și sarcini deschise la avansat.
+  Calitate: 41 de teste Node (plus validarea conținutului, a tabelului de acoperire și a contrastului), E2E pe 3 ecrane + tastatură.
+- **Următorul pas:** copilul rezolvă T1–T4 și testele noi → notăm timpii reali și dificultatea; apoi secțiunea U2
+  (Adunarea și scăderea până la 1000 · Pământul).
 
 ## Etape
 - [x] M0 Schelet: git, `_surse/`, `.gitignore`, `package.json`, `CLAUDE.md`, docs (curriculum, cercetare)
@@ -34,6 +38,9 @@
 - [x] M14 (v0.5.0): feedback extern nr. 2 (rezultat păstrat la eșecul stocării, concepte pe subpunct, istoric accesibil, intro ca
   punct de plecare, accesibilitate, contrast, pauză neutră, praguri exacte la cronometru, explicații corectate) + „răspunsuri date
   de-a gata” scoase din conținut (T2–T4 v2); publicat, E2E pe site-ul live: 541 de verificări, tag `v0.5.0`
+- [x] M15 (v0.6.0): secțiunea „Numerele de la 0 la 1000 · Corpul omenesc” cu 6 teste tematice; 12 concepte noi, 39 de emoji, 4 scene
+  și 14 desene noi (grafice, hartă de linii, magazin, tabel de poziție, cuburi, medalie); tipurile `route` și `chart`, `mark` cu reguli
+  de set; publicat, E2E pe site-ul live: vezi jurnalul, tag `v0.6.0`
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -42,6 +49,12 @@
 | recap-c1-t2 | La piață cu bunica | 2 | publicat | npm test + E2E | 45 | – |
 | recap-c1-t3 | Călătorie în spațiu | 2 | publicat | npm test + E2E | 45 | – |
 | recap-c1-t4 | O zi la fermă | 2 | publicat | npm test + E2E | 45 | – |
+| u1-t1 | Lista de cumpărături | 1 | publicat | npm test + E2E | 45 | – |
+| u1-t2 | Prin oraș: tramvai, metrou, autobuz | 1 | publicat | npm test + E2E | 45 | – |
+| u1-t3 | Excursie cu trenul și cu mașina | 1 | publicat | npm test + E2E | 45 | – |
+| u1-t4 | Sondajul clasei | 1 | publicat | npm test + E2E | 45 | – |
+| u1-t5 | Concursul sportiv al școlii | 1 | publicat | npm test + E2E | 45 | – |
+| u1-t6 | Corpul meu în numere | 1 | publicat | npm test + E2E | 45 | – |
 
 ## Decizii
 | data | decizie | motiv |
@@ -85,6 +98,11 @@
 | 2026-09-12 | Pauza dintre niveluri sărbătorește doar un nivel terminat; altfel e neutră și spune câte exerciții au rămas | feedback nr. 2 |
 | 2026-09-12 | Un desen decorativ nou nu cere versiune; unul cu date (riglă, cofraj, model cu bare) da | feedback nr. 2 (excepția era prea largă); fără mecanism automat |
 | 2026-09-12 | Neaplicate, în backlog: săgeți la butoanele radio, explicații vizuale interactive, ceas cu tragere directă, legătura desen–răspuns în validator | funcționalități noi sau over-engineering față de cerere |
+| 2026-09-12 | Secțiunea „Numerele de la 0 la 1000” = un singur grup cu 6 teste tematice (corpul și sănătatea apar în fiecare test, T6 e dedicat); grupul „Corpul omenesc” a fost eliminat | decizia utilizatorului |
+| 2026-09-12 | Două tipuri noi (`route`: stații atinse în ordine pe hartă; `chart`: bare construite) + reguli de set la `mark`; sarcini deschise cu mai multe soluții verificate prin reguli, probleme în 3+ pași și puzzle-uri la avansat | cererea utilizatorului: pași mulți și gândire creativă, evaluabile automat |
+| 2026-09-12 | Harta liniilor e fictivă (Gara, Piața Mare, Teatrul…), orașele și trenurile sunt inventate; graficele cu bare urmează programa (clasa a II-a), pictograma cu legendă 2/5/10 și cercul cu 4 felii egale sunt sprijin, nu obiective | sursele reale se contrazic (metroul), iar programa nu numește pictograma; ½ și ¼ sunt în programă |
+| 2026-09-12 | Adunările până la 1000 doar fără trecere sau cu sute rotunde; trecerea peste ordin rămâne în 0–100 | programa spune „fără trecere” la 0–1000 (contradicție cu CS 1.4); U2 va lămuri |
+| 2026-09-12 | Agenții se lansează pe rând; pauze la cererea utilizatorului până la resetarea consumului | cererea utilizatorului (consum responsabil) |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -96,7 +114,8 @@
 ## Backlog
 - Scanările actuale acoperă manualul până la înmulțire; utilizatorul adaugă scanări noi după finalizarea etapei curente.
 - Secțiuni noi după manual: Numerele 0–1000 · Corpul omenesc (U1); Adunarea și scăderea 0–1000 · Pământul (U2); apoi înmulțirea.
-- Tipuri noi: balanță interactivă, traseu pe rețea cu săgeți, hotspot pe imagine, grafic cu bare, calendar, desen/simetrie.
+- Tipuri noi: balanță interactivă, hotspot pe imagine, calendar, desen/simetrie (traseul și graficul cu bare există din v0.6.0).
+- Secțiunea următoare: U2 „Adunarea și scăderea până la 1000 · Pământul” (grupurile din catalog sunt marcate `soon`).
 - Variante generate aleator (cu sămânță), diplomă printabilă.
 - Amânate la cerere: citire cu voce (TTS), tastatură numerică proprie pe ecran.
 - Din feedback-ul nr. 2, neaplicate: săgeți sus/jos la butoanele radio (Tab + Space merg); explicații vizuale interactive
@@ -141,3 +160,11 @@
   în variante, portofel cu număr de bancnote, T4-e10/T2-e05/T2-e07/T2-e10/T4-e06/T3-e11 refăcute, `shuffle`, explicații corectate,
   „42 de lei” pe etichete (mari acum), T2–T4 v2; (8) documentație, v0.5.0. v0.5.0 publicat, E2E pe site-ul live 541/541.
   **De făcut data viitoare:** copilul rezolvă T1–T4 → timpii reali; scanări noi (după înmulțire).
+- **2026-09-12 (a patra sesiune)** — Planificarea și construirea secțiunii „Numerele de la 0 la 1000 · Corpul omenesc”: trei explorări
+  (manualul și caietul pagină cu pagină, banca vizuală și tipurile, documentare web: programa, UK/US, transport, bani, corp) și un agent
+  de proiectare, lansate pe rând. Decizii: 6 subiecte (cumpărături, oraș, excursie, sondaj, concurs, corp), un singur grup, două tipuri
+  noi + reguli de set, totul într-o sesiune. Implementare în 14 commit-uri: concepte + emoji + scene; 14 desene noi; `mark.rules`;
+  `route`; `chart`; demo + E2E; T1…T6 (fiecare validat cu `npm test` și E2E pe laptop și telefon, cu capturi privite); documentație,
+  v0.6.0. Retușuri pe drum: etichete de preț mai mari și cu font după lungime, bon cu total „?”, tabelul cu variante trecut pe
+  rânduri (telefon), emoji „ecran”.
+  **De făcut data viitoare:** copilul rezolvă un test din secțiunea nouă → timpii reali și ce e prea greu; apoi U2.

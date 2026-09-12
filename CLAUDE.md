@@ -33,10 +33,11 @@ tests/ *.test.js (node --test)   tools/ e2e.py (Playwright), acoperire.mjs (tabe
 _surse/ scanările PDF (ignorate de git) — deschide-le doar dacă docs/curriculum.md nu acoperă ce cauți
 ```
 
-## Tipuri de exerciții (11)
+## Tipuri de exerciții (13)
 `choice` · `truefalse` · `fill` (layout inline/steps/table/tree/chain; casete number/relation/sign/select/text) ·
-`slider` · `match` (săgeți) · `order` (+ cuvânt secret / indicii logice) · `categorize` · `mark` (+ paletă) ·
-`build` (numărătoare) · `clock` · `money`. Exemple complete: `site/data/demo.js` (vizibile la `#/atelier/tipuri`); ghid: `docs/ghid-autor.md`.
+`slider` · `match` (săgeți) · `order` (+ cuvânt secret / indicii logice) · `categorize` · `mark` (+ paletă / `rules` de set) ·
+`build` (numărătoare) · `clock` · `money` · `route` (stații atinse în ordine pe harta liniilor; `key` sau `rules`) ·
+`chart` (grafic cu bare construit; `key` sau `rules`). Exemple complete: `site/data/demo.js` (vizibile la `#/atelier/tipuri`); ghid: `docs/ghid-autor.md`.
 Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual` (desen deasupra casetelor), `feedback: [{ if, text }]` pentru greșeli tipice.
 
 ## Comenzi
@@ -93,3 +94,10 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
 - Contrast: textul colorat folosește tokenii `--c-*-ink` (≥ 4,5:1, verificat de `tests/css.test.js`); culorile vii rămân pe
   fundaluri, buline și linii. Casetele de completat se prezintă cititorului de ecran cu șablonul lor (`blankLabel` din `fill/logic.js`).
 - E2E: `--only <id>` sare fluxurile de atelier și de tastatură (`types_flow`, `keyboard_flow`) — rulează și fără `--only`.
+- Sarcini deschise (`mark.rules`, `route.rules`, `chart.rules`, `money.distinct`): orice răspuns care respectă regulile ia tot creditul;
+  validatorul cere cel puțin o soluție (o găsește prin enumerare: `mark` ≤ 12 elemente, `chart` ≤ 200 000 de combinații, `route`
+  ≤ 12 stații) și, la `route` cu `key`, un singur drum cel mai scurt. `chart.key` nu acceptă 0 (bară neatinsă). Hărțile (`route-map`,
+  liste de obiecte) și tabelele se pun în `context.visual` / `part.visual`, nu în `{{v:}}` (valorile n-au voie cu spații).
+- Structura unui test tematic (secțiunea 0–1000): poveste comună, ≥ 6 tipuri, formare + comparare/ordonare + încă un concept
+  `mat.nr1000.*` în fiecare test, 1–2 exerciții MEM, la intermediar două probleme în 2 pași, la avansat: problemă în 3+ pași
+  (`fill` cu `layout: 'steps'`), sarcină deschisă cu reguli și un puzzle (`search`, cifre ascunse, mers invers, greșeala din bon/tabel).
