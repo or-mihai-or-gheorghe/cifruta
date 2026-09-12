@@ -9,7 +9,7 @@
   revizuire cu explicații, rezolvare, „Mai încerc o dată” repetabil), 11 tipuri de exerciții, banca vizuală (36 de desene,
   peisaje și ceas animate), sunete discrete cu buton de oprire, atelier pentru autori. Conținut: **4 teste de recapitulare a
   clasei I** (T1–T4 v2), toate exercițiile cu desen sau emoji, fără răspunsuri „la vedere”. Calitate: 32 de teste Node (plus
-  validarea conținutului, a tabelului de acoperire și a contrastului), E2E ~530 de verificări pe 3 ecrane + tastatură.
+  validarea conținutului, a tabelului de acoperire și a contrastului), E2E 541 de verificări pe 3 ecrane + tastatură.
 - **Următorul pas:** copilul rezolvă T1–T4 → notăm timpii reali și dificultatea; apoi secțiunile U1 (numere 0–1000) și U2.
 
 ## Etape
@@ -33,7 +33,7 @@
   publicat, E2E pe site-ul live: 475 de verificări, tag `v0.4.0`
 - [x] M14 (v0.5.0): feedback extern nr. 2 (rezultat păstrat la eșecul stocării, concepte pe subpunct, istoric accesibil, intro ca
   punct de plecare, accesibilitate, contrast, pauză neutră, praguri exacte la cronometru, explicații corectate) + „răspunsuri date
-  de-a gata” scoase din conținut (T2–T4 v2); publicat, E2E pe site-ul live: vezi jurnalul, tag `v0.5.0`
+  de-a gata” scoase din conținut (T2–T4 v2); publicat, E2E pe site-ul live: 541 de verificări, tag `v0.5.0`
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -139,5 +139,5 @@
   la unire, focus păstrat la sortare, tokeni `--c-*-ink` cu test de contrast; (6) litere pe carduri la rezultate, reîncercare
   repetată + „refăcut corect”, antet compact pe telefon, doar linia nouă animată la unire; (7) conținut: T4-e01 fără pictograme
   în variante, portofel cu număr de bancnote, T4-e10/T2-e05/T2-e07/T2-e10/T4-e06/T3-e11 refăcute, `shuffle`, explicații corectate,
-  „42 de lei” pe etichete (mari acum), T2–T4 v2; (8) documentație, v0.5.0.
+  „42 de lei” pe etichete (mari acum), T2–T4 v2; (8) documentație, v0.5.0. v0.5.0 publicat, E2E pe site-ul live 541/541.
   **De făcut data viitoare:** copilul rezolvă T1–T4 → timpii reali; scanări noi (după înmulțire).
