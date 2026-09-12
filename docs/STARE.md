@@ -12,7 +12,7 @@
   animate), sunete discrete cu buton de oprire, atelier pentru autori. Conținut: **4 teste de recapitulare a clasei I** (T1–T4 v2)
   și **6 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc), toate
   exercițiile cu desen sau emoji, fără răspunsuri „la vedere”, cu probleme în mai mulți pași și sarcini deschise la avansat.
-  Calitate: 41 de teste Node (plus validarea conținutului, a tabelului de acoperire și a contrastului), E2E pe 3 ecrane + tastatură.
+  Calitate: 41 de teste Node (plus validarea conținutului, a tabelului de acoperire și a contrastului), E2E 1005 verificări pe 3 ecrane + tastatură.
 - **Următorul pas:** copilul rezolvă T1–T4 și testele noi → notăm timpii reali și dificultatea; apoi secțiunea U2
   (Adunarea și scăderea până la 1000 · Pământul).
 
@@ -40,7 +40,7 @@
   de-a gata” scoase din conținut (T2–T4 v2); publicat, E2E pe site-ul live: 541 de verificări, tag `v0.5.0`
 - [x] M15 (v0.6.0): secțiunea „Numerele de la 0 la 1000 · Corpul omenesc” cu 6 teste tematice; 12 concepte noi, 39 de emoji, 4 scene
   și 14 desene noi (grafice, hartă de linii, magazin, tabel de poziție, cuburi, medalie); tipurile `route` și `chart`, `mark` cu reguli
-  de set; publicat, E2E pe site-ul live: vezi jurnalul, tag `v0.6.0`
+  de set; publicat, E2E pe site-ul live: 1005 verificări, tag `v0.6.0`
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -166,5 +166,5 @@
   noi + reguli de set, totul într-o sesiune. Implementare în 14 commit-uri: concepte + emoji + scene; 14 desene noi; `mark.rules`;
   `route`; `chart`; demo + E2E; T1…T6 (fiecare validat cu `npm test` și E2E pe laptop și telefon, cu capturi privite); documentație,
   v0.6.0. Retușuri pe drum: etichete de preț mai mari și cu font după lungime, bon cu total „?”, tabelul cu variante trecut pe
-  rânduri (telefon), emoji „ecran”.
+  rânduri (telefon), emoji „ecran”. v0.6.0 publicat, E2E local 1005/1005 și pe site-ul live 1005/1005.
   **De făcut data viitoare:** copilul rezolvă un test din secțiunea nouă → timpii reali și ce e prea greu; apoi U2.
