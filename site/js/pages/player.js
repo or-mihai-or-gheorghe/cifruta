@@ -259,7 +259,7 @@ export default async function player(container, [testId]) {
   function submit() {
     save();
     const result = scoreTest(test, draft.answers);
-    addAttempt({
+    const saved = addAttempt({
       id: `${testId}-${Date.now()}`,
       testId,
       testVersion: test.version,
@@ -279,9 +279,9 @@ export default async function player(container, [testId]) {
       feeling: null,
       secondChance: {},
     });
-    submitted = true;
+    submitted = saved; // fără salvare, ciorna rămâne: rezultatul se vede acum, din memorie, dar nu intră în istoric
     clearInterval(timer);
-    clearDraft(testId);
+    if (saved) clearDraft(testId);
     location.hash = `#/rezultate/${testId}`;
   }
 

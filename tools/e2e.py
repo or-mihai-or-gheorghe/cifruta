@@ -314,6 +314,21 @@ def pages_flow(run: Run, page: Page, test: dict, vp: str):
     run.check(page.evaluate("localStorage.getItem('cifruta:attempts')") == "[]" and page.get_by_test_id("clear-all").count() == 0, f"[{vp}] „Șterge toate rezultatele” golește istoricul din toate secțiunile")
     page.evaluate("localStorage.clear()")
 
+    # stocarea nu mai scrie (plină sau blocată): rezultatul se vede oricum, cu un mesaj, iar ciorna rămâne
+    run.goto(page, f"test/{tid}", debug=True)
+    page.wait_for_selector("[data-testid=start]")
+    page.get_by_test_id("start").click()
+    page.wait_for_selector(".ex-card")
+    page.evaluate("window.__dbg.fillCorrect()")
+    page.wait_for_timeout(200)
+    page.evaluate("void (Storage.prototype.setItem = () => { throw new Error('QuotaExceededError'); })")
+    page.evaluate("window.__dbg.submit()")
+    page.wait_for_selector("[data-testid=score]")
+    kept = page.evaluate(f"localStorage.getItem('cifruta:draft:{tid}') !== null")
+    run.check(page.get_by_test_id("unsaved").is_visible() and page.get_by_test_id("score").get_attribute("data-value") == "100" and kept, f"[{vp}] {tid}: când stocarea nu scrie, rezultatul se afișează cu un mesaj, iar ciorna rămâne")
+    page.reload()  # readuce setItem
+    page.evaluate("localStorage.clear()")
+
 
 def test_flow(run: Run, page: Page, test: dict, vp: str):
     tid = test["id"]

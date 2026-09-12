@@ -10,7 +10,7 @@ import { findTest, loadTest } from '../core/loader.js';
 import { cantitate, formatNumber } from '../core/ro.js';
 import { evaluateExercise, gradeFor, reached } from '../core/scoring.js';
 import { play } from '../core/sound.js';
-import { clearDraft, lastAttempt, updateAttempt } from '../core/storage.js';
+import { clearDraft, isUnsaved, lastAttempt, updateAttempt } from '../core/storage.js';
 import { mountExercise } from '../components/exercise.js';
 import { clearHistoryButton } from '../components/history.js';
 import { art, backLink, callout, confetti, levelPill, stars } from '../components/ui.js';
@@ -152,6 +152,9 @@ export default async function review(container, [testId]) {
       { class: 'l-container l-stack l-stack--lg', 'data-theme': test.theme },
       backLink(`#/sectiune/${entry.section.id}`, entry.section.title),
       summary,
+      isUnsaved(attempt)
+        ? h('div', { 'data-testid': 'unsaved' }, callout('warn', 'capcana', '<strong>Rezultatul nu a putut fi salvat</strong> în acest browser (spațiu plin sau stocare blocată). Îl vezi acum, dar nu va apărea în istoric. Ciorna cu răspunsurile rămâne.'))
+        : null,
       h('section', { class: 'c-card l-stack' }, h('h2', { class: 'u-center' }, 'Cum te-ai simțit?'), h('div', { class: 'c-feel' }, feelButtons)),
       parents,
       sameVersion
