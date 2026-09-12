@@ -416,6 +416,7 @@
 }
 .ex-match__item.is-linked { border-color: var(--pair, var(--c-brand)); }
 .ex-match__item .ex-face > .ex-face__art:only-child { width: 7rem; max-width: 100%; } /* un desen singur (eticheta de preț) se vede mare, cât să i se citească textul */
+.ex-mark__item .ex-face__art:has(> .v-tag), .ex-order__card .ex-face__art:has(> .v-tag) { width: 6.5rem; max-width: 100%; }
 .ex-match__badges { display: flex; gap: 2px; }
 .ex-match__badge:empty { display: none; }
 .ex-match__badge { display: grid; place-items: center; min-width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--pair, var(--c-brand)); color: var(--c-on-brand); font-size: 0.85rem; }

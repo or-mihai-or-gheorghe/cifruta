@@ -151,7 +151,10 @@ registerVisual('tag', {
   render: (p) => `
     <path d="M4 32 L28 6 H110 Q116 6 116 12 V52 Q116 58 110 58 H28 Z" fill="${C.yellow}" ${st(3)}/>
     <circle cx="24" cy="32" r="5" fill="${C.white}" ${st(2)}/>
-    ${svgText(72, 32, has(p.n) ? cantitate(Number(p.n), singularOf(p.unit), p.unit) : p.unit, { size: has(p.n) && Number(p.n) % 100 >= 20 ? 15 : 20 })}`,
+    ${(() => {
+      const text = has(p.n) ? cantitate(Number(p.n), singularOf(p.unit), p.unit) : p.unit;
+      return svgText(72, 32, text, { size: text.length > 8 ? 12.5 : text.length > 6 ? 15 : 20 });
+    })()}`,
   demos: [{ n: 18 }, { n: 42 }],
 });
 

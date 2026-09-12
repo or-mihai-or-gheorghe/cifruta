@@ -65,8 +65,22 @@ export default {
       icon: 'calcul',
       color: 'usor',
       groups: [
-        { id: 'u1-numere', title: 'Numerele naturale 0–1000', tests: [], soon: true },
-        { id: 'u1-corp', title: 'Corpul omenesc și sănătatea', tests: [], soon: true },
+        {
+          id: 'u1-viata',
+          title: 'Numerele până la 1000 în viața de zi cu zi',
+          tests: [
+            {
+              id: 'u1-t1',
+              file: 'tests/numere-1000/t1-lista-de-cumparaturi.js',
+              version: 1,
+              theme: 'magazin',
+              title: 'Lista de cumpărături',
+              subtitle: 'Prețuri de 3 cifre · rotunjire · bani de 100, 200, 500 · meniu sănătos',
+              estMin: 45,
+              exercises: 11,
+            },
+          ],
+        },
       ],
     },
     {

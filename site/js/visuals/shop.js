@@ -1,6 +1,5 @@
 // Magazin: raft cu produse și etichete de preț, bon de casă, listă de cumpărături.
 
-import { escapeHTML } from '../core/dom.js';
 import { cantitate } from '../core/ro.js';
 import { registerVisual } from './index.js';
 import { C, emojiImage, has, list, num, st, txt } from './palette.js';
@@ -43,10 +42,11 @@ registerVisual('receipt', {
   group: GROUP,
   defaults: { title: 'BON' },
   viewBox: (p) => `0 0 200 ${72 + 22 * linesOf(p).length}`,
-  label: (p) => `bon: ${linesOf(p).map(([name, n]) => `${name} ${lei(n)}`).join(', ')}; total ${lei(has(p.total) ? p.total : linesOf(p).reduce((s, [, n]) => s + num(n, 0), 0))}`,
+  // total: lipsă → suma rândurilor; un număr → tipărit ca atare (poate fi greșit intenționat); '?' → de aflat
+  label: (p) => `bon: ${linesOf(p).map(([name, n]) => `${name} ${lei(n)}`).join(', ')}; total ${p.total === '?' ? 'de aflat' : lei(has(p.total) ? p.total : linesOf(p).reduce((s, [, n]) => s + num(n, 0), 0))}`,
   render: (p) => {
     const lines = linesOf(p);
-    const total = has(p.total) ? num(p.total, 0) : lines.reduce((s, [, n]) => s + num(n, 0), 0);
+    const total = p.total === '?' ? '?' : has(p.total) ? num(p.total, 0) : lines.reduce((s, [, n]) => s + num(n, 0), 0);
     const h = 72 + 22 * lines.length;
     const zig = Array.from({ length: 10 }, (_, i) => `L${18 + i * 18} ${h - 2} L${27 + i * 18} ${h - 8}`).join(' ');
     let out = `<path d="M9 4 H191 V${h - 8} ${zig} L9 ${h - 8} Z" fill="${C.white}" ${st(2)}/>`;
@@ -60,7 +60,7 @@ registerVisual('receipt', {
     const ty = 44 + lines.length * 22;
     out += `<line x1="20" y1="${ty - 12}" x2="180" y2="${ty - 12}" stroke="${C.ink}" stroke-width="1.5"/>`;
     out += txt(20, ty + 2, 'TOTAL', { size: 12, anchor: 'start', weight: 800 });
-    out += txt(180, ty + 2, `${escapeHTML(String(total))} lei`, { size: 13, anchor: 'end', weight: 800 });
+    out += txt(180, ty + 2, total === '?' ? '?' : `${total} lei`, { size: 13, anchor: 'end', weight: 800 });
     return out;
   },
   demos: [{ lines: 'Ghete|230,Rucsac|128,Penar|41' }, { lines: 'Ghete|230,Rucsac|128,Penar|41', total: 499 }],
