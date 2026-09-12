@@ -23,6 +23,7 @@ export default {
       estMin: 3,
       concepts: ['mat.nr100.siruri', 'mat.log.modele'],
       title: 'Șirurile de pe panoul rachetei',
+      context: { text: 'Pe panoul rachetei, numerele urcă sau coboară cu același pas.', visual: { v: 'rocket', n: '?' } },
       type: 'fill',
       layout: 'inline',
       prompt: 'Descoperă regula și continuă fiecare șir.',
@@ -254,6 +255,11 @@ export default {
       estMin: 6,
       concepts: ['mat.op.lanturi', 'mat.op.cu-trecere', 'mat.pb.mersul-invers'],
       title: 'Drumul rachetei',
+      context: {
+        text: 'Racheta pornește de la stația 25.',
+        visual: { v: 'number-line', min: 0, max: 100, minor: 10, labels: '0,50,100', marker: 25, icon: 'racheta' },
+        size: 'lg',
+      },
       type: 'fill',
       layout: 'chain',
       prompt: 'Racheta trece prin mai multe stații. Completează numerele care lipsesc.',
@@ -320,6 +326,7 @@ export default {
       estMin: 6,
       concepts: ['mat.pb.mersul-invers', 'mat.op.proba'],
       title: 'Numărul la care m-am gândit',
+      context: { text: 'Mergem înapoi, pas cu pas, până la numărul ascuns.', visual: { v: 'planet', n: '?' } },
       parts: [
         {
           id: 'a',

@@ -209,6 +209,7 @@ export default {
       estMin: 4,
       concepts: ['mat.op.proba', 'mat.op.familii'],
       title: 'Proba adunării',
+      context: { text: 'Întregul 63 e făcut din 36 și 27; scăderea ia o parte înapoi.', visual: { v: 'bar-model', parts: '36,27', total: '63' }, size: 'lg' },
       type: 'match',
       prompt: 'Unește fiecare adunare cu scăderea care o **verifică**.',
       left: [
@@ -263,6 +264,7 @@ export default {
       estMin: 4,
       concepts: ['mat.op.semne', 'mat.op.cu-trecere'],
       title: 'Semnele pierdute',
+      context: { text: 'Uuu! Vântul a suflat peste socotelile fermierului.', visual: { v: 'energy', name: 'vant' } },
       type: 'fill',
       layout: 'inline',
       prompt: 'Vântul a spulberat semnele. Pune **+** sau **−**, ca să fie adevărat.',
@@ -293,6 +295,7 @@ export default {
           id: 'a',
           type: 'fill',
           layout: 'steps',
+          visual: { v: 'bar-model', parts: '38,?', total: '?' },
           prompt: 'La fermă sunt **38 de găini**. Rațele sunt **cu 15 mai puține**. Câte păsări sunt **în total**?',
           rows: [
             { label: 'Câte rațe sunt? Alege semnul și calculează.', t: '38 [[s]] 15 = [[a]]' },

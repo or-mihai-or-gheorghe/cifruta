@@ -100,6 +100,7 @@ export default {
       estMin: 3,
       concepts: ['mat.op.cu-trecere', 'mat.op.strategii'],
       title: 'Socoteli la tarabă',
+      context: { text: 'La tarabă, bunica socotește repede.', visual: { v: 'scene', theme: 'piata' }, size: 'lg' },
       type: 'fill',
       layout: 'inline',
       prompt: 'Calculează.',
@@ -372,7 +373,7 @@ export default {
       estMin: 6,
       concepts: ['mat.pb.doua-operatii', 'mat.pb.doua-moduri', 'mat.pb.plan'],
       title: 'Ouăle vândute',
-      context: { text: 'Bunica avea **45 de ouă** {{e:ou}}. A vândut **18** dimineața și **12** după-amiaza.' },
+      context: { text: 'Bunica avea **45 de ouă** {{e:ou}}. A vândut **18** dimineața și **12** după-amiaza.', visual: { v: 'egg-carton', full: 4, loose: 5 }, size: 'lg' },
       parts: [
         {
           id: 'a',

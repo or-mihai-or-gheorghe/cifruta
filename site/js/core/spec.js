@@ -7,6 +7,7 @@ import { markupErrors, plain } from './markup.js';
 import { getLogic, hasType } from './registry.js';
 import { wordCount } from './ro.js';
 import { trecere } from './rules.js';
+import { hasVisual } from '../visuals/index.js';
 
 const LEVEL_IDS = config.levels.map((l) => l.id);
 const CU_TRECERE = ['mat.op.cu-trecere', 'mat.op1000.cu-trecere'];
@@ -53,6 +54,10 @@ export function validateTest(raw, { concepts } = {}) {
     if (!ex.concepts?.length) errors.push(`${where}: lipsesc conceptele`);
     for (const c of ex.concepts ?? []) if (concepts && !concepts[c]) errors.push(`${where}: concept necunoscut „${c}”`);
     if (!ex.explain?.idea) warnings.push(`${where}: lipsește explicația (explain.idea)`);
+    const checkVisual = (spec, path) => {
+      if (spec && !hasVisual(spec.v)) errors.push(`${path}: desen necunoscut „${spec.v}”`);
+    };
+    checkVisual(ex.context?.visual, `${where}.context.visual`);
 
     const partIds = new Set();
     const ops = []; // adunările și scăderile din exercițiu, pentru etichetele „cu / fără trecere”
@@ -64,6 +69,11 @@ export function validateTest(raw, { concepts } = {}) {
       if (!hasType(part.type)) {
         errors.push(`${pw}: tip necunoscut „${part.type}”`);
         continue;
+      }
+      checkVisual(part.visual, `${pw}.visual`);
+      checkVisual(part.itemVisual, `${pw}.itemVisual`);
+      for (const list of ['items', 'bins', 'left', 'right']) {
+        for (const it of Array.isArray(part[list]) ? part[list] : []) checkVisual(it?.visual, `${pw}.${list}.${it?.id}.visual`);
       }
       const logic = getLogic(part.type);
       let partErrors;

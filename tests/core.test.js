@@ -135,6 +135,14 @@ test('lint: diacritice și sedilă', () => {
   assert.deepEqual(seen, ['blanks.a.feedback[0].text']);
 });
 
+test('spec: desenele din conținut trebuie să existe în bancă', () => {
+  const [first] = demo.exercises;
+  const bad = { ...demo, exercises: [{ ...first, context: { visual: { v: 'nu-exista' } }, parts: [{ ...first.parts[0], itemVisual: { v: 'nici-asta' } }] }] };
+  const errors = validateTest(bad).errors.filter((e) => e.includes('desen necunoscut'));
+  assert.equal(errors.length, 2, errors.join('; '));
+  assert.deepEqual(validateTest(demo).errors, []);
+});
+
 test('scoring: calificative și scor total', () => {
   assert.equal(gradeFor(49).code, 'EX');
   assert.equal(gradeFor(50).code, 'S');

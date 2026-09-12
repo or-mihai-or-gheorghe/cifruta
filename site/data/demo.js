@@ -34,6 +34,7 @@ export default {
         {
           id: 'b',
           type: 'choice',
+          visual: { v: 'rocket-shapes' },
           prompt: 'Ce figuri vezi în desenul rachetei? Alege toate variantele potrivite.',
           items: [
             {
@@ -57,6 +58,7 @@ export default {
       estMin: 3,
       concepts: ['med.soare'],
       title: 'Adevărat sau fals',
+      context: { visual: { v: 'sky-body', name: 'soare' }, text: 'Privește cerul și gândește-te ce e adevărat.' },
       type: 'truefalse',
       prompt: 'Citește și alege **A** (adevărat) sau **F** (fals).',
       items: [
@@ -173,6 +175,7 @@ export default {
       estMin: 3,
       concepts: ['mat.op.lanturi'],
       title: 'Lanț de operații',
+      context: { text: 'Racheta pornește de la stația 25.', visual: { v: 'rocket', n: 25 } },
       type: 'fill',
       layout: 'chain',
       prompt: 'Completează drumul rachetei.',
@@ -213,6 +216,7 @@ export default {
       title: 'Ordonează',
       type: 'order',
       direction: 'asc',
+      itemVisual: { v: 'suitcase' },
       prompt: 'Așază valizele de la cel mai mic număr la cel mai mare.',
       items: [
         { id: 'v1', text: '65', tag: 'N' },
@@ -280,7 +284,7 @@ export default {
       estMin: 3,
       concepts: ['mat.pb.doua-operatii'],
       title: 'Problemă cu plan',
-      context: { text: 'Bunica avea 45 de ouă. A vândut 18 dimineața și 12 după-amiaza.' },
+      context: { text: 'Bunica avea 45 de ouă. A vândut 18 dimineața și 12 după-amiaza.', visual: { v: 'egg-carton', full: 4, loose: 5 } },
       type: 'fill',
       layout: 'steps',
       prompt: 'Câte ouă i-au rămas bunicii?',
