@@ -22,7 +22,7 @@ import time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from playwright.sync_api import Page, expect, sync_playwright
+from playwright.sync_api import Page, expect, sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 ROOT = Path(__file__).resolve().parent.parent
 SITE = ROOT / "site"
@@ -496,8 +496,13 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     page.locator("[data-testid=parents] summary").click()
     rows = page.locator("[data-testid^=attempt-]").count()
     page.locator("[data-testid^=see-attempt-]").first.click()
-    page.wait_for_selector("[data-testid=score]")
-    run.check(rows == 2 and page.get_by_test_id("score").get_attribute("data-value") == "100", f"[{vp}] {tid}: lista încercărilor are {rows} rânduri, iar „Vezi” deschide încercarea cu 100")
+    # pe site-ul publicat, pagina veche (scor 10) rămâne în DOM cât se încarcă încercarea cerută: așteptăm chiar valoarea 100
+    try:
+        page.wait_for_function("document.querySelector('[data-testid=score]')?.dataset.value === '100'", timeout=15000)
+        opened = True
+    except PlaywrightTimeoutError:
+        opened = False
+    run.check(rows == 2 and opened, f"[{vp}] {tid}: lista încercărilor are {rows} rânduri, iar „Vezi” deschide încercarea cu 100")
     run.goto(page, f"rezultate/{tid}", debug=True)
     page.wait_for_selector(".ex-review__item")
 

@@ -40,7 +40,7 @@
   de-a gata” scoase din conținut (T2–T4 v2); publicat, E2E pe site-ul live: 541 de verificări, tag `v0.5.0`
 - [x] M15 (v0.6.0): secțiunea „Numerele de la 0 la 1000 · Corpul omenesc” cu 6 teste tematice; 12 concepte noi, 39 de emoji, 4 scene
   și 14 desene noi (grafice, hartă de linii, magazin, tabel de poziție, cuburi, medalie); tipurile `route` și `chart`, `mark` cu reguli
-  de set; publicat, E2E pe site-ul live: 1005 verificări, tag `v0.6.0`
+  de set; publicat, E2E local 1005 verificări, pe site-ul live 1003/1005 (2 curse de timp în script, corectate), tag `v0.6.0`
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -166,5 +166,7 @@
   noi + reguli de set, totul într-o sesiune. Implementare în 14 commit-uri: concepte + emoji + scene; 14 desene noi; `mark.rules`;
   `route`; `chart`; demo + E2E; T1…T6 (fiecare validat cu `npm test` și E2E pe laptop și telefon, cu capturi privite); documentație,
   v0.6.0. Retușuri pe drum: etichete de preț mai mari și cu font după lungime, bon cu total „?”, tabelul cu variante trecut pe
-  rânduri (telefon), emoji „ecran”. v0.6.0 publicat, E2E local 1005/1005 și pe site-ul live 1005/1005.
+  rânduri (telefon), emoji „ecran”. v0.6.0 publicat: E2E local 1005/1005; pe site-ul live 1003/1005 la prima rulare — cele două
+  eșecuri erau o cursă de timp în scriptul E2E (clicul pe „Vezi” citea scorul paginii vechi cât se încărca de pe rețea încercarea
+  cerută), corectată; fluxul rerulat pe live: 32/32.
   **De făcut data viitoare:** copilul rezolvă un test din secțiunea nouă → timpii reali și ce e prea greu; apoi U2.
