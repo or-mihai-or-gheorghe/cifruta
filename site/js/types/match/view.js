@@ -2,6 +2,7 @@
 
 import { createDnd } from '../../core/dnd.js';
 import { h, pop } from '../../core/dom.js';
+import { play } from '../../core/sound.js';
 import { plain } from '../../core/markup.js';
 import { shuffled } from '../../core/rng.js';
 import { feedbackBox, isLocked, itemFace, setState } from '../_view.js';
@@ -102,6 +103,7 @@ export default {
           pop(item);
           pop(zone);
         }
+        play(linking ? 'place' : 'tap');
         ctx.onChange(answer);
       },
     });

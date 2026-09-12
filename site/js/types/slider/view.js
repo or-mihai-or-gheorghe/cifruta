@@ -3,6 +3,7 @@
 // tastatură (săgeți) și cititoarele de ecran. Termometrul folosește slider-ul nativ, vizibil.
 
 import { h } from '../../core/dom.js';
+import { play } from '../../core/sound.js';
 import { md, plain } from '../../core/markup.js';
 import { cantitate, formatNumber, singularOf } from '../../core/ro.js';
 import { visualSVG } from '../../visuals/index.js';
@@ -45,6 +46,7 @@ export default {
         h('div', { class: 'ex-slider__result' }),
       );
       input.addEventListener('input', () => commit(item.id, Number(input.value)));
+      input.addEventListener('change', () => play('place')); // o dată, la eliberare (nu la fiecare pas)
       if (!thermo) followPointer(item.id, pic);
       rows[item.id] = { row, pic, input };
     }
@@ -79,6 +81,7 @@ export default {
         if (e.pointerId !== pointer) return;
         pointer = null;
         commit(id, valueAt(e));
+        play('place');
       });
       pic.addEventListener('pointercancel', (e) => {
         if (e.pointerId !== pointer) return;

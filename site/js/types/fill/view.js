@@ -1,6 +1,7 @@
 // fill — casete de completat în șabloane; layout-uri inline, steps, table, tree, chain.
 
 import { h, pop } from '../../core/dom.js';
+import { play } from '../../core/sound.js';
 import { md } from '../../core/markup.js';
 import { feedbackBox, isLocked, setState } from '../_view.js';
 import { keyOf, kindOf } from './logic.js';
@@ -91,7 +92,10 @@ export default {
               if (isLocked(mode)) return;
               const selected = group.dataset.value === v ? '' : v;
               paint(selected);
-              if (selected) pop(e.currentTarget);
+              if (selected) {
+                pop(e.currentTarget);
+                play('tap');
+              }
               change(id, selected);
             },
           },

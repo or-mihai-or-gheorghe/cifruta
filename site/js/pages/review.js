@@ -9,6 +9,7 @@ import { md } from '../core/markup.js';
 import { findTest, loadTest } from '../core/loader.js';
 import { cantitate, formatNumber } from '../core/ro.js';
 import { evaluateExercise, gradeFor, reached } from '../core/scoring.js';
+import { play } from '../core/sound.js';
 import { clearDraft, lastAttempt, updateAttempt } from '../core/storage.js';
 import { mountExercise } from '../components/exercise.js';
 import { art, backLink, callout, confetti, levelPill, stars } from '../components/ui.js';
@@ -161,6 +162,7 @@ export default async function review(container, [testId]) {
   );
 
   countUp(scoreNum, attempt.score);
+  play({ FB: 'win', B: 'yes' }[grade.code] ?? 'done');
   // confetti-ul vine după ce scorul a terminat de numărat
   if (attempt.score >= config.confettiAt) setTimeout(() => container.isConnected && confetti(), 650);
 
@@ -228,6 +230,7 @@ export default async function review(container, [testId]) {
             pop(node);
             confetti({ count: 16 });
           }
+          play(won ? 'yes' : 'no');
         });
         box.append(h('div', { class: 'l-cluster' }, check), verdict);
       });

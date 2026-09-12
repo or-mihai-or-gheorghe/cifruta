@@ -1,6 +1,7 @@
 // mark — atinge (colorează) elementele potrivite; cu paletă: alege întâi culoarea.
 
 import { h, pop } from '../../core/dom.js';
+import { play } from '../../core/sound.js';
 import { md, plain } from '../../core/markup.js';
 import { hasVisual, visualSVG } from '../../visuals/index.js';
 import { isLocked, itemFace, setState } from '../_view.js';
@@ -35,6 +36,7 @@ export default {
                 b.setAttribute('aria-checked', String(on));
               }
               pop(e.currentTarget);
+              play('tap');
             },
           }, h('span', { class: 'ex-palette__swatch', 'aria-hidden': 'true' }, shapeOf(p.id)), h('span', { html: md(p.label) }))))
       : null;
@@ -64,6 +66,7 @@ export default {
       }
       paint();
       pop(items[id]);
+      play('tap');
     }
 
     function paint() {

@@ -83,6 +83,9 @@ export const EMOJI = {
   bunica: { char: '👵', code: '1f475', label: 'bunică' },
   baiat: { char: '👦', code: '1f466', label: 'băiat' },
   fata: { char: '👧', code: '1f467', label: 'fată' },
+  // interfață
+  sunet: { char: '🔊', code: '1f50a', label: 'sunete pornite' },
+  mut: { char: '🔇', code: '1f507', label: 'sunete oprite' },
 };
 
 export const hasEmoji = (name) => Object.hasOwn(EMOJI, name);

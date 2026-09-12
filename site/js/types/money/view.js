@@ -1,6 +1,7 @@
 // money — alege portofelul, apoi atinge bancnotele ca să le pui; atinge o bancnotă din portofel ca s-o scoți.
 
 import { h, pop } from '../../core/dom.js';
+import { play } from '../../core/sound.js';
 import { md } from '../../core/markup.js';
 import { cantitate } from '../../core/ro.js';
 import { moneySum } from '../../core/rules.js';
@@ -70,6 +71,7 @@ export default {
       const w = wallets[active];
       pop(w.pieces.querySelector(`.ex-piece[data-value="${value}"]`)); // bancnota nou pusă
       pop(w.sum);
+      play('place');
       ctx.onChange(answer);
     }
 
@@ -81,6 +83,7 @@ export default {
       answer = { ...answer, [id]: combo };
       active = id;
       paint();
+      play('tap');
       ctx.onChange(answer);
     }
 

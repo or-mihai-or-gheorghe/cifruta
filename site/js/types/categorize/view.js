@@ -2,6 +2,7 @@
 
 import { createDnd } from '../../core/dnd.js';
 import { h, pop } from '../../core/dom.js';
+import { play } from '../../core/sound.js';
 import { md, plain } from '../../core/markup.js';
 import { shuffled } from '../../core/rng.js';
 import { hasVisual, visualSVG } from '../../visuals/index.js';
@@ -69,6 +70,7 @@ export default {
         }
         paint();
         pop(item); // elementul „aterizează” la locul nou
+        play('place');
         ctx.onChange(answer);
       },
     });

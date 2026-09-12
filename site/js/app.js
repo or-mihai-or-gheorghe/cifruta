@@ -3,6 +3,8 @@
 import './visuals/all.js';
 import { clear, h } from './core/dom.js';
 import { onRouteChange } from './core/router.js';
+import { setSoundEnabled, soundEnabled } from './core/sound.js';
+import { emojiHTML } from './visuals/emoji.js';
 import { art } from './components/ui.js';
 
 const PAGES = {
@@ -12,6 +14,17 @@ const PAGES = {
   rezultate: () => import('./pages/review.js'),
   atelier: () => import('./pages/atelier.js'),
 };
+
+// butonul de sunet („Sunete” apăsat = pornite)
+const soundBtn = h('button', { type: 'button', class: 'c-btn c-btn--ghost c-btn--icon c-sound', 'data-testid': 'sound-toggle', onClick: () => { setSoundEnabled(!soundEnabled()); paintSound(); } });
+function paintSound() {
+  const on = soundEnabled();
+  soundBtn.innerHTML = emojiHTML(on ? 'sunet' : 'mut');
+  soundBtn.setAttribute('aria-pressed', String(on));
+  soundBtn.setAttribute('aria-label', on ? 'Sunete pornite. Apasă ca să le oprești.' : 'Sunete oprite. Apasă ca să le pornești.');
+  soundBtn.title = on ? 'Sunete pornite' : 'Sunete oprite';
+}
+paintSound();
 
 const app = document.getElementById('app');
 const main = h('main', { class: 'l-main', id: 'continut', tabindex: '-1' });
@@ -29,7 +42,7 @@ app.replaceChildren(
         art({ v: 'mascot', mood: 'vesela', decorative: true }, { cls: 'c-logo__art' }),
         h('span', {}, 'Cifruța', h('span', { class: 'c-logo__sub' }, 'exerciții pentru clasa a II-a')),
       ),
-      h('nav', { class: 'l-cluster', 'aria-label': 'Navigare' }, h('a', { class: 'c-btn c-btn--ghost c-btn--sm', href: '#/' }, 'Teste')),
+      h('nav', { class: 'l-cluster', 'aria-label': 'Navigare' }, h('a', { class: 'c-btn c-btn--ghost c-btn--sm', href: '#/' }, 'Teste'), soundBtn),
     ),
   ),
   main,

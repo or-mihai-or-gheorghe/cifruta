@@ -3,6 +3,8 @@
 //
 // createDnd(root, { items: '.ex-drag', zones: '.ex-drop', onDrop(item, zone), locked: () => false })
 
+import { play } from './sound.js';
+
 const THRESHOLD = 8;
 
 export function createDnd(root, { items, zones, onDrop, locked = () => false }) {
@@ -17,6 +19,7 @@ export function createDnd(root, { items, zones, onDrop, locked = () => false }) 
   function pick(item) {
     unpick();
     picked = item;
+    play('tap');
     item.classList.add('is-picked');
     item.setAttribute('aria-pressed', 'true');
     root.classList.add('has-picked');

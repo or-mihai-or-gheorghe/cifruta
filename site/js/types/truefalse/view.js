@@ -1,6 +1,7 @@
 // truefalse — fiecare afirmație are butoanele A (adevărat) și F (fals).
 
 import { h, pop } from '../../core/dom.js';
+import { play } from '../../core/sound.js';
 import { md } from '../../core/markup.js';
 import { feedbackBox, isLocked, setState } from '../_view.js';
 
@@ -44,6 +45,7 @@ export default {
       answer = { ...answer, [id]: value };
       paint();
       pop(rows[id].querySelector('.ex-tf__btn.is-selected'));
+      play('tap');
       ctx.onChange(answer);
     }
 

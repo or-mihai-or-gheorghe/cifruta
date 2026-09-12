@@ -107,6 +107,16 @@ def smoke(run: Run, page: Page, vp: str):
             run.check(state == "paused", f"[{vp}] pe cardurile testelor peisajele stau pe loc până la hover ({state})")
     fonts = page.evaluate("document.fonts.check('16px Andika', 'ăâîșț') && document.fonts.check('700 16px \"Baloo 2\"', 'ăâîșț')")
     run.check(fonts, f"[{vp}] fonturile Andika și Baloo 2 sunt încărcate")
+    # butonul de sunet: pornit implicit, oprirea se ține minte
+    toggle = page.get_by_test_id("sound-toggle")
+    was_on = toggle.get_attribute("aria-pressed") == "true"
+    toggle.click()
+    off = toggle.get_attribute("aria-pressed") == "false" and page.evaluate("localStorage.getItem('cifruta:sound')") == '"off"'
+    page.reload()
+    page.wait_for_selector("[data-testid=sound-toggle]")
+    kept = page.get_by_test_id("sound-toggle").get_attribute("aria-pressed") == "false"
+    page.get_by_test_id("sound-toggle").click()
+    run.check(was_on and off and kept and page.get_by_test_id("sound-toggle").get_attribute("aria-pressed") == "true", f"[{vp}] sunetele sunt pornite implicit, se opresc din antet și starea se ține minte")
 
 
 def watch_pops(page: Page, selector: str):
@@ -389,6 +399,7 @@ def keyboard_flow(run: Run, browser, base: str):
         return
     page.goto(f"{base}?debug=1#/test/{tests[0]['id']}")
     page.wait_for_selector("[data-testid=start]")
+    run.check(page.get_by_test_id("sound-toggle").get_attribute("aria-pressed") == "false", "[tastatură] la mișcare redusă sunetele pornesc oprite")
     page.get_by_test_id("start").focus()
     page.keyboard.press("Enter")
     page.wait_for_selector(".ex-card")

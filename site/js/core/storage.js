@@ -18,6 +18,10 @@ const write = (key, value) => {
   }
 };
 
+/** Preferințe simple (de ex. sunetele): cifruta:<cheie>. */
+export const getPref = (key, fallback = null) => read(key, fallback);
+export const setPref = (key, value) => write(key, value);
+
 export const getDraft = (testId) => read(`draft:${testId}`, null);
 export const saveDraft = (testId, draft) => write(`draft:${testId}`, draft);
 export const clearDraft = (testId) => localStorage.removeItem(`${PREFIX}draft:${testId}`);

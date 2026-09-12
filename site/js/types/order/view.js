@@ -2,6 +2,7 @@
 
 import { createDnd } from '../../core/dnd.js';
 import { h, pop } from '../../core/dom.js';
+import { play } from '../../core/sound.js';
 import { plain } from '../../core/markup.js';
 import { shuffled } from '../../core/rng.js';
 import { hasVisual, visualSVG } from '../../visuals/index.js';
@@ -77,6 +78,7 @@ export default {
         }
         if (keepFocus) item.focus();
         pop(item);
+        play('place');
         ctx.onChange([...order]);
       },
     });

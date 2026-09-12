@@ -1,6 +1,7 @@
 // choice — carduri de variante; alegere simplă sau multiplă.
 
 import { h, pop } from '../../core/dom.js';
+import { play } from '../../core/sound.js';
 import { md } from '../../core/markup.js';
 import { shuffled } from '../../core/rng.js';
 import { feedbackBox, isLocked, itemFace, setState } from '../_view.js';
@@ -57,6 +58,7 @@ export default {
       }
       paint();
       pop(buttons[item.id][id]);
+      play('tap');
       ctx.onChange(answer);
     }
 

@@ -6,6 +6,7 @@ import { findTest, loadTest } from '../core/loader.js';
 import { getLogic } from '../core/registry.js';
 import { cantitate } from '../core/ro.js';
 import { newSeed } from '../core/rng.js';
+import { play } from '../core/sound.js';
 import { progressOf, scoreTest } from '../core/scoring.js';
 import { addAttempt, clearDraft, getDraft, saveDraft } from '../core/storage.js';
 import { mountExercise } from '../components/exercise.js';
@@ -120,10 +121,12 @@ export default async function player(container, [testId]) {
       answers: draft.answers[ex.id] ?? {},
       seed: draft.seed,
       onChange: (partId, answer) => {
+        const wasDone = isDone(ex, draft.answers);
         (draft.answers[ex.id] ??= {})[partId] = answer;
         save();
         renderMap();
         renderReady(index);
+        if (!wasDone && isDone(ex, draft.answers)) play('done');
       },
     });
     if (token !== renderToken || !container.isConnected) return ctl.destroy();
@@ -199,6 +202,7 @@ export default async function player(container, [testId]) {
       ),
     );
     confetti({ count: 24 });
+    play('level');
   }
 
   async function finish() {

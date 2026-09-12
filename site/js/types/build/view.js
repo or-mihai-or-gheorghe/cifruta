@@ -1,6 +1,7 @@
 // build — numărătoarea: butoane + și − pe fiecare tijă (sute / zeci / unități).
 
 import { h } from '../../core/dom.js';
+import { play } from '../../core/sound.js';
 import { md } from '../../core/markup.js';
 import { visualSVG } from '../../visuals/index.js';
 import { isLocked, setState } from '../_view.js';
@@ -37,6 +38,7 @@ export default {
       answer = { ...answer, [id]: beads };
       if (places.every((p) => beads[p] === 0)) delete answer[id]; // toate bilele scoase: la fel ca neatinsă
       paint(id);
+      if (beads[place] !== was) play('tap');
       if (beads[place] > was) rows[id].pic.querySelector(`.v-abacus__bead[data-rod="${place}"][data-i="${beads[place] - 1}"]`)?.classList.add('is-new'); // bila nouă cade pe tijă
       ctx.onChange(answer);
     }

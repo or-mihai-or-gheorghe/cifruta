@@ -1,6 +1,7 @@
 // clock — mută acele ceasului cu butoane (câte o oră sau câte jumătate de oră).
 
 import { h } from '../../core/dom.js';
+import { play } from '../../core/sound.js';
 import { md } from '../../core/markup.js';
 import { visualLabel, visualSVG } from '../../visuals/index.js';
 import { isLocked, setState } from '../_view.js';
@@ -54,6 +55,7 @@ export default {
       } else {
         paint(id);
       }
+      play('tap');
       ctx.onChange(answer);
     }
 
