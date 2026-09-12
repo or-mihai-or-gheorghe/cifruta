@@ -47,7 +47,7 @@
 - [x] M17 (v0.7.0): nivelul avansat mai greu în toate cele 6 teste, prin mai mulți pași: trasee cu ramuri și lungimi (magazin, oraș cu
   timp la schimbări, drum cu benzinărie, cros cu ștampilă), interpretare de grafice (prețuri cu reduceri, kilometri pe zile, două
   clase, bară greșită față de tabel, ultima probă, pași pe zile), sarcini deschise mai strânse; fracțiile scoase; `route` cu
-  `segments`, `transfer`, `maxTotal` și cheie împreună cu reguli; `pie` pe categorii; publicat, E2E: vezi jurnalul, tag `v0.7.0`
+  `segments`, `transfer`, `maxTotal` și cheie împreună cu reguli; `pie` pe categorii; publicat, E2E local 1005/1005 și pe site-ul live 1005/1005, tag `v0.7.0`
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -200,3 +200,11 @@
   de test s-a schimbat de două ori în timpul rulării (`ERR_NETWORK_CHANGED`); erorile de rețea nu au venit din site. Verificarea
   peisajului din pagina secțiunii nu mai oprește suita când un desen nu s-a încărcat.
   **De făcut data viitoare:** copilul rezolvă un test din secțiunea nouă → timpii reali și ce e prea greu; apoi U2.
+- **2026-09-12 (a șasea sesiune)** — La cererea utilizatorului, nivelul avansat din toate cele 6 teste ale secțiunii 0–1000 a devenit
+  mai greu prin raționament în mai mulți pași, fără concepte viitoare: trasee cu mai multe ramuri și lungimi (magazin, oraș cu timp la
+  schimbări, drum cu benzinărie, cros cu ștampilă), interpretare de grafice (prețuri cu reduceri, kilometri pe zile, două clase, bară
+  greșită față de tabel, ultima probă, pași pe zile) și sarcini deschise mai strânse. Fracțiile au ieșit (T4, T6); diagrama circulară
+  se citește prin felii care valorează un număr. Cod: `route` cu segmente, timp de schimbare, `maxTotal`, cheie cu reguli și etichete
+  mutabile pe segment; `pie` pe categorii; inel de evidențiere mai mic. Lucrul s-a făcut în bucăți mici, după o limită de ieșire atinsă.
+  v0.7.0 publicat, E2E local 1005/1005 și pe site-ul live 1005/1005.
+  **De făcut data viitoare:** copilul rezolvă un test avansat din secțiunea nouă → timpii reali (7 minute pe exercițiu?) și ce e prea greu; apoi U2.
