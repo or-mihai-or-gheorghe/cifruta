@@ -12,6 +12,7 @@ import { evaluateExercise, gradeFor, reached } from '../core/scoring.js';
 import { play } from '../core/sound.js';
 import { clearDraft, lastAttempt, updateAttempt } from '../core/storage.js';
 import { mountExercise } from '../components/exercise.js';
+import { clearHistoryButton } from '../components/history.js';
 import { art, backLink, callout, confetti, levelPill, stars } from '../components/ui.js';
 import { emojiHTML } from '../visuals/emoji.js';
 
@@ -115,13 +116,20 @@ export default async function review(container, [testId]) {
 
   const parents = h(
     'details',
-    { class: 'c-explain' },
+    { class: 'c-explain', 'data-testid': 'parents' },
     h('summary', {}, 'Pentru părinți'),
     h(
       'div',
       { class: 'c-explain__body' },
       h('p', {}, `Timp de lucru: ${minutes(attempt.activeMs ?? 0)}${levelTimes.length ? ` (${levelTimes.join(' · ')})` : ''}. Estimare pentru un elev mediu: ${cantitate(test.exercises.reduce((s, e) => s + e.estMin, 0), 'minut', 'minute')}.`),
       h('p', {}, practice.length ? `De exersat: ${practice.join('; ')}.` : 'Toate conceptele din test au fost stăpânite (peste 70%).'),
+      h('div', { class: 'l-cluster' }, clearHistoryButton({
+        label: 'Șterge rezultatele acestui test',
+        text: `Se șterg toate încercările la „${test.title}” și ciorna începută.`,
+        testIds: [testId],
+        testid: `clear-test-${testId}`,
+        after: () => { location.hash = `#/sectiune/${entry.section.id}`; },
+      })),
     ),
   );
 

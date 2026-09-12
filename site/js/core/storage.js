@@ -44,5 +44,19 @@ export function updateAttempt(id, changes) {
   }
 }
 
+/** Șterge istoricul (încercările și ciornele) testelor date; fără argument, al tuturor testelor. */
+export function clearHistory(testIds = null) {
+  write('attempts', testIds ? read('attempts', []).filter((a) => !testIds.includes(a.testId)) : []);
+  let ids = testIds;
+  if (!ids) {
+    try {
+      ids = Object.keys(localStorage).filter((k) => k.startsWith(`${PREFIX}draft:`)).map((k) => k.slice(PREFIX.length + 'draft:'.length));
+    } catch {
+      ids = [];
+    }
+  }
+  for (const id of ids) clearDraft(id);
+}
+
 export const bestScore = (testId) =>
   listAttempts(testId).reduce((best, a) => Math.max(best, a.score), -1);

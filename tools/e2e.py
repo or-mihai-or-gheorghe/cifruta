@@ -302,6 +302,16 @@ def pages_flow(run: Run, page: Page, test: dict, vp: str):
     page.wait_for_load_state("networkidle")
     page.unroute("**/data/tests/**")
     run.check(page.get_by_test_id("summary").count() == 0 and page.get_by_test_id(f"test-card-{tid}").is_visible(), f"[{vp}] {tid}: schimbarea rapidă de rută nu lasă rezultatele peste pagina secțiunii")
+
+    # de pe pagina principală se pot șterge toate rezultatele, din toate secțiunile
+    run.goto(page, "")
+    page.wait_for_selector("[data-testid=parents]")
+    page.locator("[data-testid=parents] summary").click()
+    page.get_by_test_id("clear-all").click()
+    expect(page.get_by_test_id("modal-confirm")).to_be_visible()
+    page.get_by_test_id("modal-confirm").click()
+    page.wait_for_timeout(300)
+    run.check(page.evaluate("localStorage.getItem('cifruta:attempts')") == "[]" and page.get_by_test_id("clear-all").count() == 0, f"[{vp}] „Șterge toate rezultatele” golește istoricul din toate secțiunile")
     page.evaluate("localStorage.clear()")
 
 
@@ -386,6 +396,20 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     page.wait_for_selector(".ex-card[data-mode='solution']")
     run.check(solved == 0 and page.locator(".ex-card[data-mode='solution']").count() == 1, f"[{vp}] {tid}: „Rezolvarea” se montează la deschidere, cu aspect propriu")
     run.layout_ok(page, f"[{vp}] {tid} rezultate")
+
+    # părinții pot șterge istoricul testului din pagina secțiunii (două încercări: 100 și 10)
+    run.goto(page, f"sectiune/{test['section']}")
+    page.wait_for_selector("[data-testid=parents]")
+    page.locator("[data-testid=parents] summary").click()
+    row = page.locator("[data-testid=parents] .c-history__row").filter(has=page.get_by_test_id(f"clear-test-{tid}")).inner_text()
+    page.get_by_test_id(f"clear-test-{tid}").click()
+    expect(page.get_by_test_id("modal-confirm")).to_be_visible()
+    page.get_by_test_id("modal-confirm").click()
+    page.wait_for_selector(f"[data-testid=test-card-{tid}]")
+    page.wait_for_timeout(300)
+    left = page.evaluate(f"JSON.parse(localStorage.getItem('cifruta:attempts') || '[]').filter((a) => a.testId === '{tid}').length")
+    card = page.get_by_test_id(f"test-card-{tid}").inner_text()
+    run.check("2 încercări" in row and left == 0 and "nou" in card and page.get_by_test_id(f"clear-test-{tid}").count() == 0, f"[{vp}] {tid}: ștergerea istoricului din „Pentru părinți” golește încercările ({row!r})")
 
 
 def keyboard_flow(run: Run, browser, base: str):

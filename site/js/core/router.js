@@ -10,6 +10,9 @@ export const go = (path) => {
   location.hash = `#/${path}`;
 };
 
+/** Reîncarcă pagina curentă (după o ștergere, de exemplu), fără să schimbe adresa. */
+export const refresh = () => dispatchEvent(new Event('hashchange'));
+
 export function onRouteChange(handler) {
   addEventListener('hashchange', () => handler(currentRoute()));
   handler(currentRoute());

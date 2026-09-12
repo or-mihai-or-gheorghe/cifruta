@@ -323,6 +323,10 @@
 .c-explain__body { display: grid; gap: var(--sp-3); padding: 0 1rem 1rem; }
 .c-steps { display: grid; gap: 0.35rem; margin: 0; padding-left: 1.5rem; }
 
+/* ——— Istoricul de rezultate (pentru părinți) ——— */
+.c-history { display: grid; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
+.c-history__row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2); padding: 0.4rem 0.4rem 0.4rem 0.8rem; border-radius: var(--r-2); background: var(--c-surface-2); }
+
 /* ——— Autoevaluare ——— */
 .c-feel { display: flex; justify-content: center; gap: var(--sp-4); }
 .c-feel__btn {

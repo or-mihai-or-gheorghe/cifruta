@@ -1,7 +1,8 @@
 // Pagina principală: salutul mascotei și secțiunile.
 
 import { h } from '../core/dom.js';
-import { catalog } from '../core/loader.js';
+import { allTests, catalog } from '../core/loader.js';
+import { historyBox } from '../components/history.js';
 import { cantitate } from '../core/ro.js';
 import { art, chip, mascot } from '../components/ui.js';
 import { emojiHTML } from '../visuals/emoji.js';
@@ -44,6 +45,12 @@ export default function home(container) {
       ),
       h('div', { class: 'l-grid anim-stagger', style: { '--grid-min': '15rem' } }, sections),
       mascot('incurajeaza', 'Sfat: citește cu atenție fiecare cerință. Poți sări peste un exercițiu și poți reveni la el oricând.'),
+      historyBox(allTests(), {
+        label: 'Șterge toate rezultatele',
+        text: 'Se șterg toate rezultatele și ciornele, din toate secțiunile.',
+        testIds: null,
+        testid: 'clear-all',
+      }),
     ),
   );
 }

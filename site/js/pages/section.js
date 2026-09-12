@@ -5,6 +5,7 @@ import { findSection } from '../core/loader.js';
 import { cantitate } from '../core/ro.js';
 import { bestScore, getDraft } from '../core/storage.js';
 import { gradeFor } from '../core/scoring.js';
+import { historyBox } from '../components/history.js';
 import { art, backLink, chip } from '../components/ui.js';
 
 function testCard(test) {
@@ -48,6 +49,12 @@ export default function section(container, [id]) {
             : h('p', { class: 'c-card c-card--soon u-muted' }, 'Pregătim testele pentru această temă. Revino curând!'),
         ),
       ),
+      historyBox(sec.groups.flatMap((g) => g.tests), {
+        label: 'Șterge toate rezultatele din secțiune',
+        text: `Se șterg toate rezultatele din secțiunea „${sec.title}” (și ciornele începute).`,
+        testIds: sec.groups.flatMap((g) => g.tests.map((t) => t.id)),
+        testid: `clear-section-${sec.id}`,
+      }),
     ),
   );
 }
