@@ -72,7 +72,7 @@ export default {
             {
               id: 'u1-t1',
               file: 'tests/numere-1000/t1-lista-de-cumparaturi.js',
-              version: 2,
+              version: 3,
               theme: 'magazin',
               title: 'Lista de cumpărături',
               subtitle: 'Prețuri de 3 cifre · rotunjire · bani de 100, 200, 500 · meniu sănătos',
@@ -82,7 +82,7 @@ export default {
             {
               id: 'u1-t2',
               file: 'tests/numere-1000/t2-prin-oras.js',
-              version: 1,
+              version: 2,
               theme: 'oras',
               title: 'Prin oraș: tramvai, metrou, autobuz',
               subtitle: 'Harta liniilor · trasee · pare și impare · călători',
@@ -92,7 +92,7 @@ export default {
             {
               id: 'u1-t3',
               file: 'tests/numere-1000/t3-excursie.js',
-              version: 2,
+              version: 3,
               theme: 'oras',
               title: 'Excursie cu trenul și cu mașina',
               subtitle: 'Mersul trenurilor · distanțe în km · borne · bagaje · apă',
@@ -102,17 +102,17 @@ export default {
             {
               id: 'u1-t4',
               file: 'tests/numere-1000/t4-sondajul-clasei.js',
-              version: 2,
+              version: 3,
               theme: 'scoala',
               title: 'Sondajul clasei',
-              subtitle: 'Bețișoare · pictogramă · grafice cu bare · numere de trei cifre · jumătate și sfert',
+              subtitle: 'Bețișoare · pictogramă · grafice cu bare · diagramă circulară · numere de trei cifre',
               estMin: 45,
               exercises: 11,
             },
             {
               id: 'u1-t5',
               file: 'tests/numere-1000/t5-concursul-sportiv.js',
-              version: 1,
+              version: 2,
               theme: 'stadion',
               title: 'Concursul sportiv al școlii',
               subtitle: 'Punctaje de 3 cifre · clasament · grafic cu bare · pulsul',
@@ -122,7 +122,7 @@ export default {
             {
               id: 'u1-t6',
               file: 'tests/numere-1000/t6-corpul-meu-in-numere.js',
-              version: 2,
+              version: 3,
               theme: 'scoala',
               title: 'Corpul meu în numere',
               subtitle: '206 oase · dinți · înălțimi · somn · pași · igienă și viroze',

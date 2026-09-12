@@ -8,7 +8,7 @@ import { expectedTag, feedbackBox, isLocked, setState } from '../_view.js';
 import { adjacency, stopsById } from './logic.js';
 
 export default {
-  howto: () => 'Atinge stațiile în ordine, din aproape în aproape. Atinge ultima stație ca să te întorci.',
+  howto: () => 'Atinge locurile de pe hartă în ordine, din aproape în aproape. Atinge ultimul loc ca să te întorci.',
 
   mount(el, part, ctx) {
     const map = part.map;
@@ -30,14 +30,14 @@ export default {
         type: 'button',
         class: 'ex-route__stop',
         'aria-pressed': 'false',
-        'aria-label': `Stația ${name(s.id)}, ${linesOf(s.id).join(' și ')}`,
+        'aria-label': `Stația ${name(s.id)}, ${[...new Set(linesOf(s.id))].join(' și ')}`,
         'data-testid': `stop-${s.id}`,
         style: { left: `${(Number(s.x) / w) * 100}%`, top: `${(Number(s.y) / hgt) * 100}%` },
         onClick: () => tap(s.id),
       });
       stage.append(buttons[s.id]);
     }
-    const undo = h('button', { type: 'button', class: 'c-btn c-btn--sm', 'data-testid': 'route-undo', onClick: () => step(-1) }, '← O stație înapoi');
+    const undo = h('button', { type: 'button', class: 'c-btn c-btn--sm', 'data-testid': 'route-undo', onClick: () => step(-1) }, '← Un pas înapoi');
     const reset = h('button', { type: 'button', class: 'c-btn c-btn--sm c-btn--ghost', 'data-testid': 'route-reset', onClick: () => restart() }, 'De la început');
     const notes = h('div', { class: 'l-stack l-stack--sm' });
     el.append(stage, h('div', { class: 'ex-route__tools' }, undo, reset), live, notes);

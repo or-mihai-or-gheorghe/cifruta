@@ -68,7 +68,7 @@ export default {
 | `build` | `tool: 'abacus'`, `places: ['Z','U']` (sau `['S','Z','U']`), `items: [{ id, label, target }]` | `{ itemId: { Z, U } }` |
 | `clock` | `step: 30`, `items: [{ id, label?, answer: { h, m } }]` | `{ itemId: { h, m } }` |
 | `money` | `allowed: [1, 5, 10, 20, 50]`, `target`, `items: [{ id, label }]`, `distinct?` (feluri diferite), `fewest?` (cele mai puține bancnote) | `{ itemId: { '10': 1, '1': 2 } }` |
-| `route` | `map: { w, h, stops: [{ id, label, x, y, side? }], lines: [{ id, label, color: 'rosie'\|'albastra'\|'verde'\|…, stops: [ids] }] }` (definită o dată în fișier și refolosită de desenul `route-map`), `from`, `to`, `key: [ids]` (trebuie să fie **singurul** drum cel mai scurt; alt drum bun ia jumătate) sau `rules: { via?, avoid?, maxStops?, maxChanges?, lines? }` | `[stopId, …]` |
+| `route` | `map: { w, h, stops: [{ id, label, x, y, side? }], lines: [{ id, label, color: 'rosie'\|'albastra'\|'verde'\|'gri'\|…, stops: [ids] }], segments?: [{ a, b, n, at? }], unit?: 'pași'\|'minute'\|'km'\|'metri', transfer?: 4 }` (definită o dată în fișier; cu `segments`, lungimea drumului e suma segmentelor plus `transfer` la fiecare schimbare de linie), `from`, `to`, `rules?: { via?, avoid?, maxStops?, maxChanges?, maxTotal?, lines? }`, `key?: [ids]` (singurul cel mai scurt dintre drumurile care respectă `rules`; alt drum bun ia jumătate). Pentru drumuri de mașină sau poteci, fiecare drum e o linie cu două stații, `color: 'gri'`. | `[stopId, …]` |
 | `chart` | `categories: [{ id, label, emoji? }]`, `max`, `step` (1/2/5/10), `key: { id: valoare }` (credit pe bară; fără 0) sau `rules: [{ rule: 'total', value }, { rule: 'more'\|'equal', a, b }, { rule: 'most'\|'least', a }, { rule: 'range', a, min?, max? }, { rule: 'each', min?, max? }]`, `given?: { id: valoare }` (bare gata desenate, blocate) | `{ id: valoare }` |
 
 ### `fill` în detaliu
@@ -122,8 +122,8 @@ HTML nu este permis (se afișează ca text).
 
 ## 5. Banca vizuală (`visual: { v: 'nume', …parametri }`)
 - **Suporturi pentru numere:** `shell` · `star` · `flower {color}` · `suitcase {tag}` · `apple {color}` · `leaf` · `balloon {color}` · `planet {color}` · `rocket` · `basket {label}` · `tag {n, unit}` · `medal {n, rank}` — toate cu `n`.
-- **Date și grafice:** `bar-chart {labels, values, emojis?, step, max?, hide?, numbers?}` · `pictogram {labels, values, emoji, each, unit}` · `tally {labels, values}` · `pie {slices, filled, labels?}` · `data-table {head: 'A|B', rows: 'x|1;y|2', highlight?}` · `podium {names, values?}`.
-- **Oraș și transport:** `route-map {stops, lines, path?, from?, to?, w, h}` (liste de obiecte → doar din date, nu din `{{v:}}`) · `signpost {label, n, unit}`.
+- **Date și grafice:** `bar-chart {labels, values, emojis?, step, max?, hide?, numbers?}` · `pictogram {labels, values, emoji, each, unit}` · `tally {labels, values}` · `pie {slices, filled, labels?}` sau `pie {groups: '3,2,2,1', names}` (felii egale colorate pe categorii, cu legendă fără numere) · `data-table {head: 'A|B', rows: 'x|1;y|2', highlight?}` · `podium {names, values?}`.
+- **Oraș și transport:** `route-map {stops, lines, segments?, unit?, path?, from?, to?, w, h}` (`segment.at` mută eticheta de lungime pe segment, departe de numele stațiilor) (liste de obiecte → doar din date, nu din `{{v:}}`) · `signpost {label, n, unit}`.
 - **Magazin:** `shelf {products: 'minge:120,carte:60'}` · `receipt {title, lines: 'Ghete|230,Rucsac|128', total?}` (`total` poate fi greșit intenționat sau `'?'`) · `note-list {title, lines, checked?}`.
 - **Unelte:** `abacus {places, S, Z, U}` · `egg-carton {full, loose}` · `ten-frame {n}` · `number-line {min, max, minor, labels, marker, icon}` (`icon` = orice emoji) · `thermometer {min, max, minor, major, value}` · `ruler {length, from, to}` · `clock {h, m}` · `balance {left, right}` · `bar-model {parts, total}` · `place-value {s, z, u}` (cifră sau `?`) · `base-ten {n}` (plăci de 100, bare de 10, cuburi).
 - **Bani:** `banknote {value: 1|5|10|20|50|100|200|500}` · `coin {value: 1|5|10|50}` (bani).
@@ -152,6 +152,9 @@ schimbă doar rotația), bila nouă de pe numărătoare, confetti-ul mascotei (d
   mai multe soluții, verificarea rezultatului, „găsește greșeala”, mersul invers.
 - Diacritice corecte (ș, ț cu virgulă). Acordul cu numeralul: **1 leu**, 19 lei, **20 de lei**, 101 lei, **1 grad**,
   **22 de grade** (în șabloane cu casete folosește formulări neutre: „Rest (lei): [[a]]”). În cod: `cantitate(n, 'leu', 'lei')`.
+- **Fără concepte viitoare:** în secțiunea 0–1000 nu folosim înmulțirea, împărțirea, fracțiile (jumătatea, sfertul) sau adunări și
+  scăderi până la 1000 cu trecere peste ordin. Nivelul avansat devine mai greu prin **mai mulți pași**: compararea ramurilor unui traseu,
+  „ce se schimbă dacă…”, date combinate din două reprezentări (tabel și grafic, două grafice), condiții ascunse într-o poveste.
 - **Sarcini deschise și pași mulți (gândirea creativă):** la nivelul avansat, cel puțin o sarcină cu **mai multe răspunsuri bune**
   verificate prin reguli (`mark.rules`, `route.rules`, `chart.rules`, `money.distinct`), o problemă în **3+ pași** (`fill` cu
   `layout: 'steps'`, plan → calcul → verificare) și un puzzle (ghicitoare cu `search`, cifre ascunse, mers invers, greșeala din

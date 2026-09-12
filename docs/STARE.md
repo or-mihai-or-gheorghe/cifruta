@@ -1,7 +1,7 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-12 · **Versiune:** 0.6.1
+- **Data:** 2026-09-12 · **Versiune:** 0.7.0
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -44,6 +44,10 @@
 - [x] M16 (v0.6.1): remedierea auditului secțiunii 0–1000: chei și afirmații greșite, explicații contrazise de evaluator, răspunsuri
   vizibile în pași, modele de sănătate, desene ilizibile pe telefon, etichete de concepte, T4 cu numere de trei cifre; validatorul
   prinde casetele repetate și parametrii desenelor; publicat, E2E local 1005/1005 și pe site-ul live 1005/1005, tag `v0.6.1`
+- [x] M17 (v0.7.0): nivelul avansat mai greu în toate cele 6 teste, prin mai mulți pași: trasee cu ramuri și lungimi (magazin, oraș cu
+  timp la schimbări, drum cu benzinărie, cros cu ștampilă), interpretare de grafice (prețuri cu reduceri, kilometri pe zile, două
+  clase, bară greșită față de tabel, ultima probă, pași pe zile), sarcini deschise mai strânse; fracțiile scoase; `route` cu
+  `segments`, `transfer`, `maxTotal` și cheie împreună cu reguli; `pie` pe categorii; publicat, E2E: vezi jurnalul, tag `v0.7.0`
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -52,12 +56,12 @@
 | recap-c1-t2 | La piață cu bunica | 2 | publicat | npm test + E2E | 45 | – |
 | recap-c1-t3 | Călătorie în spațiu | 2 | publicat | npm test + E2E | 45 | – |
 | recap-c1-t4 | O zi la fermă | 2 | publicat | npm test + E2E | 45 | – |
-| u1-t1 | Lista de cumpărături | 2 | publicat | npm test + E2E | 45 | – |
-| u1-t2 | Prin oraș: tramvai, metrou, autobuz | 1 | publicat | npm test + E2E | 45 | – |
-| u1-t3 | Excursie cu trenul și cu mașina | 2 | publicat | npm test + E2E | 45 | – |
-| u1-t4 | Sondajul clasei | 2 | publicat | npm test + E2E | 45 | – |
-| u1-t5 | Concursul sportiv al școlii | 1 | publicat | npm test + E2E | 45 | – |
-| u1-t6 | Corpul meu în numere | 2 | publicat | npm test + E2E | 45 | – |
+| u1-t1 | Lista de cumpărături | 3 | publicat | npm test + E2E | 45 | – |
+| u1-t2 | Prin oraș: tramvai, metrou, autobuz | 2 | publicat | npm test + E2E | 45 | – |
+| u1-t3 | Excursie cu trenul și cu mașina | 3 | publicat | npm test + E2E | 45 | – |
+| u1-t4 | Sondajul clasei | 3 | publicat | npm test + E2E | 45 | – |
+| u1-t5 | Concursul sportiv al școlii | 2 | publicat | npm test + E2E | 45 | – |
+| u1-t6 | Corpul meu în numere | 3 | publicat | npm test + E2E | 45 | – |
 
 ## Decizii
 | data | decizie | motiv |
@@ -111,6 +115,9 @@
 | 2026-09-12 | Etichetele `med.*` doar pe exerciții care evaluează cunoștințe; datele de sănătate din povești nu sunt recomandări | raportul pe concepte credita igiena sau organele pentru calcule |
 | 2026-09-12 | T4 lucrează și cu numere de trei cifre (cărțile bibliotecii, voturile școlii); totalul curent rămâne ascuns în timpul rezolvării | structura secțiunii; decizia din v0.5.0 (suma afișată pe loc dădea răspunsul) |
 | 2026-09-12 | Remedierea se face în loturi mari, cu teste și commit-uri puține | cererea utilizatorului |
+| 2026-09-12 | Nivelul avansat devine mai greu prin raționament în mai mulți pași, nu prin materie nouă; în secțiunea 0–1000 fără fracții, înmulțire sau operații cu trecere peste ordin până la 1000 | cererea utilizatorului |
+| 2026-09-12 | Traseele au lungimi pe segmente (pași, minute, km, metri), timp la schimbarea liniei și cel mai scurt drum după lungime; cheia se poate combina cu reguli | cererea utilizatorului: trasee cu mai multe ramuri |
+| 2026-09-12 | Diagrama circulară se citește fără fracții: felii egale pe categorii, fiecare felie valorează un număr de copii | cererea inițială de diagrame circulare, păstrată fără concepte viitoare |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -119,6 +126,7 @@
 - După publicare, GitHub Pages poate servi ~10 min fișiere vechi (cache).
 - T2–T4 au trecut la versiunea 2 (v0.5.0): încercările făcute pe versiunea 1 arată doar rezumatul, fără lista pe exerciții.
 - Testele u1-t1, u1-t3, u1-t4 și u1-t6 au trecut la versiunea 2 (v0.6.1), cu același efect pentru încercările făcute înainte.
+- În v0.7.0 toate cele 6 teste ale secțiunii 0–1000 au primit o versiune nouă: încercările mai vechi arată doar rezumatul.
 
 ## Backlog
 - Scanările actuale acoperă manualul până la înmulțire; utilizatorul adaugă scanări noi după finalizarea etapei curente.

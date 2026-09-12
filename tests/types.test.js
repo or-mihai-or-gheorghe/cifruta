@@ -212,7 +212,7 @@ test('route: drumul cerut ia tot, alt drum bun ia jumătate, drumurile rupte nim
   // validator: cheia trebuie să fie singurul drum cel mai scurt
   assert.ok(logic.validate({ ...part, key: ['gara', 'piata', 'parc', 'lac', 'teatru'] }).some((e) => e.includes('mai scurt')));
   assert.ok(logic.validate({ ...part, key: ['gara', 'teatru'] }).some((e) => e.includes('nicio linie')));
-  assert.ok(logic.validate({ ...part, key: undefined }).some((e) => e.includes('exact unul')));
+  assert.ok(logic.validate({ ...part, key: undefined }).some((e) => e.includes('e nevoie')));
   assert.ok(logic.validate({ ...part, to: 'gara' }).some((e) => e.includes('diferite')));
 });
 
@@ -257,4 +257,41 @@ test('chart: credit pe bară cu cheie; cu reguli, orice grafic bun ia tot', () =
 test('fill: o casetă apare o singură dată în șabloane', () => {
   const dup = { type: 'fill', rows: ['Adultul are cu [[b]] dinți mai mult: 32 − 20 = [[b]]'], blanks: { b: { answer: 12 } } };
   assert.ok(getLogic('fill').validate(dup).some((e) => e.includes('apare de 2 ori')));
+});
+
+test('route: segmente cu lungimi, timp de schimbare, cheie împreună cu reguli', () => {
+  const logic = getLogic('route');
+  const edges = [['i', 'f'], ['i', 'j'], ['f', 'p'], ['f', 'l'], ['j', 'l'], ['p', 'l'], ['p', 'c'], ['l', 'c']];
+  const lengths = [12, 15, 18, 25, 14, 9, 20, 16];
+  const map = {
+    w: 320,
+    h: 200,
+    unit: 'pași',
+    stops: [['i', 30, 170], ['f', 120, 170], ['j', 30, 80], ['p', 210, 170], ['l', 140, 90], ['c', 280, 60]].map(([id, x, y]) => ({ id, label: { i: 'Intrarea', f: 'Fructe', j: 'Jucării', p: 'Pâine', l: 'Lactate', c: 'Casa' }[id], x, y })),
+    lines: edges.map(([a, b]) => ({ id: a + b, label: 'culoar', color: 'gri', stops: [a, b] })),
+    segments: edges.map(([a, b], k) => ({ a, b, n: lengths[k] })),
+  };
+  const part = { type: 'route', map, from: 'i', to: 'c', rules: { via: ['p', 'l'] }, key: ['i', 'f', 'p', 'l', 'c'] };
+  assert.deepEqual(logic.validate(part), []);
+  assert.equal(logic.evaluate(part, ['i', 'f', 'p', 'l', 'c']).earned, 1);
+  const longer = logic.evaluate(part, ['i', 'j', 'l', 'p', 'c']);
+  assert.equal(longer.earned, 0.5);
+  assert.match(longer.items[0].feedback, /58 de pași/);
+  assert.match(logic.evaluate(part, ['i', 'f', 'p', 'c']).items[0].feedback, /prin Lactate/);
+  assert.ok(logic.validate({ ...part, key: ['i', 'j', 'l', 'p', 'c'] }).some((e) => e.includes('mai scurt (55 de pași)')));
+  assert.ok(logic.validate({ ...part, map: { ...map, segments: map.segments.slice(1) } }).some((e) => e.includes('lipsește lungimea')));
+  const limit = { type: 'route', map, from: 'i', to: 'c', rules: { maxTotal: 45 } };
+  assert.deepEqual(logic.solution(limit), ['i', 'j', 'l', 'c']);
+  assert.match(logic.evaluate(limit, ['i', 'f', 'p', 'c']).items[0].feedback, /50 de pași; sunt permise cel mult 45 de pași/);
+
+  // o schimbare de linie costă timp: pe tramvai până la capăt poate fi mai repede decât o scurtătură cu schimbare
+  const city = {
+    ...parts['route.a'].map,
+    unit: 'minute',
+    transfer: 5,
+    segments: [{ a: 'gara', b: 'piata', n: 4 }, { a: 'piata', b: 'parc', n: 3 }, { a: 'parc', b: 'lac', n: 3 }, { a: 'muzeu', b: 'piata', n: 2 }, { a: 'piata', b: 'teatru', n: 3 }, { a: 'teatru', b: 'lac', n: 2 }],
+  };
+  const tram = { type: 'route', map: city, from: 'gara', to: 'lac', key: ['gara', 'piata', 'parc', 'lac'] };
+  assert.deepEqual(logic.validate(tram), []);
+  assert.ok(logic.validate({ ...tram, map: { ...city, transfer: 0 } }).some((e) => e.includes('mai scurt (9 minute)')));
 });

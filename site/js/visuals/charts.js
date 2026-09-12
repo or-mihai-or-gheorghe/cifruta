@@ -161,12 +161,25 @@ registerVisual('tally', {
 registerVisual('pie', {
   group: GROUP,
   defaults: { slices: 4, filled: 1 },
-  viewBox: '0 0 120 120',
-  check: (p) => (num(p.filled, 0) <= num(p.slices, 4) ? [] : ['filled nu poate fi mai mare decât slices']),
-  label: (p) => `cerc împărțit în ${num(p.slices, 4)} felii egale, ${num(p.filled, 0)} colorate${has(p.labels) ? `: ${list(p.labels).join(', ')}` : ''}`,
+  // cu groups ('3,2,2,1') și names, feliile egale se colorează pe categorii, iar legenda arată doar culorile (nu și numerele)
+  viewBox: (p) => (has(p.groups) ? '0 0 270 120' : '0 0 120 120'),
+  check: (p) => {
+    const errors = num(p.filled, 0) <= num(p.slices, 4) ? [] : ['filled nu poate fi mai mare decât slices'];
+    if (has(p.groups)) {
+      const g = raw(p.groups).filter((x) => x !== '');
+      if (g.some((x) => !Number.isInteger(Number(x)) || Number(x) < 1)) errors.push('groups trebuie să conțină numere întregi pozitive');
+      if (list(p.names).length !== g.length) errors.push(`names are ${list(p.names).length} elemente, iar groups are ${g.length}`);
+    }
+    return errors;
+  },
+  label: (p) => has(p.groups)
+    ? `cerc cu felii egale: ${list(p.names).map((n, i) => `${n} ${nums(p.groups)[i]} felii`).join(', ')}`
+    : `cerc împărțit în ${num(p.slices, 4)} felii egale, ${num(p.filled, 0)} colorate${has(p.labels) ? `: ${list(p.labels).join(', ')}` : ''}`,
   render: (p) => {
-    const n = Math.max(2, num(p.slices, 4));
-    const filled = Math.max(0, Math.min(n, num(p.filled, 0)));
+    const groups = nums(p.groups);
+    const groupOf = groups.flatMap((count, g) => Array.from({ length: count }, () => g));
+    const n = groups.length ? groupOf.length : Math.max(2, num(p.slices, 4));
+    const filled = groups.length ? n : Math.max(0, Math.min(n, num(p.filled, 0)));
     const labels = list(p.labels);
     const r = 50;
     let out = '';
@@ -174,15 +187,19 @@ registerVisual('pie', {
       const a0 = -Math.PI / 2 + (i * 2 * Math.PI) / n;
       const a1 = a0 + (2 * Math.PI) / n;
       const [x0, y0, x1, y1] = [60 + r * Math.cos(a0), 60 + r * Math.sin(a0), 60 + r * Math.cos(a1), 60 + r * Math.sin(a1)].map((v) => v.toFixed(1));
-      out += `<path d="M60 60 L${x0} ${y0} A${r} ${r} 0 ${n === 2 ? 1 : 0} 1 ${x1} ${y1} Z" fill="${i < filled ? COLORS[i % COLORS.length] : C.white}" ${st(2)}/>`;
+      out += `<path d="M60 60 L${x0} ${y0} A${r} ${r} 0 ${n === 2 ? 1 : 0} 1 ${x1} ${y1} Z" fill="${groups.length ? COLORS[groupOf[i] % COLORS.length] : i < filled ? COLORS[i % COLORS.length] : C.white}" ${st(2)}/>`;
       if (labels[i]) {
         const am = (a0 + a1) / 2;
         out += txt((60 + r * 0.62 * Math.cos(am)).toFixed(1), (60 + r * 0.62 * Math.sin(am)).toFixed(1), labels[i], { size: 10 });
       }
     }
+    list(p.names).forEach((name, g) => {
+      const y = 22 + g * 24;
+      out += `<rect x="130" y="${y - 8}" width="16" height="16" rx="3" fill="${COLORS[g % COLORS.length]}" ${st(1.5)}/>` + txt(154, y, name, { size: 12, anchor: 'start' });
+    });
     return out;
   },
-  demos: [{ slices: 4, filled: 1 }, { slices: 4, filled: 2, labels: '6 h,6 h,6 h,6 h' }, { slices: 8, filled: 3 }],
+  demos: [{ slices: 4, filled: 1 }, { slices: 4, filled: 2, labels: '6 h,6 h,6 h,6 h' }, { slices: 8, filled: 3 }, { groups: '3,2,2,1', names: 'fructe,sandviciuri,iaurt,covrigi' }],
 });
 
 // ——— Tabel de date: head 'Tren|Pleacă|Ajunge', rows ['R1|8:00|10:30', …] sau 'R1|8:00|10:30;R2|…' ———

@@ -4,10 +4,31 @@
 
 const ECHIPE = { v: 'data-table', head: 'Echipa|Puncte', rows: 'Roșie|416;Albastră|403;Verde|461;Galbenă|380' };
 
+// Traseul de cros: punctele sunt stații, numerele sunt metrii dintre ele.
+const CROS = {
+  w: 320,
+  h: 200,
+  unit: 'metri',
+  stops: [
+    { id: 'start', label: 'Start', x: 30, y: 100 },
+    { id: 'pod', label: 'Podul', x: 140, y: 40, side: 'top' },
+    { id: 'stejar', label: 'Stejarul', x: 140, y: 170 },
+    { id: 'fantana', label: 'Fântâna', x: 215, y: 95, side: 'right' },
+    { id: 'sosire', label: 'Sosirea', x: 295, y: 150 },
+  ],
+  lines: [
+    ['start', 'pod'], ['start', 'stejar'], ['pod', 'fantana'], ['stejar', 'fantana'], ['stejar', 'sosire'], ['fantana', 'sosire'],
+  ].map(([a, b]) => ({ id: `${a}-${b}`, label: 'potecă', color: 'verde', stops: [a, b] })),
+  segments: [
+    { a: 'start', b: 'pod', n: 200 }, { a: 'start', b: 'stejar', n: 300 }, { a: 'pod', b: 'fantana', n: 300 },
+    { a: 'stejar', b: 'fantana', n: 100 }, { a: 'stejar', b: 'sosire', n: 400 }, { a: 'fantana', b: 'sosire', n: 200 },
+  ],
+};
+
 export default {
   schema: 1,
   id: 'u1-t5',
-  version: 1,
+  version: 2,
   theme: 'stadion',
   title: 'Concursul sportiv al școlii',
   subtitle: 'Punctaje de 3 cifre · clasament · grafic cu bare · pulsul',
@@ -152,7 +173,7 @@ export default {
     {
       id: 'e06',
       level: 'intermediar',
-      estMin: 4,
+      estMin: 3,
       concepts: ['mat.log.grafic-bare', 'mat.log.tabel'],
       title: 'Graficul medaliilor',
       context: { text: 'Câte medalii a câștigat școala anul acesta.', visual: { v: 'data-table', head: 'Medalii|Câte', rows: 'aur|6;argint|4;bronz|8' }, size: 'lg' },
@@ -199,7 +220,7 @@ export default {
     {
       id: 'e08',
       level: 'intermediar',
-      estMin: 4,
+      estMin: 3,
       concepts: ['mat.log.pictograma', 'mat.nr100.adunare-repetata'],
       title: 'Sticlele de apă',
       context: { text: 'Câte sticle de apă a băut fiecare echipă. Atenție la legendă!', visual: { v: 'pictogram', labels: 'Roșie,Albastră,Verde', values: '15,20,10', emoji: 'apa', each: 5, unit: 'sticle' }, size: 'lg' },
@@ -227,25 +248,72 @@ export default {
     {
       id: 'e09',
       level: 'avansat',
-      estMin: 6,
-      concepts: ['mat.op.cu-trecere', 'mat.pb.doua-operatii', 'mat.pb.plan', 'mat.pb.decizie'],
-      title: 'Pulsul lui Vlad',
-      context: { text: 'Înainte de cursă, pulsul lui Vlad era **72** de bătăi pe minut. După alergare a crescut cu **25**, iar după pauză a scăzut cu **18**.', visual: { v: 'organ', name: 'inima' } },
+      estMin: 7,
+      concepts: ['mat.geo.trasee', 'mat.mas.lungime', 'mat.op1000.fara-trecere', 'mat.pb.doua-operatii', 'mat.pb.decizie'],
+      title: 'Crosul cu ștampilă',
+      context: { text: 'La cros, fiecare alergător {{e:alergare}} trebuie să treacă pe la **Pod**, unde primește o ștampilă. Numerele de pe hartă arată metrii dintre puncte.' },
       parts: [
         {
           id: 'a',
-          concepts: ['mat.op.cu-trecere', 'mat.pb.doua-operatii', 'mat.pb.plan'],
+          concepts: ['mat.geo.trasee', 'mat.pb.decizie'],
+          type: 'route',
+          prompt: 'Atinge punctele pe drumul **cel mai scurt** de la Start la Sosire care trece pe la Pod.',
+          map: CROS,
+          from: 'start',
+          to: 'sosire',
+          rules: { via: ['pod'] },
+          key: ['start', 'pod', 'fantana', 'sosire'],
+        },
+        {
+          id: 'b',
+          concepts: ['mat.mas.lungime', 'mat.op1000.fara-trecere'],
           type: 'fill',
-          layout: 'steps',
-          prompt: 'Socotește pulsul.',
+          prompt: 'Câți metri are drumul ales?',
+          rows: ['Metri: [[a]]'],
+          checks: ['200 + 300 + 200 = [[a]]'],
+          blanks: { a: { answer: 700, feedback: [{ if: 600, text: '600 de metri are drumul pe la Stejar, dar el nu trece pe la Pod.' }] } },
+        },
+        {
+          id: 'c',
+          concepts: ['mat.op1000.fara-trecere', 'mat.pb.doua-operatii'],
+          type: 'fill',
+          prompt: 'Cu câți metri e mai lung decât cel mai scurt drum de pe hartă, fără ștampilă?',
+          rows: ['Metri în plus: [[b]]'],
+          checks: ['700 - 600 = [[b]]'],
+          blanks: { b: { answer: 100 } },
+        },
+      ],
+      explain: {
+        idea: 'Adună metrii pe fiecare drum care trece pe la Pod și alege-l pe cel mai scurt; apoi compară-l cu cel mai scurt drum din toată harta.',
+        steps: ['Start, Pod, Fântână, Sosire: 200 + 300 + 200 = 700 m.', 'Start, Pod, Fântână, Stejar, Sosire: 200 + 300 + 100 + 400 = 1000 m.', 'Fără ștampilă, cel mai scurt ar fi Start, Stejar, Fântână, Sosire: 300 + 100 + 200 = 600 m.', 'Diferența: 700 − 600 = 100 m.'],
+        trap: 'Drumul de 600 m e mai scurt, dar nu trece pe la Pod: fără ștampilă, alergătorul nu e primit la sosire.',
+      },
+    },
+    {
+      id: 'e10',
+      level: 'avansat',
+      estMin: 7,
+      concepts: ['mat.log.grafic-bare', 'mat.nr1000.comparare', 'mat.op1000.fara-trecere', 'mat.pb.doua-operatii', 'mat.pb.decizie'],
+      title: 'Ultima probă',
+      context: { text: 'Graficul arată punctele echipelor după trei probe. La ultima probă, prima echipă primește **100 de puncte**, a doua **40**, iar celelalte nimic. **Albastra** a câștigat ultima probă, iar **Galbena** a ieșit a doua.', visual: { v: 'bar-chart', labels: 'Roșie,Albastră,Verde,Galbenă', values: '250,300,200,350', step: 50, max: 400 }, size: 'lg' },
+      parts: [
+        {
+          id: 'a',
+          concepts: ['mat.log.grafic-bare', 'mat.nr1000.comparare', 'mat.op1000.fara-trecere', 'mat.pb.doua-operatii'],
+          type: 'fill',
+          prompt: 'Citește graficul și completează.',
           rows: [
-            { label: 'După alergare:', t: '72 + 25 = [[a]]' },
-            { label: 'După pauză:', t: '[[b]] − 18 = [[c]]' },
+            'Echipa care conducea înainte de ultima probă: [[a]]',
+            'Punctele Albastrei la final: [[b]]',
+            'Punctele Galbenei la final: [[c]]',
+            'Echipa care câștigă concursul: [[d]]',
           ],
+          checks: ['300 + 100 = [[b]]', '350 + 40 = [[c]]'],
           blanks: {
-            a: { answer: 97 },
-            b: { answer: 97 },
-            c: { answer: 79, feedback: [{ if: 89, text: 'Din 7 nu putem lua 8: desfacem o zece. 17 − 8 = 9, iar 8 − 1 = 7 → 79.' }] },
+            a: { kind: 'select', options: ['Roșie', 'Albastră', 'Verde', 'Galbenă'], answer: 'Galbenă' },
+            b: { answer: 400 },
+            c: { answer: 390, feedback: [{ if: 450, text: 'Galbena a ieșit a doua: primește 40 de puncte, nu 100.' }] },
+            d: { kind: 'select', options: ['Roșie', 'Albastră', 'Verde', 'Galbenă'], answer: 'Albastră', feedback: [{ if: 'Galbenă', text: 'Galbena conducea, dar la final are 390 de puncte, iar Albastra 400.' }] },
           },
         },
         {
@@ -253,45 +321,24 @@ export default {
           concepts: ['mat.pb.decizie'],
           type: 'choice',
           weight: 0.5,
-          prompt: 'A revenit pulsul lui Vlad la 72?',
+          prompt: 'Ar fi putut câștiga echipa **Verde**, dacă primea ea cele 100 de puncte de la ultima probă?',
           items: [
             {
               id: 'i1',
               options: [
-                { id: 'nu', text: 'Nu: inima bate încă mai repede decât înainte.' },
-                { id: 'da', text: 'Da: a ajuns exact la 72.' },
+                { id: 'nu', text: 'Nu' },
+                { id: 'da', text: 'Da' },
               ],
               correct: 'nu',
-              feedback: [{ if: 'da', text: 'Compară pulsul de după pauză cu 72.' }],
+              feedback: [{ if: 'da', text: 'Verde ar fi avut 200 + 100 = 300 de puncte, iar Galbena avea deja 350 înainte de ultima probă.' }],
             },
           ],
         },
       ],
       explain: {
-        idea: 'Pulsul crește la efort și scade la odihnă: adunăm creșterea, scădem scăderea, apoi comparăm cu valoarea de la început.',
-        steps: ['72 + 25 = 97.', '97 − 18 = 79.', '79 este mai mare decât 72: mai are 7 bătăi în plus, deci inima nu s-a liniștit de tot.'],
-        check: '79 + 18 − 25 = 72',
-      },
-    },
-    {
-      id: 'e10',
-      level: 'avansat',
-      estMin: 6,
-      concepts: ['mat.mas.bani-mari', 'mat.mas.bani'],
-      title: 'Taxa de participare',
-      context: { text: 'Taxa echipei este **250 de lei**. Casieria are bancnote de 50, 100 și 200 de lei.', visual: { v: 'banknote', value: 200 } },
-      type: 'money',
-      allowed: [50, 100, 200],
-      target: 250,
-      distinct: true,
-      prompt: 'Plătește exact 250 de lei în **două feluri diferite**.',
-      items: [
-        { id: 'f1', label: 'Primul fel' },
-        { id: 'f2', label: 'Al doilea fel' },
-      ],
-      explain: {
-        idea: 'Aceeași sumă se poate forma din bancnote diferite: mai puține bancnote mari sau mai multe bancnote mici.',
-        steps: ['200 + 50 = 250.', '100 + 100 + 50 = 250.', 'Sau: 50 + 50 + 50 + 50 + 50 = 250.'],
+        idea: 'Citește punctele de pe grafic, adaugă punctele ultimei probe, apoi compară totalurile.',
+        steps: ['Înainte de ultima probă conducea Galbena, cu 350 de puncte.', 'Albastra: 300 + 100 = 400. Galbena: 350 + 40 = 390.', '400 > 390: câștigă Albastra.', 'Chiar cu 100 de puncte, Verde ar fi avut 200 + 100 = 300, mai puțin decât cele 350 ale Galbenei.'],
+        trap: 'Echipa care conduce înainte de ultima probă nu câștigă neapărat concursul.',
       },
     },
     {

@@ -4,7 +4,7 @@ import { registerVisual } from './index.js';
 import { C, has, list, num, st, txt } from './palette.js';
 
 const GROUP = 'Oraș și transport';
-const LINE_COLORS = { rosie: C.red, albastra: C.blue, verde: C.greenDark, galbena: C.yellowDark, mov: C.purple, portocalie: C.orange };
+const LINE_COLORS = { rosie: C.red, albastra: C.blue, verde: C.greenDark, galbena: C.yellowDark, mov: C.purple, portocalie: C.orange, gri: C.gray };
 const colorOf = (c) => LINE_COLORS[c] ?? C.gray;
 
 export const DEMO_MAP = {
@@ -31,7 +31,7 @@ registerVisual('route-map', {
   group: GROUP,
   check: (p) => {
     const ids = new Set(stopsOf(p).map((s) => s.id));
-    return [...list(p.path), ...linesOf(p).flatMap((l) => l.stops ?? [])].filter((id) => !ids.has(id)).map((id) => `stație necunoscută „${id}”`);
+    return [...list(p.path), ...linesOf(p).flatMap((l) => l.stops ?? []), ...(Array.isArray(p.segments) ? p.segments.flatMap((s) => [s.a, s.b]) : [])].filter((id) => !ids.has(id)).map((id) => `stație necunoscută „${id}”`);
   },
   defaults: { w: 320, h: 200 },
   viewBox: (p) => `0 0 ${num(p.w, 320)} ${num(p.h, 200)}`,
@@ -40,7 +40,8 @@ registerVisual('route-map', {
     const name = (id) => byId[id]?.label ?? id;
     const lines = linesOf(p).map((l) => `linia ${l.color ?? l.id} (${l.label ?? l.id}): ${l.stops.map(name).join(', ')}`).join('; ');
     const path = list(p.path);
-    return `hartă cu ${lines}${path.length ? `; traseu: ${path.map(name).join(' → ')}` : ''}`;
+    const segs = (Array.isArray(p.segments) ? p.segments : []).map((s) => `${name(s.a)}–${name(s.b)} ${s.n}${p.unit ? ` ${p.unit}` : ''}`).join(', ');
+    return `hartă cu ${lines}${segs ? `; lungimi: ${segs}` : ''}${path.length ? `; traseu: ${path.map(name).join(' → ')}` : ''}`;
   },
   render: (p) => {
     const stops = stopsOf(p);
@@ -59,6 +60,16 @@ registerVisual('route-map', {
       const pts = path.map((id) => byId[id]);
       out += `<polyline class="v-route-map__path" points="${pts.map((s) => `${s.x},${s.y}`).join(' ')}" fill="none" stroke="${C.ink}" stroke-width="12" stroke-linejoin="round" stroke-linecap="round" opacity=".18"/>`;
       out += `<polyline points="${pts.map((s) => `${s.x},${s.y}`).join(' ')}" fill="none" stroke="${C.white}" stroke-width="3" stroke-dasharray="7 6" stroke-linejoin="round" stroke-linecap="round"/>`;
+    }
+    // lungimea fiecărui segment (pași, minute, km), pe o etichetă albă la mijlocul lui
+    for (const sg of Array.isArray(p.segments) ? p.segments : []) {
+      const a = byId[sg.a];
+      const b = byId[sg.b];
+      if (!a || !b) continue;
+      const t = Math.min(0.9, Math.max(0.1, Number(sg.at ?? 0.5))); // `at` mută eticheta pe segment, departe de numele stațiilor
+      const [mx, my] = [a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t];
+      const w = 10 + String(sg.n).length * 7;
+      out += `<rect x="${mx - w / 2}" y="${my - 9}" width="${w}" height="18" rx="9" fill="${C.white}" ${st(1.5)}/>` + txt(mx, my + 0.5, sg.n, { size: 11 });
     }
     for (const s of stops) {
       const transfer = (onLines[s.id]?.length ?? 0) > 1;

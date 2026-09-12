@@ -105,3 +105,8 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   `registerVisual`, `visualErrors` din `visuals/index.js`). Explicațiile **nu** sunt verificate automat: exemplele și limitele din
   `explain` se confruntă cu evaluatorul (auditul din v0.6.1 a găsit acolo erori), iar etichetele `med.*` stau doar pe exercițiile
   care evaluează cunoștințe. La `chart`, `most`/`least` înseamnă maxim/minim strict: scrie-o în enunț.
+- `route` cu `map.segments` (lungimi) și `map.transfer` (timp la schimbarea liniei): validatorul cere o lungime pentru fiecare segment și,
+  la `key`, un singur drum cel mai scurt dintre cele care respectă `rules` (cheia și regulile se pot combina: „cel mai scurt drum care
+  trece prin…”). În timpul rezolvării nu se afișează lungimea drumului ales (ar da răspunsul subpunctului următor).
+- Secțiunea 0–1000 nu folosește concepte viitoare (înmulțire, împărțire, fracții, operații până la 1000 cu trecere): avansatul se
+  îngreunează prin pași, nu prin materie nouă. Diagrama circulară se citește prin felii care valorează un număr (`pie {groups, names}`).
