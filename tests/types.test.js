@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { getLogic } from '../site/js/core/registry.js';
+import { blankLabel } from '../site/js/types/fill/logic.js';
 import { normalizeTest } from '../site/js/core/spec.js';
 import demo from '../site/data/demo.js';
 import '../site/js/visuals/all.js';
@@ -129,4 +130,19 @@ test('choice multiplu, match cu mesaj țintit, ceas, numărătoare', () => {
   assert.equal(evalPart('clock.a', { i1: { h: 21, m: 30 } }).earned, 1);
   assert.equal(evalPart('build.a', { i1: { Z: 4, U: 6 } }).earned, 1);
   assert.equal(evalPart('build.a', { i1: { Z: 6, U: 4 } }).earned, 0);
+});
+
+test('fill: eticheta casetei vine din șablon (pentru cititorul de ecran)', () => {
+  const inline = { type: 'fill', rows: ['40 + 8 = [[a]]', { t: '7 zeci [[b]] 70', label: 'Compară' }], blanks: { a: { answer: 48 }, b: { kind: 'relation' } } };
+  assert.equal(blankLabel(inline, 'a'), '40 + 8 = …');
+  assert.equal(blankLabel(inline, 'b'), 'Compară: 7 zeci … 70');
+  assert.equal(blankLabel({ ...inline, blanks: { ...inline.blanks, a: { answer: 48, label: 'Suma' } } }, 'a'), 'Suma');
+  const table = { type: 'fill', layout: 'table', head: ['Ziua', 'Pepeni'], rows: [['vineri', '26'], ['în total', '[[t]]']], blanks: { t: { answer: 26 } } };
+  assert.equal(blankLabel(table, 't'), 'în total, Pepeni');
+  const tree = { type: 'fill', layout: 'tree', labels: ['zeci', 'unități'], trees: [{ top: '47', left: '[[z]]', right: '[[u]]' }], blanks: { z: { answer: 40 }, u: { answer: 7 } } };
+  assert.equal(blankLabel(tree, 'z'), 'zeci din 47');
+  assert.equal(blankLabel(tree, 'u'), 'unități din 47');
+  const chain = { type: 'fill', layout: 'chain', chains: [{ start: '25', steps: [{ op: '+18', out: '[[x]]' }, { op: '-3', out: '[[y]]' }] }], blanks: { x: { answer: 43 }, y: { answer: 40 } } };
+  assert.equal(blankLabel(chain, 'x'), '25 +18 = …');
+  assert.equal(blankLabel(chain, 'y'), '… -3 = …');
 });

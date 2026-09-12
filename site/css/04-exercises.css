@@ -49,9 +49,9 @@
 .ex-howto .c-emoji { width: 1.2em; height: 1.2em; }
 
 /* ——— Stări comune (bun / greșit / răspunsul corect) — mereu cu icon ——— */
-.is-correct { --state: var(--c-ok); --state-bg: var(--c-ok-bg); }
-.is-wrong { --state: var(--c-bad); --state-bg: var(--c-bad-bg); }
-.is-missed { --state: var(--c-ok); --state-bg: var(--c-surface); }
+.is-correct { --state: var(--c-ok); --state-bg: var(--c-ok-bg); --state-ink: var(--c-ok-ink); }
+.is-wrong { --state: var(--c-bad); --state-bg: var(--c-bad-bg); --state-ink: var(--c-bad-ink); }
+.is-missed { --state: var(--c-ok); --state-bg: var(--c-surface); --state-ink: var(--c-ok-ink); }
 .ex-state {
   position: absolute;
   top: -0.5rem;
@@ -70,7 +70,7 @@
   box-shadow: var(--sh-1);
   animation: anim-bounce-in 400ms var(--ease-spring) both;
 }
-.is-missed > .ex-state { background: var(--c-surface); color: var(--c-ok); border: 2px solid var(--c-ok); }
+.is-missed > .ex-state { background: var(--c-surface); color: var(--c-ok-ink); border: 2px solid var(--c-ok); }
 .ex-feedback { display: flex; gap: 0.4rem; align-items: flex-start; font-size: var(--fs-0); padding: 0.4rem 0.7rem; border-radius: var(--r-2); background: var(--c-note); }
 .ex-feedback .c-emoji { flex: none; }
 .ex-expected {
@@ -80,7 +80,7 @@
   padding: 0 0.4rem;
   border-radius: var(--r-1);
   background: var(--c-ok-bg);
-  color: var(--c-ok);
+  color: var(--c-ok-ink);
   font-family: var(--font-title);
   font-weight: 700;
 }
@@ -266,7 +266,7 @@
 .ex-blank.has-value { border-style: solid; border-color: var(--c-brand); background: var(--c-surface); }
 .ex-blank[readonly] { cursor: default; }
 .ex-blank-wrap.is-correct .ex-blank,
-.ex-blank-wrap.is-wrong .ex-blank { border-style: solid; border-color: var(--state); background: var(--state-bg); color: var(--state); }
+.ex-blank-wrap.is-wrong .ex-blank { border-style: solid; border-color: var(--state); background: var(--state-bg); color: var(--state-ink); }
 .ex-blank-wrap.is-wrong .ex-blank { text-decoration: line-through; text-decoration-thickness: 2px; }
 .ex-blank-wrap > .ex-state { top: -0.8rem; right: auto; left: -0.6rem; }
 
@@ -380,12 +380,14 @@
   --face-art: 2.8rem;
 }
 .ex-chip.is-correct, .ex-chip.is-wrong { border-color: var(--state); background: var(--state-bg); --edge: var(--state); }
-.ex-chip__expected { font-size: var(--fs-0); color: var(--c-ok); font-weight: 700; }
+.ex-chip__expected { font-size: var(--fs-0); color: var(--c-ok-ink); font-weight: 700; }
 
 /* ——— match ——— */
 .ex-match { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3) clamp(2.5rem, 1rem + 8vw, 7rem); align-items: start; }
 .ex-match__lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 0; }
-.ex-match__line { fill: none; stroke-width: 4; stroke-linecap: round; stroke-dasharray: 600; animation: anim-draw 450ms var(--ease-out) both; --len: 600; }
+.ex-match__line { fill: none; stroke-width: 4; stroke-linecap: round; stroke-dasharray: 600; --len: 600; }
+.ex-match__line--new { animation: anim-draw 450ms var(--ease-out) both; }
+.ex-match.has-picked .ex-match__item--right:not(.is-linked) { border-style: dashed; border-color: var(--c-brand); }
 .ex-match__col { display: grid; gap: var(--sp-3); }
 .ex-match__item {
   position: relative;

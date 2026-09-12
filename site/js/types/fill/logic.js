@@ -13,6 +13,7 @@
 
 import { calc, hasRelation, holds, isPureMath, relation } from '../../core/expr.js';
 import { searchNumbers } from '../../core/rules.js';
+import { plain } from '../../core/markup.js';
 import { sameText } from '../../core/ro.js';
 import { countAnswered, feedbackFor, isBlank, makeResult } from '../_shared.js';
 
@@ -40,6 +41,57 @@ export function templatesOf(part) {
     default:
       return [];
   }
+}
+
+const dots = (tpl) => plain(String(tpl).replace(BLANK, '…')).replace(/\s+/g, ' ').trim();
+
+/**
+ * Eticheta unei casete pentru cititorul de ecran (blank.label are prioritate): șablonul ei, cu casetele
+ * înlocuite prin „…” — „40 + 8 = …”; în tabel, capul rândului și al coloanei; în arbore, „zeci din 47”.
+ */
+export function blankLabel(part, id) {
+  const blank = part.blanks?.[id];
+  if (blank?.label) return blank.label;
+  const has = (tpl) => blanksIn(tpl).includes(id);
+  switch (part.layout ?? 'inline') {
+    case 'inline':
+    case 'steps':
+      for (const r of part.rows ?? []) {
+        const row = rowOf(r);
+        if (has(row.t)) return `${row.label ? `${plain(row.label)}: ` : ''}${dots(row.t)}`;
+      }
+      break;
+    case 'table':
+      for (const row of part.rows ?? []) {
+        const ci = row.findIndex(has);
+        if (ci < 0) continue;
+        const heads = [ci > 0 ? row[0] : '', part.head?.[ci] ?? ''].map((t) => plain(String(t)).trim()).filter(Boolean);
+        return heads.join(', ') || dots(row[ci]);
+      }
+      break;
+    case 'tree': {
+      const [left, right] = part.labels ?? ['partea stângă', 'partea dreaptă'];
+      for (const t of part.trees ?? []) {
+        if (has(t.top)) return `întregul din ${dots(t.left)} și ${dots(t.right)}`;
+        if (has(t.left)) return `${plain(left)} din ${dots(t.top)}`;
+        if (has(t.right)) return `${plain(right)} din ${dots(t.top)}`;
+      }
+      break;
+    }
+    case 'chain':
+      for (const c of part.chains ?? []) {
+        if (has(c.start)) return 'începutul lanțului';
+        let prev = String(c.start);
+        for (const st of c.steps) {
+          if (has(st.out)) return `${dots(prev)} ${plain(st.op)} = …`;
+          prev = String(st.out);
+        }
+      }
+      break;
+    default:
+      break;
+  }
+  return '';
 }
 
 const PLACEHOLDER = { number: '1', relation: '=', sign: '+' };

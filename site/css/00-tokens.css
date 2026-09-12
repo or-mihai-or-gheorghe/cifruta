@@ -39,6 +39,15 @@
   --c-avansat: #35339a;
   --c-avansat-bg: #e1e1f5;
 
+  /* ——— Variante pentru text: contrast ≥ 4,5:1 pe fundalurile deschise de mai sus (fundalurile și liniile rămân vii) ——— */
+  --c-usor-ink: #0c5f8f;
+  --c-intermediar-ink: #5a2fb8;
+  --c-avansat-ink: #35339a;
+  --c-ok-ink: #0a6547;
+  --c-bad-ink: #a5350a;
+  --c-warn-ink: #8f6100;
+  --c-info-ink: #155f9e;
+
   /* ——— Ordinele numerelor, ca pe numărătoarea din manual ——— */
   --c-s: #2e9e44;
   --c-z: #e03131;
@@ -153,6 +162,6 @@
 [data-theme='spatiu'] { --c-theme: #4338ca; --c-theme-bg: #e5e4fa; }
 [data-theme='ferma'] { --c-theme: #4d7c0f; --c-theme-bg: #e8f3d6; }
 
-[data-level='usor'] { --c-level: var(--c-usor); --c-level-bg: var(--c-usor-bg); }
-[data-level='intermediar'] { --c-level: var(--c-intermediar); --c-level-bg: var(--c-intermediar-bg); }
-[data-level='avansat'] { --c-level: var(--c-avansat); --c-level-bg: var(--c-avansat-bg); }
+[data-level='usor'] { --c-level: var(--c-usor); --c-level-bg: var(--c-usor-bg); --c-level-ink: var(--c-usor-ink); }
+[data-level='intermediar'] { --c-level: var(--c-intermediar); --c-level-bg: var(--c-intermediar-bg); --c-level-ink: var(--c-intermediar-ink); }
+[data-level='avansat'] { --c-level: var(--c-avansat); --c-level-bg: var(--c-avansat-bg); --c-level-ink: var(--c-avansat-ink); }

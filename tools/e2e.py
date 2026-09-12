@@ -203,6 +203,9 @@ def types_flow(run: Run, page: Page, vp: str):
     else:
         page.locator(tid("left-l2")).drag_to(page.locator(tid("right-r54")))
     tap(tid("left-l3")); tap(tid("right-r84"))
+    page.wait_for_timeout(100)
+    linked = page.locator(tid("left-l3")).get_attribute("aria-label") or ""
+    run.check("unit cu" in linked and page.locator(".ex-match__line").count() == 3 and page.locator(".ex-match__line--new").count() == 1, f"[{vp}] unire: perechea e anunțată („{linked}”), iar dintre cele 3 linii doar ultima se desenează animat")
     ok("match")
 
     key = ["v2", "v6", "v4", "v7", "v1", "v5", "v3"]
@@ -538,10 +541,11 @@ def keyboard_flow(run: Run, browser, base: str):
     key("[data-testid=item-vaca]", "Space")
     key("[data-testid=bin-dom]", "Enter")
     in_bin = (answer("categorize") or {}).get("vaca")
+    focused = page.evaluate("document.activeElement?.dataset.testid")
     key("[data-testid=bin-dom] [data-testid=item-vaca]", "Space")
     key("[data-testid=tray]", "Enter")
     back = (answer("categorize") or {}).get("vaca")
-    run.check(in_bin == "dom" and back is None, f"[tastatură] un element intră în coș și se scoate înapoi pe tavă ({in_bin} → {back})")
+    run.check(in_bin == "dom" and back is None and focused == "item-vaca", f"[tastatură] un element intră în coș (focusul rămâne pe el: {focused}) și se scoate înapoi pe tavă ({in_bin} → {back})")
     expect(page.locator("[data-testid=item-vaca]")).not_to_have_class(re.compile(r"\banim-pop\b"))
     run.check(True, "[tastatură] la mișcare redusă clasa anim-pop tot dispare")
 

@@ -4,7 +4,7 @@ import { h, pop } from '../../core/dom.js';
 import { play } from '../../core/sound.js';
 import { md } from '../../core/markup.js';
 import { expectedTag, feedbackBox, isLocked, setState } from '../_view.js';
-import { keyOf, kindOf } from './logic.js';
+import { blankLabel, keyOf, kindOf } from './logic.js';
 
 const BLANK = /\[\[(\w+)\]\]/g;
 const SEGMENTS = { relation: ['<', '=', '>'], sign: ['+', '−'] };
@@ -31,6 +31,11 @@ export default {
     let answer = {};
     let mode = 'solve';
     const widgets = {}; // blankId → { wrap, set(value), lock(bool) }
+    // cititorul de ecran aude șablonul casetei („Căsuță: 40 + 8 = …”), nu doar „căsuță”
+    const labelOf = (id, generic) => {
+      const label = blankLabel(part, id);
+      return label ? (blanks[id].label ? label : `${generic}: ${niceMinus(label)}`) : generic.toLowerCase();
+    };
     const feedbackArea = h('div', { class: 'l-stack l-stack--sm' });
 
     function change(id, value) {
@@ -49,7 +54,7 @@ export default {
         maxlength: text ? '20' : '4', // până la 1000
         autocomplete: 'off',
         spellcheck: 'false',
-        'aria-label': blank.label ?? 'căsuță',
+        'aria-label': labelOf(id, 'Căsuță'),
         'data-testid': `blank-${id}`,
         style: { '--digits': text ? 6 : digits },
       });
@@ -76,7 +81,7 @@ export default {
       const kind = kindOf(blank);
       const values = kind === 'select' ? blank.options.map(String) : SEGMENTS[kind];
       const shown = (v) => (kind === 'sign' ? niceMinus(v) : String(v)); // variantele de la select se compară exact
-      const group = h('span', { class: `ex-seg${kind === 'select' ? ' ex-seg--words' : ''}`, role: 'radiogroup', 'aria-label': blank.label ?? 'alege' });
+      const group = h('span', { class: `ex-seg${kind === 'select' ? ' ex-seg--words' : ''}`, role: 'radiogroup', 'aria-label': labelOf(id, 'Alege') });
       const buttons = values.map((v) =>
         h(
           'button',

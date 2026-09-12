@@ -21,6 +21,8 @@ export default {
     const leftById = Object.fromEntries(part.left.map((l) => [l.id, l]));
     const rightById = Object.fromEntries(part.right.map((r) => [r.id, r]));
     const colorOf = (leftId) => PAIR_COLORS[leftOrder.indexOf(leftId) % PAIR_COLORS.length];
+    const nameOf = (item) => plain(String(item?.text ?? item?.label ?? item?.id ?? ''));
+    let fresh = null; // ultima legătură făcută: doar ea se desenează animat
 
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('class', 'ex-match__lines');
@@ -40,7 +42,8 @@ export default {
     const board = h('div', { class: 'ex-match' }, leftCol, rightCol);
     board.prepend(svg);
     const notes = h('div', { class: 'l-stack l-stack--sm' });
-    el.append(board, notes);
+    const live = h('span', { class: 'u-visually-hidden', 'aria-live': 'polite' });
+    el.append(board, notes, live);
 
     function draw() {
       const box = board.getBoundingClientRect();
@@ -60,7 +63,7 @@ export default {
         const mid = (x1 + x2) / 2;
         path.setAttribute('d', `M${x1} ${y1} C${mid} ${y1}, ${mid} ${y2}, ${x2 - 8} ${y2}`);
         path.setAttribute('stroke', color);
-        path.setAttribute('class', 'ex-match__line');
+        path.setAttribute('class', `ex-match__line${l === fresh ? ' ex-match__line--new' : ''}`);
         const head = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         head.setAttribute('d', `M${x2 - 12} ${y2 - 7} L${x2} ${y2} L${x2 - 12} ${y2 + 7} Z`);
         head.setAttribute('fill', color);
@@ -76,10 +79,12 @@ export default {
         btn.classList.toggle('is-linked', on);
         btn.style.setProperty('--pair', colorOf(id));
         btn.querySelector('.ex-match__badge').textContent = on ? String(leftOrder.indexOf(id) + 1) : '';
+        btn.setAttribute('aria-label', `${nameOf(leftById[id])}, ${on ? `unit cu ${nameOf(rightById[answer[id]])}` : 'neunit'}`);
       }
       for (const [id, btn] of Object.entries(rightEls)) {
         const links = byRight[id] ?? [];
         btn.classList.toggle('is-linked', links.length > 0);
+        btn.setAttribute('aria-label', `${nameOf(rightById[id])}, ${links.length ? `unit de ${links.map((l) => nameOf(leftById[l])).join(' și ')}` : 'neunit'}`);
         btn.querySelector('.ex-match__badges').replaceChildren(
           ...links.map((l) => h('span', { class: 'ex-match__badge', style: { '--pair': colorOf(l) } }, String(leftOrder.indexOf(l) + 1))),
         );
@@ -98,6 +103,8 @@ export default {
         answer = { ...answer };
         if (linking) answer[l] = r;
         else delete answer[l];
+        fresh = linking ? l : null;
+        live.textContent = `${nameOf(leftById[l])} ${linking ? `unit cu ${nameOf(rightById[r])}` : 'neunit'}`;
         paint();
         if (linking) {
           pop(item);
@@ -117,6 +124,7 @@ export default {
       get: () => answer,
       set(a) {
         answer = { ...(a ?? {}) };
+        fresh = null;
         paint();
       },
       mode(m) {
@@ -126,6 +134,7 @@ export default {
       },
       showResult(res) {
         result = res;
+        fresh = null;
         const messages = [];
         for (const r of res.items) {
           const btn = leftEls[r.id];

@@ -69,6 +69,7 @@ export default {
           delete answer[id];
         }
         paint();
+        item.focus({ preventScroll: true }); // mutarea între containere ar pierde focusul (tastatură)
         pop(item); // elementul „aterizează” la locul nou
         play('place');
         ctx.onChange(answer);
