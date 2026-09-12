@@ -20,8 +20,9 @@ vizibil în site la `#/atelier/tipuri`) și cele 4 teste din `site/data/tests/re
 
 **Modifici un test deja publicat?** Crește `version` în test **și** în catalog — ciornele vechi ale copiilor sunt ignorate,
 iar rezultatele vechi își păstrează scorul (fără lista pe exerciții, care nu s-ar mai potrivi cu testul nou).
-**Excepție:** dacă adaugi sau schimbi doar un desen (`context.visual`, `part.visual`, `itemVisual`), versiunea rămâne —
-răspunsurile, id-urile și ciornele nu sunt afectate.
+**Excepție:** dacă adaugi sau schimbi doar un desen **decorativ** (peisaj, suport pentru numere, mascotă), versiunea rămâne —
+răspunsurile, id-urile și ciornele nu sunt afectate. Desenele **cu date** (riglă, cofraj, numărătoare, termometru, axă, model cu
+bare, țarcuri) fac parte din enunț: dacă le schimbi numerele sau conținutul, crește versiunea.
 
 ## 2. Schema
 
@@ -42,6 +43,9 @@ export default {
   măcar un desen sau un emoji — vezi exemplele din `site/data/demo.js`.
 - `parts: [{ id: 'a', type, prompt, visual?, …câmpurile tipului }]` — subpunctele a), b), c). Dacă exercițiul are o
   singură parte, câmpurile ei se scriu direct pe exercițiu (forma scurtă).
+- `part.concepts` (opțional, subset din conceptele exercițiului): când subpunctele exersează concepte diferite (a) citește
+  termometrul, b) scade), raportul pentru părinți creditează fiecare subpunct separat. Fiecare concept al exercițiului trebuie
+  să apară pe cel puțin un subpunct (validatorul verifică).
 - `points` lipsește de obicei: implicit 2 / 3 / 4 după nivel. Scorul: 10 din oficiu + 90 × puncte obținute / total.
 - **Subpunctele valorează egal** în exercițiu, oricâte casete ar avea fiecare (a) cu 5 casete și b) cu o alegere: câte
   jumătate). Pentru o alegere între **două** variante, unde ghicitul e ușor, pune `weight: 0.5` pe subpunct
@@ -53,7 +57,7 @@ export default {
 
 | Tip | Câmpuri principale | Răspuns salvat |
 |-|-|-|
-| `choice` | `items: [{ id, q?, options: ['50', …] \| [{ id, text, visual?, emoji? }], correct, multi?, calc?, feedback? }]`, `style: 'circles'`, `shuffle` | `{ itemId: optionId }` |
+| `choice` | `items: [{ id, q?, options: ['50', …] \| [{ id, text, visual?, emoji? }], correct, multi?, calc?, feedback? }]`, `style: 'circles'`, `shuffle` (amestecă variantele; `shuffle: false` pe un element le lasă în ordine) | `{ itemId: optionId }` |
 | `truefalse` | `items: [{ id, text, answer: true\|false, why? }]` | `{ itemId: bool }` |
 | `fill` | `layout`, `rows` / `trees` / `chains` / `head`, `blanks`, `checks?` (vezi mai jos) | `{ blankId: valoare }` |
 | `slider` | `skin: 'line'\|'thermometer'`, `min, max, step`, `ticks: { minor, major?, labels? }`, `unit?`, `items: [{ id, label, answer, tolerance? }]` | `{ itemId: număr }` |
@@ -85,6 +89,8 @@ export default {
   `choice`/`match`).
 - **Lățimea casetelor:** toate casetele numerice ale unui subpunct au aceeași lățime (după cel mai lung răspuns), ca
   lățimea să nu trădeze răspunsul; se pot scrie până la 4 cifre.
+- **Cititorul de ecran** aude fiecare casetă cu șablonul ei („Căsuță: 40 + 8 = …”; în tabel, capul rândului și al coloanei;
+  în arbore, „zeci din 47”). `blank.label` înlocuiește eticheta automată când e nevoie.
 
 ### Etichetele „cu / fără trecere peste ordin”
 - Definiția, pe coloane: la **adunare** e cu trecere dacă suma cifrelor unei coloane e cel puțin 10 (7 + 5, 28 + 12);
@@ -138,6 +144,10 @@ schimbă doar rotația), bila nouă de pe numărătoare, confetti-ul mascotei (d
   mai multe soluții, verificarea rezultatului, „găsește greșeala”, mersul invers.
 - Diacritice corecte (ș, ț cu virgulă). Acordul cu numeralul: **1 leu**, 19 lei, **20 de lei**, 101 lei, **1 grad**,
   **22 de grade** (în șabloane cu casete folosește formulări neutre: „Rest (lei): [[a]]”). În cod: `cantitate(n, 'leu', 'lei')`.
+- **Răspunsul nu stă la vedere:** variantele nu repetă pictograma sau textul din desen (țarcurile → doar numele animalelor),
+  o variantă corectă nu spune rezultatul altui subpunct (T4-e10: a) estimează, b) calculează), contextul nu dă prima pereche
+  din exercițiu, iar suma din portofel nu se vede în timpul rezolvării. Amestecă variantele (`shuffle: true`) când n-au o ordine
+  naturală; la mersul invers copilul alege și semnul (`kind: 'sign'`), nu doar numărul.
 
 ## 7. Explicații și mesaje de feedback
 Șablon: **Ce ne cere? → idee (desen) → pași → proba → capcana**. Lăudăm strategia, nu copilul („Încă nu — hai să privim zecile”).
@@ -174,3 +184,4 @@ La începutul clasei a II-a se adaugă ~20–30 s pentru citirea fiecărui enun�
 - [ ] `npm run e2e` verde; capturile arată bine pe laptop, tabletă și telefon
 - [ ] durata exact 45 min (suma `estMin`), 4/4/3 exerciții, 1–2 de explorarea mediului, fiecare exercițiu cu `explain`
 - [ ] catalogul actualizat (`version`, `estMin`, `exercises`), `npm run acoperire`, `docs/STARE.md` actualizat
+- [ ] răspunsul nu e vizibil în enunț, desen sau variante; variantele fără ordine naturală sunt amestecate

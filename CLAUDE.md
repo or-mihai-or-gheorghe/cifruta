@@ -54,7 +54,8 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
 - **Test nou:** fișier în `site/data/tests/<grup>/`, intrare în `data/catalog.js` (id, file, version, estMin, exercises), concepte din
   `data/concepts.js`; 4 ușor → 4 intermediar → 3 avansat, exact 45 min; `npm test` până e verde. Detalii: `docs/ghid-autor.md`.
 - **Modificare de test publicat:** crește `version` (în test și în catalog) → ciornele vechi sunt ignorate, iar rezultatele vechi
-  își păstrează scorul, dar nu mai arată lista pe exerciții (rezumatul vine din încercarea salvată).
+  își păstrează scorul, dar nu mai arată lista pe exerciții (rezumatul vine din încercarea salvată). Un desen decorativ nou nu cere
+  versiune; unul cu date (riglă, cofraj, model cu bare) da.
 - **Tip nou:** `js/types/<tip>/logic.js` + `view.js`, o linie în `core/registry.js`, un exemplu în `data/demo.js`, stiluri în `css/04-exercises.css`.
 - **Vizual nou:** `registerVisual` într-un modul din `js/visuals/`, culori din variabile `--v-*`, `demos` pentru atelier.
 - **Desen nou într-un exercițiu publicat:** `context.visual` / `part.visual` / `itemVisual` / `item.visual` / `bin.visual` din bancă;
@@ -83,3 +84,12 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   șterge din casetele „Pentru părinți” (`clearHistory(testIds | null)` din `core/storage.js`, `refresh()` din `core/router.js`).
 - Sunete: `play('tap'|'place'|'done'|'level'|'win'|'yes'|'no')` din `core/sound.js` (WebAudio sintetizat, fără fișiere), pornite
   la gesturi; butonul din antet ține preferința în `cifruta:sound`; implicit oprite la `prefers-reduced-motion`.
+- Pagina de început e punctul de plecare: `player.js` deschide mereu intro-ul (`show(-1)`); „Continuă testul” reia de la `resumeAt`,
+  „Reîncepe de la zero” șterge ciorna (cu confirmare). `#/rezultate/<test>/<încercare>` arată o anumită încercare (`getAttempt`).
+- `addAttempt()` întoarce `false` când stocarea nu scrie: încercarea rămâne în memorie (`isUnsaved`), ciorna nu se șterge, iar
+  rezultatele arată un mesaj. Conceptele se creditează **pe subpunct** (`part.concepts`, altfel cele ale exercițiului).
+- Răspunsul nu stă la vedere: în portofel se arată doar numărul de bancnote până la rezultate; variantele nu repetă desenul;
+  `shuffle: true` la alegeri fără ordine naturală (`item.shuffle: false` o oprește pe un element). Vezi ghidul, secțiunea 6.
+- Contrast: textul colorat folosește tokenii `--c-*-ink` (≥ 4,5:1, verificat de `tests/css.test.js`); culorile vii rămân pe
+  fundaluri, buline și linii. Casetele de completat se prezintă cititorului de ecran cu șablonul lor (`blankLabel` din `fill/logic.js`).
+- E2E: `--only <id>` sare fluxurile de atelier și de tastatură (`types_flow`, `keyboard_flow`) — rulează și fără `--only`.

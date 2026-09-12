@@ -1,14 +1,15 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-12 · **Versiune:** 0.4.0
+- **Data:** 2026-09-12 · **Versiune:** 0.5.0
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
-- **Ce funcționează:** site complet: catalog pe secțiuni, player (un exercițiu pe ecran, hartă pe niveluri, ecrane între
-  niveluri, ciornă), rezultate (scor, calificativ, stele, confetti, autoevaluare, zona pentru părinți, revizuire cu
-  explicații, rezolvare, „Mai încerc o dată”), 11 tipuri de exerciții, banca vizuală (36 de desene, peisaje și ceas
-  animate), sunete discrete cu buton de oprire, atelier pentru autori. Conținut: **4 teste de recapitulare a clasei I**
-  (T1 v2, T2–T4), toate exercițiile cu desen sau emoji. Calitate: 26 de teste Node (plus validarea conținutului și a
-  tabelului de acoperire), E2E ~400 de verificări pe 3 ecrane + tastatură.
+- **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
+  la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
+  rezultate (scor, calificativ, stele, confetti, autoevaluare, zona pentru părinți cu lista încercărilor și concepte pe subpunct,
+  revizuire cu explicații, rezolvare, „Mai încerc o dată” repetabil), 11 tipuri de exerciții, banca vizuală (36 de desene,
+  peisaje și ceas animate), sunete discrete cu buton de oprire, atelier pentru autori. Conținut: **4 teste de recapitulare a
+  clasei I** (T1–T4 v2), toate exercițiile cu desen sau emoji, fără răspunsuri „la vedere”. Calitate: 32 de teste Node (plus
+  validarea conținutului, a tabelului de acoperire și a contrastului), E2E ~530 de verificări pe 3 ecrane + tastatură.
 - **Următorul pas:** copilul rezolvă T1–T4 → notăm timpii reali și dificultatea; apoi secțiunile U1 (numere 0–1000) și U2.
 
 ## Etape
@@ -30,14 +31,17 @@
   exercițiile; publicat, E2E pe site-ul live: 442 de verificări, tag `v0.3.0`
 - [x] M13 (v0.4.0): fiecare test durează exact 45 de minute; istoricul se poate șterge pe test / secțiune / tot; cronometru discret;
   publicat, E2E pe site-ul live: 475 de verificări, tag `v0.4.0`
+- [x] M14 (v0.5.0): feedback extern nr. 2 (rezultat păstrat la eșecul stocării, concepte pe subpunct, istoric accesibil, intro ca
+  punct de plecare, accesibilitate, contrast, pauză neutră, praguri exacte la cronometru, explicații corectate) + „răspunsuri date
+  de-a gata” scoase din conținut (T2–T4 v2); publicat, E2E pe site-ul live: vezi jurnalul, tag `v0.5.0`
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
 |-|-|-|-|-|-|-|
 | recap-c1-t1 | Amintiri din vacanță | 2 | publicat | npm test + E2E | 45 | – |
-| recap-c1-t2 | La piață cu bunica | 1 | publicat | npm test + E2E | 45 | – |
-| recap-c1-t3 | Călătorie în spațiu | 1 | publicat | npm test + E2E | 45 | – |
-| recap-c1-t4 | O zi la fermă | 1 | publicat | npm test + E2E | 45 | – |
+| recap-c1-t2 | La piață cu bunica | 2 | publicat | npm test + E2E | 45 | – |
+| recap-c1-t3 | Călătorie în spațiu | 2 | publicat | npm test + E2E | 45 | – |
+| recap-c1-t4 | O zi la fermă | 2 | publicat | npm test + E2E | 45 | – |
 
 ## Decizii
 | data | decizie | motiv |
@@ -72,12 +76,22 @@
 | 2026-09-12 | Fiecare test durează exact 45 de minute (validatorul refuză altă sumă) | cererea utilizatorului |
 | 2026-09-12 | Cronometru discret în player (inel + mm:ss, din timpul lucrat pe exerciții), avertizare calmă la 5 minute, la 0 nu trimite | cererea utilizatorului; înlocuiește decizia „fără cronometru afișat”, dar rămâne fără presiune |
 | 2026-09-12 | Istoricul se șterge din „Pentru părinți”: pe test (rezultate), pe secțiune, sau tot (acasă); include ciornele | cererea utilizatorului (părintele curăță încercările de probă) |
+| 2026-09-12 | Pagina de început e punctul de plecare: „Continuă testul” (reia de unde a rămas), „Reîncepe de la zero”, „Vezi rezultatele ultimei încercări”; ruta `#/rezultate/<test>/<încercare>` | decizia utilizatorului (feedback nr. 2: istoricul nu era accesibil) |
+| 2026-09-12 | Portofelul arată doar numărul de bancnote în timpul rezolvării, la toate exercițiile cu bani; suma apare la rezultate | decizia utilizatorului: suma în timp real dădea răspunsul |
+| 2026-09-12 | Răspunsul nu stă la vedere: variante fără pictograma din desen, fără rezultatul altui subpunct, `shuffle` la alegeri fără ordine naturală, semn ales la mersul invers | observația utilizatorului + căutare proprie în T1–T4 (regula e în ghid, secțiunea 6) |
+| 2026-09-12 | Conceptele se creditează pe subpunct (`part.concepts`), „Niciun concept nu a rămas sub 70%” | feedback nr. 2: un subpunct greșit trăgea toate conceptele exercițiului la „de exersat” |
+| 2026-09-12 | Salvarea răspunde cu succes/eșec: la eșec rezultatul se arată din memorie, ciorna rămâne, plus un mesaj | feedback nr. 2: rezultatul se pierdea când `localStorage` nu scria |
+| 2026-09-12 | Text colorat pe tokeni `--c-*-ink` (contrast ≥ 4,5:1, test unitar); fundalurile și bulinele rămân vii | feedback nr. 2: „Ușor” avea 3,06:1 |
+| 2026-09-12 | Pauza dintre niveluri sărbătorește doar un nivel terminat; altfel e neutră și spune câte exerciții au rămas | feedback nr. 2 |
+| 2026-09-12 | Un desen decorativ nou nu cere versiune; unul cu date (riglă, cofraj, model cu bare) da | feedback nr. 2 (excepția era prea largă); fără mecanism automat |
+| 2026-09-12 | Neaplicate, în backlog: săgeți la butoanele radio, explicații vizuale interactive, ceas cu tragere directă, legătura desen–răspuns în validator | funcționalități noi sau over-engineering față de cerere |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
 - Încercările făcute înainte de v0.2.0 își păstrează scorul salvat, dar lista pe exerciții le recalculează cu subpunctele egale
   (poate diferi puțin de scorul din rezumat); la T1 (v2) încercările vechi arată doar rezumatul.
 - După publicare, GitHub Pages poate servi ~10 min fișiere vechi (cache).
+- T2–T4 au trecut la versiunea 2 (v0.5.0): încercările făcute pe versiunea 1 arată doar rezumatul, fără lista pe exerciții.
 
 ## Backlog
 - Scanările actuale acoperă manualul până la înmulțire; utilizatorul adaugă scanări noi după finalizarea etapei curente.
@@ -85,6 +99,8 @@
 - Tipuri noi: balanță interactivă, traseu pe rețea cu săgeți, hotspot pe imagine, grafic cu bare, calendar, desen/simetrie.
 - Variante generate aleator (cu sămânță), diplomă printabilă.
 - Amânate la cerere: citire cu voce (TTS), tastatură numerică proprie pe ecran.
+- Din feedback-ul nr. 2, neaplicate: săgeți sus/jos la butoanele radio (Tab + Space merg); explicații vizuale interactive
+  (evidențieri pas cu pas în desen); ceas și termometru cu tragere directă; validator care leagă desenele cu date de răspunsuri.
 - Conturi de utilizator + bază de date (ex. Cloudflare D1 / Supabase) prin înlocuirea `core/storage.js`.
 - Publicare automată la push: `gh auth refresh -h github.com -s workflow` + mutarea workflow-ului în `.github/workflows/` + sursa Pages „GitHub Actions”.
 
@@ -114,3 +130,14 @@
   Apoi, la cerere: durata exact 45 de minute pe test (impusă de validator), ștergerea istoricului pe test / secțiune / tot,
   cronometru discret cu inel care se golește. v0.4.0 publicat, E2E pe site-ul live 475/475.
   **De făcut data viitoare:** copilul rezolvă T1–T4 (ascultă și sunetele la volum mic) → timpii reali; scanări noi.
+- **2026-09-12 (a treia sesiune)** — Al doilea feedback extern (10 probleme + 7 sugestii), verificat punct cu punct (toate cele 10
+  confirmate; săgețile la radio, explicațiile interactive și ceasul cu tragere lăsate în backlog) + observația utilizatorului că
+  răspunsul stă uneori la vedere, extinsă printr-o căutare în T1–T4 și demo (11 situații). Remediere în 8 etape cu commit și E2E:
+  (1) `addAttempt` întoarce succesul, încercarea nesalvată rămâne în memorie, ciorna nu se șterge; (2) `part.concepts` + creditare
+  pe subpunct; (3) praguri exacte la cronometru (5:00, 0:00), o singură reacție, pauză neutră când rămân exerciții; (4) intro ca
+  punct de plecare, lista încercărilor cu rută proprie, ciornele la părinți; (5) etichete din șablon la casete, perechi anunțate
+  la unire, focus păstrat la sortare, tokeni `--c-*-ink` cu test de contrast; (6) litere pe carduri la rezultate, reîncercare
+  repetată + „refăcut corect”, antet compact pe telefon, doar linia nouă animată la unire; (7) conținut: T4-e01 fără pictograme
+  în variante, portofel cu număr de bancnote, T4-e10/T2-e05/T2-e07/T2-e10/T4-e06/T3-e11 refăcute, `shuffle`, explicații corectate,
+  „42 de lei” pe etichete (mari acum), T2–T4 v2; (8) documentație, v0.5.0.
+  **De făcut data viitoare:** copilul rezolvă T1–T4 → timpii reali; scanări noi (după înmulțire).
