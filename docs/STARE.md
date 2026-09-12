@@ -32,10 +32,10 @@
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
 |-|-|-|-|-|-|-|
-| recap-c1-t1 | Amintiri din vacanță | 2 | publicat | npm test + E2E | 44 | – |
-| recap-c1-t2 | La piață cu bunica | 1 | publicat | npm test + E2E | 44 | – |
-| recap-c1-t3 | Călătorie în spațiu | 1 | publicat | npm test + E2E | 43 | – |
-| recap-c1-t4 | O zi la fermă | 1 | publicat | npm test + E2E | 43 | – |
+| recap-c1-t1 | Amintiri din vacanță | 2 | publicat | npm test + E2E | 45 | – |
+| recap-c1-t2 | La piață cu bunica | 1 | publicat | npm test + E2E | 45 | – |
+| recap-c1-t3 | Călătorie în spațiu | 1 | publicat | npm test + E2E | 45 | – |
+| recap-c1-t4 | O zi la fermă | 1 | publicat | npm test + E2E | 45 | – |
 
 ## Decizii
 | data | decizie | motiv |

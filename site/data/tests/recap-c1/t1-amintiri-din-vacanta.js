@@ -285,7 +285,7 @@ export default {
     {
       id: 'e09',
       level: 'avansat',
-      estMin: 6,
+      estMin: 7,
       concepts: ['mat.pb.o-operatie', 'mat.pb.mai-mult-mai-putin', 'mat.pb.decizie'],
       title: 'Bunicul și Andrei',
       context: { text: 'La mare, Andrei a stat cu bunicul lui. Bunicul are **69 de ani**, iar Andrei are **7 ani**. {{e:bunic}} {{e:baiat}}' },

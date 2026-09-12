@@ -219,7 +219,7 @@ export default {
     {
       id: 'e07',
       level: 'intermediar',
-      estMin: 4,
+      estMin: 5,
       concepts: ['mat.log.tabel', 'mat.op.cu-trecere', 'mat.pb.mai-mult-mai-putin'],
       title: 'Pepenii vânduți',
       context: { text: 'Domnul Ion a notat într-un tabel câți pepeni {{e:pepene}} a vândut.' },

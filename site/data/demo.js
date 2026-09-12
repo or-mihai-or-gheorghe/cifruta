@@ -89,7 +89,7 @@ export default {
     {
       id: 'fill-tree',
       level: 'usor',
-      estMin: 3,
+      estMin: 2,
       concepts: ['mat.nr100.formare'],
       title: 'Descompune',
       type: 'fill',
@@ -125,7 +125,7 @@ export default {
     {
       id: 'mark',
       level: 'usor',
-      estMin: 3,
+      estMin: 2,
       concepts: ['mat.nr100.paritate'],
       title: 'Atinge',
       type: 'mark',
@@ -233,7 +233,7 @@ export default {
     {
       id: 'slider',
       level: 'intermediar',
-      estMin: 3,
+      estMin: 2,
       concepts: ['mat.nr100.axa'],
       title: 'Axa numerelor',
       type: 'slider',

@@ -97,7 +97,7 @@ test('trecerea peste ordin: pe coloane; validatorul prinde etichetele greșite',
 
   const withRow = (concepts, row) => ({
     schema: 1, id: 't', version: 1, title: 'Test',
-    exercises: [{ id: 'e1', level: 'usor', estMin: 44, concepts, title: 'Calcule', type: 'fill', rows: [row], blanks: { a: { expr: row.split('=')[0] } }, explain: { idea: 'Calculăm.' } }],
+    exercises: [{ id: 'e1', level: 'usor', estMin: 45, concepts, title: 'Calcule', type: 'fill', rows: [row], blanks: { a: { expr: row.split('=')[0] } }, explain: { idea: 'Calculăm.' } }],
   });
   const errorsOf = (concepts, row) => validateTest(withRow(concepts, row.replace('=', '= [[a]]'))).errors;
   assert.deepEqual(errorsOf(['mat.op.fara-trecere'], '45 - 15 ='), []);
@@ -107,6 +107,10 @@ test('trecerea peste ordin: pe coloane; validatorul prinde etichetele greșite',
   assert.match(errorsOf(['mat.op.fara-trecere'], '45 - 15 - 12 =').join(), /30 − 12/); // și calculele intermediare
   assert.deepEqual(errorsOf(['mat.op.fara-trecere', 'mat.op.cu-trecere'], '45 - 15 - 12 ='), []); // exercițiu mixt
   assert.deepEqual(errorsOf(['mat.nr100.comparare'], '24 - 18 ='), []); // fără etichete de operații: nu se verifică
+  // un test durează exact 45 de minute
+  const short = withRow(['mat.nr100.comparare'], '45 - 15 = [[a]]');
+  short.exercises[0].estMin = 44;
+  assert.match(validateTest(short).errors.join(), /exact 45 min/);
 });
 
 test('markup: escapare, formatare, tokenuri', () => {

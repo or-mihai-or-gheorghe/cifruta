@@ -40,7 +40,7 @@ _surse/ scanările PDF (ignorate de git) — deschide-le doar dacă docs/curricu
 Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual` (desen deasupra casetelor), `feedback: [{ if, text }]` pentru greșeli tipice.
 
 ## Comenzi
-- `npm test` — teste unitare + validarea întregului conținut (schemă, răspunsuri, unicitate, durată 40–48 min, diacritice,
+- `npm test` — teste unitare + validarea întregului conținut (schemă, răspunsuri, unicitate, durată exact 45 min, diacritice,
   etichete „cu / fără trecere”) + verifică dacă tabelul de acoperire din `docs/curriculum.md` e la zi (`npm run acoperire` îl regenerează).
 - `npm run serve` — site local la http://localhost:8080 (`?debug=1` expune `window.__dbg`).
 - `npm run e2e` — Playwright (Chromium headless): fluxuri pe fiecare test, gesturi pe fiecare tip, tastatură, capturi în `test-results/`
@@ -52,7 +52,7 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
 
 ## Rețete
 - **Test nou:** fișier în `site/data/tests/<grup>/`, intrare în `data/catalog.js` (id, file, version, estMin, exercises), concepte din
-  `data/concepts.js`; 4 ușor → 4 intermediar → 3 avansat, ~43 min; `npm test` până e verde. Detalii: `docs/ghid-autor.md`.
+  `data/concepts.js`; 4 ușor → 4 intermediar → 3 avansat, exact 45 min; `npm test` până e verde. Detalii: `docs/ghid-autor.md`.
 - **Modificare de test publicat:** crește `version` (în test și în catalog) → ciornele vechi sunt ignorate, iar rezultatele vechi
   își păstrează scorul, dar nu mai arată lista pe exerciții (rezumatul vine din încercarea salvată).
 - **Tip nou:** `js/types/<tip>/logic.js` + `view.js`, o linie în `core/registry.js`, un exemplu în `data/demo.js`, stiluri în `css/04-exercises.css`.

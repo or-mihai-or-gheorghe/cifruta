@@ -78,7 +78,7 @@ export default {
     {
       id: 'e02',
       level: 'usor',
-      estMin: 2,
+      estMin: 3,
       concepts: ['med.animale.domestice-salbatice', 'mat.log.clasificare'],
       title: 'Domestice sau sălbatice?',
       type: 'categorize',
@@ -234,7 +234,7 @@ export default {
     {
       id: 'e07',
       level: 'intermediar',
-      estMin: 3,
+      estMin: 4,
       concepts: ['med.energie.surse'],
       title: 'Energia de la fermă',
       context: { text: 'Ferma are nevoie de energie pentru lumină, căldură și aparate.' },

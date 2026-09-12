@@ -7,7 +7,7 @@ vizibil în site la `#/atelier/tipuri`) și cele 4 teste din `site/data/tests/re
 
 1. Alege grupul din `site/data/catalog.js` (sau adaugă o secțiune / un grup nou).
 2. Creează fișierul `site/data/tests/<grup>/tN-nume-scurt.js` (nu îl numi `test-*.js`).
-3. Scrie testul după schema de mai jos: **11 exerciții = 4 ușor + 4 intermediar + 3 avansat**, total 40–48 de minute,
+3. Scrie testul după schema de mai jos: **11 exerciții = 4 ușor + 4 intermediar + 3 avansat**, total **exact 45 de minute**,
    o poveste din viața reală, 1–2 exerciții de explorarea mediului.
 4. Etichetează fiecare exercițiu cu ID-uri din `site/data/concepts.js` (adaugă concepte noi acolo, cu `grade`,
    `competencies`, `source`).
@@ -172,5 +172,5 @@ La începutul clasei a II-a se adaugă ~20–30 s pentru citirea fiecărui enun�
 ## 10. Checklist înainte de commit
 - [ ] `npm test` verde (0 erori; citește și avertismentele)
 - [ ] `npm run e2e` verde; capturile arată bine pe laptop, tabletă și telefon
-- [ ] durata 40–48 min, 4/4/3 exerciții, 1–2 de explorarea mediului, fiecare exercițiu cu `explain`
+- [ ] durata exact 45 min (suma `estMin`), 4/4/3 exerciții, 1–2 de explorarea mediului, fiecare exercițiu cu `explain`
 - [ ] catalogul actualizat (`version`, `estMin`, `exercises`), `npm run acoperire`, `docs/STARE.md` actualizat

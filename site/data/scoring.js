@@ -16,5 +16,5 @@ export default {
   starAt: 0.8, // o stea pe nivel la cel puțin 80%
   practiceBelow: 0.7, // concepte „de exersat” sub 70%
   confettiAt: 90,
-  estMinRange: [40, 48],
+  estMin: 45, // durata exactă a unui test, în minute (suma estMin a exercițiilor)
 };

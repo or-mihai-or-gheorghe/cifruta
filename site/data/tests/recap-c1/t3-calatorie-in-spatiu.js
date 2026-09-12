@@ -227,7 +227,7 @@ export default {
     {
       id: 'e08',
       level: 'intermediar',
-      estMin: 3,
+      estMin: 4,
       concepts: ['mat.geo.corpuri', 'mat.log.clasificare'],
       title: 'Rucsacul astronautei',
       type: 'categorize',
@@ -284,7 +284,7 @@ export default {
     {
       id: 'e10',
       level: 'avansat',
-      estMin: 5,
+      estMin: 6,
       concepts: ['mat.geo.numarare-figuri', 'mat.geo.figuri'],
       title: 'Figuri ascunse',
       parts: [

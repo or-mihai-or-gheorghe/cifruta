@@ -113,9 +113,8 @@ export function validateTest(raw, { concepts } = {}) {
     }
   }
 
-  const [lo, hi] = config.estMinRange;
-  if (test.exercises.length && (totalMin < lo || totalMin > hi)) {
-    errors.push(`durata estimată ${totalMin} min este în afara intervalului ${lo}–${hi} min`);
+  if (test.exercises.length && totalMin !== config.estMin) {
+    errors.push(`durata estimată este ${totalMin} min, dar un test trebuie să dureze exact ${config.estMin} min`);
   }
 
   walkTexts(raw, (text, path) => {
