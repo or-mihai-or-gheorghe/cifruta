@@ -279,7 +279,7 @@ export default {
             { id: 'somn', label: 'somn', emoji: 'pat' },
             { id: 'scoala', label: 'școală', emoji: 'scoala' },
             { id: 'joaca', label: 'joacă afară', emoji: 'alergare' },
-            { id: 'ecrane', label: 'ecrane', emoji: 'calcul' },
+            { id: 'ecrane', label: 'ecrane', emoji: 'ecran' },
           ],
           max: 12,
           step: 1,

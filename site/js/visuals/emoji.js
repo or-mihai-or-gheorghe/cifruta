@@ -112,6 +112,7 @@ export const EMOJI = {
   baschet: { char: '🏀', code: '1f3c0', label: 'minge de baschet' },
   dans: { char: '💃', code: '1f483', label: 'dans' },
   cronometru: { char: '⏱️', code: '23f1', label: 'cronometru' },
+  ecran: { char: '📺', code: '1f4fa', label: 'ecran' },
   // corp și sănătate
   os: { char: '🦴', code: '1f9b4', label: 'os' },
   dinte: { char: '🦷', code: '1f9b7', label: 'dinte' },
