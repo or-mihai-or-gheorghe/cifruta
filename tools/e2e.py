@@ -715,7 +715,8 @@ def fulger_shapes_flow(run: Run, page: Page, vp: str):
             page.wait_for_function(FULGER_READY)
             s = state()
             fit = page.evaluate(FULGER_FIT)
-            arts = page.locator("[data-testid=fg-answers] .fg-opt__art svg").count()
+            # fiecare variantă are un desen sau un text (la „Câte axe…” variantele sunt numere)
+            arts = page.evaluate("[...document.querySelectorAll('[data-testid=fg-answers] .fg-opt')].filter((b) => b.querySelector('.fg-opt__art svg') || [...b.children].some((c) => !c.classList.contains('fg-opt__key') && c.textContent.trim())).length")
             figure = page.get_by_test_id("fg-figure")
             # desenul are mărimea lui: toată lățimea cardului sau o înălțime mare (nu lățimea implicită a unui SVG, 300 px)
             drawn = not s["figure"] or (figure.count() == 1 and page.evaluate("(() => { const f = document.querySelector('[data-testid=fg-figure]'); const r = f.getBoundingClientRect(); return r.width >= 0.9 * f.parentElement.getBoundingClientRect().width || r.height >= 88; })()"))
@@ -750,7 +751,11 @@ def fulger_screens(run: Run, browser, base: str):
         ("telefon culcat", {"viewport": {"width": 844, "height": 390}, "has_touch": True, "is_mobile": True}),
         ("telefon mic", {"viewport": {"width": 360, "height": 640}, "has_touch": True, "is_mobile": True}),
     ]
-    rounds = [(FULGER_TOPIC, ("add-100-cu", "sort-4-dir", "cmp-expr")), ("siruri-intrusi", ("matrice", "analogie", "sir-doua"))]
+    rounds = [
+        (FULGER_TOPIC, ("add-100-cu", "sort-4-dir", "cmp-expr")),
+        ("siruri-intrusi", ("matrice", "analogie", "sir-doua")),
+        ("puzzle-forme", ("simetrie-jumatate", "piesa-rotita", "axe-cate")),
+    ]
     for name, opts in screens:
         context = browser.new_context(locale="ro-RO", **opts)
         page = context.new_page()

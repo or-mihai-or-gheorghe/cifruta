@@ -129,6 +129,8 @@ Ce altă documentare am folosit (exemple de exerciții, aplicații, UX): `docs/c
 | Desen pe rețea după condiții; trasee cu săgeți ↑→↓← | I | 📜➕ | `mat.geo.trasee` |
 | Numărarea figurilor în desene compuse (apare și în recapitularea din manual) | II | 📘📜 | `mat.geo.numarare-figuri` |
 | Axa de simetrie, semicerc, con, desfășurări | II | 📜 | `mat.geo.simetrie` |
+| Compunerea figurilor din piese (tangram, piesa care lipsește) | II | 📜 | `mat.geo.compunere` |
+| Figuri rotite și figuri în oglindă (Jocuri fulger) | II | ➕ | `mat.geo.rotire` |
 | Coordonate (rând, coloană) | II | 📜 | `mat.geo.coordonate` |
 
 ### 5. Măsurări, timp și bani

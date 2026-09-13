@@ -109,6 +109,9 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
         }
         const bare = q.choices.map((c) => q.options[c]).map((o) => (o.v === 'glyph' ? `${glyphKey({ ...o, color: 'albastru' })}|${o.axis ?? ''}` : JSON.stringify(o)));
         assert.equal(new Set(bare).size, 4, `${where}: două variante diferă doar prin culoare`);
+        // și cititorul de ecran le deosebește: variantele au nume diferite
+        const names = q.choices.map((c) => q.options[c]).map((o) => (o.v ? /aria-label="([^"]*)"/.exec(visualSVG(o))[1] : (o.emoji ?? o.text)));
+        assert.equal(new Set(names).size, 4, `${where}: două variante au același nume (${names.join(' | ')})`);
         assert.deepEqual(JSON.parse(JSON.stringify(q)), q, `${where}: întrebarea se schimbă după JSON`);
         positions[q.choices.indexOf(q.answer)]++;
       } else if (q.mode === 'choice') {

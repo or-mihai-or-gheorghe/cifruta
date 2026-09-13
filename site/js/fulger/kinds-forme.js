@@ -5,13 +5,17 @@
 // indiciu: variantele diferă între ele și fără culori. Regulile fiecărui tip, cu răspunsul găsit independent, sunt în
 // tests/fulger-forme.rules.js.
 
-import { canonical, COLORS, FILLS, glyphKey, normRot, ROTS, SHAPES, SIZES } from '../core/forme.js';
+import { axesCount, canonical, COLORS, FILLS, glyphKey, isAxis, linesFor, normRot, ROTS, SHAPES, SIZES } from '../core/forme.js';
+import { cellsKey, connected, freeKey, isChiral, mirror, normalize, orientations, polyominoes, rotations, size } from '../core/grile.js';
 import { int, pickOne, shuffle } from './rand.js';
 
 const MODELE = 'mat.log.modele';
 const CLASIFICARE = 'mat.log.clasificare';
 const FIGURI = 'mat.geo.figuri';
 const ANALOGII = 'mat.log.analogii';
+const COMPUNERE = 'mat.geo.compunere';
+const ROTIRE = 'mat.geo.rotire';
+const SIMETRIE = 'mat.geo.simetrie';
 
 // figuri ușor de deosebit și de numit
 const EASY = ['patrat', 'cerc', 'triunghi', 'stea', 'inima', 'cruce', 'romb', 'semicerc', 'casa'];
@@ -435,4 +439,249 @@ export const SHAPE_KINDS = {
       }
     },
   },
+  'piesa-lipsa': {
+    label: 'Piesa care umple golul',
+    points: 2,
+    fastMs: 5000,
+    mode: 'figure',
+    concepts: [COMPUNERE],
+    generate(rand) {
+      for (;;) {
+        const n = pickOne(rand, [3, 4, 4]);
+        const piece = pickOne(rand, orientations(pickOne(rand, polyominoes(n))));
+        const { rows, cols, hole } = board(rand, piece);
+        const [boardColor, color] = paint(rand, 2);
+        // distractori: piesa cu o căsuță lipsă sau în plus (așezată la fel), apoi piese diferite cu tot atâtea căsuțe, care nu intră oricum
+        // le-ai roti sau întoarce; niciodată aceeași piesă rotită
+        const smaller = shuffle(rand, piece).map((cell) => piece.filter((x) => x !== cell)).filter(connected);
+        const bigger = shuffle(rand, around(piece)).map((cell) => [...piece, cell]);
+        const others = shuffle(rand, polyominoes(n).filter((p) => freeKey(p) !== freeKey(piece))).map((p) => pickOne(rand, orientations(p)));
+        const options = [smaller[0], bigger[0], ...others, smaller[1], bigger[1]].filter(Boolean).map(normalize);
+        const box = boxFor([piece, ...options]);
+        const q = figureQuestion('piesa-lipsa', rand, {
+          prompt: 'Ce piesă umple golul?',
+          figure: boardArt(rows, cols, hole, boardColor),
+          key: `${rows}x${cols}:${hole.map(([r, c]) => `${r}.${c}`).join(' ')}`,
+          answer: pieceArt(piece, box, color),
+          distractors: options.map((p) => pieceArt(p, box, color)),
+        });
+        if (q) return q;
+      }
+    },
+  },
+  'piesa-rotita': {
+    label: 'Piesa rotită care umple golul',
+    points: 3,
+    fastMs: 7000,
+    mode: 'figure',
+    concepts: [COMPUNERE, ROTIRE],
+    generate(rand) {
+      for (;;) {
+        const n = pickOne(rand, [4, 5, 5]);
+        const base = pickOne(rand, polyominoes(n));
+        const turns = rotations(base);
+        if (turns.length < 2) continue; // pătratul arată la fel oricum l-ai roti
+        const piece = pickOne(rand, turns);
+        const answer = pickOne(rand, turns.filter((t) => cellsKey(t) !== cellsKey(piece)));
+        const { rows, cols, hole } = board(rand, piece);
+        const [boardColor, color] = paint(rand, 2);
+        // distractori: piese diferite cu tot atâtea căsuțe, rotite la întâmplare (niciuna nu intră, nici întoarsă); fără imaginea în oglindă
+        const others = shuffle(rand, polyominoes(n).filter((p) => freeKey(p) !== freeKey(base))).map((p) => pickOne(rand, orientations(p)));
+        const box = boxFor([answer, ...others]);
+        const q = figureQuestion('piesa-rotita', rand, {
+          prompt: 'Ce piesă umple golul, dacă o rotești?',
+          figure: boardArt(rows, cols, hole, boardColor),
+          key: `${rows}x${cols}:${hole.map(([r, c]) => `${r}.${c}`).join(' ')}>${cellsKey(answer)}`,
+          answer: pieceArt(answer, box, color),
+          distractors: others.map((p) => pieceArt(p, box, color)),
+        });
+        if (q) return q;
+      }
+    },
+  },
+  'rotita-oglinda': {
+    label: 'Aceeași piesă, doar rotită',
+    points: 4,
+    fastMs: 8000,
+    mode: 'figure',
+    concepts: [ROTIRE],
+    generate(rand) {
+      for (;;) {
+        const n = pickOne(rand, [4, 5, 5]);
+        const chiral = polyominoes(n).filter(isChiral);
+        const base = pickOne(rand, chiral);
+        const shown = pickOne(rand, rotations(base));
+        const answer = pickOne(rand, rotations(base).filter((t) => cellsKey(t) !== cellsKey(shown)));
+        // distractori: imaginea în oglindă, rotită în două feluri, și o altă piesă nesimetrică, rotită
+        const mirrors = shuffle(rand, rotations(mirror(base)));
+        const other = pickOne(rand, rotations(pickOne(rand, chiral.filter((p) => freeKey(p) !== freeKey(base)))));
+        const options = [mirrors[0], mirrors[1], other, mirrors[2]].filter(Boolean);
+        const box = boxFor([shown, answer, ...options]);
+        const color = pickOne(rand, COLORS);
+        const q = figureQuestion('rotita-oglinda', rand, {
+          prompt: 'Care e aceeași piesă, doar rotită?',
+          figure: pieceArt(shown, box, color),
+          key: `${cellsKey(shown)}>${cellsKey(answer)}`,
+          answer: pieceArt(answer, box, color),
+          distractors: options.map((p) => pieceArt(p, box, color)),
+        });
+        if (q) return q;
+      }
+    },
+  },
+  'simetrie-axa': {
+    label: 'Axa de simetrie',
+    points: 2,
+    fastMs: 4500,
+    mode: 'figure',
+    concepts: [SIMETRIE],
+    generate(rand) {
+      for (;;) {
+        const g = { ...pickOne(rand, AXIS_SHAPES), rot: pickOne(rand, [0, 90, 180, 270]), fill: pickOne(rand, ['plin', 'plin', 'dungi']), color: pickOne(rand, COLORS) };
+        const lines = linesFor(g);
+        const axes = shuffle(rand, lines.filter((line) => isAxis(g, line)));
+        // distractori: o diagonală care nu e axă (greșeala tipică la dreptunghi), apoi linia mutată de la mijloc sau cealaltă direcție
+        const wrong = shuffle(rand, lines.filter((line) => !isAxis(g, line)));
+        const ordered = [...wrong.filter((line) => line[0] === 'd').slice(0, 1), ...wrong.filter((line) => line[0] !== 'd'), ...wrong.filter((line) => line[0] === 'd').slice(1)];
+        if (!axes.length) continue;
+        const spec = glyph(g);
+        const q = figureQuestion('simetrie-axa', rand, {
+          prompt: 'Care linie e axă de simetrie?',
+          key: `${bareId(spec)}|${axes[0]}`,
+          answer: { ...spec, axis: axes[0] },
+          distractors: ordered.map((axis) => ({ ...spec, axis })),
+        });
+        if (q) return q;
+      }
+    },
+  },
+  'simetrie-jumatate': {
+    label: 'Figura completată în oglindă',
+    points: 3,
+    fastMs: 7000,
+    mode: 'figure',
+    concepts: [SIMETRIE],
+    generate(rand) {
+      for (;;) {
+        const [rows, cols] = [4, 4];
+        const axis = rand() < 0.7 ? 'v' : 'h';
+        // prima jumătate: 3–5 dintre cele 8 căsuțe din stânga (sau de sus)
+        const spots = Array.from({ length: 8 }, (_, i) => (axis === 'v' ? [Math.floor(i / 2), i % 2] : [i % 2, Math.floor(i / 2)]));
+        const half = shuffle(rand, spots).slice(0, int(rand, 3, 5));
+        const across = ([r, c]) => (axis === 'v' ? [r, cols - 1 - c] : [rows - 1 - r, c]);
+        const shift = ([r, c]) => (axis === 'v' ? [r, c + cols / 2] : [r + rows / 2, c]);
+        const turned = ([r, c]) => [rows - 1 - r, cols - 1 - c];
+        const second = half.map(across);
+        const moved = pickOne(rand, second);
+        const target = pickOne(rand, spots.map(across).filter(([r, c]) => !second.some(([a, b]) => a === r && b === c)));
+        const color = pickOne(rand, COLORS);
+        const art = (cells) => ({ v: 'cell-grid', rows, cols, grid: true, axis, color, cells: sortCells(cells) });
+        const q = figureQuestion('simetrie-jumatate', rand, {
+          prompt: 'Cum arată figura completată în oglindă?',
+          figure: art(half),
+          key: `${axis}:${sortCells(half).map(([r, c]) => `${r}.${c}`).join(' ')}`,
+          answer: art([...half, ...second]),
+          // distractori: copia mutată, fără oglindire; copia răsturnată; oglindirea cu o căsuță greșită
+          distractors: [art([...half, ...half.map(shift)]), art([...half, ...half.map(turned)]), art([...half, ...second.filter((x) => x !== moved), target])],
+        });
+        if (q) return q;
+      }
+    },
+  },
+  'axe-cate': {
+    label: 'Câte axe de simetrie are figura',
+    points: 4,
+    fastMs: 7000,
+    mode: 'figure',
+    concepts: [SIMETRIE],
+    generate(rand) {
+      for (;;) {
+        // întâi numărul de axe (fiecare variantă e răspunsul la fel de des), apoi o figură cu atâtea axe; variantele stau în ordine
+        const count = pickOne(rand, [0, 1, 2, 4]);
+        const g = { ...pickOne(rand, AXES_BY_COUNT[count]), rot: pickOne(rand, count === 4 ? [0, 45] : [0, 90, 180, 270]), fill: pickOne(rand, FILLS), color: pickOne(rand, COLORS) };
+        if (axesCount(g) !== count) continue;
+        const spec = glyph(g);
+        const options = ['0', '1', '2', '4'].map((text) => ({ text }));
+        return {
+          kind: 'axe-cate',
+          mode: 'figure',
+          key: `axe-cate:${bareId(spec)}`,
+          prompt: 'Câte axe de simetrie are figura?',
+          figure: spec,
+          choices: options.map(artId),
+          options: Object.fromEntries(options.map((o) => [artId(o), o])),
+          answer: artId({ text: String(count) }),
+        };
+      }
+    },
+  },
 };
+
+// ——— simetrii (folosite doar în generatoare, deci pot sta după tipuri) ———
+
+// figuri cu una sau două axe când sunt rotite cu câte un sfert (axele cad pe liniile desenate: mijloacele și diagonalele cutiei)
+const AXIS_SHAPES = [
+  { shape: 'dreptunghi' },
+  { shape: 'dreptunghi', variant: 'ingust' },
+  { shape: 'triunghi', variant: 'ascutit' },
+  { shape: 'triunghi', variant: 'dreptunghic' },
+  { shape: 'trapez' },
+  { shape: 'casa' },
+  { shape: 'inima' },
+  { shape: 'semicerc' },
+  { shape: 'sageata' },
+  { shape: 'romb' },
+  { shape: 'oval' },
+];
+
+// figurile după numărul axelor (fără triunghiul echilateral, steaua și cercul, care au 3, 5 sau oricâte axe)
+const AXES_BY_COUNT = {
+  0: [{ shape: 'paralelogram' }],
+  1: [{ shape: 'trapez' }, { shape: 'casa' }, { shape: 'inima' }, { shape: 'semicerc' }, { shape: 'sageata' }, { shape: 'triunghi', variant: 'ascutit' }, { shape: 'triunghi', variant: 'dreptunghic' }],
+  2: [{ shape: 'dreptunghi' }, { shape: 'dreptunghi', variant: 'ingust' }, { shape: 'romb' }, { shape: 'oval' }],
+  4: [{ shape: 'patrat' }, { shape: 'cruce' }],
+};
+
+const sortCells = (cells) => [...cells].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+
+// ——— piese pe tablă (folosite doar în generatoare, deci pot sta după tipuri) ———
+
+const place = (piece, r0, c0) => piece.map(([r, c]) => [r + r0, c + c0]);
+
+/** Căsuțele vecine piesei, pe laturi, din afara ei. */
+function around(piece) {
+  const out = new Map();
+  for (const [r, c] of piece) {
+    for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      if (!piece.some(([pr, pc]) => pr === r + dr && pc === c + dc)) out.set(`${r + dr}.${c + dc}`, [r + dr, c + dc]);
+    }
+  }
+  return [...out.values()];
+}
+
+/** O tablă de 3–5 rânduri și 4–5 coloane, cu golul piesei așezat la întâmplare. */
+function board(rand, piece) {
+  const [ph, pw] = size(piece);
+  const rows = int(rand, Math.max(3, ph), Math.max(4, ph));
+  const cols = int(rand, Math.max(4, pw), 5);
+  return { rows, cols, hole: place(piece, int(rand, 0, rows - ph), int(rand, 0, cols - pw)) };
+}
+
+/** Cutia pătrată comună pieselor dintr-o întrebare. */
+const boxFor = (pieces) => Math.max(...pieces.flatMap((p) => size(p)));
+
+const boardArt = (rows, cols, hole, color) => ({
+  v: 'cell-grid',
+  rows,
+  cols,
+  grid: true,
+  color,
+  cells: Array.from({ length: rows * cols }, (_, i) => [Math.floor(i / cols), i % cols]).filter(([r, c]) => !hole.some(([hr, hc]) => hr === r && hc === c)),
+  holes: hole,
+});
+
+function pieceArt(piece, box, color) {
+  const cells = normalize(piece);
+  const [rows, cols] = size(cells);
+  return { v: 'cell-grid', rows, cols, box, color, cells };
+}

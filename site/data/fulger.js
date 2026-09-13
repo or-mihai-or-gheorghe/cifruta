@@ -137,6 +137,54 @@ export default {
       ],
     },
     {
+      id: 'puzzle-forme',
+      title: 'Puzzle cu forme',
+      short: 'Puzzle cu forme',
+      text: 'Piesa care completează tabla, piese rotite sau întoarse, axe de simetrie și figuri completate în oglindă.',
+      icon: 'puzzle',
+      grade: 2,
+      concepts: ['mat.geo.compunere', 'mat.geo.rotire', 'mat.geo.simetrie'],
+      levels: [
+        {
+          id: 'usor',
+          warmup: ['piesa-lipsa', 'simetrie-axa'],
+          mix: [
+            { kind: 'piesa-lipsa', weight: 3 },
+            { kind: 'simetrie-axa', weight: 3 },
+            { kind: 'simetrie-jumatate', weight: 1.5 },
+            { kind: 'piesa-rotita', weight: 1 },
+          ],
+          stars: [27, 74, 175],
+        },
+        {
+          id: 'intermediar',
+          warmup: ['piesa-lipsa', 'simetrie-axa'],
+          mix: [
+            { kind: 'piesa-rotita', weight: 2.5 },
+            { kind: 'simetrie-jumatate', weight: 2.5 },
+            { kind: 'simetrie-axa', weight: 1.5 },
+            { kind: 'piesa-lipsa', weight: 1.5 },
+            { kind: 'axe-cate', weight: 1 },
+            { kind: 'rotita-oglinda', weight: 1 },
+          ],
+          stars: [27, 75, 185],
+        },
+        {
+          id: 'avansat',
+          warmup: ['piesa-rotita', 'simetrie-jumatate'],
+          mix: [
+            { kind: 'rotita-oglinda', weight: 2.5 },
+            { kind: 'axe-cate', weight: 2 },
+            { kind: 'piesa-rotita', weight: 2 },
+            { kind: 'simetrie-jumatate', weight: 2 },
+            { kind: 'piesa-lipsa', weight: 0.5 },
+            { kind: 'simetrie-axa', weight: 0.5 },
+          ],
+          stars: [28, 77, 205],
+        },
+      ],
+    },
+    {
       id: 'numere-1000',
       title: 'Numere până la 1000',
       short: 'Până la 1000',
@@ -171,7 +219,7 @@ export default {
       title: 'Ecuații simple',
       short: 'Ecuații',
       text: 'Aflarea numărului necunoscut, de exemplu □ + 7 = 15.', // spații nedespărțite: exemplul stă pe un rând
-      icon: 'puzzle',
+      icon: 'proba',
       grade: 1,
       concepts: ['mat.op.necunoscut'],
       soon: true,

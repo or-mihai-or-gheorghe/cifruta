@@ -160,14 +160,15 @@ const COLOR_WORDS = {
   portocaliu: ['portocaliu', 'portocalie', 'portocalii'],
 };
 const FILL_WORDS = { plin: ['plin', 'plină', 'pline'], gol: ['gol', 'goală', 'goale'], dungi: ['cu dungi', 'cu dungi', 'cu dungi'] };
+// rotirea în sensul acelor de ceas: fiecare pas are alt nume, ca variantele rotite diferit să nu sune la fel
 const TURN_WORDS = {
-  45: ['înclinat', 'înclinată'],
+  45: ['înclinat spre dreapta', 'înclinată spre dreapta'],
   90: ['întors spre dreapta', 'întoarsă spre dreapta'],
-  135: ['înclinat', 'înclinată'],
+  135: ['aproape răsturnat, spre dreapta', 'aproape răsturnată, spre dreapta'],
   180: ['răsturnat', 'răsturnată'],
-  225: ['înclinat', 'înclinată'],
+  225: ['aproape răsturnat, spre stânga', 'aproape răsturnată, spre stânga'],
   270: ['întors spre stânga', 'întoarsă spre stânga'],
-  315: ['înclinat', 'înclinată'],
+  315: ['înclinat spre stânga', 'înclinată spre stânga'],
 };
 
 /** Numele figurii pentru cititorul de ecran: „stea mică, galbenă, cu dungi”; cu `count`: „3 cercuri, roșii, pline”. */
@@ -239,12 +240,18 @@ export function axisLine(g, kind) {
     case 'd2':
       return diag([x0, y1], [x1, y0]);
     case 'v-off':
-      return [[round(cx + (x1 - x0) * 0.24), round(y0 - out)], [round(cx + (x1 - x0) * 0.24), round(y1 + out)]];
+      return [[round(cx + (x1 - x0) * 0.3), round(y0 - out)], [round(cx + (x1 - x0) * 0.3), round(y1 + out)]];
     case 'h-off':
-      return [[round(x0 - out), round(cy + (y1 - y0) * 0.24)], [round(x1 + out), round(cy + (y1 - y0) * 0.24)]];
+      return [[round(x0 - out), round(cy + (y1 - y0) * 0.3)], [round(x1 + out), round(cy + (y1 - y0) * 0.3)]];
     default:
       throw new Error(`linie necunoscută: ${kind}`);
   }
+}
+
+/** Liniile potrivite pentru o figură: cele prin mijloc și diagonalele, iar cele deplasate doar pe laturile lungi, unde deplasarea se vede. */
+export function linesFor(g) {
+  const [x0, x1, y0, y1] = bounds(g);
+  return LINES.filter((kind) => (kind !== 'v-off' || x1 - x0 >= 60) && (kind !== 'h-off' || y1 - y0 >= 60));
 }
 
 function reflect([x, y], [[x1, y1], [x2, y2]]) {

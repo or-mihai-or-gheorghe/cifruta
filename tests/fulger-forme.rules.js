@@ -2,7 +2,7 @@
 // Fiecare regulă găsește singură răspunsul, din desen și din variante, fără codul generatoarelor, și cere ca el să fie răspunsul
 // întrebării (o singură variantă bună). Numele nu se termină în .test.js: fișierul e importat, nu rulat separat.
 
-import { canonical, glyphKey, measure, normRot, outline } from '../site/js/core/forme.js';
+import { axisLine, canonical, glyphKey, measure, normRot, outline } from '../site/js/core/forme.js';
 
 const key = (g) => glyphKey(g);
 const cellsOf = (q) => q.figure?.cells ?? [];
@@ -179,4 +179,92 @@ export const SHAPE_RULES = {
     if (!model || !fill || !known.every(({ c }) => c.shape !== shape || c.color === model.color)) return false;
     return answers(q, key({ ...model, fill }), slot);
   },
+  'piesa-lipsa': (q) => {
+    const f = q.figure;
+    if (!isBoard(f) || !sameBox(optionList(q))) return false;
+    // o singură variantă e golul, așezată la fel, și nicio altă variantă nu intră în gol, nici rotită, nici întoarsă
+    const exact = q.choices.filter((c) => pieceKey(q.options[c].cells) === pieceKey(f.holes));
+    const fits = optionList(q).filter((o) => o.cells.length === f.holes.length && sameAnyWay(o.cells, f.holes));
+    return exact.length === 1 && exact[0] === q.answer && fits.length === 1;
+  },
+  'piesa-rotita': (q) => {
+    const f = q.figure;
+    if (!isBoard(f) || !sameBox(optionList(q))) return false;
+    // o singură variantă intră în gol (chiar dacă piesele s-ar putea întoarce): aceeași piesă, rotită, nu așezată ca golul
+    const fits = q.choices.filter((c) => q.options[c].cells.length === f.holes.length && sameAnyWay(q.options[c].cells, f.holes));
+    const cells = q.options[q.answer].cells;
+    return fits.length === 1 && fits[0] === q.answer && sameTurned(cells, f.holes) && pieceKey(cells) !== pieceKey(f.holes);
+  },
+  'rotita-oglinda': (q) => {
+    const shown = q.figure?.cells;
+    if (q.figure?.v !== 'cell-grid' || !shown || sameTurned(flipCells(shown), shown) || !sameBox([q.figure, ...optionList(q)])) return false;
+    // o singură variantă e piesa rotită (nu doar copiată), iar cel puțin două sunt imaginea ei în oglindă
+    const rotated = q.choices.filter((c) => sameTurned(q.options[c].cells, shown));
+    const mirrored = optionList(q).filter((o) => !sameTurned(o.cells, shown) && sameTurned(flipCells(o.cells), shown));
+    return rotated.length === 1 && rotated[0] === q.answer && pieceKey(q.options[q.answer].cells) !== pieceKey(shown) && mirrored.length >= 2;
+  },
+  'simetrie-axa': (q) => {
+    const opts = optionList(q);
+    // aceeași figură de 4 ori, cu linii diferite; doar una dintre linii o împarte în două părți care se suprapun prin îndoire
+    const axes = q.choices.filter((c) => reflectsOnto(q.options[c], axisLine(q.options[c], q.options[c].axis)));
+    // o linie deplasată stă doar pe o latură lungă (cel puțin 60 din 100), unde se vede că nu trece prin mijloc
+    const span = (g, i) => Math.max(...outline(g).map((p) => p[i])) - Math.min(...outline(g).map((p) => p[i]));
+    const fair = opts.every((o) => (o.axis !== 'v-off' || span(o, 0) >= 60) && (o.axis !== 'h-off' || span(o, 1) >= 60));
+    return !q.figure && fair && opts.every((o) => o.v === 'glyph' && key(o) === key(opts[0])) && new Set(opts.map((o) => o.axis)).size === 4 && axes.length === 1 && axes[0] === q.answer;
+  },
+  'simetrie-jumatate': (q) => {
+    const f = q.figure;
+    if (f?.v !== 'cell-grid' || f.grid !== true || !['v', 'h'].includes(f.axis) || (f.axis === 'v' ? f.cols : f.rows) % 2) return false;
+    const first = ([r, c]) => (f.axis === 'v' ? c < f.cols / 2 : r < f.rows / 2);
+    const across = ([r, c]) => (f.axis === 'v' ? [r, f.cols - 1 - c] : [f.rows - 1 - r, c]);
+    const firstHalf = (cells) => cells.filter(first).map(([r, c]) => `${r}.${c}`).sort().join(' ');
+    const symmetric = (cells) => cells.every((cell) => cells.some(([r, c]) => r === across(cell)[0] && c === across(cell)[1]));
+    // în desen e doar prima jumătate; toate variantele o păstrează, iar una singură e completată în oglindă
+    const same = optionList(q).every((o) => o.rows === f.rows && o.cols === f.cols && o.axis === f.axis && firstHalf(o.cells) === firstHalf(f.cells));
+    const good = q.choices.filter((c) => symmetric(q.options[c].cells));
+    return f.cells.length > 0 && f.cells.every(first) && same && good.length === 1 && good[0] === q.answer;
+  },
+  'axe-cate': (q) => {
+    const g = q.figure;
+    if (g?.v !== 'glyph' || optionList(q).map((o) => o.text).join(',') !== '0,1,2,4') return false;
+    // axele găsite prin încercare: dreptele prin mijlocul vârfurilor, din grad în grad
+    const pts = outline(g);
+    const [cx, cy] = [0, 1].map((i) => pts.reduce((s, p) => s + p[i], 0) / pts.length);
+    let count = 0;
+    for (let deg = 0; deg < 180; deg++) {
+      const a = (deg * Math.PI) / 180;
+      if (reflectsOnto(g, [[cx, cy], [cx + Math.cos(a), cy + Math.sin(a)]])) count++;
+    }
+    return q.options[q.answer].text === String(count);
+  },
 };
+
+// ——— piese și simetrii, scrise din nou aici, independent de generatoare ———
+
+function pieceKey(cells) {
+  const [r0, c0] = [Math.min(...cells.map((x) => x[0])), Math.min(...cells.map((x) => x[1]))];
+  return cells.map(([r, c]) => `${r - r0}.${c - c0}`).sort().join(' ');
+}
+const turnCells = (cells) => cells.map(([r, c]) => [c, -r]);
+const flipCells = (cells) => cells.map(([r, c]) => [r, -c]);
+const sameTurned = (a, b) => [a, turnCells(a), turnCells(turnCells(a)), turnCells(turnCells(turnCells(a)))].some((t) => pieceKey(t) === pieceKey(b));
+const sameAnyWay = (a, b) => sameTurned(a, b) || sameTurned(flipCells(a), b);
+const sameBox = (arts) => arts.length > 0 && arts.every((a) => a.box !== undefined && a.box === arts[0].box);
+
+/** Tabla: toate căsuțele pline, în afară de gol, fără suprapuneri. */
+function isBoard(f) {
+  if (f?.v !== 'cell-grid' || f.grid !== true || !f.holes?.length) return false;
+  const all = [...f.cells, ...f.holes].map(([r, c]) => `${r}.${c}`);
+  return all.length === f.rows * f.cols && new Set(all).size === all.length;
+}
+
+/** Figura oglindită față de dreapta dată ajunge peste ea însăși (fiecare vârf pe un vârf). */
+function reflectsOnto(g, [[x1, y1], [x2, y2]]) {
+  const pts = outline(g);
+  const [dx, dy] = [x2 - x1, y2 - y1];
+  return pts.every(([x, y]) => {
+    const t = ((x - x1) * dx + (y - y1) * dy) / (dx * dx + dy * dy);
+    const [rx, ry] = [2 * (x1 + t * dx) - x, 2 * (y1 + t * dy) - y];
+    return pts.some(([u, v]) => Math.abs(u - rx) < 0.5 && Math.abs(v - ry) < 0.5);
+  });
+}

@@ -4,7 +4,7 @@
 import { axisLine, COLORS, FILLS, glyphName, LINES, outline, SHAPES, SIZES } from '../core/forme.js';
 import { EMOJI } from './emoji.js';
 import { registerVisual } from './index.js';
-import { C, emojiImage, num, st, txt } from './palette.js';
+import { bool, C, emojiImage, num, st, txt } from './palette.js';
 
 const GROUP = 'Forme și puzzle-uri';
 export const FILL_COLORS = { rosu: C.red, albastru: C.blue, galben: C.yellow, verde: C.green, mov: C.purple, portocaliu: C.orange };
@@ -67,10 +67,20 @@ export function glyphBody(raw, id) {
   return defs + shape + axis;
 }
 
+// liniile desenate peste figură, spuse cititorului de ecran (d1 = diagonala cutiei figurii de sus din stânga în jos spre dreapta)
+const AXIS_WORDS = {
+  v: 'cu o linie punctată verticală, prin mijloc',
+  h: 'cu o linie punctată orizontală, prin mijloc',
+  d1: 'cu o linie punctată pe diagonală, din stânga sus',
+  d2: 'cu o linie punctată pe diagonală, din stânga jos',
+  'v-off': 'cu o linie punctată verticală, alături de mijloc',
+  'h-off': 'cu o linie punctată orizontală, alături de mijloc',
+};
+
 registerVisual('glyph', {
   group: GROUP,
   defaults: { shape: 'patrat', fill: 'plin', color: 'albastru', size: 'mare', rot: 0 },
-  label: (p) => `${glyphName(norm(p))}${p.axis ? ', cu o linie punctată' : ''}`,
+  label: (p) => `${glyphName(norm(p))}${p.axis ? `, ${AXIS_WORDS[p.axis] ?? 'cu o linie punctată'}` : ''}`,
   render: (p, { uid }) => glyphBody(p, uid),
   check: (p) => glyphErrors(p),
   demos: [
@@ -165,5 +175,84 @@ registerVisual('glyph-cells', {
       ],
     },
     { cols: 3, cells: [{ shape: 'sageata', color: 'portocaliu' }, { sep: '→' }, { shape: 'sageata', color: 'portocaliu', rot: 90 }, { emoji: 'minge' }, { sep: '→' }, { slot: true }], mark: 5 },
+  ],
+});
+
+// ——— rețele de căsuțe: table cu un gol, piese, figuri de completat în oglindă ———
+
+const CELL = 20;
+const cellList = (v) => (Array.isArray(v) ? v.filter((x) => Array.isArray(x) && x.length === 2).map(([r, c]) => [Number(r), Number(c)]) : []);
+const hasCell = (list, r, c) => list.some(([a, b]) => a === r && b === c);
+
+/** Mărimea rețelei și a cutiei în care se desenează (`box`: o cutie pătrată comună, ca piesele variantelor să aibă aceeași scară). */
+function gridSize(p) {
+  const rows = Math.round(num(p.rows, 3));
+  const cols = Math.round(num(p.cols, 3));
+  const box = p.box === undefined ? null : Math.round(num(p.box, 0));
+  return { rows, cols, w: box ?? cols, h: box ?? rows };
+}
+
+registerVisual('cell-grid', {
+  group: GROUP,
+  defaults: { rows: 3, cols: 3, color: 'albastru' },
+  viewBox: (p) => {
+    const { w, h } = gridSize(p);
+    return `0 0 ${w * CELL + 8} ${h * CELL + 8}`;
+  },
+  label: (p) => {
+    const { rows, cols } = gridSize(p);
+    const [filled, holes] = [cellList(p.cells), cellList(p.holes)];
+    const what = bool(p.grid) ? `rețea de ${rows} pe ${cols}` : `piesă din ${filled.length === 1 ? '1 căsuță' : `${filled.length} căsuțe`}`;
+    const axis = p.axis === 'v' ? ', cu axa punctată verticală' : p.axis === 'h' ? ', cu axa punctată orizontală' : '';
+    const rowText = (r) => `rândul ${r + 1}: ${Array.from({ length: cols }, (_, c) => (hasCell(holes, r, c) ? 'lipsă' : hasCell(filled, r, c) ? 'plină' : 'goală')).join(', ')}`;
+    return `${what}${axis}; ${Array.from({ length: rows }, (_, r) => rowText(r)).join('; ')}`;
+  },
+  render: (p) => {
+    const { rows, cols, w, h } = gridSize(p);
+    const [ox, oy] = [4 + ((w - cols) * CELL) / 2, 4 + ((h - rows) * CELL) / 2];
+    const [filled, holes] = [cellList(p.cells), cellList(p.holes)];
+    const color = FILL_COLORS[p.color] ?? C.blue;
+    const board = bool(p.grid);
+    let out = board ? `<rect x="${ox}" y="${oy}" width="${cols * CELL}" height="${rows * CELL}" fill="${C.white}"/>` : '';
+    if (board) {
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) out += `<rect x="${ox + c * CELL}" y="${oy + r * CELL}" width="${CELL}" height="${CELL}" fill="none" stroke="${C.gray}" stroke-width="1"/>`;
+    }
+    for (const [r, c] of filled) out += `<rect x="${ox + c * CELL}" y="${oy + r * CELL}" width="${CELL}" height="${CELL}" fill="${color}" ${st(2)}/>`;
+    // golul: doar marginea lui, punctată
+    for (const [r, c] of holes) {
+      const [x, y] = [ox + c * CELL, oy + r * CELL];
+      const sides = [[r - 1, c, x, y, x + CELL, y], [r + 1, c, x, y + CELL, x + CELL, y + CELL], [r, c - 1, x, y, x, y + CELL], [r, c + 1, x + CELL, y, x + CELL, y + CELL]];
+      for (const [nr, nc, x1, y1, x2, y2] of sides) {
+        if (!hasCell(holes, nr, nc)) out += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${C.ink}" stroke-width="2.5" stroke-dasharray="4 3" stroke-linecap="round"/>`;
+      }
+    }
+    if (board) out += `<rect x="${ox}" y="${oy}" width="${cols * CELL}" height="${rows * CELL}" fill="none" ${st(2.5)}/>`;
+    if (p.axis === 'v' || p.axis === 'h') {
+      const [mx, my] = [ox + (cols * CELL) / 2, oy + (rows * CELL) / 2];
+      const [x1, y1, x2, y2] = p.axis === 'v' ? [mx, oy - 3, mx, oy + rows * CELL + 3] : [ox - 3, my, ox + cols * CELL + 3, my];
+      const line = `x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke-linecap="round"`;
+      out += `<line ${line} stroke="${C.white}" stroke-width="5"/><line ${line} stroke="${C.ink}" stroke-width="2.5" stroke-dasharray="5 4"/>`;
+    }
+    return out;
+  },
+  check: (p) => {
+    const e = [];
+    const { rows, cols, w } = gridSize(p);
+    if (!(rows >= 1 && rows <= 8 && cols >= 1 && cols <= 8)) e.push(`rows și cols trebuie să fie între 1 și 8: ${p.rows} × ${p.cols}`);
+    if (p.box !== undefined && !(w >= Math.max(rows, cols) && w <= 8)) e.push(`box trebuie să cuprindă rețeaua: ${p.box}`);
+    const inside = ([r, c]) => Number.isInteger(r) && Number.isInteger(c) && r >= 0 && r < rows && c >= 0 && c < cols;
+    for (const [name, v] of [['cells', p.cells], ['holes', p.holes]]) {
+      if (v !== undefined && !(Array.isArray(v) && v.every((x) => Array.isArray(x) && x.length === 2 && inside(x.map(Number))))) e.push(`${name}: căsuțe [rând, coloană] din rețea`);
+    }
+    const keys = [...cellList(p.cells), ...cellList(p.holes)].map(([r, c]) => `${r}.${c}`);
+    if (new Set(keys).size !== keys.length) e.push('o căsuță apare de două ori');
+    if (p.axis !== undefined && !['v', 'h'].includes(p.axis)) e.push(`axis: v sau h, nu ${p.axis}`);
+    if (p.color !== undefined && !FILL_COLORS[p.color]) e.push(`culoare necunoscută: ${p.color}`);
+    return e;
+  },
+  demos: [
+    { rows: 3, cols: 4, grid: true, color: 'verde', cells: [[0, 0], [0, 1], [0, 2], [0, 3], [1, 0], [1, 3], [2, 0], [2, 1], [2, 3]], holes: [[1, 1], [1, 2], [2, 2]] },
+    { rows: 2, cols: 3, box: 4, color: 'portocaliu', cells: [[0, 0], [0, 1], [1, 1], [1, 2]] },
+    { rows: 4, cols: 4, grid: true, axis: 'v', color: 'mov', cells: [[0, 1], [1, 0], [1, 1], [3, 0]] },
   ],
 });

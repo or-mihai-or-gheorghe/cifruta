@@ -93,6 +93,8 @@ export default {
   'mat.geo.trasee': { domain: 'mat', title: 'Trasee pe rețea cu săgeți', grade: 1, competencies: ['2.1'], source: ['imbogatire'] },
   'mat.geo.simetrie': { domain: 'mat', title: 'Axa de simetrie', grade: 2, competencies: ['2.2'], source: ['programa'] },
   'mat.geo.coordonate': { domain: 'mat', title: 'Rând și coloană (coordonate)', grade: 2, competencies: ['2.1'], source: ['programa'] },
+  'mat.geo.compunere': { domain: 'mat', title: 'Compunerea figurilor din piese (piesa care lipsește)', grade: 2, competencies: ['2.2'], source: ['programa'] },
+  'mat.geo.rotire': { domain: 'mat', title: 'Figuri rotite și figuri în oglindă', grade: 2, competencies: ['2.2'], source: ['imbogatire'] },
 
   // ——— 5. Măsurări, timp și bani ———
   'mat.mas.unitati': { domain: 'mat', title: 'Alegerea unității de măsură potrivite', grade: 1, competencies: ['6.4'], source: ['manual', 'programa', 'en2'] },
