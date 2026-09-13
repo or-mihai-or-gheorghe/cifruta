@@ -1,15 +1,15 @@
 // Pagina principală: salutul mascotei și secțiunile.
 
-import fulgerConfig from '../../data/fulger.js';
 import { h } from '../core/dom.js';
 import { allTests, catalog } from '../core/loader.js';
 import { historyBox } from '../components/history.js';
 import { cantitate } from '../core/ro.js';
 import { getFulger } from '../core/storage.js';
-import { art, chip, levelInfo, mascot } from '../components/ui.js';
+import { art, chip, mascot } from '../components/ui.js';
+import { playableTopics, topicTotal } from '../fulger/engine.js';
 import { emojiHTML } from '../visuals/emoji.js';
 
-/** Cardul jocului Calcul fulger, cu recordurile pe niveluri. */
+/** Cardul jocului Calcul fulger, cu totalul recordurilor pe fiecare temă. */
 function fulgerCard() {
   const { best } = getFulger();
   return h(
@@ -20,14 +20,15 @@ function fulgerCard() {
       'div',
       { class: 'fg-home__body l-stack l-stack--sm' },
       h('h2', { class: 'fg-home__title' }, 'Calcul fulger'),
-      h('p', { class: 'fg-home__text' }, 'Câte operații rezolvi în 2 minute? Strânge alune, fă serii și bate-ți recordul!'),
+      h('p', { class: 'fg-home__text' }, 'Câte operații rezolvi în 2 minute? Alege o temă, strânge alune, fă serii și bate-ți recordul!'),
     ),
     h(
       'div',
       { class: 'fg-home__levels l-cluster' },
-      fulgerConfig.levels.map((l) =>
-        best[l.id] ? chip(`${levelInfo(l.id).label}: ${cantitate(best[l.id].alune, 'alună', 'alune')}`, '', 'trofeu') : chip(`${levelInfo(l.id).label}: nou`, 'c-chip--soon'),
-      ),
+      playableTopics().map((t) => {
+        const total = topicTotal(t.id, best);
+        return total ? chip(`${t.short}: ${cantitate(total, 'alună', 'alune')}`, '', 'trofeu') : chip(`${t.short}: nou`, 'c-chip--soon');
+      }),
     ),
     h('span', { class: 'c-btn c-btn--accent c-btn--lg fg-home__cta', 'aria-hidden': 'true' }, 'Joacă'),
   );

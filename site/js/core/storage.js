@@ -2,6 +2,8 @@
 // (cifruta:attempts); pentru profilul unui copil, cifruta:p:<uid>:<pid>:attempts. Preferințele (sunetul) sunt comune.
 // Scrierile se anunță prin onWrite: cloud/sync.js le pune în coada profilului și le trimite în Firestore.
 
+import { LEGACY_TOPIC, normalizeFulger, recordKey } from '../fulger/records.js';
+
 const PREFIX = 'cifruta:';
 let scope = ''; // '' = fără cont; altfel 'p:<uid>:<pid>:'
 let profile = null; // { uid, pid } al scopului curent sau null
@@ -139,24 +141,24 @@ export function clearHistory(testIds = null) {
 export const bestScore = (testId) =>
   listAttempts(testId).reduce((best, a) => Math.max(best, a.score), -1);
 
-// ——— Calcul fulger: recordurile pe niveluri, ultimele runde și medaliile (cifruta:[scop]fulger) ———
+// ——— Calcul fulger: recordurile pe teme și niveluri, ultimele runde și medaliile (cifruta:[scop]fulger) ———
+// Recordurile au chei „temă:nivel”; datele de dinainte de teme se normalizează la citire (js/fulger/records.js).
 
-export function getFulger() {
-  const data = read(`${scope}fulger`, {});
-  return { best: data.best ?? {}, rounds: data.rounds ?? [], medals: data.medals ?? {} };
-}
+export const getFulger = () => normalizeFulger(read(`${scope}fulger`, {}));
 
 /** Salvează o rundă terminată și medaliile câștigate acum; întoarce { saved, record, previous }. */
 export function saveFulgerRound(round, { keep = 30, medals = [] } = {}) {
   const data = getFulger();
-  const previous = data.best[round.level]?.alune ?? null;
-  const record = round.total > (previous ?? 0);
+  const entry = { ...round, topic: round.topic ?? LEGACY_TOPIC };
+  const key = recordKey(entry.topic, entry.level);
+  const previous = data.best[key]?.alune ?? null;
+  const record = entry.total > (previous ?? 0);
   // recordul păstrează și ce trebuie clasamentului „tot timpul”, chiar după ce runda iese din ultimele `keep`
-  if (record) data.best[round.level] = { alune: round.total, at: round.at, correct: round.correct, bestStreak: round.bestStreak };
-  data.rounds = [...data.rounds, round].slice(-keep);
-  for (const id of medals) data.medals[id] ??= round.at;
+  if (record) data.best[key] = { alune: entry.total, at: entry.at, correct: entry.correct, bestStreak: entry.bestStreak };
+  data.rounds = [...data.rounds, entry].slice(-keep);
+  for (const id of medals) data.medals[id] ??= entry.at;
   const saved = write(`${scope}fulger`, data);
-  emit({ type: 'fulger-round', round, state: { best: data.best, medals: data.medals } });
+  emit({ type: 'fulger-round', round: entry, state: { best: data.best, medals: data.medals } });
   return { saved, record, previous };
 }
 
@@ -167,11 +169,10 @@ export function clearFulger() {
 
 // ——— Datele unui scop: sincronizarea, mutarea rezultatelor fără cont, ieșirea din cont ———
 
-/** Încercările și Calcul fulger ale unui scop (fără ciorne). */
+/** Încercările și Calcul fulger ale unui scop (fără ciorne), cu Calcul fulger normalizat. */
 export function readScopeData(p = null) {
   const s = scopeOf(p);
-  const f = read(`${s}fulger`, {});
-  return { attempts: read(`${s}attempts`, []), fulger: { best: f.best ?? {}, rounds: f.rounds ?? [], medals: f.medals ?? {} } };
+  return { attempts: read(`${s}attempts`, []), fulger: normalizeFulger(read(`${s}fulger`, {})) };
 }
 
 /** Înlocuiește datele unui scop fără să anunțe scrierea (datele vin din cloud). */

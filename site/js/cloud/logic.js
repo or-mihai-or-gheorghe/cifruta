@@ -1,12 +1,15 @@
 // Cifruța în cloud: logica pură (fără Firebase și fără DOM), testată în Node (tests/cloud.test.js).
 // Aceleași limite apar și în firestore.rules: poreclă, avatare, profiluri, id-urile clasamentelor.
 
+import { LEGACY_TOPIC, LEVEL_IDS, recordKey } from '../fulger/records.js';
+
 export const AVATARS = ['veverita', 'iepure', 'vulpe', 'urs', 'arici', 'pisica', 'caine', 'rata', 'lup', 'cal', 'oaie', 'gaina'];
 export const PROFILE_IDS = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'];
-export const LEVELS = ['usor', 'intermediar', 'avansat'];
+export const LEVELS = LEVEL_IDS;
 export const TESTS_BOARD = 'teste-stele';
 export const QUEUE_MAX = 200;
-export const WEEKS_KEPT = 2; // clasamentele săptămânale în care un profil își păstrează intrarea, pe fiecare nivel
+export const WEEKS_KEPT = 2; // clasamentele săptămânale în care un profil își păstrează intrarea, pe fiecare nivel și total
+export const FULGER_MAX = 3000; // scorul maxim al unei intrări pe nivel; totalul unei teme are cel mult 3 × FULGER_MAX
 
 const NICKNAME = /^[\p{L}\p{N} .'-]{2,20}$/u;
 
@@ -57,8 +60,11 @@ export function isoWeek(date = new Date()) {
   return `${year}-W${String(week).padStart(2, '0')}`;
 }
 
-/** Clasamentele în care intră o rundă de Calcul fulger: tot timpul și săptămâna ei. */
-export const fulgerBoards = (level, date = new Date()) => [`fulger-${level}-all`, `fulger-${level}-${isoWeek(date)}`];
+/**
+ * Id-ul unui clasament Calcul fulger: `fulger-<temă>-<usor|intermediar|avansat|total>-<all|AAAA-Wss>`.
+ * `fulger-total-<perioadă>` (fără temă) rămâne rezervat pentru super-totalul pe toate temele.
+ */
+export const fulgerBoard = (topic, scope, period) => `fulger-${topic}-${scope}-${period}`;
 
 export const entryId = (uid, pid) => `${uid}_${pid}`;
 
@@ -71,17 +77,26 @@ export function rankEntries(entries) {
   });
 }
 
-const WEEKLY = /^fulger-([a-z]+)-(\d{4}-W\d{2})$/;
+const WEEKLY = /^(fulger-.+)-(\d{4}-W\d{2})$/; // grupul = clasamentul fără săptămână (temă și nivel sau total)
+const RETIRED = /^fulger-(usor|intermediar|avansat)-(all|\d{4}-W\d{2})$/; // clasamentele de dinainte de teme (v0.9)
 
-/** Clasamentele păstrate de un profil: cele de tot timpul și testele rămân; pe fiecare nivel, doar ultimele WEEKS_KEPT săptămâni. */
+/** Un clasament Calcul fulger de dinainte de teme, care nu se mai scrie (intrările lui se șterg la curățenie). */
+export const isRetiredBoard = (board) => RETIRED.test(board);
+
+/**
+ * Clasamentele păstrate de un profil: cele de tot timpul și testele rămân; pe fiecare temă și nivel (și pe totalul temei), doar
+ * ultimele WEEKS_KEPT săptămâni; clasamentele de dinainte de teme ies. `dropped` = intrările de șters.
+ */
 export function pruneBoards(boards) {
   const all = [...new Set(boards)].sort();
+  const dropped = all.filter(isRetiredBoard);
   const weeks = {};
   for (const b of all) {
+    if (isRetiredBoard(b)) continue;
     const m = b.match(WEEKLY);
     if (m) (weeks[m[1]] ??= []).push(b);
   }
-  const dropped = Object.values(weeks).flatMap((list) => list.slice(0, -WEEKS_KEPT));
+  dropped.push(...Object.values(weeks).flatMap((list) => list.slice(0, -WEEKS_KEPT)));
   return { keep: all.filter((b) => !dropped.includes(b)), dropped };
 }
 
@@ -101,11 +116,11 @@ export const roundId = (round) => round.id ?? `${round.level}-${Date.parse(round
 /** Runda cu cele mai multe alune (la egalitate, prima); null pentru o listă goală. */
 export const bestRound = (rounds) => rounds.reduce((best, r) => (!best || r.total > best.total ? r : best), null);
 
-/** Starea Calcul fulger de pe două dispozitive: recordul cel mai mare pe nivel și medaliile de oriunde, cu prima dată. */
+/** Starea Calcul fulger de pe două dispozitive: recordul cel mai mare pe cheie și medaliile de oriunde, cu prima dată. */
 export function mergeFulgerState(a = {}, b = {}) {
   const best = { ...(a.best ?? {}) };
-  for (const [level, v] of Object.entries(b.best ?? {})) {
-    if (!best[level] || (v?.alune ?? 0) > (best[level].alune ?? 0)) best[level] = v;
+  for (const [key, v] of Object.entries(b.best ?? {})) {
+    if (!best[key] || (v?.alune ?? 0) > (best[key].alune ?? 0)) best[key] = v;
   }
   const medals = { ...(a.medals ?? {}) };
   for (const [id, at] of Object.entries(b.medals ?? {})) {
@@ -130,7 +145,10 @@ export function mergeAttempts(local, cloud, pending = []) {
   return [...byId.values()].sort(bySubmitted);
 }
 
-/** Calcul fulger după aducerea din cloud: rundele din cloud și cele din coadă; recordurile și medaliile locale contează doar dacă n-au urcat. */
+/**
+ * Calcul fulger după aducerea din cloud (ambele părți deja normalizate): rundele din cloud și cele din coadă; recordurile și medaliile
+ * locale contează doar dacă n-au urcat.
+ */
 export function mergeFulger(local, cloud, pending = [], keep = 30) {
   const cleared = pending.some((op) => op.type === 'clear-fulger');
   const waiting = new Set(pending.filter((op) => op.type === 'round').map((op) => op.id));
@@ -159,7 +177,7 @@ export const sameData = (a, b) => stable(a) === stable(b);
 
 const ATTEMPT_KEYS = ['id', 'testId', 'testVersion', 'seed', 'startedAt', 'submittedAt', 'activeMs', 'msByExercise', 'score', 'grade',
   'earnedPoints', 'totalPoints', 'levels', 'concepts', 'exercises', 'feeling', 'secondChance'];
-const ROUND_KEYS = ['id', 'level', 'at', 'total', 'correct', 'wrong', 'bestStreak', 'fast', 'stars', 'byKind'];
+const ROUND_KEYS = ['id', 'topic', 'level', 'at', 'total', 'correct', 'wrong', 'bestStreak', 'fast', 'stars', 'byKind'];
 
 const pick = (obj, keys) => Object.fromEntries(keys.filter((k) => obj[k] !== undefined).map((k) => [k, obj[k]]));
 
@@ -204,26 +222,48 @@ export function withAttemptStars(best = {}, attempt) {
   return { ...best, [attempt.testId]: stars };
 }
 
-/** Cea mai bună rundă a săptămânii pe fiecare nivel (state/fulger.week), după o rundă urcată; null dacă nu se schimbă. */
+/** Cea mai bună rundă a săptămânii pe fiecare temă și nivel (state/fulger.week, cheie „temă:nivel”), după o rundă urcată; null dacă nu se schimbă. */
 export function withWeekBest(week = {}, round) {
   const id = isoWeek(new Date(round.at));
-  const prev = week[round.level];
+  const key = recordKey(round.topic ?? LEGACY_TOPIC, round.level);
+  const prev = week[key];
   if (prev && (prev.id > id || (prev.id === id && prev.alune >= round.total))) return null;
-  return { ...week, [round.level]: { id, alune: round.total, correct: round.correct ?? 0, bestStreak: round.bestStreak ?? 0, at: round.at } };
+  return { ...week, [key]: { id, alune: round.total, correct: round.correct ?? 0, bestStreak: round.bestStreak ?? 0, at: round.at } };
 }
 
+const capEntry = (e) => ({ score: Math.min(e.score, FULGER_MAX), correct: Math.min(e.correct ?? 0, 500), bestStreak: Math.min(e.bestStreak ?? 0, 500) });
+
 /**
- * Intrările Calcul fulger ale unui nivel: „tot timpul” din recordul permanent (state.best), săptămâna curentă din state.week sau din
- * rundele din browser ale săptămânii (cea mai mare dintre ele). [[board, { score, correct, bestStreak }], …], doar scoruri pozitive.
+ * Intrările Calcul fulger ale unei teme, din starea normalizată (chei „temă:nivel”):
+ * - pe fiecare nivel, „tot timpul” din recordul permanent (state.best) și săptămâna curentă din state.week sau din rundele din browser
+ *   ale săptămânii (cea mai mare dintre ele): { score, correct, bestStreak };
+ * - totalul temei pe fiecare perioadă, suma intrărilor pe niveluri: { score, levels }.
+ * Doar scoruri pozitive: [[board, payload], …].
  */
-export function fulgerCandidates(level, { best = {}, week = {} } = {}, rounds = [], weekId = isoWeek()) {
+export function fulgerCandidates(topic, { best = {}, week = {} } = {}, rounds = [], weekId = isoWeek()) {
   const out = [];
-  const record = best[level];
-  if (record?.alune > 0) out.push([`fulger-${level}-all`, { score: record.alune, correct: record.correct ?? 0, bestStreak: record.bestStreak ?? 0 }]);
-  const local = bestRound(rounds.filter((r) => r.level === level && r.total > 0 && isoWeek(new Date(r.at)) === weekId));
-  const saved = week[level]?.id === weekId ? week[level] : null;
-  const options = [saved && { score: saved.alune, correct: saved.correct ?? 0, bestStreak: saved.bestStreak ?? 0 }, local && { score: local.total, correct: local.correct ?? 0, bestStreak: local.bestStreak ?? 0 }];
-  const top = options.filter(Boolean).reduce((a, b) => (!a || b.score > a.score ? b : a), null);
-  if (top?.score > 0) out.push([`fulger-${level}-${weekId}`, top]);
+  const totals = { all: { score: 0, levels: 0 }, [weekId]: { score: 0, levels: 0 } };
+  const add = (level, period, entry) => {
+    const payload = capEntry(entry);
+    out.push([fulgerBoard(topic, level, period), payload]);
+    totals[period].score += payload.score;
+    totals[period].levels++;
+  };
+  for (const level of LEVEL_IDS) {
+    const key = recordKey(topic, level);
+    const ofLevel = rounds.filter((r) => (r.topic ?? LEGACY_TOPIC) === topic && r.level === level && r.total > 0);
+    const record = best[key];
+    if (record?.alune > 0) {
+      // recordurile din v0.9.0 au doar { alune, at }: răspunsurile corecte și seria vin din runda recordului, dacă e în browser
+      const same = ofLevel.find((r) => r.total === record.alune);
+      add(level, 'all', { score: record.alune, correct: record.correct ?? same?.correct, bestStreak: record.bestStreak ?? same?.bestStreak });
+    }
+    const local = bestRound(ofLevel.filter((r) => isoWeek(new Date(r.at)) === weekId));
+    const saved = week[key]?.id === weekId ? week[key] : null;
+    const options = [saved && { score: saved.alune, correct: saved.correct, bestStreak: saved.bestStreak }, local && { score: local.total, correct: local.correct, bestStreak: local.bestStreak }];
+    const top = options.filter(Boolean).reduce((a, b) => (!a || b.score > a.score ? b : a), null);
+    if (top?.score > 0) add(level, weekId, top);
+  }
+  for (const [period, total] of Object.entries(totals)) if (total.levels) out.push([fulgerBoard(topic, 'total', period), total]);
   return out;
 }

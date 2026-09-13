@@ -25,7 +25,8 @@ singura barieră** și au teste automate pe emulator.
 
 `core/storage.js` are un **scop**: fără cont, cheile de până acum (`cifruta:attempts`, `cifruta:fulger`, `cifruta:draft:<test>`); pentru
 un profil, `cifruta:p:<uid>:<pid>:…`. Sunetul rămâne comun. Paginile citesc tot sincron. După aducerea datelor din cloud, `account.js`
-reîncarcă doar paginile liniștite (`#/`, secțiunile, hub-ul Calcul fulger), niciodată un test sau o rundă în desfășurare.
+reîncarcă doar paginile liniștite (`#/`, secțiunile, lista temelor și hub-ul unei teme din Calcul fulger), niciodată un test sau o
+rundă în desfășurare.
 
 Fiecare scriere (`addAttempt`, `updateAttempt`, `clearHistory`, `saveFulgerRound`, `clearFulger`) se anunță prin `onWrite`.
 Cât scopul e un profil, `sync.js` o pune imediat în coada profilului (`…:pending`, cel mult 200 de operații, cu număr de ordine), chiar
@@ -34,7 +35,8 @@ adaugă și o operație `boards`, care aliniază clasamentele cu starea complet�
 O altă filă a aceluiași browser află de ieșirea voluntară din evenimentul `storage` (sesiunea comună dispare), oprește sincronizarea
 și își șterge și ea copiile profilurilor.
 
-- **Operații:** `attempt`, `clear-attempts`, `stars`, `round`, `board`, `boards`, `clear-fulger`.
+- **Operații:** `attempt`, `clear-attempts`, `stars`, `round`, `board` (cu id-ul temei: nivelurile și totalul ei, într-o tranzacție),
+  `boards` (la activare, toate temele jucabile și stelele), `clear-fulger`.
 - **La eșec:** operația rămâne în coadă, iar trimiterea se reia după 20 s, 100 s și apoi 5 min, la evenimentul `online` și la activarea
   următoare. Clasamentele nu blochează coada. O operație refuzată de 5 ori, de exemplu cu date invalide, se scoate din coadă.
 - **La aducere:** cloudul e sursa. O încercare sau o rundă locală rămâne doar dacă așteaptă în coadă. O ștergere din coadă ascunde
@@ -52,14 +54,19 @@ O altă filă a aceluiași browser află de ieșirea voluntară din evenimentul 
 | `users/{uid}` | proprietarul și adminul | `email` (din token), `name`, `createdAt`, `lastSeenAt`, `consentAt` |
 | `users/{uid}/profiles/{p1…p6}` | proprietarul, adminul (adminul schimbă doar `nickname`) | `nickname`, `avatar`, `showOnBoards`, `createdAt`, `attempts`, `rounds`, `boards` |
 | `…/attempts/{id}` | proprietarul, adminul | încercarea, cu timpul de rezolvare (`activeMs`, `msByExercise`, `startedAt`, `submittedAt`); `answers` ca text JSON (Firestore nu acceptă liste în liste) |
-| `…/fulger/{nivel-ms}` | proprietarul, adminul | runda: `level`, `at`, `total`, `correct`, `wrong`, `bestStreak`, `fast`, `stars`, `byKind` |
-| `…/state/fulger` | proprietarul, adminul | `best` pe niveluri (recordul, cu `correct` și `bestStreak`), `medals`, `week` (cea mai bună rundă a săptămânii, pe nivel) |
+| `…/fulger/{nivel-ms}` | proprietarul, adminul | runda: `topic`, `level`, `at`, `total`, `correct`, `wrong`, `bestStreak`, `fast`, `stars`, `byKind` (fără `topic`, runda e din prima temă) |
+| `…/state/fulger` | proprietarul, adminul | chei „temă:nivel”: `best` (recordul, cu `correct` și `bestStreak`) și `week` (cea mai bună rundă a săptămânii); `medals`, comune temelor |
 | `…/state/tests` | proprietarul, adminul | `best`: cele mai multe stele pe fiecare test, din toate încercările profilului, de pe orice dispozitiv |
-| `leaderboards/{board}/entries/{uid}_{pid}` | orice cont autentificat citește; proprietarul scrie, validat; adminul redenumește și șterge | `uid`, `pid`, `nickname`, `avatar`, `score`, `updatedAt`; la fulger și `correct`, `bestStreak`; la teste și `tests` |
+| `leaderboards/{board}/entries/{uid}_{pid}` | orice cont autentificat citește; proprietarul scrie, validat; adminul redenumește și șterge | `uid`, `pid`, `nickname`, `avatar`, `score`, `updatedAt`; pe un nivel și `correct`, `bestStreak`; la totalul temei `levels`; la teste `tests` |
 
 **Clasamentele:**
-- `fulger-<nivel>-all` și `fulger-<nivel>-<an>-W<săptămâna>` (săptămâna ISO, după ora României). Un profil își păstrează
-  intrările doar în ultimele 2 săptămâni ale fiecărui nivel; cele mai vechi se șterg în aceeași tranzacție.
+- Pe nivel: `fulger-<temă>-<usor|intermediar|avansat>-<all|AAAA-Wss>` (săptămâna ISO, după ora României).
+- Totalul temei: `fulger-<temă>-total-<all|AAAA-Wss>`, adică recordurile nivelurilor adunate (la săptămână, cele mai bune runde ale
+  săptămânii), cel mult 9000, cu numărul de niveluri.
+  Se scrie în aceeași tranzacție cu intrările pe niveluri ale temei.
+- `fulger-total-<perioadă>` e rezervat pentru un super-total pe mai multe teme și nu e încă acceptat de reguli.
+- Un profil își păstrează intrările doar în ultimele 2 săptămâni ale fiecărui clasament. Cele mai vechi și cele de dinainte de teme
+  (`fulger-usor-all`, cu id-ul doar pe nivel) se șterg în aceeași tranzacție, la redenumire sau la activarea profilului.
 - `teste-stele`: cea mai bună încercare a fiecărui test, cu 0–3 stele, adunate. La 0 stele, intrarea se șterge.
 
 **Scrierile legate între ele merg în tranzacții:**

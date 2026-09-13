@@ -64,6 +64,8 @@
 
 .fg-how { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
 .fg-how__item { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border: 2px solid var(--c-line); border-radius: var(--r-3); background: var(--c-surface); }
+/* flex: none — altfel, lângă un text lung, iconița se micșorează (imaginile au max-width: 100%) */
+.fg-how__icon { flex: none; }
 .fg-how__icon .c-emoji { width: 2.2rem; height: 2.2rem; margin: 0; }
 .fg-how__title { display: block; font-family: var(--font-title); font-size: var(--fs-1); }
 .fg-how__text { font-size: var(--fs-0); color: var(--c-ink-soft); }
@@ -86,6 +88,11 @@
 }
 .fg-box { display: inline-block; width: 0.9em; height: 0.9em; border: 2px dashed currentColor; border-radius: 0.2em; vertical-align: -0.1em; }
 .fg-level__best { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); font-family: var(--font-title); font-weight: 700; }
+
+/* ——— Temele ——— */
+.fg-topic__head { display: flex; align-items: center; gap: var(--sp-3); }
+.fg-topic__head .c-card__title { overflow-wrap: anywhere; }
+.fg-concepts { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0; padding: 0; list-style: none; }
 .fg-level__play { margin-top: auto; }
 
 .fg-medals { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 8.5rem), 1fr)); gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }

@@ -1,7 +1,7 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-13 · **Versiune:** 0.9.1 (contul familiei e publicat; remedierile din recenzia reviziei 49b623c)
+- **Data:** 2026-09-13 · **Versiune:** 0.10.0 (Calcul fulger pe teme legate de programă, cu clasamente pe temă)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -9,22 +9,23 @@
   revizuire cu explicații, rezolvare, „Mai încerc o dată” repetabil), 13 tipuri de exerciții (cu traseu pe harta liniilor și
   grafic cu bare construit; `mark` cu reguli de set pentru sarcini deschise), banca vizuală (50 de desene: și grafice, pictograme,
   bețișoare, felii, tabele, podium, hartă de linii, indicator, raft, bon, listă, tabel de poziție, cuburi, medalie; 8 peisaje
-  animate), sunete discrete cu buton de oprire, atelier pentru autori, jocul **Calcul fulger** (`#/fulger`: runde de 2 minute pe trei
-  niveluri, 16 tipuri de întrebări generate, alune cu bonus de viteză și de serie, Turbo, pistă spre stele și record, 6 medalii, „Greșelile tale” și ținta următoarei stele la rezultate). Conținut: **4 teste de recapitulare a clasei I** (T1–T4 v2)
+  animate), sunete discrete cu buton de oprire, atelier pentru autori, jocul **Calcul fulger** (`#/fulger`: teme legate de programă,
+  fiecare cu trei niveluri; acum „Adunări și scăderi până la 100”, iar numerele până la 1000, înmulțirea, împărțirea și ecuațiile
+  simple apar „în curând”; runde de 2 minute, 16 tipuri de întrebări generate, fiecare cu conceptele ei („Ce exersăm”), alune cu bonus de viteză și de serie, Turbo, pistă spre stele și record, 6 medalii, „Greșelile tale” și ținta următoarei stele la rezultate). Conținut: **4 teste de recapitulare a clasei I** (T1–T4 v2)
   și **6 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc), toate
   exercițiile cu desen sau emoji, fără răspunsuri „la vedere”, cu probleme în mai mulți pași și sarcini deschise la avansat.
   **Contul familiei** (v0.9.0, `docs/cloud.md`): părintele intră cu Google și face profiluri de copii (poreclă + avatar, cu acordul
   părintelui); rezultatele profilului care joacă se sincronizează cu Cloud Firestore (coadă cu reîncercări, tranzacții, mutarea
-  rezultatelor fără cont); clasament doar pentru cei din cont (Calcul fulger pe nivel, săptămâna aceasta și tot timpul, plus stelele
-  de la teste); administrare (blocare, redenumire, ștergeri); pagina de confidențialitate. Fără configurarea Firebase, site-ul arată
+  rezultatelor fără cont); clasament doar pentru cei din cont (Calcul fulger pe temă: pe nivel și totalul temei, săptămâna aceasta
+  și tot timpul; stelele de la teste); administrare (blocare, redenumire, ștergeri); pagina de confidențialitate. Fără configurarea Firebase, site-ul arată
   ca în v0.8.1, plus legătura „Confidențialitate” din subsol.
-  Calitate: 72 de teste Node (plus validarea conținutului, a tabelului de acoperire, a contrastului și calibrarea stelelor din
-  Calcul fulger), 12 teste ale regulilor Firestore pe emulator, E2E 1096 de verificări pe 3 ecrane + tastatură (plus telefon ținut
-  orizontal și telefon mic) și E2E pentru cont pe emulatoare, cu 49 de verificări (două dispozitive, două file, blocare, clasamente).
-- **Următorul pas:** verificarea cu un cont Google real pe site-ul publicat (laptop, telefon, iPad) și documentul `admins/<uid>`;
-  apoi Calcul fulger pe teme (acum adunări, scăderi și comparări; mai târziu numere mai mari, înmulțire, împărțire, ecuații simple),
-  cu plan aprobat înainte, pentru că schimbă și clasamentele. În paralel: copilul joacă și rezolvă testele → pragurile și timpii
-  reali; apoi secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul).
+  Calitate: 76 de teste Node (plus validarea conținutului, a tabelului de acoperire, a contrastului și calibrarea stelelor din
+  Calcul fulger pe fiecare temă și nivel), 13 teste ale regulilor Firestore pe emulator, E2E 1118 verificări pe 3 ecrane + tastatură
+  (plus telefon ținut orizontal și telefon mic) și E2E pentru cont pe emulatoare, cu 58 de verificări (două dispozitive, două file,
+  blocare, clasamente pe temă, date vechi din cloud).
+- **Următorul pas:** verificarea cu un cont Google real pe site-ul publicat (laptop, telefon, iPad) și documentul `admins/<uid>`.
+  În paralel: copilul joacă și rezolvă testele → pragurile și timpii reali. Apoi a doua temă din Calcul fulger (rețeta din
+  `CLAUDE.md`), cu super-totalul pe mai multe teme, și secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul).
 
 ## Etape
 - [x] M0 Schelet: git, `_surse/`, `.gitignore`, `package.json`, `CLAUDE.md`, docs (curriculum, cercetare)
@@ -75,6 +76,10 @@
   „tot timpul” și săptămâna din `state/fulger`, ieșirea dintr-o filă; T1-e09c, T3-e09, T5-e09 și T3-e10 lămurite; pastila cu cel mai
   bun scor nu mai iese din card. Reguli 12/12 (publicate), E2E cont 49/49, E2E local 1096/1096; publicat, E2E pe site-ul live
   1096/1096, tag `v0.9.1`
+- [ ] M22 (v0.10.0): Calcul fulger pe teme: lista temelor și hub-ul temei, cu „Ce exersăm” (conceptele din programă, pe fiecare tip de
+  întrebare); tema „Adunări și scăderi până la 100” și patru teme „în curând”; recorduri pe „temă:nivel”, normalizate la citire;
+  clasamente pe temă și nivel plus totalul temei, cele vechi șterse; rutele vechi redirecționate. npm test 76/76, reguli 13/13,
+  E2E cont 58/58, E2E local 1118/1118
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -163,6 +168,11 @@
 | 2026-09-13 | Coada spre cloud se scrie oricând scopul e un profil, și înainte ca Firebase să se încarce; clasamentele se calculează din `state/tests` și `state/fulger` (`best` cu `correct` și `bestStreak`, `week`), cu o aliniere la fiecare activare | recenzia: rezultate pierdute la reconectare, stele greșite pe două dispozitive, record pierdut după ultimele 30 de runde |
 | 2026-09-13 | O altă filă află de ieșirea din cont prin evenimentul `storage` și își șterge singură copiile profilurilor | recenzia și diagnosticul: ștergerea făcută de prima filă se pierdea când a doua tocmai scria |
 | 2026-09-13 | Enunțurile cer explicit „cel mai scurt drum care…” și scriu restricțiile (fără să treci de două ori prin același raion); fără versiune nouă, pentru că răspunsurile nu se schimbă | recenzia: calcule corecte respinse din cauza unor restricții nespuse |
+| 2026-09-13 | Calcul fulger pe teme: fiecare temă are cele 3 niveluri, cu stelele și recordurile ei; conținutul de acum e tema „Adunări și scăderi până la 100”; temele viitoare (numere până la 1000, înmulțirea, împărțirea, ecuații simple) apar „în curând” | cererea utilizatorului: jocuri cu același comportament pentru alte operații și concepte; deciziile lui la cele 4 întrebări |
+| 2026-09-13 | Recordurile și cele mai bune runde ale săptămânii au chei „temă:nivel”; datele vechi se normalizează la fiecare citire, fără script de migrare; id-ul rundei nu se schimbă | coada și documentele din cloud rămân valabile; în cloud aproape nu există date |
+| 2026-09-13 | Clasamente pe temă și nivel plus totalul temei (`fulger-<temă>-total-<perioadă>`), scrise în aceeași tranzacție; `fulger-total-<perioadă>` rămâne rezervat pentru super-total; clasamentele vechi ies din lista profilului și se șterg | decizia utilizatorului: totaluri pe temă acum, un super-total pe mai multe teme mai târziu, fără migrare |
+| 2026-09-13 | Medaliile rămân comune; „Campionul” = 3 stele la toate nivelurile unei teme; fiecare temă și fiecare tip de întrebare poartă conceptele din programă („Ce exersăm”), iar etichetele „fără / cu trecere” se verifică pe întrebările generate | decizia utilizatorului; programa ca bază pentru temele viitoare |
+| 2026-09-13 | La publicare, regulile Firestore înaintea site-ului; temele jucabile stau și în `fulgerTopics()` din reguli, iar un test le compară cu datele | regulile vechi ar refuza rundele cu temă |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -177,6 +187,8 @@
   configurarea proiectului Firebase. Dacă popup-ul e blocat des pe telefoane, varianta e Firebase Hosting cu login prin redirect.
 - În limitele regulilor, un client priceput poate trimite un scor inventat în clasament (fără Cloud Functions nu se verifică pe
   server); există moderarea din `#/admin`.
+- Calcul fulger păstrează ultimele 30 de runde pentru toate temele împreună: când apar teme noi, istoricul pe temă se subțiază
+  (recordurile rămân); se revede la a doua temă.
 
 ## Backlog
 - Scanările actuale acoperă manualul până la înmulțire; utilizatorul adaugă scanări noi după finalizarea etapei curente.
@@ -187,7 +199,8 @@
   indicii treptate, pașii unei probleme afișați pe rând, animații legate de operație (gruparea din 5 în 5, simbolul care se desface,
   deplasarea pe axă).
 - Variante generate aleator (cu sămânță), diplomă printabilă.
-- Calcul fulger, mai departe: tipuri noi (numere până la 1000, tabla înmulțirii, ecuații □ + 7 = 15), răspuns tastat, antrenament
+- Calcul fulger, mai departe: temele „în curând” (numere până la 1000, înmulțirea, împărțirea, ecuații □ + 7 = 15) și super-totalul
+  pe mai multe teme (`fulger-total-<perioadă>`, rezervat), răspuns tastat, antrenament
   fără cronometru, magazinul Cifruței (accesorii pentru mascotă cumpărate cu alune), provocarea zilei, vibrații pe tabletă, nivel
   adaptiv; pragurile de stele și timpii „fulger” se ajustează după runde reale.
 - Amânate la cerere: citire cu voce (TTS), tastatură numerică proprie pe ecran.
@@ -304,3 +317,16 @@
   ipoteză greșită despre `getAfter` a fost verificată cu un diagnostic și retrasă. npm test 72/72, reguli 12/12 (publicate), E2E cont
   49/49, E2E local 1096/1096.
   **De făcut data viitoare:** verificarea cu un cont real; planul pentru Calcul fulger pe teme (cerut de utilizator).
+- **2026-09-13 (a opta sesiune, a doua continuare)** — Calcul fulger pe teme, la cererea utilizatorului: mai târziu vor veni numere
+  mai mari, înmulțirea, împărțirea și ecuații simple, cu același joc. Patru decizii ale lui (temă → 3 niveluri, conținutul de acum ca o
+  singură temă, clasamente pe temă și nivel plus totalul temei, cu loc pentru un super-total, medalii comune) și un plan aprobat.
+  Implementare: temele în date, conceptele pe fiecare tip de întrebare (etichetele „fără / cu trecere” verificate pe 500 de semințe),
+  chei „temă:nivel” normalizate la fiecare citire (`fulger/records.js`), lista temelor, hub-ul temei cu „Ce exersăm”, rutele vechi
+  redirecționate, pastile pe teme pe pagina principală; în cloud, totalul temei în aceeași tranzacție cu nivelurile, clasamentele vechi
+  scoase din profil și șterse (și la redenumire), regulile cu temele și totalurile, plus un test care compară temele din reguli cu
+  datele. Pe drum: după o reîncărcare, `__cloud.flush()` din E2E nu aștepta conectarea, iar scrierile de test prin REST se ciocneau cu
+  tranzacția în curs (400); iconița „Serii” din „Cum se joacă” se micșora lângă textul lung (eroare mai veche). O recenzie independentă
+  a diferențelor (reguli, migrare, versiuni amestecate, rute, teste) nu a găsit probleme. O citire din producție, doar a formei datelor,
+  fără valori personale, a arătat un profil cu date din v0.9.0: record fără serie și fără săptămână. Intrarea „tot timpul” își ia acum
+  seria din runda recordului, cu un test pe forma aceasta. npm test 76/76, reguli 13/13, E2E cont 58/58, E2E local 1118/1118.
+  **De făcut data viitoare:** verificarea cu un cont real; copilul joacă → pragurile; a doua temă și super-totalul.

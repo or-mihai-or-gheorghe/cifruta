@@ -55,17 +55,17 @@ test('storage: ciornele se listează și se șterg odată cu istoricul', () => {
   delete globalThis.localStorage;
 });
 
-test('storage: calcul fulger păstrează recordul pe nivel, ultimele runde și medaliile', () => {
+test('storage: calcul fulger păstrează recordul pe temă și nivel, ultimele runde și medaliile', () => {
   globalThis.localStorage = fakeStorage();
   const empty = { best: {}, rounds: [], medals: {} };
   assert.deepEqual(getFulger(), empty);
-  const round = (level, total, at) => ({ level, total, at });
+  const round = (level, total, at) => ({ topic: 'adunari-scaderi-100', level, total, at });
   assert.deepEqual(saveFulgerRound(round('usor', 50, 't1'), { keep: 2, medals: ['prima-cursa'] }), { saved: true, record: true, previous: null });
   assert.deepEqual(saveFulgerRound(round('usor', 40, 't2'), { keep: 2, medals: ['prima-cursa'] }), { saved: true, record: false, previous: 50 });
   assert.deepEqual(saveFulgerRound(round('usor', 60, 't3'), { keep: 2 }), { saved: true, record: true, previous: 50 });
   assert.deepEqual(saveFulgerRound(round('avansat', 0, 't4'), { keep: 2 }), { saved: true, record: false, previous: null });
   const data = getFulger();
-  assert.deepEqual(data.best, { usor: { alune: 60, at: 't3' } });
+  assert.deepEqual(data.best, { 'adunari-scaderi-100:usor': { alune: 60, at: 't3' } });
   assert.deepEqual(data.rounds.map((r) => r.at), ['t3', 't4']);
   assert.deepEqual(data.medals, { 'prima-cursa': 't1' }); // medalia păstrează data primei câștigări
   clearHistory(); // istoricul testelor nu atinge jocul
@@ -75,6 +75,22 @@ test('storage: calcul fulger păstrează recordul pe nivel, ultimele runde și m
 
   globalThis.localStorage = fakeStorage({ full: true });
   assert.equal(saveFulgerRound(round('usor', 10, 't5')).saved, false);
+  delete globalThis.localStorage;
+});
+
+test('storage: rezultatele Calcul fulger de dinainte de teme se citesc în tema lor și se rescriu în forma nouă', () => {
+  globalThis.localStorage = fakeStorage();
+  localStorage.setItem('cifruta:fulger', JSON.stringify({ best: { usor: { alune: 77, at: 'v' } }, rounds: [{ level: 'usor', total: 77, at: 'v' }], medals: { 'prima-cursa': 'v' } }));
+  const data = getFulger();
+  assert.deepEqual(data.best, { 'adunari-scaderi-100:usor': { alune: 77, at: 'v' } });
+  assert.equal(data.rounds[0].topic, 'adunari-scaderi-100');
+  assert.deepEqual(data.medals, { 'prima-cursa': 'v' });
+  // o rundă nouă din tema aceasta vede recordul vechi; o rundă fără temă (dintr-o filă veche) intră tot aici
+  assert.deepEqual(saveFulgerRound({ topic: 'adunari-scaderi-100', level: 'usor', total: 70, at: 'w' }), { saved: true, record: false, previous: 77 });
+  assert.deepEqual(saveFulgerRound({ level: 'usor', total: 90, at: 'x' }), { saved: true, record: true, previous: 77 });
+  const raw = JSON.parse(localStorage.getItem('cifruta:fulger'));
+  assert.deepEqual(Object.keys(raw.best), ['adunari-scaderi-100:usor']);
+  assert.ok(raw.rounds.length === 3 && raw.rounds.every((r) => r.topic === 'adunari-scaderi-100'));
   delete globalThis.localStorage;
 });
 
@@ -94,7 +110,7 @@ test('storage: fiecare profil are datele lui, iar scrierile se anunță', () => 
   updateAttempt('b1', { feeling: 'vesel' });
   saveFulgerRound({ level: 'usor', total: 10, at: 'x' });
   setScoped('pending', [{ type: 'attempt', id: 'b1' }]);
-  assert.equal(getFulger().best.usor.alune, 10);
+  assert.equal(getFulger().best['adunari-scaderi-100:usor'].alune, 10);
 
   setScope(null);
   assert.deepEqual(listAttempts().map((a) => a.id), ['a1']);

@@ -10,6 +10,11 @@ export const go = (path) => {
   location.hash = `#/${path}`;
 };
 
+/** Înlocuiește adresa curentă, fără o intrare nouă în istoric (de exemplu, pentru rutele de dinainte de teme). */
+export const redirect = (path) => {
+  location.replace(`#/${path}`);
+};
+
 /** Reîncarcă pagina curentă (după o ștergere, de exemplu), fără să schimbe adresa. */
 export const refresh = () => dispatchEvent(new Event('hashchange'));
 

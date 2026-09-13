@@ -2,12 +2,16 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
+import config from '../site/data/fulger.js';
 import {
-  AVATARS, bestRound, cleanNickname, combineData, dequeue, enqueue, entryId, freeProfileId, fromCloudAttempt, fulgerBoards, isoWeek,
-  mergeAttempts, mergeFulger, mergeFulgerState, nicknameError, pruneBoards, QUEUE_MAX, roundId, sameData, signInError, testStars,
-  toCloudAttempt, toCloudRound, rankEntries,
+  AVATARS, bestRound, cleanNickname, combineData, dequeue, enqueue, entryId, freeProfileId, fromCloudAttempt, fulgerBoard, isoWeek,
+  isRetiredBoard, mergeAttempts, mergeFulger, mergeFulgerState, nicknameError, pruneBoards, QUEUE_MAX, rankEntries, roundId, sameData,
+  signInError, testStars, toCloudAttempt, toCloudRound,
 } from '../site/js/cloud/logic.js';
+import { recordKey } from '../site/js/fulger/records.js';
 import { EMOJI } from '../site/js/visuals/emoji.js';
+
+const T = 'adunari-scaderi-100';
 
 test('cloud: locurile din clasament împart locul la scor egal', () => {
   assert.deepEqual(rankEntries([{ score: 90 }, { score: 80 }, { score: 80 }, { score: 70 }]).map((e) => e.place), [1, 2, 2, 4]);
@@ -28,14 +32,20 @@ test('cloud: săptămâna ISO se socotește după ora României', () => {
   assert.equal(isoWeek(new Date('2026-12-31T12:00:00Z')), '2026-W53');
   assert.equal(isoWeek(new Date('2027-01-01T12:00:00Z')), '2026-W53'); // vineri: săptămâna anului trecut
   assert.equal(isoWeek(new Date('2027-01-04T12:00:00Z')), '2027-W01');
-  assert.deepEqual(fulgerBoards('usor', new Date('2026-09-13T12:00:00Z')), ['fulger-usor-all', 'fulger-usor-2026-W37']);
+  assert.equal(fulgerBoard(T, 'usor', isoWeek(new Date('2026-09-13T12:00:00Z'))), 'fulger-adunari-scaderi-100-usor-2026-W37');
   assert.equal(entryId('abc', 'p2'), 'abc_p2');
 });
 
-test('cloud: un profil își păstrează intrările din ultimele două săptămâni ale fiecărui nivel', () => {
-  const { keep, dropped } = pruneBoards(['fulger-usor-2026-W30', 'fulger-usor-all', 'teste-stele', 'fulger-usor-2026-W37', 'fulger-usor-2026-W36', 'fulger-avansat-2026-W30', 'fulger-usor-all']);
-  assert.deepEqual(dropped, ['fulger-usor-2026-W30']);
-  assert.deepEqual(keep, ['fulger-avansat-2026-W30', 'fulger-usor-2026-W36', 'fulger-usor-2026-W37', 'fulger-usor-all', 'teste-stele']);
+test('cloud: un profil își păstrează ultimele două săptămâni ale fiecărui clasament; cele de dinainte de teme ies', () => {
+  const t = (scope, period) => fulgerBoard(T, scope, period);
+  const { keep, dropped } = pruneBoards([
+    t('usor', '2026-W30'), t('usor', 'all'), 'teste-stele', t('usor', '2026-W37'), t('usor', '2026-W36'),
+    t('total', '2026-W35'), t('total', '2026-W36'), t('total', '2026-W37'), t('avansat', '2026-W30'),
+    'fulger-usor-all', 'fulger-usor-2026-W37', t('usor', 'all'),
+  ]);
+  assert.deepEqual(dropped.sort(), [t('total', '2026-W35'), t('usor', '2026-W30'), 'fulger-usor-2026-W37', 'fulger-usor-all'].sort());
+  assert.deepEqual(keep, [t('avansat', '2026-W30'), t('total', '2026-W36'), t('total', '2026-W37'), t('usor', '2026-W36'), t('usor', '2026-W37'), t('usor', 'all'), 'teste-stele'].sort());
+  assert.ok(isRetiredBoard('fulger-avansat-all') && isRetiredBoard('fulger-intermediar-2026-W01') && !isRetiredBoard(t('avansat', 'all')) && !isRetiredBoard('teste-stele'));
 });
 
 test('cloud: stelele de la teste iau cea mai bună încercare a fiecărui test', () => {
@@ -69,27 +79,27 @@ test('cloud: aducerea încercărilor păstrează ce n-a urcat și respectă ște
 });
 
 test('cloud: aducerea rundelor păstrează rundele din coadă, iar ștergerea din coadă ignoră cloudul', () => {
-  const r = (at, total) => ({ level: 'usor', at, total });
+  const r = (at, total) => ({ topic: T, level: 'usor', at, total });
   const first = r('2026-09-01T10:00:00.000Z', 50);
-  const cloud = { rounds: [{ ...first, id: roundId(first) }], best: { usor: { alune: 50, at: 'x' } }, medals: { m1: '2026-09-01' } };
-  const local = { rounds: [first, r('2026-09-05T10:00:00.000Z', 80)], best: { usor: { alune: 80, at: 'y' } }, medals: { m2: '2026-09-05' } };
+  const cloud = { rounds: [{ ...first, id: roundId(first) }], best: { [recordKey(T, 'usor')]: { alune: 50, at: 'x' } }, medals: { m1: '2026-09-01' } };
+  const local = { rounds: [first, r('2026-09-05T10:00:00.000Z', 80)], best: { [recordKey(T, 'usor')]: { alune: 80, at: 'y' } }, medals: { m2: '2026-09-05' } };
   assert.deepEqual(mergeFulger(local, cloud, []), cloud); // fără coadă, cloudul are dreptate
   const merged = mergeFulger(local, cloud, enqueue([], { type: 'round', id: roundId(local.rounds[1]) }));
   assert.deepEqual(merged.rounds.map((x) => x.total), [50, 80]);
-  assert.equal(merged.best.usor.alune, 80);
+  assert.equal(merged.best[recordKey(T, 'usor')].alune, 80);
   assert.deepEqual(Object.keys(merged.medals).sort(), ['m1', 'm2']);
   assert.deepEqual(mergeFulger(local, cloud, enqueue([], { type: 'clear-fulger' })), { best: local.best, rounds: [], medals: local.medals });
 });
 
 test('cloud: rezultatele fără cont intră într-un profil fără dubluri', () => {
-  const round = (day, total) => ({ level: 'usor', at: `2026-09-0${day}T00:00:00Z`, total });
-  const target = { attempts: [{ id: 'a1', submittedAt: '2' }], fulger: { rounds: [round(2, 5)], best: { usor: { alune: 5, at: 'b' } }, medals: {} } };
-  const extra = { attempts: [{ id: 'a0', submittedAt: '1' }, { id: 'a1', submittedAt: '2', stale: true }], fulger: { rounds: [round(1, 9), round(2, 5)], best: { usor: { alune: 9, at: 'a' } }, medals: { m: 'a' } } };
+  const round = (day, total) => ({ topic: T, level: 'usor', at: `2026-09-0${day}T00:00:00Z`, total });
+  const target = { attempts: [{ id: 'a1', submittedAt: '2' }], fulger: { rounds: [round(2, 5)], best: { [recordKey(T, 'usor')]: { alune: 5, at: 'b' } }, medals: {} } };
+  const extra = { attempts: [{ id: 'a0', submittedAt: '1' }, { id: 'a1', submittedAt: '2', stale: true }], fulger: { rounds: [round(1, 9), round(2, 5)], best: { [recordKey(T, 'usor')]: { alune: 9, at: 'a' } }, medals: { m: 'a' } } };
   const out = combineData(target, extra);
   assert.deepEqual(out.attempts.map((a) => a.id), ['a0', 'a1']);
   assert.equal(out.attempts[1].stale, undefined);
   assert.deepEqual(out.fulger.rounds.map((r) => r.total), [9, 5]);
-  assert.equal(out.fulger.best.usor.alune, 9);
+  assert.equal(out.fulger.best[recordKey(T, 'usor')].alune, 9);
   assert.deepEqual(out.fulger.medals, { m: 'a' });
 });
 
@@ -102,7 +112,9 @@ test('cloud: încercările și rundele pentru Firestore păstrează doar cheile 
   assert.deepEqual(fromCloudAttempt({ ...cloud, answers: '{stricat' }).answers, {});
   const round = toCloudRound({ id: 'usor-1', level: 'usor', at: 'x', total: 5, byKind: {}, mistakes: [] });
   assert.deepEqual(Object.keys(round).sort(), ['at', 'byKind', 'id', 'level', 'total']);
-  assert.equal(toCloudRound({ level: 'avansat', at: '2026-09-13T10:00:00.000Z', total: 1 }).id, `avansat-${Date.parse('2026-09-13T10:00:00.000Z')}`);
+  const topical = toCloudRound({ topic: T, level: 'avansat', at: '2026-09-13T10:00:00.000Z', total: 1 });
+  assert.equal(topical.topic, T);
+  assert.equal(topical.id, `avansat-${Date.parse('2026-09-13T10:00:00.000Z')}`); // id-ul rundei nu depinde de temă
 });
 
 test('cloud: mesajele de intrare, date egale în altă ordine, cea mai bună rundă', () => {
@@ -142,7 +154,24 @@ test('cloud: avatarele există în bancă, iar regulile folosesc aceleași avata
   assert.ok(rules.includes("'^p[1-6]$'"));
 });
 
-test('cloud: stelele pe teste și recordurile săptămânii vin din starea completă, nu din ultimele runde', async () => {
+test('cloud: regulile acceptă exact temele jucabile, iar id-urile clasamentelor nu se încurcă', () => {
+  const rules = readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8');
+  const fn = (name) => rules.match(new RegExp(`function ${name}\\(\\) \\{\\s*return '([^']+)';`))?.[1];
+  const playable = config.topics.filter((t) => !t.soon).map((t) => t.id);
+  assert.equal(fn('fulgerTopics'), `(${playable.join('|')})`, 'firestore.rules: fulgerTopics() are aceleași teme ca data/fulger.js');
+  const [topics, period] = [fn('fulgerTopics'), fn('fulgerPeriod')];
+  const level = new RegExp(`^fulger-${topics}-(usor|intermediar|avansat)-${period}$`);
+  const total = new RegExp(`^fulger-${topics}-total-${period}$`);
+  const ids = playable.flatMap((topic) => ['usor', 'intermediar', 'avansat', 'total'].flatMap((scope) => ['all', '2026-W37'].map((p) => fulgerBoard(topic, scope, p))));
+  assert.equal(new Set(ids).size, ids.length);
+  for (const id of ids) assert.equal([level.test(id), total.test(id)].filter(Boolean).length, 1, id);
+  const soon = config.topics.filter((t) => t.soon).map((t) => fulgerBoard(t.id, 'usor', 'all'));
+  for (const id of ['fulger-usor-all', 'fulger-avansat-2026-W37', 'fulger-total-all', 'fulger-total-2026-W37', ...soon]) {
+    assert.ok(!level.test(id) && !total.test(id), `${id} nu trebuie acceptat`);
+  }
+});
+
+test('cloud: stelele pe teste, recordurile săptămânii și totalul temei vin din starea completă', async () => {
   const { fulgerCandidates, starsTotal, withAttemptStars, withWeekBest } = await import('../site/js/cloud/logic.js');
   const attempt = (testId, stars) => ({ testId, levels: { usor: { star: stars > 0 }, intermediar: { star: stars > 1 }, avansat: { star: stars > 2 } } });
   let best = withAttemptStars({}, attempt('t1', 3));
@@ -151,22 +180,45 @@ test('cloud: stelele pe teste și recordurile săptămânii vin din starea compl
   assert.deepEqual(starsTotal(best), { stars: 6, tests: 2 });
   assert.deepEqual(starsTotal(withAttemptStars(best, attempt('t3', 0))), { stars: 6, tests: 3 });
 
-  const r = (day, total) => ({ level: 'usor', at: `2026-09-${day}T10:00:00.000Z`, total, correct: total / 10, bestStreak: 5 });
+  const key = (level) => recordKey(T, level);
+  const r = (day, total, level = 'usor') => ({ topic: T, level, at: `2026-09-${day}T10:00:00.000Z`, total, correct: total / 10, bestStreak: 5 });
   let week = withWeekBest({}, r(14, 100)); // luni: 2026-W38
-  assert.equal(week.usor.id, '2026-W38');
+  assert.equal(week[key('usor')].id, '2026-W38');
   assert.equal(withWeekBest(week, r(15, 90)), null);
   week = withWeekBest(week, r(16, 150));
-  assert.equal(week.usor.alune, 150);
+  assert.equal(week[key('usor')].alune, 150);
   assert.equal(withWeekBest(week, r(10, 500)), null); // o rundă întârziată din săptămâna trecută nu înlocuiește săptămâna curentă
-  assert.equal(withWeekBest(week, r(21, 20)).usor.alune, 20); // săptămână nouă
+  assert.equal(withWeekBest(week, r(21, 20))[key('usor')].alune, 20); // săptămână nouă
+  assert.equal(withWeekBest({}, { level: 'usor', at: '2026-09-14T10:00:00.000Z', total: 5 })[key('usor')].alune, 5); // rundă fără temă: prima temă
 
-  const state = { best: { usor: { alune: 500, correct: 60, bestStreak: 30 } }, week };
-  assert.deepEqual(fulgerCandidates('usor', state, [r(16, 100)], '2026-W38'), [
-    ['fulger-usor-all', { score: 500, correct: 60, bestStreak: 30 }], // recordul, deși runda lui nu mai e în browser
-    ['fulger-usor-2026-W38', { score: 150, correct: 15, bestStreak: 5 }],
+  const state = { best: { [key('usor')]: { alune: 500, correct: 60, bestStreak: 30 }, [key('avansat')]: { alune: 3500, correct: 600, bestStreak: 40 } }, week };
+  assert.deepEqual(fulgerCandidates(T, state, [r(16, 100), r(16, 80, 'intermediar')], '2026-W38'), [
+    [`fulger-${T}-usor-all`, { score: 500, correct: 60, bestStreak: 30 }], // recordul, deși runda lui nu mai e în browser
+    [`fulger-${T}-usor-2026-W38`, { score: 150, correct: 15, bestStreak: 5 }],
+    [`fulger-${T}-intermediar-2026-W38`, { score: 80, correct: 8, bestStreak: 5 }],
+    [`fulger-${T}-avansat-all`, { score: 3000, correct: 500, bestStreak: 40 }], // limitele din reguli
+    [`fulger-${T}-total-all`, { score: 3500, levels: 2 }],
+    [`fulger-${T}-total-2026-W38`, { score: 230, levels: 2 }],
   ]);
-  assert.deepEqual(fulgerCandidates('usor', { best: {} }, [r(21, 40)], '2026-W39'), [['fulger-usor-2026-W39', { score: 40, correct: 4, bestStreak: 5 }]]);
-  assert.deepEqual(fulgerCandidates('avansat', state, [r(16, 100)], '2026-W38'), []);
+  assert.deepEqual(fulgerCandidates(T, { best: {} }, [r(21, 40)], '2026-W39'), [[`fulger-${T}-usor-2026-W39`, { score: 40, correct: 4, bestStreak: 5 }], [`fulger-${T}-total-2026-W39`, { score: 40, levels: 1 }]]);
+  assert.deepEqual(fulgerCandidates('alta-tema', state, [r(16, 100)], '2026-W38'), []);
+});
+
+test('cloud: datele din v0.9.0 (record fără serie, fără săptămână) ajung în clasamentele temei', async () => {
+  const { fulgerCandidates, pruneBoards } = await import('../site/js/cloud/logic.js');
+  const { normalizeFulger } = await import('../site/js/fulger/records.js');
+  const at = '2026-09-13T10:00:00.000Z'; // duminică, 2026-W37
+  const cloud = normalizeFulger({ best: { usor: { alune: 120, at } }, medals: {} }); // forma din producție de dinainte de teme
+  const { rounds } = normalizeFulger({ rounds: [{ id: 'usor-1', level: 'usor', at, total: 120, correct: 20, wrong: 1, bestStreak: 9 }] });
+  assert.deepEqual(fulgerCandidates(T, cloud, rounds, '2026-W37'), [
+    [`fulger-${T}-usor-all`, { score: 120, correct: 20, bestStreak: 9 }], // din runda recordului
+    [`fulger-${T}-usor-2026-W37`, { score: 120, correct: 20, bestStreak: 9 }],
+    [`fulger-${T}-total-all`, { score: 120, levels: 1 }],
+    [`fulger-${T}-total-2026-W37`, { score: 120, levels: 1 }],
+  ]);
+  // fără runda în browser (alt dispozitiv), recordul intră oricum, cu 0 la câmpurile lipsă (regulile le acceptă)
+  assert.deepEqual(fulgerCandidates(T, cloud, [], '2026-W38'), [[`fulger-${T}-usor-all`, { score: 120, correct: 0, bestStreak: 0 }], [`fulger-${T}-total-all`, { score: 120, levels: 1 }]]);
+  assert.deepEqual(pruneBoards(['fulger-usor-2026-W37', 'fulger-usor-all', 'teste-stele', `fulger-${T}-usor-all`]).dropped, ['fulger-usor-2026-W37', 'fulger-usor-all']);
 });
 
 test('cloud: scrierile unui profil intră în coadă înainte ca sincronizarea să pornească', async () => {
@@ -180,9 +232,11 @@ test('cloud: scrierile unui profil intră în coadă înainte ca sincronizarea s
   storage.setScope({ uid: 'u1', pid: 'p1' });
   assert.deepEqual(storage.currentProfile(), { uid: 'u1', pid: 'p1' });
   storage.addAttempt({ id: 'a1', testId: 't1', score: 80 });
-  storage.saveFulgerRound({ level: 'usor', at: '2026-09-13T10:00:00.000Z', total: 50, correct: 10, wrong: 0, bestStreak: 10, fast: 2, stars: 1, byKind: {} });
-  assert.deepEqual(storage.getScoped('pending').map((op) => op.type), ['attempt', 'stars', 'round', 'board']);
-  assert.deepEqual(storage.getFulger().best.usor, { alune: 50, at: '2026-09-13T10:00:00.000Z', correct: 10, bestStreak: 10 });
+  storage.saveFulgerRound({ topic: T, level: 'usor', at: '2026-09-13T10:00:00.000Z', total: 50, correct: 10, wrong: 0, bestStreak: 10, fast: 2, stars: 1, byKind: {} });
+  const pending = storage.getScoped('pending');
+  assert.deepEqual(pending.map((op) => op.type), ['attempt', 'stars', 'round', 'board']);
+  assert.equal(pending.at(-1).id, T); // o operație de clasament pe temă
+  assert.deepEqual(storage.getFulger().best[recordKey(T, 'usor')], { alune: 50, at: '2026-09-13T10:00:00.000Z', correct: 10, bestStreak: 10 });
   storage.setScope(null);
   delete globalThis.localStorage;
 });

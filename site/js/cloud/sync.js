@@ -2,13 +2,15 @@
 // înainte ca Firebase să se încarce sau fără internet. Când contul e confirmat, startSync aduce datele din cloud (îmbinate cu coada)
 // și trimite coada. Ce nu ajunge (fără internet, limita de frecvență a clasamentului) rămâne în cifruta:p:<uid>:<pid>:pending și
 // se reia: la revenirea internetului, după o pauză, la activarea următoare. Tot ce ține împreună (încercare + contor + stelele pe
-// teste, rundă + stare + contor, intrări + lista clasamentelor) se scrie într-o tranzacție. Clasamentele se calculează din starea
-// completă din cloud (state/fulger, state/tests), nu doar din ce e în browser.
+// teste, rundă + stare + contor, intrările unei teme + totalul ei + lista clasamentelor) se scrie într-o tranzacție. Clasamentele se
+// calculează din starea completă din cloud (state/fulger, state/tests), nu doar din ce e în browser. Starea Calcul fulger se
+// normalizează la fiecare citire (chei „temă:nivel”, js/fulger/records.js), așa că datele de dinainte de teme se migrează singure.
 
 import config from '../../data/fulger.js';
 import { currentProfile, getAttempt, getFulger, getScoped, onWrite, readScopeData, setScoped, writeScopeData } from '../core/storage.js';
+import { LEGACY_TOPIC, LEVEL_IDS, normalizeFulger } from '../fulger/records.js';
 import {
-  dequeue, enqueue, entryId, fromCloudAttempt, fulgerCandidates, LEVELS, mergeAttempts, mergeFulger, mergeFulgerState, pruneBoards,
+  dequeue, enqueue, entryId, fromCloudAttempt, fulgerCandidates, isRetiredBoard, mergeAttempts, mergeFulger, mergeFulgerState, pruneBoards,
   roundId, sameData, starsTotal, TESTS_BOARD, toCloudAttempt, toCloudRound, withAttemptStars, withWeekBest,
 } from './logic.js';
 
@@ -16,6 +18,9 @@ const RETRY_MS = [20_000, 100_000, 300_000]; // a doua încercare trece de limit
 const MAX_TRIES = 5; // o operație refuzată de atâtea ori (date invalide) se scoate, ca să nu blocheze coada
 const COUNTED = new Set(['permission-denied', 'invalid-argument', 'failed-precondition', 'out-of-range', 'not-found']);
 const GONE = 'cifruta/gone';
+
+/** Temele jucabile (fără engine.js, ca pornirea să nu încarce generatoarele de întrebări). */
+const playableTopicIds = () => config.topics.filter((t) => !t.soon && t.levels?.length).map((t) => t.id);
 
 let ctx = null; // { db, f, uid, pid, blocked(), onProfile(changes), onGone() }
 let running = null;
@@ -90,7 +95,7 @@ function onStorageWrite(e) {
     add({ type: 'stars' });
   } else if (e.type === 'fulger-round') {
     add({ type: 'round', id: roundId(e.round) });
-    add({ type: 'board', id: e.round.level });
+    add({ type: 'board', id: e.round.topic ?? LEGACY_TOPIC }); // o singură operație pe temă: nivelurile și totalul, împreună
   } else if (e.type === 'fulger-clear') {
     add({ type: 'clear-fulger' });
   } else return;
@@ -102,6 +107,9 @@ onWrite(onStorageWrite);
 
 const onOnline = () => flush();
 
+// activarea în curs (aducerea din cloud și operația `boards`); flush() o așteaptă, ca numărul salvărilor rămase să fie cel real
+let activation = Promise.resolve();
+
 /** Pornește sincronizarea profilului activ (scopul din storage trebuie să fie deja al lui); true dacă datele locale s-au schimbat. */
 export async function startSync(context) {
   stopSync();
@@ -110,14 +118,16 @@ export async function startSync(context) {
   addEventListener('online', onOnline);
   failures = 0;
   let changed = false;
-  try {
-    changed = await pull(mine);
-  } catch (err) {
-    if (ctx === mine) setStatus({ syncing: false, error: describe(err) });
-  }
-  if (ctx !== mine) return changed;
-  add({ type: 'boards' }); // o dată pe activare: clasamentele se aliniază cu starea completă (alte dispozitive, reveniri)
-  flush();
+  activation = (async () => {
+    try {
+      changed = await pull(mine);
+    } catch (err) {
+      if (ctx === mine) setStatus({ syncing: false, error: describe(err) });
+    }
+    if (ctx === mine) add({ type: 'boards' }); // o dată pe activare: clasamentele se aliniază cu starea completă (alte dispozitive, reveniri, teme)
+  })();
+  await activation;
+  if (ctx === mine) flush();
   return changed;
 }
 
@@ -151,7 +161,8 @@ export function requestBoards() {
 /** Trimite coada; întoarce câte operații au rămas. Cu `timeout`, nu așteaptă mai mult (trimiterea continuă în fundal). */
 export function flush({ timeout = 0 } = {}) {
   if (!ctx) return Promise.resolve(syncStatus().pending);
-  const job = (running ??= drain(ctx).finally(() => {
+  const c = ctx;
+  const job = (running ??= activation.then(() => (ctx === c ? drain(c) : syncStatus().pending)).finally(() => {
     if (running === job) running = null;
   }));
   if (!timeout) return job;
@@ -221,9 +232,10 @@ function run(c, op) {
     case 'round':
       return pushRound(c, op.id);
     case 'board':
-      return pushBoards(c, [op.id]);
+      // o operație din coada de dinainte de teme are ca id nivelul
+      return pushBoards(c, [LEVEL_IDS.includes(op.id) ? LEGACY_TOPIC : op.id]);
     case 'boards':
-      return pushBoards(c, LEVELS).then(() => pushStars(c));
+      return pushBoards(c, playableTopicIds()).then(() => pushStars(c));
     case 'clear-fulger':
       return clearRounds(c);
     default:
@@ -246,10 +258,10 @@ async function pull(c) {
   const profile = { uid: c.uid, pid: c.pid };
   const pending = getScoped('pending', []);
   const local = readScopeData(profile);
-  const state = stateSnap.exists() ? stateSnap.data() : {};
+  const cloud = normalizeFulger({ ...(stateSnap.exists() ? stateSnap.data() : {}), rounds: roundsSnap.docs.map((d) => d.data()) });
   const next = {
     attempts: mergeAttempts(local.attempts, attemptsSnap.docs.map((d) => fromCloudAttempt(d.data())), pending),
-    fulger: mergeFulger(local.fulger, { rounds: roundsSnap.docs.map((d) => d.data()), best: state.best, medals: state.medals }, pending, config.keepRounds),
+    fulger: mergeFulger(local.fulger, cloud, pending, config.keepRounds),
   };
   setScoped('pulled', true);
   setStatus({ syncing: false, error: null, lastSync: Date.now() });
@@ -309,10 +321,10 @@ async function pushRound(c, id) {
   await c.f.runTransaction(c.db, async (tx) => {
     const profile = await readProfile(tx, r);
     const existing = await tx.get(r.round(id));
-    const cloud = dataOf(await tx.get(r.state()));
+    const cloud = normalizeFulger(dataOf(await tx.get(r.state())));
     const week = withWeekBest(cloud.week, round) ?? cloud.week ?? {};
     tx.set(r.round(id), toCloudRound(round));
-    tx.set(r.state(), { ...mergeFulgerState(cloud, local), week });
+    tx.set(r.state(), { ...mergeFulgerState(cloud, local), week }); // scrisă înapoi normalizată: documentul vechi se migrează
     if (!existing.exists()) tx.update(r.profile(), { rounds: (profile.rounds ?? 0) + 1 });
   });
 }
@@ -329,25 +341,25 @@ async function clearRounds(c) {
 
 const entryBase = (c, profile) => ({ uid: c.uid, pid: c.pid, nickname: profile.nickname, avatar: profile.avatar, updatedAt: c.f.serverTimestamp() });
 
-/** Calcul fulger: „tot timpul” din recordul permanent, săptămâna din cea mai bună rundă a ei; scorul doar crește. */
-async function pushBoards(c, levels) {
+/**
+ * Calcul fulger, pe temele date: pe fiecare nivel „tot timpul” din recordul permanent și săptămâna din cea mai bună rundă a ei, plus
+ * totalul temei pe ambele perioade; scorul doar crește. În aceeași tranzacție se șterg intrările din clasamentele vechi sau prea vechi.
+ */
+async function pushBoards(c, topics) {
   const local = getFulger();
   const r = refs(c);
   const boards = await c.f.runTransaction(c.db, async (tx) => {
     const profile = await readProfile(tx, r);
-    const cloud = dataOf(await tx.get(r.state()));
-    if (!profile.showOnBoards) return null;
+    const cloud = normalizeFulger(dataOf(await tx.get(r.state())));
     const { best } = mergeFulgerState(cloud, local);
-    const wanted = levels.flatMap((level) => fulgerCandidates(level, { best, week: cloud.week }, local.rounds));
-    if (!wanted.length) return null;
+    const wanted = profile.showOnBoards ? topics.flatMap((topic) => fulgerCandidates(topic, { best, week: cloud.week }, local.rounds)) : [];
+    if (!wanted.length && !(profile.boards ?? []).some(isRetiredBoard)) return null;
     const entries = [];
     for (const [board] of wanted) entries.push(await tx.get(r.entry(board)));
     const writes = wanted.filter(([, top], i) => !entries[i].exists() || top.score > entries[i].data().score);
-    if (!writes.length) return null;
     const { keep, dropped } = pruneBoards([...(profile.boards ?? []), ...writes.map(([board]) => board)]);
-    for (const [board, top] of writes) {
-      tx.set(r.entry(board), { ...entryBase(c, profile), score: Math.min(top.score, 3000), correct: Math.min(top.correct, 500), bestStreak: Math.min(top.bestStreak, 500) });
-    }
+    if (!writes.length && !dropped.length) return null;
+    for (const [board, top] of writes) tx.set(r.entry(board), { ...entryBase(c, profile), ...top });
     for (const board of dropped) tx.delete(r.entry(board));
     if (!sameData(keep, profile.boards ?? [])) tx.update(r.profile(), { boards: keep });
     return keep;
@@ -372,7 +384,9 @@ async function pushStars(c) {
       next = next.filter((b) => b !== TESTS_BOARD);
     } else {
       tx.set(r.entry(TESTS_BOARD), { ...entryBase(c, profile), score: Math.min(stars, 1000), tests: Math.min(tests, 1000) });
-      next = pruneBoards([...next, TESTS_BOARD]).keep;
+      const pruned = pruneBoards([...next, TESTS_BOARD]);
+      for (const board of pruned.dropped) tx.delete(r.entry(board)); // scoase din listă, deci și din clasament
+      next = pruned.keep;
     }
     if (!sameData(next, profile.boards ?? [])) tx.update(r.profile(), { boards: next });
     return next;

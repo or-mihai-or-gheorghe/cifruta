@@ -1,5 +1,7 @@
-// Calcul fulger: hub-ul cu nivelurile (#/fulger), runda (#/fulger/<nivel>) și rezultatele ei.
+// Calcul fulger: lista temelor (#/fulger), hub-ul unei teme cu nivelurile ei (#/fulger/<temă>), runda (#/fulger/<temă>/<nivel>)
+// și rezultatele ei. Rutele de dinainte de teme (#/fulger/<nivel>) duc la tema în care au intrat rezultatele vechi.
 
+import concepts, { GRADES } from '../../data/concepts.js';
 import config from '../../data/fulger.js';
 import { boardLink } from '../components/board-link.js';
 import { clearHistoryButton } from '../components/history.js';
@@ -7,55 +9,132 @@ import { backLink, callout, chip, confetti, levelInfo, levelPill, mascot, stars 
 import { countUp, h, pop, prefersReducedMotion } from '../core/dom.js';
 import { seededRandom } from '../core/rng.js';
 import { cantitate, formatDateTime, formatNumber } from '../core/ro.js';
-import { refresh } from '../core/router.js';
+import { redirect, refresh } from '../core/router.js';
 import { play } from '../core/sound.js';
 import { clearFulger, getFulger, saveFulgerRound } from '../core/storage.js';
-import { levelConfig, medalsFor, nextStar, practiceFor, starsFor } from '../fulger/engine.js';
+import { levelConfig, medalsFor, nextStar, playableTopics, practiceFor, starsFor, topicConfig, topicStars, topicTotal } from '../fulger/engine.js';
 import { KINDS } from '../fulger/kinds.js';
+import { LEGACY_TOPIC, LEVEL_IDS, recordKey } from '../fulger/records.js';
 import { mountArena } from '../fulger/view.js';
 import { emojiHTML } from '../visuals/emoji.js';
 import { visualSVG } from '../visuals/index.js';
 
 const alune = (n) => cantitate(n, 'alună', 'alune');
+const levelLabel = (id) => levelInfo(id)?.label ?? id;
 
-export default function fulger(container, [levelId] = []) {
-  const lvl = levelId ? levelConfig(levelId) : null;
-  return lvl ? roundPage(container, lvl) : hubPage(container);
+export default function fulger(container, [first, second] = []) {
+  if (!first) return topicsPage(container);
+  if (LEVEL_IDS.includes(first)) return redirect(`fulger/${LEGACY_TOPIC}/${first}`);
+  const topic = topicConfig(first);
+  if (!topic || topic.soon) return redirect('fulger');
+  if (!second) return topicPage(container, topic);
+  const lvl = levelConfig(topic.id, second);
+  return lvl ? roundPage(container, topic, lvl) : redirect(`fulger/${topic.id}`);
 }
 
-// ——— Hub ———
+// ——— Lista temelor și hub-ul unei teme ———
 
-function hubPage(container) {
+const HOW = [
+  ['cronometru', '2 minute', 'Rezolvă cât mai multe operații.'],
+  ['foc', 'Serii', 'Corect de mai multe ori la rând: alunele cresc de 1,5, de 2, apoi de 3 ori.'],
+  ['fulger', 'Fulgere', 'Repede și în serie: alune duble.'],
+];
+
+function hero(title, text) {
+  return h(
+    'section',
+    { class: 'fg-hub__hero anim-fade-up' },
+    h('div', { class: 'fg-hub__bolt', 'aria-hidden': 'true', html: emojiHTML('fulger') }),
+    h('div', { class: 'l-stack l-stack--sm' }, h('h1', { class: 'fg-hub__title' }, title), h('p', { class: 'fg-hub__text' }, text)),
+    h('div', { class: 'fg-hub__mascot', 'aria-hidden': 'true', html: visualSVG({ v: 'mascot', mood: 'sarbatoreste' }) }),
+  );
+}
+
+const howTo = () =>
+  h(
+    'ul',
+    { class: 'fg-how' },
+    HOW.map(([icon, title, text]) =>
+      h('li', { class: 'fg-how__item' }, h('span', { class: 'fg-how__icon', 'aria-hidden': 'true', html: emojiHTML(icon) }), h('span', {}, h('strong', { class: 'fg-how__title' }, title), h('span', { class: 'fg-how__text' }, text))),
+    ),
+  );
+
+function topicHead(topic) {
+  return h(
+    'div',
+    { class: 'fg-topic__head' },
+    h('span', { class: 'c-card__icon', 'aria-hidden': 'true', html: emojiHTML(topic.icon ?? 'calcul') }),
+    h('div', {}, h('h3', { class: 'c-card__title' }, topic.title), h('span', { class: 'u-small u-muted' }, `Programa: ${GRADES[topic.grade]}`)),
+  );
+}
+
+function topicCard(topic, data) {
+  if (topic.soon) {
+    return h(
+      'article',
+      { class: 'c-card c-card--soon fg-topic', 'data-testid': `fg-topic-${topic.id}` },
+      topicHead(topic),
+      h('p', { class: 'c-card__text' }, topic.text),
+      h('div', { class: 'c-card__footer l-cluster' }, chip('în curând', 'c-chip--soon')),
+    );
+  }
+  const total = topicTotal(topic.id, data.best);
+  return h(
+    'a',
+    { class: 'c-card c-card--link fg-topic', href: `#/fulger/${topic.id}`, 'data-testid': `fg-topic-${topic.id}` },
+    topicHead(topic),
+    h('p', { class: 'c-card__text' }, topic.text),
+    h(
+      'div',
+      { class: 'c-card__footer l-cluster' },
+      chip(`${topicStars(topic.id, data.best)} din ${cantitate(topic.levels.length * 3, 'stea', 'stele')}`, '', 'stea'),
+      total ? chip(`Total: ${alune(total)}`, '', 'trofeu') : chip('Nou!', 'c-chip--soon'),
+    ),
+  );
+}
+
+function topicsPage(container) {
   document.title = 'Calcul fulger — Cifruța';
   const data = getFulger();
-  const how = [
-    ['cronometru', '2 minute', 'Rezolvă cât mai multe operații.'],
-    ['foc', 'Serii', 'Corect de mai multe ori la rând: alunele cresc de 1,5, de 2, apoi de 3 ori.'],
-    ['fulger', 'Fulgere', 'Repede și în serie: alune duble.'],
-  ];
+  const first = playableTopics()[0];
   container.append(
     h(
       'div',
       { class: 'l-container l-stack l-stack--lg' },
       backLink('#/', 'Pagina de început'),
+      hero('Calcul fulger', 'Câte operații rezolvi în 2 minute? Alege o temă, strânge alune, fă serii și bate-ți recordul!'),
+      howTo(),
       h(
         'section',
-        { class: 'fg-hub__hero anim-fade-up' },
-        h('div', { class: 'fg-hub__bolt', 'aria-hidden': 'true', html: emojiHTML('fulger') }),
-        h('div', { class: 'l-stack l-stack--sm' }, h('h1', { class: 'fg-hub__title' }, 'Calcul fulger'), h('p', { class: 'fg-hub__text' }, 'Câte operații rezolvi în 2 minute? Strânge alune, fă serii și bate-ți recordul!')),
-        h('div', { class: 'fg-hub__mascot', 'aria-hidden': 'true', html: visualSVG({ v: 'mascot', mood: 'sarbatoreste' }) }),
+        { class: 'l-stack l-stack--sm' },
+        h('h2', { class: 'fg-h2' }, 'Alege tema'),
+        h('div', { class: 'l-grid anim-stagger', style: { '--grid-min': '16rem' } }, config.topics.map((t) => topicCard(t, data))),
       ),
-      h(
-        'ul',
-        { class: 'fg-how' },
-        how.map(([icon, title, text]) =>
-          h('li', { class: 'fg-how__item' }, h('span', { class: 'fg-how__icon', 'aria-hidden': 'true', html: emojiHTML(icon) }), h('span', {}, h('strong', { class: 'fg-how__title' }, title), h('span', { class: 'fg-how__text' }, text))),
-        ),
-      ),
-      h('div', { class: 'l-grid anim-stagger', style: { '--grid-min': '15rem' } }, config.levels.map((l) => levelCard(l, data))),
-      boardLink('fulger/usor/week', { row: 'center' }),
+      first ? boardLink(`fulger/${first.id}/total/week`, { row: 'center' }) : null,
       medalShelf(data),
-      parentsBox(data),
+      parentsBox(data.rounds, { clear: true }),
+    ),
+  );
+}
+
+function topicPage(container, topic) {
+  document.title = `Calcul fulger · ${topic.short} — Cifruța`;
+  const data = getFulger();
+  container.append(
+    h(
+      'div',
+      { class: 'l-container l-stack l-stack--lg' },
+      backLink('#/fulger', 'Toate temele'),
+      hero(topic.title, topic.text),
+      h(
+        'section',
+        { class: 'l-stack l-stack--sm' },
+        h('h2', { class: 'fg-h2' }, 'Ce exersăm'),
+        h('ul', { class: 'fg-concepts', 'data-testid': 'fg-concepts' }, topic.concepts.map((id) => h('li', {}, chip(concepts[id]?.title ?? id)))),
+      ),
+      h('div', { class: 'l-grid anim-stagger', style: { '--grid-min': '15rem' } }, topic.levels.map((l) => levelCard(topic, l, data))),
+      boardLink(`fulger/${topic.id}/total/week`, { row: 'center' }),
+      parentsBox(data.rounds.filter((r) => r.topic === topic.id), { topic }),
     ),
   );
 }
@@ -67,16 +146,16 @@ function sample(kind, seed) {
   return h('li', { class: 'fg-sample' }, content);
 }
 
-function levelCard(lvl, data) {
-  const best = data.best[lvl.id]?.alune ?? null;
+function levelCard(topic, lvl, data) {
+  const best = data.best[recordKey(topic.id, lvl.id)]?.alune ?? null;
   const examples = ['choice', 'compare', 'sort'].map((mode) => lvl.mix.find((m) => KINDS[m.kind].mode === mode)?.kind).filter(Boolean);
   return h(
     'article',
     { class: 'c-card fg-level', 'data-level': lvl.id, 'data-testid': `fg-card-${lvl.id}` },
-    h('div', { class: 'fg-level__head' }, levelPill(lvl.id), stars(best === null ? 0 : starsFor(lvl.id, best))),
+    h('div', { class: 'fg-level__head' }, levelPill(lvl.id), stars(best === null ? 0 : starsFor(lvl, best))),
     h('ul', { class: 'fg-samples', 'aria-label': 'Exemple de întrebări' }, examples.map((kind, i) => sample(kind, 11 + i))),
     h('p', { class: 'fg-level__best', 'data-testid': `fg-best-${lvl.id}` }, best === null ? chip('Nou!', 'c-chip--soon') : chip(`Record: ${alune(best)}`, '', 'trofeu')),
-    h('a', { class: 'c-btn c-btn--primary c-btn--lg fg-level__play', href: `#/fulger/${lvl.id}`, 'data-testid': `fg-level-${lvl.id}` }, 'Joacă'),
+    h('a', { class: 'c-btn c-btn--primary c-btn--lg fg-level__play', href: `#/fulger/${topic.id}/${lvl.id}`, 'data-testid': `fg-level-${lvl.id}` }, 'Joacă'),
   );
 }
 
@@ -101,9 +180,11 @@ function medalShelf(data) {
   );
 }
 
-function parentsBox(data) {
-  const rounds = data.rounds.slice(-10).reverse();
-  const practice = practiceFor(data.rounds);
+/** „Pentru părinți”: ultimele runde (ale unei teme sau ale tuturor), tipurile de exersat și, pe lista temelor, ștergerea. */
+function parentsBox(rounds, { topic = null, clear = false } = {}) {
+  const last = rounds.slice(-10).reverse();
+  const practice = practiceFor(rounds);
+  const title = (r) => (topic ? levelLabel(r.level) : `${topicConfig(r.topic)?.short ?? r.topic} · ${levelLabel(r.level)}`);
   return h(
     'details',
     { class: 'c-explain', 'data-testid': 'parents' },
@@ -111,24 +192,25 @@ function parentsBox(data) {
     h(
       'div',
       { class: 'c-explain__body' },
-      h('p', { class: 'u-small u-muted' }, 'Rundele se salvează doar în acest browser. O stea înseamnă un copil sigur pe răspunsuri, trei stele unul sigur și foarte rapid; atingerile la întâmplare nu ajung la stele.'),
-      rounds.length
+      h('p', { class: 'u-small u-muted' }, 'O stea înseamnă un copil sigur pe răspunsuri, trei stele unul sigur și foarte rapid; atingerile la întâmplare nu ajung la stele.'),
+      topic ? h('p', { class: 'u-small' }, `Programa: ${GRADES[topic.grade]} · ${topic.concepts.map((id) => concepts[id]?.title ?? id).join('; ')}.`) : null,
+      last.length
         ? h(
             'ul',
             { class: 'c-history' },
-            rounds.map((r) =>
+            last.map((r) =>
               h(
                 'li',
                 { class: 'c-history__row' },
-                h('span', {}, h('strong', {}, levelInfo(r.level)?.label ?? r.level), ` — ${formatDateTime(r.at)} · ${alune(r.total)} · ${r.correct} corecte din ${r.correct + r.wrong}`),
+                h('span', {}, h('strong', {}, title(r)), ` — ${formatDateTime(r.at)} · ${alune(r.total)} · ${r.correct} corecte din ${r.correct + r.wrong}`),
                 stars(r.stars ?? 0),
               ),
             ),
           )
         : h('p', { class: 'u-muted' }, 'Nu există runde salvate.'),
       practice.length ? h('p', {}, h('strong', {}, 'De exersat: '), practice.map((p) => `${p.label} (${p.correct} din ${p.total})`).join(' · ')) : null,
-      rounds.length
-        ? h('div', { class: 'l-cluster' }, clearHistoryButton({ label: 'Șterge rundele', title: 'Ștergi rundele?', text: 'Se șterg rundele, recordurile și medaliile de la Calcul fulger.', testid: 'fg-clear', action: clearFulger }))
+      clear && rounds.length
+        ? h('div', { class: 'l-cluster' }, clearHistoryButton({ label: 'Șterge rundele', title: 'Ștergi rundele?', text: 'Se șterg rundele, recordurile și medaliile de la Calcul fulger, din toate temele.', testid: 'fg-clear', action: clearFulger }))
         : null,
     ),
   );
@@ -136,20 +218,22 @@ function parentsBox(data) {
 
 // ——— Runda ———
 
-function roundPage(container, lvl) {
-  document.title = `Calcul fulger · ${levelInfo(lvl.id)?.label ?? lvl.id} — Cifruța`;
+function roundPage(container, topic, lvl) {
+  document.title = `Calcul fulger · ${topic.short} · ${levelLabel(lvl.id)} — Cifruța`;
   document.body.classList.add('is-game');
   const pending = new Set(); // opririle numărătorii de la rezultate
   let arena = mountArena(container, {
+    topic: topic.id,
+    topicTitle: topic.short,
     level: lvl.id,
-    best: getFulger().best[lvl.id]?.alune ?? null,
+    best: getFulger().best[recordKey(topic.id, lvl.id)]?.alune ?? null,
     onEnd(summary) {
       arena?.destroy();
       arena = null;
       document.body.classList.remove('is-game');
       container.replaceChildren();
       window.scrollTo(0, 0);
-      results(container, lvl, summary, pending);
+      results(container, topic, lvl, summary, pending);
     },
   });
   if (new URLSearchParams(location.search).has('debug')) window.__dbg = { fulger: arena.debug };
@@ -175,17 +259,17 @@ function precisionHint(summary) {
 
 /** „Încă 12 alune și prinzi a doua stea.”: ținta pentru runda următoare. */
 function targetLine(lvl, summary) {
-  const next = nextStar(lvl.id, summary.total);
+  const next = nextStar(lvl, summary.total);
   if (!next || !summary.answered) return null;
   return h('p', { class: 'fg-target', 'data-testid': 'fg-next-star' }, `Încă ${alune(next.at - summary.total)} și prinzi ${STAR_WORDS[next.index]} stea.`);
 }
 
-/** Pasul următor: după 3 stele, nivelul următor; fără nicio stea (din cel puțin 5 răspunsuri), nivelul mai ușor. */
-function suggestion(lvl, summary) {
-  const i = config.levels.indexOf(lvl);
-  const target = summary.stars === 3 ? config.levels[i + 1] : summary.stars === 0 && summary.answered >= 5 ? config.levels[i - 1] : null;
+/** Pasul următor în temă: după 3 stele, nivelul următor; fără nicio stea (din cel puțin 5 răspunsuri), nivelul mai ușor. */
+function suggestion(topic, lvl, summary) {
+  const i = topic.levels.indexOf(lvl);
+  const target = summary.stars === 3 ? topic.levels[i + 1] : summary.stars === 0 && summary.answered >= 5 ? topic.levels[i - 1] : null;
   if (!target) return null;
-  return h('a', { class: `c-btn c-btn--lg${summary.stars === 3 ? ' c-btn--accent' : ''}`, href: `#/fulger/${target.id}`, 'data-testid': 'fg-suggest' }, `Încearcă nivelul ${levelInfo(target.id)?.label ?? target.id}`);
+  return h('a', { class: `c-btn c-btn--lg${summary.stars === 3 ? ' c-btn--accent' : ''}`, href: `#/fulger/${topic.id}/${target.id}`, 'data-testid': 'fg-suggest' }, `Încearcă nivelul ${levelLabel(target.id)}`);
 }
 
 /** O greșeală: operația cu răspunsul corect evidențiat și ce a ales copilul. */
@@ -215,17 +299,18 @@ function mistakesSection(summary) {
   );
 }
 
-function results(container, lvl, summary, pending) {
+function results(container, topic, lvl, summary, pending) {
+  const key = recordKey(topic.id, lvl.id);
   const before = getFulger();
   const at = new Date().toISOString();
-  const last = before.rounds.filter((r) => r.level === lvl.id).at(-1)?.total ?? null;
+  const last = before.rounds.filter((r) => r.topic === topic.id && r.level === lvl.id).at(-1)?.total ?? null;
   let saved = null;
   let earned = [];
   if (summary.answered > 0) {
-    const previous = before.best[lvl.id]?.alune ?? 0;
-    const best = summary.total > previous ? { ...before.best, [lvl.id]: { alune: summary.total, at } } : before.best;
+    const previous = before.best[key]?.alune ?? 0;
+    const best = summary.total > previous ? { ...before.best, [key]: { alune: summary.total, at } } : before.best;
     earned = medalsFor(summary, { rounds: before.rounds.length + 1, best }).filter((id) => !before.medals[id]);
-    const round = { level: lvl.id, at, total: summary.total, correct: summary.correct, wrong: summary.wrong, bestStreak: summary.bestStreak, fast: summary.fast, stars: summary.stars, byKind: summary.byKind };
+    const round = { topic: topic.id, level: lvl.id, at, total: summary.total, correct: summary.correct, wrong: summary.wrong, bestStreak: summary.bestStreak, fast: summary.fast, stars: summary.stars, byKind: summary.byKind };
     saved = saveFulgerRound(round, { keep: config.keepRounds, medals: earned });
   }
   const reduced = prefersReducedMotion();
@@ -295,6 +380,7 @@ function results(container, lvl, summary, pending) {
     'section',
     { class: 'fg-score-card', 'data-level': lvl.id, 'data-testid': 'fg-results' },
     h('h1', { class: 'fg-score-card__title' }, 'Gata, timpul a expirat!'),
+    h('p', { class: 'u-small u-muted' }, topic.title),
     levelPill(lvl.id),
     h('ol', { class: 'fg-tally' }, rows.map((r) => r.el)),
     total,
@@ -314,8 +400,8 @@ function results(container, lvl, summary, pending) {
       { class: 'l-container l-container--narrow l-stack l-stack--lg fg-results' },
       card,
       saved && !saved.saved ? callout('warn', 'capcana', 'Runda nu s-a putut salva în acest browser (stocare plină sau blocată).') : null,
-      h('div', { class: 'l-cluster l-cluster--center' }, again, suggestion(lvl, summary) ?? h('a', { class: 'c-btn c-btn--lg', href: '#/fulger', 'data-testid': 'fg-levels' }, 'Alt nivel')),
-      summary.answered ? boardLink(`fulger/${lvl.id}/week`, { row: 'center' }) : null,
+      h('div', { class: 'l-cluster l-cluster--center' }, again, suggestion(topic, lvl, summary) ?? h('a', { class: 'c-btn c-btn--lg', href: `#/fulger/${topic.id}`, 'data-testid': 'fg-levels' }, 'Alt nivel')),
+      summary.answered ? boardLink(`fulger/${topic.id}/${lvl.id}/week`, { row: 'center' }) : null,
       buddy,
       summary.answered
         ? h(

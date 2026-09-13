@@ -1,17 +1,24 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
+import concepts from '../site/data/concepts.js';
 import config from '../site/data/fulger.js';
 import { calc, relation } from '../site/js/core/expr.js';
 import { seededRandom } from '../site/js/core/rng.js';
 import { trecere } from '../site/js/core/rules.js';
-import { createRound, medalsFor, milestone, nextStar, pauseAfter, practiceFor, precisionBonus, scoreAnswer, starsFor } from '../site/js/fulger/engine.js';
+import {
+  createRound, levelConfig, medalsFor, milestone, nextStar, pauseAfter, playableTopics, practiceFor, precisionBonus, scoreAnswer, starsFor,
+  topicConfig, topicStars, topicTotal,
+} from '../site/js/fulger/engine.js';
 import { KINDS } from '../site/js/fulger/kinds.js';
+import { LEGACY_TOPIC, LEVEL_IDS, normalizeFulger, recordKey, splitKey } from '../site/js/fulger/records.js';
 import { EMOJI } from '../site/js/visuals/emoji.js';
 
 const SEEDS = 500;
 const terms = (text) => text.split(/ [+−] /).map(Number);
 const inRange = (x, min, max) => Number(x) >= min && Number(x) <= max;
+const FARA = 'mat.op.fara-trecere';
+const CU = 'mat.op.cu-trecere';
 
 // Regulile fiecărui tip, verificate pe întrebările generate
 const RULES = {
@@ -46,6 +53,12 @@ const RULES = {
   'sort-4-dir': ({ numbers }) => numbers.length === 4 && numbers.every((x) => inRange(x, 0, 100)),
 };
 
+/** Trecerea peste ordin a unui calcul din text: pe coloane la doi termeni, prin suma unităților la trei. */
+function carries(text) {
+  const t = terms(text);
+  return t.length === 2 ? trecere(text.includes('−') ? '-' : '+', t[0], t[1]) : t.reduce((s, x) => s + (x % 10), 0) >= 10;
+}
+
 /** Un răspuns greșit la întâmplare. */
 function wrongAnswer(q, rand) {
   const pick = (list) => list[Math.floor(rand() * list.length)];
@@ -66,12 +79,14 @@ function guessAnswer(q, rand) {
   return order;
 }
 
-test('fulger: fiecare tip generează întrebări corecte, în limitele lui (500 de semințe)', () => {
+test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu conceptele potrivite (500 de semințe)', () => {
   assert.deepEqual(Object.keys(RULES).sort(), Object.keys(KINDS).sort(), 'fiecare tip are regulile lui în test');
   for (const [id, kind] of Object.entries(KINDS)) {
+    assert.ok(kind.concepts?.length && kind.concepts.every((c) => concepts[c]), `${id}: concepte din data/concepts.js`);
     const positions = [0, 0, 0, 0];
     const relations = { '<': 0, '=': 0, '>': 0 };
     const dirs = new Set();
+    const carry = { cu: 0, fara: 0 };
     for (let seed = 1; seed <= SEEDS; seed++) {
       const q = kind.generate(seededRandom(seed));
       const where = `${id} (sămânța ${seed}): ${JSON.stringify(q)}`;
@@ -83,6 +98,7 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui (500 
         assert.ok(q.choices.includes(q.answer) && q.choices.every((c) => Number.isInteger(c) && c >= 0), where);
         assert.deepEqual(q.choices, [...q.choices].sort((a, b) => a - b), where);
         positions[q.choices.indexOf(q.answer)]++;
+        carry[carries(q.text) ? 'cu' : 'fara']++;
       } else if (q.mode === 'compare') {
         assert.equal(q.answer, relation(calc(q.left), calc(q.right)), where);
         relations[q.answer]++;
@@ -95,6 +111,8 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui (500 
     }
     if (kind.mode === 'choice') {
       assert.ok(positions.every((n) => n >= SEEDS * 0.15 && n <= SEEDS * 0.35), `${id}: răspunsul corect pe pozițiile 1–4: ${positions}`);
+      // „fără trecere” doar dacă nu apare niciodată trecerea, „cu trecere” doar dacă apare mereu, amândouă dacă apar amândouă
+      assert.deepEqual([kind.concepts.includes(FARA), kind.concepts.includes(CU)], [carry.fara > 0, carry.cu > 0], `${id}: etichetele de trecere față de ${JSON.stringify(carry)}`);
     }
     if (kind.mode === 'compare') assert.ok(Object.values(relations).every((n) => n >= SEEDS * 0.1), `${id}: semnele ${JSON.stringify(relations)}`);
     if (id === 'sort-4-dir') assert.deepEqual([...dirs].sort(), ['asc', 'desc']);
@@ -135,41 +153,47 @@ test('fulger: pragurile de serie și Turbo', () => {
 
 test('fulger: runda e deterministă, începe cu încălzirea și nu repetă întrebările recente', () => {
   const keys = (seed) => {
-    const round = createRound({ level: 'intermediar', seed });
+    const round = createRound({ topic: LEGACY_TOPIC, level: 'intermediar', seed });
     return Array.from({ length: 40 }, () => round.answer(round.next().answer, 2000).question.key);
   };
   assert.deepEqual(keys(42), keys(42));
   assert.notDeepEqual(keys(42), keys(43));
-  for (const lvl of config.levels) {
-    const round = createRound({ level: lvl.id, seed: 7 });
-    const recent = [];
-    for (let i = 0; i < 1500; i++) {
-      const q = round.next();
-      if (i < config.warmupCount) assert.ok(lvl.warmup.includes(q.kind), `${lvl.id}: încălzirea începe cu ${q.kind}`);
-      assert.ok(!recent.includes(q.key), `${lvl.id}: ${q.key} revine printre ultimele ${config.noRepeat} întrebări`);
-      recent.push(q.key);
-      if (recent.length > config.noRepeat) recent.shift();
-      round.answer(q.answer, 1000);
+  for (const topic of playableTopics()) {
+    for (const lvl of topic.levels) {
+      const round = createRound({ topic: topic.id, level: lvl.id, seed: 7 });
+      const recent = [];
+      for (let i = 0; i < 1500; i++) {
+        const q = round.next();
+        if (i < config.warmupCount) assert.ok(lvl.warmup.includes(q.kind), `${topic.id}/${lvl.id}: încălzirea începe cu ${q.kind}`);
+        assert.ok(!recent.includes(q.key), `${topic.id}/${lvl.id}: ${q.key} revine printre ultimele ${config.noRepeat} întrebări`);
+        recent.push(q.key);
+        if (recent.length > config.noRepeat) recent.shift();
+        round.answer(q.answer, 1000);
+      }
     }
   }
-  assert.throws(() => createRound({ level: 'nu-exista' }));
+  assert.throws(() => createRound({ topic: LEGACY_TOPIC, level: 'nu-exista' }));
+  assert.throws(() => createRound({ topic: 'nu-exista', level: 'usor' }));
+  const soon = config.topics.find((t) => t.soon);
+  assert.throws(() => createRound({ topic: soon.id, level: 'usor' }), 'o temă „în curând” nu se joacă');
 });
 
 test('fulger: rezumatul adună alunele, seria cea mai lungă și bonusul de precizie', () => {
-  const round = createRound({ level: 'usor', seed: 3 });
+  const round = createRound({ topic: LEGACY_TOPIC, level: 'usor', seed: 3 });
   const rand = seededRandom(9);
   const results = Array.from({ length: 12 }, (_, i) => {
     const q = round.next();
     return round.answer(i === 4 ? wrongAnswer(q, rand) : q.answer, 1500);
   });
   const s = round.summary();
+  assert.deepEqual([s.topic, s.level], [LEGACY_TOPIC, 'usor']);
   assert.deepEqual([s.answered, s.correct, s.wrong, s.bestStreak], [12, 11, 1, 7]);
   assert.deepEqual([results[4].correct, results[4].streak, results[5].streak], [false, 0, 1]);
   assert.equal(s.alune, results.reduce((sum, r) => sum + r.alune, 0));
   assert.equal(s.base + s.speedBonus + s.streakBonus, s.alune);
   assert.equal(s.precisionBonus, Math.round(s.alune * 0.1)); // 11 din 12 corecte
   assert.equal(s.total, s.alune + s.precisionBonus);
-  assert.equal(s.stars, starsFor('usor', s.total));
+  assert.equal(s.stars, starsFor(levelConfig(LEGACY_TOPIC, 'usor'), s.total));
   assert.equal(Object.values(s.byKind).reduce((n, k) => n + k.total, 0), 12);
   assert.equal(s.mistakes.length, 1); // greșelile, pentru „Greșelile tale”
   assert.equal(s.mistakes[0].question.key, results[4].question.key);
@@ -177,33 +201,82 @@ test('fulger: rezumatul adună alunele, seria cea mai lungă și bonusul de prec
 });
 
 test('fulger: bonusul de precizie și stelele', () => {
+  const usor = levelConfig(LEGACY_TOPIC, 'usor');
   assert.equal(precisionBonus(9, 9, 100), 0); // prea puține răspunsuri
   assert.equal(precisionBonus(10, 10, 100), 20);
   assert.equal(precisionBonus(10, 9, 100), 10);
   assert.equal(precisionBonus(10, 8, 100), 0);
-  assert.equal(starsFor('usor', 29), 0);
-  assert.equal(starsFor('usor', 30), 1);
-  assert.equal(starsFor('avansat', 235), 3);
-  assert.deepEqual(nextStar('usor', 29), { index: 0, at: 30 });
-  assert.deepEqual(nextStar('usor', 80), { index: 2, at: 175 });
-  assert.equal(nextStar('usor', 175), null);
+  assert.equal(starsFor(usor, 29), 0);
+  assert.equal(starsFor(usor, 30), 1);
+  assert.equal(starsFor(levelConfig(LEGACY_TOPIC, 'avansat'), 235), 3);
+  assert.deepEqual(nextStar(usor, 29), { index: 0, at: 30 });
+  assert.deepEqual(nextStar(usor, 80), { index: 2, at: 175 });
+  assert.equal(nextStar(usor, 175), null);
 });
 
-test('fulger: configurația trimite doar la tipuri, iconițe și statistici cunoscute', () => {
+test('fulger: temele și nivelurile trimit doar la tipuri, concepte, iconițe și statistici cunoscute', () => {
   const stats = new Set(['rounds', 'bestStreak', 'fast', 'perfect', 'levels3']);
-  assert.deepEqual(config.levels.map((l) => l.id), ['usor', 'intermediar', 'avansat']);
-  for (const lvl of config.levels) {
-    for (const { kind, weight } of lvl.mix) assert.ok(KINDS[kind] && weight > 0, `${lvl.id}: ${kind}`);
-    for (const kind of lvl.warmup) assert.ok(lvl.mix.some((m) => m.kind === kind), `${lvl.id}: încălzirea ${kind} nu e în amestec`);
-    assert.ok(lvl.stars.length === 3 && lvl.stars.every((s, i) => i === 0 || s > lvl.stars[i - 1]), `${lvl.id}: pragurile de stele cresc`);
+  const reserved = new Set([...LEVEL_IDS, 'total', 'all']);
+  const ids = config.topics.map((t) => t.id);
+  assert.equal(new Set(ids).size, ids.length, 'id-urile temelor sunt unice');
+  const used = new Set();
+  for (const topic of config.topics) {
+    assert.match(topic.id, /^[a-z0-9]+(-[a-z0-9]+)*$/, topic.id);
+    assert.ok(!topic.id.split('-').some((s) => reserved.has(s)), `${topic.id}: un segment rezervat ar încurca rutele și clasamentele`);
+    assert.ok(topic.title && topic.short && topic.text && [0, 1, 2].includes(topic.grade), `${topic.id}: titlu, nume scurt, descriere, clasă`);
+    assert.ok(!topic.icon || EMOJI[topic.icon], `${topic.id}: iconița ${topic.icon}`);
+    assert.ok(topic.concepts?.length && topic.concepts.every((c) => concepts[c]), `${topic.id}: concepte din data/concepts.js`);
+    assert.equal(Boolean(topic.soon), !topic.levels, `${topic.id}: „în curând” exact când n-are niveluri`);
+    if (topic.soon) continue;
+    assert.deepEqual(topic.levels.map((l) => l.id), LEVEL_IDS, `${topic.id}: nivelurile`);
+    const kinds = new Set();
+    for (const lvl of topic.levels) {
+      for (const { kind, weight } of lvl.mix) {
+        assert.ok(KINDS[kind] && weight > 0, `${topic.id}/${lvl.id}: ${kind}`);
+        kinds.add(kind);
+        used.add(kind);
+      }
+      for (const kind of lvl.warmup) assert.ok(lvl.mix.some((m) => m.kind === kind), `${topic.id}/${lvl.id}: încălzirea ${kind} nu e în amestec`);
+      assert.ok(lvl.stars.length === 3 && lvl.stars.every((s, i) => i === 0 || s > lvl.stars[i - 1]), `${topic.id}/${lvl.id}: pragurile de stele cresc`);
+    }
+    const fromKinds = [...new Set([...kinds].flatMap((k) => KINDS[k].concepts))].sort();
+    assert.deepEqual(fromKinds, [...topic.concepts].sort(), `${topic.id}: conceptele temei sunt conceptele tipurilor ei`);
   }
+  assert.ok(topicConfig(LEGACY_TOPIC) && !topicConfig(LEGACY_TOPIC).soon, 'tema rezultatelor de dinainte de teme se poate juca');
+  assert.deepEqual(Object.keys(KINDS).filter((k) => !used.has(k)), [], 'fiecare tip e folosit într-o temă');
   for (const m of config.medals) assert.ok(EMOJI[m.icon] && stats.has(m.stat), `${m.id}: ${m.icon} / ${m.stat}`);
 });
 
-test('fulger: medaliile și tipurile de exersat', () => {
-  assert.deepEqual(medalsFor({ answered: 16, wrong: 0, bestStreak: 16, fast: 11 }, { rounds: 1, best: {} }), ['prima-cursa', 'in-flacari', 'fulgerul', 'fara-gres']);
-  const best = Object.fromEntries(config.levels.map((l) => [l.id, { alune: l.stars.at(-1) }]));
-  assert.deepEqual(medalsFor({ answered: 5, wrong: 2, bestStreak: 21, fast: 0 }, { rounds: 4, best }), ['prima-cursa', 'in-flacari', 'de-neoprit', 'campionul']);
+test('fulger: recordurile de dinainte de teme intră în tema lor; normalizarea e idempotentă', () => {
+  const key = (level) => recordKey(LEGACY_TOPIC, level);
+  const legacy = {
+    best: { usor: { alune: 77, at: 'a' }, [key('usor')]: { alune: 50, at: 'b' }, avansat: { alune: 10, at: 'c' } },
+    rounds: [{ level: 'usor', at: 'a', total: 77 }, { topic: 'alta', level: 'usor', at: 'd', total: 5 }],
+    medals: { 'prima-cursa': 'a' },
+    week: { usor: { id: '2026-W37', alune: 30 }, [key('usor')]: { id: '2026-W38', alune: 10 } },
+  };
+  const n = normalizeFulger(legacy);
+  assert.deepEqual(Object.keys(n.best).sort(), [key('avansat'), key('usor')]);
+  assert.equal(n.best[key('usor')].alune, 77); // aceeași înregistrare în ambele forme: câștigă recordul mai mare
+  assert.deepEqual(n.rounds.map((r) => r.topic), [LEGACY_TOPIC, 'alta']);
+  assert.equal(n.week[key('usor')].id, '2026-W38'); // la săptămână rămâne cea mai nouă
+  assert.deepEqual(n.medals, { 'prima-cursa': 'a' });
+  assert.deepEqual(normalizeFulger(n), n);
+  assert.deepEqual(normalizeFulger(), { best: {}, rounds: [], medals: {} });
+  assert.deepEqual(splitKey(key('avansat')), { topic: LEGACY_TOPIC, level: 'avansat' });
+  assert.deepEqual(splitKey('usor'), { topic: LEGACY_TOPIC, level: 'usor' });
+});
+
+test('fulger: medaliile comune temelor, totalul și stelele unei teme, tipurile de exersat', () => {
+  const topic = topicConfig(LEGACY_TOPIC);
+  const summary = (extra) => ({ topic: LEGACY_TOPIC, ...extra });
+  assert.deepEqual(medalsFor(summary({ answered: 16, wrong: 0, bestStreak: 16, fast: 11 }), { rounds: 1, best: {} }), ['prima-cursa', 'in-flacari', 'fulgerul', 'fara-gres']);
+  const best = Object.fromEntries(topic.levels.map((l) => [recordKey(LEGACY_TOPIC, l.id), { alune: l.stars.at(-1) }]));
+  assert.deepEqual(medalsFor(summary({ answered: 5, wrong: 2, bestStreak: 21, fast: 0 }), { rounds: 4, best }), ['prima-cursa', 'in-flacari', 'de-neoprit', 'campionul']);
+  const elsewhere = Object.fromEntries(topic.levels.map((l) => [recordKey('alta-tema', l.id), { alune: 9999 }]));
+  assert.ok(!medalsFor(summary({ answered: 5, wrong: 2, bestStreak: 1, fast: 0 }), { rounds: 4, best: elsewhere }).includes('campionul'), 'recordurile altei teme nu fac „Campionul” aici');
+  assert.equal(topicTotal(LEGACY_TOPIC, best), topic.levels.reduce((sum, l) => sum + l.stars.at(-1), 0));
+  assert.deepEqual([topicStars(LEGACY_TOPIC, best), topicStars(LEGACY_TOPIC, {}), topicTotal(LEGACY_TOPIC, {})], [9, 0, 0]);
   const rounds = [
     { byKind: { 'sub-100-cu': { correct: 2, total: 6, ms: 1 }, 'add-1c': { correct: 9, total: 10, ms: 1 } } },
     { byKind: { 'sub-100-cu': { correct: 1, total: 1, ms: 1 } } },
@@ -219,8 +292,8 @@ const honest = (accuracy, [lo, hi]) => (q, rand) => ({
 const guesser = (ms) => (q, rand) => ({ ms: q.mode === 'sort' ? (ms * q.numbers.length) / 2 : ms, given: guessAnswer(q, rand) });
 
 /** O rundă întreagă cu motorul real; timpul curge ca în interfață: întârzierea de la apariție, gândirea, pauza. */
-function playRound(level, seed, decide) {
-  const round = createRound({ level, seed });
+function playRound(topic, level, seed, decide) {
+  const round = createRound({ topic, level, seed });
   const rand = seededRandom(seed * 7 + 1);
   for (let t = 0; ; ) {
     const q = round.next();
@@ -230,18 +303,20 @@ function playRound(level, seed, decide) {
   }
 }
 
-test('fulger: pragurile de stele se potrivesc cu copiii simulați (mediana a 200 de runde)', () => {
-  const median = (level, decide) => Array.from({ length: 200 }, (_, i) => playRound(level, 101 + i, decide).total).sort((a, b) => a - b)[100];
-  for (const { id, stars: [one, two, three] } of config.levels) {
-    const m = {
-      rapid: median(id, honest(0.95, [0.6, 1.1])),
-      bun: median(id, honest(0.9, [0.9, 1.8])),
-      incet: median(id, honest(0.9, [1.6, 3])),
-      ghicitRepede: median(id, guesser(450)),
-      ghicitLent: median(id, guesser(900)),
-    };
-    const where = `${id}: ${JSON.stringify(m)}, praguri ${one}/${two}/${three}`;
-    assert.ok(m.rapid >= three && m.bun >= two && m.incet >= one, where);
-    assert.ok(m.ghicitRepede < one && m.ghicitLent < one, where);
+test('fulger: pragurile de stele se potrivesc cu copiii simulați (mediana a 200 de runde, pe fiecare temă și nivel)', () => {
+  for (const topic of playableTopics()) {
+    for (const { id, stars: [one, two, three] } of topic.levels) {
+      const median = (decide) => Array.from({ length: 200 }, (_, i) => playRound(topic.id, id, 101 + i, decide).total).sort((a, b) => a - b)[100];
+      const m = {
+        rapid: median(honest(0.95, [0.6, 1.1])),
+        bun: median(honest(0.9, [0.9, 1.8])),
+        incet: median(honest(0.9, [1.6, 3])),
+        ghicitRepede: median(guesser(450)),
+        ghicitLent: median(guesser(900)),
+      };
+      const where = `${topic.id}/${id}: ${JSON.stringify(m)}, praguri ${one}/${two}/${three}`;
+      assert.ok(m.rapid >= three && m.bun >= two && m.incet >= one, where);
+      assert.ok(m.ghicitRepede < one && m.ghicitLent < one, where);
+    }
   }
 });

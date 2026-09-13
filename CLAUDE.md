@@ -28,8 +28,9 @@ site/                      ← publicat
   js/types/<tip>/logic.js  logică pură (Node o poate importa): validate · count · answered · empty · solution · evaluate
   js/types/<tip>/view.js   DOM: mount(el, part, ctx) → { get, set, mode, showResult, destroy }
   js/visuals/              banca vizuală: registerVisual(nume, {render, label, demos}); all.js le importă pe toate
-  js/fulger/               Calcul fulger (joc de calcul pe viteză, #/fulger): kinds (întrebări generate cu sămânță) · engine
-                           (runda și punctajul, pur) · view (arena) · effects (particule, bannere); pagina e pages/fulger.js
+  js/fulger/               Calcul fulger (joc de calcul pe viteză, pe teme, #/fulger): kinds (întrebări generate cu sămânță, cu
+                           concepte) · engine (temele, runda și punctajul, pur) · records (chei „temă:nivel”, datele vechi) ·
+                           view (arena) · effects (particule, bannere); pagina e pages/fulger.js
   data/catalog.js          secțiuni → grupuri → teste · concepts.js (ID-uri de concepte) · scoring.js · demo.js · fulger.js (jocul)
   data/tests/<grup>/tN-nume.js   testele (NU le numi test-*.js)
 docs/  STARE.md · curriculum.md (harta conceptelor + surse) · cercetare.md · ghid-autor.md
@@ -65,9 +66,16 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
 - **Vizual nou:** `registerVisual` într-un modul din `js/visuals/`, culori din variabile `--v-*`, `demos` pentru atelier.
 - **Desen nou într-un exercițiu publicat:** `context.visual` / `part.visual` / `itemVisual` / `item.visual` / `bin.visual` din bancă;
   **nu** cere versiune nouă (răspunsurile și ciornele nu sunt afectate); `npm test` verifică numele desenului.
-- **Tip nou în Calcul fulger:** o intrare în `KINDS` (`js/fulger/kinds.js`: `label`, `points`, `fastMs`, `mode`, `generate(rand)` cu
-  răspunsul calculat și variante din greșeli tipice), o linie în `mix`-ul unui nivel din `data/fulger.js` și regulile tipului în
-  `RULES` din `tests/fulger.test.js`; testul de calibrare spune dacă pragurile de stele mai sunt potrivite.
+- **Tip nou în Calcul fulger:** o intrare în `KINDS` (`js/fulger/kinds.js`: `label`, `points`, `fastMs`, `mode`, `concepts` din
+  `data/concepts.js`, `generate(rand)` cu răspunsul calculat și variante din greșeli tipice), o linie în `mix`-ul unui nivel al unei
+  teme din `data/fulger.js` și regulile tipului în `RULES` din `tests/fulger.test.js`; testul de calibrare spune dacă pragurile de stele
+  mai sunt potrivite, iar conceptele temei trebuie să fie exact conceptele tipurilor ei (etichetele „fără / cu trecere” se verifică).
+- **Temă nouă în Calcul fulger:** tipurile ei în `KINDS`, apoi tema în `topics` din `data/fulger.js`: id permanent (fără segmentele
+  `usor`, `intermediar`, `avansat`, `total`, `all`), `title`, `short`, `text`, `icon`, `grade`, `concepts` și cele 3 niveluri cu `warmup`,
+  `mix`, `stars` (o temă `soon: true` n-are niveluri și apare doar ca „în curând”). Id-ul intră și în `fulgerTopics()` din
+  `firestore.rules` (un test le compară). Verificare: `npm test`, `npm run test:rules`, `npm run e2e`, `npm run e2e:cloud`; la publicare
+  **`npm run deploy:rules` înaintea lui `npm run deploy`**. Id-ul unei teme publicate nu se mai schimbă: e în cheile recordurilor
+  („temă:nivel”) și în id-urile clasamentelor.
 
 ## Capcane știute
 - `node --test` fără argumente ar prinde fișiere `test-*.js` — rulăm explicit `tests/**/*.test.js`.
@@ -122,7 +130,7 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   de timpul rundei (întârzierea de la apariție, pauzele după răspuns) se programează cu `after()` pe acest timp, nu cu `setTimeout`.
   Punctajul (viteza contează doar în serie), pauzele (1 s; „Hopa” la greșeli mai rapide decât cititul) și stelele vin din
   `engine.js` + `data/fulger.js`; pragurile de stele sunt verificate prin simulare în `tests/fulger.test.js`. Rundele stau în
-  `cifruta:fulger` și se șterg din hub, nu odată cu istoricul testelor. E2E: `?debug=1` → `window.__dbg.fulger` (`state`, `force`,
+  `cifruta:fulger` și se șterg din „Pentru părinți” de pe lista temelor (`#/fulger`, toate temele odată), nu odată cu istoricul testelor. E2E: `?debug=1` → `window.__dbg.fulger` (`state`, `force`,
   `elapse`, `setStreak`). Efectele trecătoare nu apar la mișcare redusă; bannerele se așază deasupra cardului, nu peste întrebare.
 - Calcul fulger pe dispozitive: Safari pe iOS pornește sunetul doar dintr-un gest încheiat, deci arena cheamă `unlockSound()` la
   Start și la ridicarea degetului (răspunsurile se iau la `pointerdown`). În rundă arena umple spațiul de sub antet prin flex
@@ -138,4 +146,7 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   `replaceChildren(null)` scrie textul „null”: listele de noduri se filtrează înainte. Blocarea stă în `blocked/{uid}`, nu în
   `users/{uid}`. Clasamentele se calculează din starea completă din cloud (`state/fulger` cu `best` și `week`, `state/tests`), nu din ce
   e în browser. Limitele de frecvență ale intrărilor (5 s la stele, 90 s la Calcul fulger) înseamnă reîncercări automate; un E2E care
-  schimbă aceeași intrare de două ori la rând trebuie să aștepte.
+  schimbă aceeași intrare de două ori la rând trebuie să aștepte. Calcul fulger are teme: recordurile și cele mai bune runde ale
+  săptămânii au chei „temă:nivel” (`js/fulger/records.js`), datele de dinainte de teme se normalizează la fiecare citire
+  (`normalizeFulger`), iar clasamentele sunt `fulger-<temă>-<nivel|total>-<perioadă>`; cele vechi (`fulger-<nivel>-…`) ies din lista
+  profilului și se șterg.

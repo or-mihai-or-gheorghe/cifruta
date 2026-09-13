@@ -45,9 +45,9 @@ function press(el, fn) {
   });
 }
 
-export function mountArena(host, { level, best = null, seed, onEnd }) {
-  const lvl = levelConfig(level);
-  const round = createRound({ level, seed });
+export function mountArena(host, { topic, topicTitle = '', level, best = null, seed, onEnd }) {
+  const lvl = levelConfig(topic, level);
+  const round = createRound({ topic, level, seed });
   const reduced = prefersReducedMotion();
   const timers = new Set();
   const later = (ms, fn) => {
@@ -143,7 +143,7 @@ export function mountArena(host, { level, best = null, seed, onEnd }) {
     h(
       'div',
       { class: 'fg-arena__inner' },
-      h('h1', { class: 'u-visually-hidden' }, `Calcul fulger · ${levelInfo(level)?.label ?? level}`),
+      h('h1', { class: 'u-visually-hidden' }, `Calcul fulger · ${topicTitle ? `${topicTitle} · ` : ''}${levelInfo(level)?.label ?? level}`),
       h('div', { class: 'fg-hud' }, timer, streakBox, basket, pauseBtn),
       track,
       h('div', { class: 'fg-stage' }, say, buddy, card, answers, cool),
@@ -160,7 +160,7 @@ export function mountArena(host, { level, best = null, seed, onEnd }) {
   // ——— start ———
   /** Ținta de pe panoul de start: recordul și steaua următoare. */
   function goal() {
-    const next = nextStar(level, best ?? 0);
+    const next = nextStar(lvl, best ?? 0);
     const record = best ? `Recordul tău: ${cantitate(best, 'alună', 'alune')}. ` : '';
     const star = next ? `${STAR_WORDS[next.index]} stea: ${cantitate(next.at, 'alună', 'alune')}.` : 'Ai toate stelele: poți bate recordul?';
     return h('p', { class: 'fg-panel__goal', 'data-testid': 'fg-goal' }, record + star);
@@ -174,6 +174,7 @@ export function mountArena(host, { level, best = null, seed, onEnd }) {
         { class: 'fg-panel anim-bounce-in' },
         h('div', { class: 'fg-panel__art', 'aria-hidden': 'true', html: visualSVG({ v: 'mascot', mood: 'vesela' }) }),
         h('h2', { class: 'fg-panel__title' }, 'Calcul fulger'),
+        topicTitle ? h('p', { class: 'u-small u-muted', 'data-testid': 'fg-topic' }, topicTitle) : null,
         levelPill(level),
         h('p', { class: 'fg-panel__text' }, 'Ai 2 minute. Răspunde corect de mai multe ori la rând: alunele cresc, iar fulgerul le dublează!'),
         goal(),

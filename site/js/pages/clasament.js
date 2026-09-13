@@ -1,26 +1,39 @@
-// Clasamentul (#/clasament/fulger/<nivel>/<week|all> și #/clasament/teste), doar pentru cei intrați în cont: porecla, avatarul
-// și scorul. Primele 20 de locuri, apoi locurile profilurilor familiei aflate mai jos.
+// Clasamentul (#/clasament/fulger/<temă>/<usor|intermediar|avansat|total>/<week|all> și #/clasament/teste), doar pentru cei intrați
+// în cont: porecla, avatarul și scorul. Primele 20 de locuri, apoi locurile profilurilor familiei aflate mai jos. Adresele de
+// dinainte de teme (#/clasament/fulger/<nivel>/<perioadă>) duc la tema în care au intrat rezultatele vechi.
 
-import fulgerConfig from '../../data/fulger.js';
 import { accountState, activeProfile, firebaseHandles, onAccountChange } from '../cloud/account.js';
 import { boardId, loadBoard } from '../cloud/boards.js';
 import { cloudConfigured } from '../cloud/config.js';
 import { backLink, callout, chip, levelInfo } from '../components/ui.js';
 import { escapeHTML, h } from '../core/dom.js';
 import { cantitate } from '../core/ro.js';
+import { redirect } from '../core/router.js';
+import { playableTopics, topicConfig } from '../fulger/engine.js';
+import { LEGACY_TOPIC, LEVEL_IDS } from '../fulger/records.js';
 import { emojiHTML } from '../visuals/emoji.js';
 
-const LEVEL_IDS = fulgerConfig.levels.map((l) => l.id);
 const PODIUM = ['aur', 'argint', 'bronz'];
+const SCOPES = [...LEVEL_IDS, 'total'];
 
-export default function clasament(container, [game = 'fulger', level = LEVEL_IDS[0], period = 'week']) {
-  const view = game === 'teste' ? { game: 'teste' } : { game: 'fulger', level: LEVEL_IDS.includes(level) ? level : LEVEL_IDS[0], period: period === 'all' ? 'all' : 'week' };
+export default function clasament(container, [game = 'fulger', first, second, third] = []) {
+  if (game === 'fulger' && LEVEL_IDS.includes(first)) return redirect(`clasament/fulger/${LEGACY_TOPIC}/${first}/${second === 'all' ? 'all' : 'week'}`);
+  const topics = playableTopics();
+  const chosen = topicConfig(first);
+  const view =
+    game === 'teste'
+      ? { game: 'teste' }
+      : { game: 'fulger', topic: chosen && !chosen.soon ? chosen.id : topics[0]?.id, level: SCOPES.includes(second) ? second : 'total', period: third === 'all' ? 'all' : 'week' };
   document.title = 'Clasament — Cifruța';
   const root = h('div', { class: 'l-container l-container--narrow l-stack l-stack--lg', 'data-testid': 'leaderboard' });
   container.append(root);
   let alive = true;
   let lastKey = null;
 
+  const route = (patch) => {
+    const v = { topic: view.topic ?? topics[0]?.id, level: view.level ?? 'total', period: view.period ?? 'week', ...patch };
+    return `#/clasament/fulger/${v.topic}/${v.level}/${v.period}`;
+  };
   const pill = (href, label, active, testid, lvl = null) =>
     h('a', { class: `lb-pill${active ? ' is-active' : ''}`, href, 'aria-current': active ? 'true' : null, 'data-testid': testid, 'data-level': lvl }, label);
 
@@ -30,14 +43,25 @@ export default function clasament(container, [game = 'fulger', level = LEVEL_IDS
     return h(
       'div',
       { class: 'l-stack l-stack--sm' },
-      h('nav', { class: 'c-tabs', 'aria-label': 'Jocul' }, tab(`#/clasament/fulger/${view.level ?? LEVEL_IDS[0]}/${view.period ?? 'week'}`, 'Calcul fulger', fulger, 'lb-tab-fulger'), tab('#/clasament/teste', 'Stele la teste', !fulger, 'lb-tab-teste')),
+      h('nav', { class: 'c-tabs', 'aria-label': 'Jocul' }, tab(route({}), 'Calcul fulger', fulger, 'lb-tab-fulger'), tab('#/clasament/teste', 'Stele la teste', !fulger, 'lb-tab-teste')),
       fulger
-        ? h(
-            'div',
-            { class: 'l-cluster lb-filters' },
-            h('div', { class: 'l-cluster', role: 'group', 'aria-label': 'Nivelul' }, LEVEL_IDS.map((id) => pill(`#/clasament/fulger/${id}/${view.period}`, levelInfo(id)?.label ?? id, id === view.level, `lb-level-${id}`, id))),
-            h('div', { class: 'l-cluster', role: 'group', 'aria-label': 'Perioada' }, pill(`#/clasament/fulger/${view.level}/week`, 'Săptămâna aceasta', view.period === 'week', 'lb-week'), pill(`#/clasament/fulger/${view.level}/all`, 'Tot timpul', view.period === 'all', 'lb-all')),
-          )
+        ? [
+            h('div', { class: 'l-cluster', role: 'group', 'aria-label': 'Tema' }, topics.map((t) => pill(route({ topic: t.id }), t.short, t.id === view.topic, `lb-topic-${t.id}`))),
+            h(
+              'div',
+              { class: 'l-cluster lb-filters' },
+              h(
+                'div',
+                { class: 'l-cluster', role: 'group', 'aria-label': 'Nivelul' },
+                LEVEL_IDS.map((id) => pill(route({ level: id }), levelInfo(id)?.label ?? id, id === view.level, `lb-level-${id}`, id)),
+                pill(route({ level: 'total' }), 'Total', view.level === 'total', 'lb-level-total'),
+              ),
+              h('div', { class: 'l-cluster', role: 'group', 'aria-label': 'Perioada' }, pill(route({ period: 'week' }), 'Săptămâna aceasta', view.period === 'week', 'lb-week'), pill(route({ period: 'all' }), 'Tot timpul', view.period === 'all', 'lb-all')),
+            ),
+            view.level === 'total'
+              ? h('p', { class: 'u-small u-muted' }, view.period === 'all' ? 'Totalul temei: recordurile celor trei niveluri, adunate.' : 'Totalul temei: cele mai bune runde ale săptămânii la cele trei niveluri, adunate.')
+              : null,
+          ]
         : h('p', { class: 'u-small u-muted' }, 'Pentru fiecare test contează cea mai bună încercare: o stea pe fiecare nivel, cel mult 3 stele pe test.'),
     );
   }
@@ -45,7 +69,7 @@ export default function clasament(container, [game = 'fulger', level = LEVEL_IDS
   function row(e, s) {
     const mine = e.uid === s.user.uid;
     const active = mine && e.pid === s.pid;
-    const tests = view.game === 'teste';
+    const extra = view.game === 'teste' ? `la ${cantitate(e.tests ?? 0, 'test', 'teste')}` : view.level === 'total' ? `la ${cantitate(e.levels ?? 0, 'nivel', 'niveluri')}` : `serie de ${e.bestStreak ?? 0}`;
     return h(
       'li',
       { class: `lb-row${mine ? ' is-mine' : ''}${active ? ' is-active' : ''}`, 'data-testid': `lb-row-${e.id}` },
@@ -55,22 +79,23 @@ export default function clasament(container, [game = 'fulger', level = LEVEL_IDS
         : h('span', { class: 'lb-place', 'aria-hidden': 'true' }, String(e.place)),
       h('span', { class: 'lb-avatar', 'aria-hidden': 'true', html: emojiHTML(e.avatar) }),
       h('span', { class: 'lb-name' }, h('strong', { class: 'u-break' }, e.nickname), active ? chip('tu', 'c-chip--ok') : mine ? chip('familia ta') : null),
-      h(
-        'span',
-        { class: 'lb-score' },
-        tests ? cantitate(e.score, 'stea', 'stele') : cantitate(e.score, 'alună', 'alune'),
-        h('small', { class: 'u-muted' }, tests ? `la ${cantitate(e.tests ?? 0, 'test', 'teste')}` : `serie de ${e.bestStreak ?? 0}`),
-      ),
+      h('span', { class: 'lb-score' }, view.game === 'teste' ? cantitate(e.score, 'stea', 'stele') : cantitate(e.score, 'alună', 'alune'), h('small', { class: 'u-muted' }, extra)),
     );
   }
 
   function empty() {
     const tests = view.game === 'teste';
+    const href = tests ? '#/' : view.level === 'total' ? `#/fulger/${view.topic}` : `#/fulger/${view.topic}/${view.level}`;
+    const text = tests
+      ? 'Încă nu are nimeni stele aici. Rezolvă un test și fii primul!'
+      : view.period === 'week'
+        ? 'Săptămâna aceasta n-a jucat încă nimeni aici. Fii primul!'
+        : 'Încă n-a jucat nimeni aici. Fii primul!';
     return h(
       'div',
       { class: 'c-card u-center lb-empty', 'data-testid': 'lb-empty' },
-      h('p', {}, tests ? 'Încă nu are nimeni stele aici. Rezolvă un test și fii primul!' : view.period === 'week' ? 'Săptămâna aceasta n-a jucat încă nimeni la acest nivel. Fii primul!' : 'Încă n-a jucat nimeni la acest nivel. Fii primul!'),
-      h('div', { class: 'l-cluster l-cluster--center' }, h('a', { class: 'c-btn c-btn--primary', href: tests ? '#/' : `#/fulger/${view.level}` }, tests ? 'Alege un test' : 'Joacă')),
+      h('p', {}, text),
+      h('div', { class: 'l-cluster l-cluster--center' }, h('a', { class: 'c-btn c-btn--primary', href }, tests ? 'Alege un test' : 'Joacă')),
     );
   }
 

@@ -1,15 +1,16 @@
-// Clasamentele, doar pentru cei intrați în cont: Calcul fulger pe fiecare nivel (săptămâna aceasta și tot timpul) și stelele de
-// la teste. Primele TOP intrări vin dintr-o interogare; locul unui profil propriu aflat mai jos, dintr-o numărare pe server.
-// Intrările le scrie cloud/sync.js; aici doar se citesc, cu o memorie scurtă, ca schimbarea filelor să nu recitească tot.
+// Clasamentele, doar pentru cei intrați în cont: Calcul fulger pe temă și nivel sau pe totalul temei (săptămâna aceasta și tot
+// timpul) și stelele de la teste. Primele TOP intrări vin dintr-o interogare; locul unui profil propriu aflat mai jos, dintr-o
+// numărare pe server. Intrările le scrie cloud/sync.js; aici doar se citesc, cu o memorie scurtă, ca schimbarea filelor să nu
+// recitească tot.
 
-import { entryId, isoWeek, rankEntries, TESTS_BOARD } from './logic.js';
+import { entryId, fulgerBoard, isoWeek, rankEntries, TESTS_BOARD } from './logic.js';
 
 export const TOP = 20;
 const FRESH_MS = 60_000;
 const cache = new Map();
 
-/** Id-ul clasamentului pentru filele paginii: { game: 'fulger' | 'teste', level, period: 'week' | 'all' }. */
-export const boardId = ({ game, level, period }) => (game === 'teste' ? TESTS_BOARD : `fulger-${level}-${period === 'all' ? 'all' : isoWeek()}`);
+/** Id-ul clasamentului pentru filele paginii: { game: 'fulger' | 'teste', topic, level: nivel | 'total', period: 'week' | 'all' }. */
+export const boardId = ({ game, topic, level, period }) => (game === 'teste' ? TESTS_BOARD : fulgerBoard(topic, level, period === 'all' ? 'all' : isoWeek()));
 
 /**
  * Primele TOP intrări, cu locul (la scor egal același loc; primul ajuns stă mai sus), și locurile profilurilor familiei aflate

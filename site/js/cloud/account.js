@@ -7,7 +7,7 @@ import { currentRoute, refresh } from '../core/router.js';
 import { clearAccountCopies, clearScopeData, moveDrafts, readScopeData, setScope, writeScopeData } from '../core/storage.js';
 import { cloudConfigured, USE_EMULATOR } from './config.js';
 import { loadFirebase } from './firebase.js';
-import { cleanNickname, combineData, freeProfileId, signInError } from './logic.js';
+import { cleanNickname, combineData, freeProfileId, isRetiredBoard, signInError } from './logic.js';
 import { readSession, sessionProfile, writeSession } from './session.js';
 import { deleteProfileCloud, flush, requestBoards, startSync, stopSync, uploadAll } from './sync.js';
 
@@ -47,7 +47,9 @@ const byId = (a, b) => a.id.localeCompare(b.id);
 
 function refreshIfSafe() {
   const route = currentRoute();
-  if (!QUIET.has(route.name) || route.params.length || document.body.classList.contains('is-game')) return;
+  // lista temelor și hub-ul unei teme (#/fulger/<temă>) se pot reîncărca; runda (#/fulger/<temă>/<nivel>) nu
+  const quiet = QUIET.has(route.name) && (route.params.length === 0 || (route.name === 'fulger' && route.params.length === 1));
+  if (!quiet || document.body.classList.contains('is-game')) return;
   refresh();
 }
 
@@ -87,7 +89,8 @@ export function connect() {
   connecting ??= loadFirebase().then(
     (loaded) => {
       fb = loaded;
-      if (USE_EMULATOR) window.__cloud = { signInAs, state: () => state, flush: () => flush() };
+      // doar pe emulator (E2E); flush așteaptă întâi confirmarea contului, ca după o reîncărcare sincronizarea să fie pornită
+      if (USE_EMULATOR) window.__cloud = { signInAs, state: () => state, flush: async () => (await connect(), flush()) };
       return new Promise((resolve) => {
         fb.a.onAuthStateChanged(fb.auth, (user) => {
           adopt(user).finally(() => resolve(state));
@@ -279,16 +282,20 @@ export async function updateProfile(pid, { nickname, avatar, showOnBoards }) {
     if (!snap.exists()) throw new Error('Profilul nu mai există.');
     const current = snap.data();
     const boards = current.boards ?? [];
-    const entryRefs = boards.map((b) => f.doc(db, 'leaderboards', b, 'entries', `${uid}_${pid}`));
+    const entryRef = (b) => f.doc(db, 'leaderboards', b, 'entries', `${uid}_${pid}`);
+    // clasamentele de dinainte de teme nu mai sunt acceptate de reguli (nici la redenumire): intrările lor se șterg aici
+    const retired = boards.filter(isRetiredBoard);
+    const live = boards.filter((b) => !isRetiredBoard(b));
     const leaving = current.showOnBoards && !showOnBoards;
     const renamed = next.nickname !== current.nickname || next.avatar !== current.avatar;
-    const entries = renamed && !leaving ? await Promise.all(entryRefs.map((r) => tx.get(r))) : [];
+    const entries = renamed && !leaving ? await Promise.all(live.map((b) => tx.get(entryRef(b)))) : [];
     const changes = { ...next };
     if (leaving) changes.boards = [];
-    else if (renamed) changes.boards = boards.filter((_, i) => entries[i].exists());
+    else if (renamed) changes.boards = live.filter((_, i) => entries[i].exists());
+    else if (retired.length) changes.boards = live;
     tx.update(ref, changes);
-    if (leaving) for (const r of entryRefs) tx.delete(r);
-    else for (const e of entries) if (e.exists()) tx.update(e.ref, { nickname: next.nickname, avatar: next.avatar, updatedAt: f.serverTimestamp() });
+    for (const b of leaving ? boards : retired) tx.delete(entryRef(b));
+    if (!leaving) for (const e of entries) if (e.exists()) tx.update(e.ref, { nickname: next.nickname, avatar: next.avatar, updatedAt: f.serverTimestamp() });
     return { changes, joining: !current.showOnBoards && showOnBoards };
   });
   patchProfile(pid, result.changes);

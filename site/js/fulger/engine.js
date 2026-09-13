@@ -1,12 +1,23 @@
-// Calcul fulger: motorul unei runde (pur, fără DOM). Alege întrebările după amestecul nivelului, verifică răspunsurile și
+// Calcul fulger: motorul unei runde (pur, fără DOM). Alege întrebările după amestecul nivelului unei teme, verifică răspunsurile și
 // socotește alunele (viteză doar în serie × serie), pauzele după greșeli, bonusul de precizie, stelele și medaliile.
 // Interfața (js/fulger/view.js) și simularea din tests/fulger.test.js folosesc aceleași funcții.
 
 import config from '../../data/fulger.js';
 import { newSeed, seededRandom } from '../core/rng.js';
 import { KINDS } from './kinds.js';
+import { recordKey } from './records.js';
 
-export const levelConfig = (id) => config.levels.find((l) => l.id === id) ?? null;
+/** Temele care se pot juca (au niveluri), în ordinea din date. */
+export const playableTopics = () => config.topics.filter((t) => !t.soon && t.levels?.length);
+
+export const topicConfig = (id) => config.topics.find((t) => t.id === id) ?? null;
+
+/** Nivelul unei teme jucabile sau null (și pentru temele „în curând”). */
+export function levelConfig(topicId, levelId) {
+  const topic = topicConfig(topicId);
+  if (!topic || topic.soon) return null;
+  return (topic.levels ?? []).find((l) => l.id === levelId) ?? null;
+}
 
 export const isCorrect = (q, given) =>
   q.mode === 'sort'
@@ -60,19 +71,28 @@ export function precisionBonus(answered, correct, alune) {
   return correct / answered >= high.from ? Math.round(alune * high.bonus) : 0;
 }
 
-export const starsFor = (level, total) => (levelConfig(level)?.stars ?? []).filter((s) => total >= s).length;
+/** Stelele unui total la nivelul dat (obiectul nivelului, cu `stars`). */
+export const starsFor = (lvl, total) => (lvl?.stars ?? []).filter((s) => total >= s).length;
 
 /** Steaua următoare pentru un total: { index, at } (index 0 = prima stea) sau null când toate sunt prinse. */
-export function nextStar(level, total) {
-  const stars = levelConfig(level)?.stars ?? [];
+export function nextStar(lvl, total) {
+  const stars = lvl?.stars ?? [];
   const index = stars.findIndex((s) => total < s);
   return index < 0 ? null : { index, at: stars[index] };
 }
 
+/** Totalul unei teme: recordurile nivelurilor ei, adunate (`best` cu chei „temă:nivel”). */
+export const topicTotal = (topicId, best = {}) =>
+  (topicConfig(topicId)?.levels ?? []).reduce((sum, l) => sum + (best[recordKey(topicId, l.id)]?.alune ?? 0), 0);
+
+/** Stelele unei teme (0–9): stelele recordului fiecărui nivel. */
+export const topicStars = (topicId, best = {}) =>
+  (topicConfig(topicId)?.levels ?? []).reduce((sum, l) => sum + starsFor(l, best[recordKey(topicId, l.id)]?.alune ?? 0), 0);
+
 /** O rundă: `next()` dă întrebarea următoare, `answer(given, ms)` o închide, `summary()` face rezumatul. */
-export function createRound({ level, seed = newSeed() }) {
-  const lvl = levelConfig(level);
-  if (!lvl) throw new Error(`fulger: nivel necunoscut „${level}”`);
+export function createRound({ topic, level, seed = newSeed() }) {
+  const lvl = levelConfig(topic, level);
+  if (!lvl) throw new Error(`fulger: temă sau nivel necunoscut „${topic}/${level}”`);
   const rand = seededRandom(seed);
   const answers = [];
   const recent = []; // cheile ultimelor întrebări, ca să nu revină prea curând
@@ -88,6 +108,7 @@ export function createRound({ level, seed = newSeed() }) {
   }
 
   return {
+    topic,
     level,
     seed,
     get question() {
@@ -150,6 +171,7 @@ export function createRound({ level, seed = newSeed() }) {
       }
       const total = alune + bonus;
       return {
+        topic,
         level,
         answered,
         correct,
@@ -163,26 +185,30 @@ export function createRound({ level, seed = newSeed() }) {
         bestStreak,
         fast: answers.filter((a) => a.speed === 'fulger').length,
         byKind,
-        stars: starsFor(level, total),
+        stars: starsFor(lvl, total),
         mistakes: answers.filter((a) => !a.correct).map((a) => ({ question: a.question, given: a.given })),
       };
     },
   };
 }
 
-/** Medaliile îndeplinite după o rundă: `rounds` = rundele jucate, `best` = recordurile salvate (cu runda aceasta). */
+/**
+ * Medaliile îndeplinite după o rundă: `rounds` = rundele jucate (din toate temele), `best` = recordurile salvate (cu runda aceasta).
+ * „Campionul” (levels3) numără nivelurile temei rundei cu recordul la 3 stele.
+ */
 export function medalsFor(summary, { rounds, best }) {
+  const topic = topicConfig(summary.topic);
   const stats = {
     rounds,
     bestStreak: summary.bestStreak,
     fast: summary.fast,
     perfect: summary.wrong === 0 ? summary.answered : 0,
-    levels3: config.levels.filter((l) => (best[l.id]?.alune ?? 0) >= l.stars.at(-1)).length,
+    levels3: (topic?.levels ?? []).filter((l) => (best[recordKey(topic.id, l.id)]?.alune ?? 0) >= l.stars.at(-1)).length,
   };
   return config.medals.filter((m) => (stats[m.stat] ?? 0) >= m.gte).map((m) => m.id);
 }
 
-/** Tipurile de exersat, pentru părinți: sub 70% corecte în ultimele runde, din cel puțin 5 răspunsuri. */
+/** Tipurile de exersat, pentru părinți: sub 70% corecte în rundele date (de regulă ale unei teme), din cel puțin 5 răspunsuri. */
 export function practiceFor(rounds, { last = 10, minAnswers = 5, below = 0.7 } = {}) {
   const totals = {};
   for (const round of rounds.slice(-last)) {

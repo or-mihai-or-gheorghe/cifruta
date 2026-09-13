@@ -3,7 +3,7 @@
 
 Rulează cu `npm run e2e:cloud`: pornește emulatoarele, rulează acest script, le oprește. Site-ul se deschide cu ?emulator=1,
 iar intrarea în cont se face cu window.__cloud.signInAs(email) (token Google fals, acceptat doar de emulator).
-Datele din emulator se golesc la începutul fiecărui flux; verificările din cloud citesc prin REST, cu drept de proprietar.
+Datele din emulator se golesc la începutul fluxurilor principale; verificările din cloud citesc și scriu prin REST, cu drept de proprietar.
 
 Folosire: npm run e2e:cloud   (sau, cu emulatoarele pornite: python3 tools/e2e_cloud.py --shots)
 """
@@ -25,11 +25,18 @@ RESET = [
     f"http://127.0.0.1:8085/emulator/v1/projects/{PROJECT}/databases/(default)/documents",
     f"http://127.0.0.1:9099/emulator/v1/projects/{PROJECT}/accounts",
 ]
+OWNER = {"Authorization": "Bearer owner"}
 LAPTOP = {"viewport": {"width": 1280, "height": 800}}
 PHONE = {"viewport": {"width": 390, "height": 844}, "is_mobile": True, "has_touch": True}
 TEST_ID = "recap-c1-t1"
 ATTEMPT_ID = f"{TEST_ID}-1757757600000"
+TOPIC = "adunari-scaderi-100"
 CLOUD_HOSTS = ("gstatic.com", "googleapis.com", "127.0.0.1:9099", "127.0.0.1:8085")
+
+
+def board(scope: str, period: str = "all") -> str:
+    """Colecția intrărilor unui clasament Calcul fulger al temei: nivel sau „total”, „all” sau o săptămână."""
+    return f"leaderboards/fulger-{TOPIC}-{scope}-{period}/entries"
 
 
 # ——— emulatoarele ———
@@ -52,8 +59,23 @@ def decode(value: dict):
     return raw
 
 
+def encode(value):
+    """Valoare Python → valoare Firestore (REST). Textul care începe cu „ts:” e un moment."""
+    if value is None:
+        return {"nullValue": None}
+    if isinstance(value, bool):
+        return {"booleanValue": value}
+    if isinstance(value, int):
+        return {"integerValue": str(value)}
+    if isinstance(value, str):
+        return {"timestampValue": value[3:]} if value.startswith("ts:") else {"stringValue": value}
+    if isinstance(value, list):
+        return {"arrayValue": {"values": [encode(v) for v in value]}}
+    return {"mapValue": {"fields": {k: encode(v) for k, v in value.items()}}}
+
+
 def rest(path: str, owner: bool = True):
-    req = urllib.request.Request(f"{FS}/{path}", headers={"Authorization": "Bearer owner"} if owner else {})
+    req = urllib.request.Request(f"{FS}/{path}", headers=OWNER if owner else {})
     try:
         with urllib.request.urlopen(req, timeout=10) as response:
             return json.load(response)
@@ -61,6 +83,14 @@ def rest(path: str, owner: bool = True):
         if error.code == 404:
             return None
         raise
+
+
+def patch(path: str, fields: dict, mask: list | None = None):
+    """Scrie un document (sau doar câmpurile din `mask`) cu drept de proprietar, fără reguli."""
+    query = ("?" + "&".join(f"updateMask.fieldPaths={k}" for k in mask)) if mask else ""
+    body = json.dumps({"fields": {k: encode(v) for k, v in fields.items()}}).encode()
+    req = urllib.request.Request(f"{FS}/{path}{query}", data=body, method="PATCH", headers={**OWNER, "Content-Type": "application/json"})
+    urllib.request.urlopen(req, timeout=10).read()
 
 
 def doc(path: str):
@@ -81,11 +111,6 @@ def anon_status(path: str) -> int:
         return error.code
 
 
-def make_admin(uid: str):
-    req = urllib.request.Request(f"{FS}/admins/{uid}", data=b'{"fields": {}}', method="PATCH", headers={"Authorization": "Bearer owner", "Content-Type": "application/json"})
-    urllib.request.urlopen(req, timeout=10).read()
-
-
 # ——— pagina ———
 
 def attempt(stars: int) -> dict:
@@ -101,8 +126,16 @@ def storage(page, body: str):
     return page.evaluate(f"import('./js/core/storage.js').then((m) => {{ {body} }})")
 
 
-def play_round(page, total: int):
-    storage(page, f"m.saveFulgerRound({{ level: 'usor', at: new Date().toISOString(), total: {total}, correct: 20, wrong: 1, bestStreak: 8, fast: 3, stars: 1, byKind: {{}} }}, {{ keep: 30 }});")
+def round_js(total: int, level: str = "usor") -> str:
+    return f"m.saveFulgerRound({{ topic: '{TOPIC}', level: '{level}', at: new Date().toISOString(), total: {total}, correct: 20, wrong: 1, bestStreak: 8, fast: 3, stars: 1, byKind: {{}} }}, {{ keep: 30 }});"
+
+
+def play_round(page, total: int, level: str = "usor"):
+    storage(page, round_js(total, level))
+
+
+def this_week(page) -> str:
+    return page.evaluate("import('./js/cloud/logic.js').then((m) => m.isoWeek())")
 
 
 def sign_in(page, email: str, name: str):
@@ -135,10 +168,20 @@ def parent(run: Run, browser, label: str, email: str, name: str, nickname: str, 
     return ctx, page, page.evaluate("window.__cloud.state().user.uid")
 
 
+def rename(page, nickname: str):
+    run_goto_profile = page.evaluate("location.hash")
+    if run_goto_profile != "#/profil":
+        page.evaluate("location.hash = '#/profil'")
+    page.get_by_test_id("edit-p1").click()
+    page.get_by_test_id("profile-nickname").fill(nickname)
+    page.get_by_test_id("profile-save").click()
+    expect(page.get_by_test_id("profile-p1")).to_contain_text(nickname)
+
+
 # ——— fluxurile ———
 
 def account_flow(run: Run, browser):
-    print("\n[cont] anonim → părinte → profil → rezultatele mutate")
+    print("\n[cont] anonim → părinte → profil → rezultatele mutate (Calcul fulger de dinainte de teme)")
     reset()
     ctx = browser.new_context(**LAPTOP)
     page = ctx.new_page()
@@ -163,12 +206,16 @@ def account_flow(run: Run, browser):
     uid = page.evaluate("window.__cloud.state().user.uid")
     base = f"users/{uid}/profiles/p1"
     profile = doc(base) or {}
-    run.check(len(docs(f"{base}/attempts")) == 1 and len(docs(f"{base}/fulger")) == 1, "cloud: încercarea și runda profilului")
+    rounds = docs(f"{base}/fulger")
+    run.check(len(docs(f"{base}/attempts")) == 1 and len(rounds) == 1 and rounds[0].get("topic") == TOPIC, "cloud: încercarea și runda profilului, runda cu tema ei")
     run.check(doc(f"{base}/state/fulger") is not None, "cloud: starea Calcul fulger")
     run.check(profile.get("attempts") == 1 and profile.get("rounds") == 1, f"cloud: contoarele profilului ({profile.get('attempts')}, {profile.get('rounds')})")
-    run.check("fulger-usor-all" in profile.get("boards", []) and "teste-stele" in profile.get("boards", []), f"cloud: lista clasamentelor {profile.get('boards')}")
-    entry = doc(f"leaderboards/fulger-usor-all/entries/{uid}_p1") or {}
-    run.check(entry.get("score") == 120 and entry.get("nickname") == "Ana", "clasament: runda cu porecla profilului")
+    boards = profile.get("boards", [])
+    run.check(all(b in boards for b in (f"fulger-{TOPIC}-usor-all", f"fulger-{TOPIC}-total-all", "teste-stele")), f"cloud: lista clasamentelor {boards}")
+    entry = doc(f"{board('usor')}/{uid}_p1") or {}
+    run.check(entry.get("score") == 120 and entry.get("nickname") == "Ana", "clasament: runda în clasamentul temei, cu porecla profilului")
+    tot = doc(f"{board('total')}/{uid}_p1") or {}
+    run.check(tot.get("score") == 120 and tot.get("levels") == 1, f"clasament: totalul temei ({tot.get('score')}, {tot.get('levels')} nivel)")
     run.check((doc(f"leaderboards/teste-stele/entries/{uid}_p1") or {}).get("score") == 3, "clasament: stelele de la teste")
     run.check((doc(f"users/{uid}") or {}).get("email") == "ana@example.com", "cloud: contul părintelui")
     local = page.evaluate(f"[localStorage.getItem('cifruta:attempts'), JSON.parse(localStorage.getItem('cifruta:p:{uid}:p1:attempts') || '[]').length]")
@@ -185,7 +232,7 @@ def account_flow(run: Run, browser):
     run.check(flushed(page2), "dispozitiv 2: sincronizat")
     pulled = page2.evaluate(f"[JSON.parse(localStorage.getItem('cifruta:p:{uid}:p1:attempts') || '[]'), JSON.parse(localStorage.getItem('cifruta:p:{uid}:p1:fulger') || '{{}}')]")
     run.check(len(pulled[0]) == 1 and pulled[0][0]["answers"] == {"e1": {"a": [["x", "y"]]}}, "dispozitiv 2: încercarea, cu răspunsurile")
-    run.check(pulled[1].get("best", {}).get("usor", {}).get("alune") == 120, "dispozitiv 2: recordul de la Calcul fulger")
+    run.check(pulled[1].get("best", {}).get(f"{TOPIC}:usor", {}).get("alune") == 120, "dispozitiv 2: recordul de la Calcul fulger, în tema lui")
     page2.reload()
     expect(page2.get_by_test_id("nav-account")).to_contain_text("Ana")
     run.goto(page2, "")
@@ -198,7 +245,7 @@ def account_flow(run: Run, browser):
     run.check((doc(f"{base}/attempts/{ATTEMPT_ID}") or {}).get("feeling") == "vesel", "cloud: autoevaluarea încercării")
     saved = doc(f"{base}/attempts/{ATTEMPT_ID}") or {}
     run.check(saved.get("activeMs") == 600000 and saved.get("startedAt") and saved.get("submittedAt"), "cloud: încercarea păstrează timpul de rezolvare")
-    run.check((doc(f"leaderboards/fulger-usor-all/entries/{uid}_p1") or {}).get("score") == 120, "clasament: o rundă mai slabă nu scade scorul")
+    run.check((doc(f"{board('usor')}/{uid}_p1") or {}).get("score") == 120, "clasament: o rundă mai slabă nu scade scorul")
 
     page2.wait_for_timeout(5500)  # intrarea cu stele tocmai a fost creată, iar regulile o lasă să se schimbe cel mult o dată la 5 s
     other = {**attempt(2), "id": "u1-t2-1757757600000", "testId": "u1-t2"}
@@ -214,22 +261,20 @@ def account_flow(run: Run, browser):
 
     print("\n[cont] redenumire, ieșirea din clasament și revenirea")
     run.goto(page2, "profil")
-    page2.get_by_test_id("edit-p1").click()
-    page2.get_by_test_id("profile-nickname").fill("Ana Maria")
-    page2.get_by_test_id("profile-save").click()
-    expect(page2.get_by_test_id("profile-p1")).to_contain_text("Ana Maria")
-    run.check((doc(f"leaderboards/fulger-usor-all/entries/{uid}_p1") or {}).get("nickname") == "Ana Maria", "clasament: porecla nouă")
+    rename(page2, "Ana Maria")
+    run.check((doc(f"{board('usor')}/{uid}_p1") or {}).get("nickname") == "Ana Maria" and (doc(f"{board('total')}/{uid}_p1") or {}).get("nickname") == "Ana Maria", "clasament: porecla nouă, și la total")
     page2.get_by_test_id("edit-p1").click()
     page2.get_by_test_id("profile-boards").uncheck()
     page2.get_by_test_id("profile-save").click()
     expect(page2.get_by_test_id("profile-p1")).to_contain_text("în afara clasamentului")
-    run.check(doc(f"leaderboards/fulger-usor-all/entries/{uid}_p1") is None and (doc(base) or {}).get("boards") == [], "clasament: intrările șterse la ieșire")
+    gone = doc(f"{board('usor')}/{uid}_p1") is None and doc(f"{board('total')}/{uid}_p1") is None
+    run.check(gone and (doc(base) or {}).get("boards") == [], "clasament: intrările șterse la ieșire, și totalul")
     page2.get_by_test_id("edit-p1").click()
     page2.get_by_test_id("profile-boards").check()
     page2.get_by_test_id("profile-save").click()
     expect(page2.get_by_test_id("profile-p1")).not_to_contain_text("în afara clasamentului")
     run.check(flushed(page2), "dispozitiv 2: revenirea în clasament a urcat")
-    run.check((doc(f"leaderboards/fulger-usor-all/entries/{uid}_p1") or {}).get("score") == 120, "clasament: recordul revine")
+    run.check((doc(f"{board('usor')}/{uid}_p1") or {}).get("score") == 120 and (doc(f"{board('total')}/{uid}_p1") or {}).get("score") == 120, "clasament: recordul și totalul revin")
 
     print("\n[cont] ieșirea din cont golește copiile din browser")
     run.goto(page, "profil")
@@ -254,7 +299,7 @@ def account_flow(run: Run, browser):
     page2.get_by_test_id("profile-delete").click()
     page2.get_by_test_id("modal-confirm").click()
     expect(page2.get_by_role("heading", name="Primul profil")).to_be_visible(timeout=20000)
-    run.check(doc(base) is None and not docs(f"{base}/fulger") and doc(f"leaderboards/fulger-usor-all/entries/{uid}_p1") is None, "cloud: profilul șters cu tot ce ține de el")
+    run.check(doc(base) is None and not docs(f"{base}/fulger") and doc(f"{board('usor')}/{uid}_p1") is None and doc(f"{board('total')}/{uid}_p1") is None, "cloud: profilul șters cu tot ce ține de el")
     page2.get_by_text("Ștergerea contului").click()
     expect(page2.get_by_test_id("delete-account")).to_be_visible()
     page2.get_by_test_id("delete-account").click()
@@ -283,40 +328,84 @@ def tabs_flow(run: Run, browser):
     ctx.close()
 
 
+def legacy_flow(run: Run, browser):
+    print("\n[cont] datele Calcul fulger de dinainte de teme din cloud: intrări noi în temă, cele vechi șterse, redenumirea merge")
+    ctx, page, uid = parent(run, browser, "vechi", "vechi@example.com", "Părinte", "Vechi", "lup")
+    run.check(flushed(page), "migrare: cont nou sincronizat")
+    base = f"users/{uid}/profiles/p1"
+    now = page.evaluate("new Date().toISOString()")
+    week = this_week(page)
+    record = {"alune": 90, "at": now, "correct": 20, "bestStreak": 9}
+    patch(f"{base}/state/fulger", {"best": {"usor": record}, "medals": {}, "week": {"usor": {**record, "id": week}}})
+    legacy_entry = {"uid": uid, "pid": "p1", "nickname": "Vechi", "avatar": "lup", "score": 90, "correct": 20, "bestStreak": 9, "updatedAt": "ts:2026-09-01T10:00:00Z"}
+    patch(f"leaderboards/fulger-usor-all/entries/{uid}_p1", legacy_entry)
+    patch(base, {"boards": ["fulger-usor-all"]}, mask=["boards"])
+
+    page.reload()
+    page.wait_for_function("window.__cloud && window.__cloud.state().pid === 'p1'", timeout=30000)
+    run.check(flushed(page), "migrare: activarea a trimis clasamentele")
+    boards = (doc(base) or {}).get("boards", [])
+    level_all = (doc(f"{board('usor')}/{uid}_p1") or {}).get("score")
+    level_week = (doc(f"{board('usor', week)}/{uid}_p1") or {}).get("score")
+    total_all = doc(f"{board('total')}/{uid}_p1") or {}
+    run.check(level_all == 90 and level_week == 90 and total_all.get("score") == 90 and total_all.get("levels") == 1, f"migrare: recordul vechi ajunge în clasamentele temei, cu totalul ({level_all}, {level_week}, {total_all.get('score')})")
+    run.check(doc(f"leaderboards/fulger-usor-all/entries/{uid}_p1") is None and "fulger-usor-all" not in boards, f"migrare: intrarea veche ștearsă ({boards})")
+
+    # un profil cu un clasament vechi rămas în listă se poate redenumi; intrarea veche se șterge în aceeași tranzacție
+    patch(f"leaderboards/fulger-usor-all/entries/{uid}_p1", legacy_entry)
+    patch(base, {"boards": [*boards, "fulger-usor-all"]}, mask=["boards"])
+    run.goto(page, "profil")
+    rename(page, "Vechi Nou")
+    after = (doc(base) or {}).get("boards", [])
+    run.check((doc(f"{board('usor')}/{uid}_p1") or {}).get("nickname") == "Vechi Nou" and doc(f"leaderboards/fulger-usor-all/entries/{uid}_p1") is None and "fulger-usor-all" not in after,
+              f"migrare: redenumirea merge și scoate clasamentul vechi ({after})")
+    ctx.close()
+
+
 def boards_admin_flow(run: Run, browser):
-    print("\n[clasament] doar pentru cei intrați în cont, doar cu porecla")
+    print("\n[clasament] doar pentru cei intrați în cont, doar cu porecla; pe temă, nivel și total")
     reset()
     anon_ctx = browser.new_context(**LAPTOP)
     anon = anon_ctx.new_page()
     run.watch(anon, "anonim")
     run.goto(anon, "clasament")
     expect(anon.get_by_test_id("lb-invite")).to_be_visible()
-    run.check(anon_status("leaderboards/fulger-usor-all/entries") == 403, "clasament: citirea fără cont e refuzată de reguli")
+    run.check(anon_status(board("usor")) == 403, "clasament: citirea fără cont e refuzată de reguli")
 
     ctx_a, ana, uid_a = parent(run, browser, "Ana", "ana@example.com", "Mama Anei", "Ana", "vulpe")
-    play_round(ana, 120)
-    run.check(flushed(ana), "Ana: runda a urcat")
+    storage(ana, round_js(120) + round_js(80, "intermediar"))  # două niveluri, o singură operație de clasament pe temă
+    run.check(flushed(ana), "Ana: rundele au urcat")
+    week = this_week(ana)
+    ana_total = doc(f"{board('total', week)}/{uid_a}_p1") or {}
+    run.check(ana_total.get("score") == 200 and ana_total.get("levels") == 2, f"clasament: totalul săptămânii din două niveluri ({ana_total.get('score')}, {ana_total.get('levels')})")
     ctx_b, bob, uid_b = parent(run, browser, "Bob", "bob@example.com", "Tata lui Bob", "Bob", "urs", PHONE)
     play_round(bob, 150)
     storage(bob, f"m.addAttempt({json.dumps(attempt(2))});")
     run.check(flushed(bob), "Bob: runda și testul au urcat")
 
-    run.goto(ana, "clasament/fulger/usor/week")
+    run.goto(ana, f"clasament/fulger/{TOPIC}/usor/week")
     rows = ana.get_by_test_id("lb-list").locator("li")
     expect(rows).to_have_count(2)
-    run.check("Bob" in rows.nth(0).inner_text() and "Ana" in rows.nth(1).inner_text(), "clasament: ordinea după scor")
+    run.check("Bob" in rows.nth(0).inner_text() and "Ana" in rows.nth(1).inner_text(), "clasament: pe nivel, ordinea după scor")
     expect(ana.get_by_test_id(f"lb-row-{uid_a}_p1")).to_contain_text("tu")
     run.check("@example.com" not in ana.content(), "clasament: fără e-mailuri în pagină")
+    run.goto(ana, f"clasament/fulger/{TOPIC}/total/week")
+    totals = ana.get_by_test_id("lb-list").locator("li")
+    expect(totals).to_have_count(2)
+    run.check("Ana" in totals.nth(0).inner_text() and "200" in totals.nth(0).inner_text() and "Bob" in totals.nth(1).inner_text(), "clasament: la total, Ana (două niveluri) trece înaintea lui Bob")
     run.shot(ana, "cloud-clasament-laptop")
+    run.goto(ana, "clasament/fulger/usor/week")
+    ana.wait_for_function(f"location.hash === '#/clasament/fulger/{TOPIC}/usor/week'", timeout=10000)
+    run.check(True, "clasament: adresa de dinainte de teme duce la tema rezultatelor vechi")
     run.goto(ana, "clasament/teste")
     expect(ana.get_by_test_id(f"lb-row-{uid_b}_p1")).to_contain_text("2 stele")
-    run.goto(bob, "clasament/fulger/usor/all")
+    run.goto(bob, f"clasament/fulger/{TOPIC}/usor/all")
     expect(bob.get_by_test_id("lb-list").locator("li")).to_have_count(2)
     run.layout_ok(bob, "telefon: clasamentul")
     run.shot(bob, "cloud-clasament-telefon")
 
     print("\n[admin] redenumește o poreclă, blochează și deblochează un cont")
-    make_admin(uid_a)
+    patch(f"admins/{uid_a}", {})
     run.goto(ana, "admin")
     ana.reload()
     expect(ana.get_by_test_id(f"admin-user-{uid_b}")).to_be_visible(timeout=20000)
@@ -324,13 +413,14 @@ def boards_admin_flow(run: Run, browser):
     ana.get_by_test_id(f"admin-nick-{uid_b}-p1").fill("Bobo")
     ana.get_by_test_id(f"admin-rename-{uid_b}-p1").click()
     expect(ana.get_by_test_id(f"admin-status-{uid_b}")).to_contain_text("schimbată")
-    run.check((doc(f"users/{uid_b}/profiles/p1") or {}).get("nickname") == "Bobo" and (doc(f"leaderboards/fulger-usor-all/entries/{uid_b}_p1") or {}).get("nickname") == "Bobo", "admin: porecla nouă în profil și în clasament")
+    run.check((doc(f"users/{uid_b}/profiles/p1") or {}).get("nickname") == "Bobo" and (doc(f"{board('usor')}/{uid_b}_p1") or {}).get("nickname") == "Bobo"
+              and (doc(f"{board('total')}/{uid_b}_p1") or {}).get("nickname") == "Bobo", "admin: porecla nouă în profil și în clasamente")
     run.shot(ana, "cloud-admin")
     ana.get_by_test_id(f"admin-block-{uid_b}").click()
     ana.get_by_test_id("modal-confirm").click()
     expect(ana.get_by_test_id(f"admin-user-{uid_b}")).to_contain_text("blocat")
-    run.check(doc(f"blocked/{uid_b}") is not None and doc(f"leaderboards/fulger-usor-all/entries/{uid_b}_p1") is None, "admin: contul blocat, intrările scoase")
-    run.goto(ana, "clasament/fulger/usor/all")
+    run.check(doc(f"blocked/{uid_b}") is not None and doc(f"{board('usor')}/{uid_b}_p1") is None and doc(f"{board('total')}/{uid_b}_p1") is None, "admin: contul blocat, intrările scoase")
+    run.goto(ana, f"clasament/fulger/{TOPIC}/usor/all")
     expect(ana.get_by_test_id("lb-list").locator("li")).to_have_count(1)
 
     # contul blocat, redeschis: aplicația vede blocarea și nu mai trimite nimic (regulile ar refuza oricum)
@@ -382,7 +472,7 @@ def main() -> int:
     run = Run(f"{base}?emulator=1", "--shots" in sys.argv)
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
-        for flow in (account_flow, boards_admin_flow):
+        for flow in (account_flow, legacy_flow, boards_admin_flow):
             try:
                 flow(run, browser)
             except Exception as error:  # noqa: BLE001 — un pas căzut se raportează, nu oprește celelalte fluxuri

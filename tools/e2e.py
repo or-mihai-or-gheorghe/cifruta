@@ -95,7 +95,7 @@ class Run:
 
 
 def smoke(run: Run, page: Page, vp: str):
-    for route, name in [("", "acasa"), ("sectiune/recapitulare", "sectiune"), ("fulger", "calcul-fulger"), ("atelier/componente", "atelier-componente"), ("atelier/vizualuri", "atelier-vizualuri"), ("atelier/tipuri", "atelier-tipuri"), ("nu-exista", "404")]:
+    for route, name in [("", "acasa"), ("sectiune/recapitulare", "sectiune"), ("fulger", "calcul-fulger"), ("fulger/adunari-scaderi-100", "calcul-fulger-tema"),("atelier/componente", "atelier-componente"), ("atelier/vizualuri", "atelier-vizualuri"), ("atelier/tipuri", "atelier-tipuri"), ("nu-exista", "404")]:
         run.goto(page, route)
         page.wait_for_function("document.querySelector('main')?.innerText.trim().length > 0")
         page.wait_for_timeout(300)
@@ -536,6 +536,7 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     run.check("2 încercări" in row and left == 0 and "nou" in card and page.get_by_test_id(f"clear-test-{tid}").count() == 0, f"[{vp}] {tid}: ștergerea istoricului din „Pentru părinți” golește încercările ({row!r})")
 
 
+FULGER_TOPIC = "adunari-scaderi-100"  # tema în care au intrat rezultatele de dinainte de teme
 FULGER_READY = "window.__dbg && window.__dbg.fulger.state().enabled"
 FULGER_FIT = "(() => { const a = document.querySelector('[data-testid=fg-answers]').getBoundingClientRect(); return { bottom: Math.round(a.bottom), vh: innerHeight, scroll: document.documentElement.scrollHeight - innerHeight, x: document.documentElement.scrollWidth - innerWidth }; })()"
 
@@ -546,11 +547,16 @@ def fulger_flow(run: Run, page: Page, vp: str):
     page.evaluate("localStorage.removeItem('cifruta:fulger')")
     run.goto(page, "")
     page.get_by_test_id("fulger-card").click()
+    page.wait_for_selector(f"[data-testid=fg-topic-{FULGER_TOPIC}]")
+    topics = page.evaluate("import('./data/fulger.js').then((m) => m.default.topics.length)")
+    run.check(page.locator(".fg-topic").count() == topics and page.locator(".fg-medal").count() == 6, f"[{vp}] fulger: cardul duce la lista temelor ({topics}), cu 6 medalii")
+    run.layout_ok(page, f"[{vp}] fulger teme")
+    page.get_by_test_id(f"fg-topic-{FULGER_TOPIC}").click()
     page.wait_for_selector("[data-testid=fg-level-usor]")
-    run.check(page.locator(".fg-level").count() == 3 and page.locator(".fg-medal").count() == 6, f"[{vp}] fulger: cardul duce la hub, cu 3 niveluri și 6 medalii")
+    run.check(page.locator(".fg-level").count() == 3 and page.get_by_test_id("fg-concepts").locator("li").count() == 5, f"[{vp}] fulger: tema duce la hub, cu 3 niveluri și „Ce exersăm”")
     run.layout_ok(page, f"[{vp}] fulger hub")
 
-    run.goto(page, "fulger/usor", debug=True)
+    run.goto(page, f"fulger/{FULGER_TOPIC}/usor", debug=True)
     page.get_by_test_id("fg-start").click()
     state = lambda: page.evaluate("window.__dbg.fulger.state()")
     ready = lambda: page.wait_for_function(FULGER_READY)
@@ -631,29 +637,51 @@ def fulger_flow(run: Run, page: Page, vp: str):
     page.get_by_test_id("fg-results").click()  # sare peste numărătoare
     page.wait_for_timeout(300)
     total = int(page.get_by_test_id("fg-total").inner_text())
-    stars = page.evaluate("import('./data/fulger.js').then((m) => m.default.levels[0].stars)")
+    stars = page.evaluate("import('./data/fulger.js').then((m) => m.default.topics[0].levels[0].stars)")
     lit = page.locator("[data-testid=fg-results] .c-star.is-on").count()
     run.check(total >= alune and lit == sum(total >= s for s in stars), f"[{vp}] fulger: totalul {total} (bara de sus {alune}, cu precizia) și {lit} stele")
     run.check(page.get_by_test_id("fg-record").is_visible() and page.get_by_test_id("fg-medal-prima-cursa").is_visible(), f"[{vp}] fulger: prima rundă aduce recordul și medalia „Prima cursă”")
     mistakes = page.locator("[data-testid=fg-mistakes] .fg-mistake").count()
     target = page.get_by_test_id("fg-next-star")
     run.check(mistakes == 2 and (lit == 3 or (target.is_visible() and "stea" in target.inner_text())), f"[{vp}] fulger: „Greșelile tale” arată cele 2 greșeli, iar ținta spune cât mai trebuie până la steaua următoare ({mistakes})")
+    links = [page.get_by_test_id(t).get_attribute("href") for t in ("fg-levels", "fg-suggest") if page.get_by_test_id(t).count()]
+    run.check(bool(links) and all(href.startswith(f"#/fulger/{FULGER_TOPIC}") for href in links), f"[{vp}] fulger: legăturile de la rezultate rămân în temă ({links})")
     run.layout_ok(page, f"[{vp}] fulger rezultate")
     run.shot(page, f"{vp}-fulger-rezultate")
     page.get_by_test_id("fg-again").click()
     page.wait_for_selector("[data-testid=fg-start]")
     run.check(True, f"[{vp}] fulger: „Mai joc o dată” pornește o rundă nouă")
 
-    run.goto(page, "fulger")
+    run.goto(page, f"fulger/{FULGER_TOPIC}")
     best = page.get_by_test_id("fg-best-usor").inner_text()
     page.reload()
     page.wait_for_selector("[data-testid=fg-best-usor]")
-    run.check(str(total) in best and page.get_by_test_id("fg-best-usor").inner_text() == best and page.get_by_test_id("fg-medal-prima-cursa").get_attribute("class").endswith("is-won"), f"[{vp}] fulger: recordul ({best}) și medalia rămân după reîncărcare")
+    kept = page.get_by_test_id("fg-best-usor").inner_text() == best
+    run.goto(page, "fulger")
+    card = page.get_by_test_id(f"fg-topic-{FULGER_TOPIC}").inner_text()
+    won = page.get_by_test_id("fg-medal-prima-cursa").get_attribute("class").endswith("is-won")
+    run.check(str(total) in best and kept and str(total) in card and won, f"[{vp}] fulger: recordul ({best}), totalul temei și medalia rămân după reîncărcare")
+    run.shot(page, f"{vp}-fulger-teme")
     page.get_by_test_id("parents").locator("summary").click()
     page.get_by_test_id("fg-clear").click()
     page.get_by_test_id("modal-confirm").click()
-    page.wait_for_function("document.querySelector('[data-testid=fg-best-usor]')?.innerText.includes('Nou')")
+    page.wait_for_function(f"document.querySelector('[data-testid=fg-topic-{FULGER_TOPIC}]')?.innerText.includes('Nou')")
     run.check(page.evaluate("localStorage.getItem('cifruta:fulger')") is None, f"[{vp}] fulger: ștergerea din „Pentru părinți” scoate rundele și recordul")
+
+    if vp == "laptop":
+        # rezultatele de dinainte de teme (v0.9) și adresa veche a unei runde
+        legacy = "{ best: { usor: { alune: 77, at: '2026-09-01T10:00:00.000Z' } }, rounds: [{ level: 'usor', at: '2026-09-01T10:00:00.000Z', total: 77, correct: 20, wrong: 1, bestStreak: 9, fast: 3, stars: 0, byKind: {} }], medals: { 'prima-cursa': '2026-09-01T10:00:00.000Z' } }"
+        page.evaluate(f"localStorage.setItem('cifruta:fulger', JSON.stringify({legacy}))")
+        run.goto(page, "fulger/usor")
+        page.wait_for_selector("[data-testid=fg-start]")
+        moved = page.evaluate("location.hash")
+        run.goto(page, f"fulger/{FULGER_TOPIC}")
+        old_best = page.get_by_test_id("fg-best-usor").inner_text()
+        run.shot(page, f"{vp}-fulger-tema")
+        run.goto(page, "fulger")
+        old_medal = page.get_by_test_id("fg-medal-prima-cursa").get_attribute("class").endswith("is-won")
+        run.check(moved == f"#/fulger/{FULGER_TOPIC}/usor" and "77" in old_best and old_medal, f"[{vp}] fulger: rezultatele de dinainte de teme apar în temă, iar #/fulger/usor duce la noua adresă ({moved}, {old_best})")
+        page.evaluate("localStorage.removeItem('cifruta:fulger')")
 
 
 def fulger_screens(run: Run, browser, base: str):
@@ -666,7 +694,7 @@ def fulger_screens(run: Run, browser, base: str):
         context = browser.new_context(locale="ro-RO", **opts)
         page = context.new_page()
         run.watch(page, name)
-        page.goto(f"{base}?debug=1#/fulger/avansat")
+        page.goto(f"{base}?debug=1#/fulger/{FULGER_TOPIC}/avansat")
         page.wait_for_selector("[data-testid=fg-start]")
         box = page.get_by_test_id("fg-start").bounding_box()
         run.check(box is not None and box["y"] + box["height"] <= opts["viewport"]["height"], f"[{name}] fulger: butonul Start încape pe ecran")
@@ -758,7 +786,7 @@ def keyboard_flow(run: Run, browser, base: str):
     run.check((answer("chart") or {}).get("mere") == 2 and page.locator("[data-testid=bar-mere]").get_attribute("aria-valuenow") == "2", f"[tastatură] bara urcă cu Enter/Space ({answer('chart')})")
 
     # Calcul fulger doar la tastatură, cu mișcare redusă
-    page.goto(f"{base}?debug=1#/fulger/usor")
+    page.goto(f"{base}?debug=1#/fulger/{FULGER_TOPIC}/usor")
     page.wait_for_selector("[data-testid=fg-start]")
     page.keyboard.press("Enter")
     page.wait_for_function(FULGER_READY)

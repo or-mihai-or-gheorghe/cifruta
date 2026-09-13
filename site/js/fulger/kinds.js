@@ -5,13 +5,20 @@
 //   choice  → text: '38 + 47', choices: [75, 84, 85, 95] (crescător)
 //   compare → left: '35 + 8', right: '42', answer: '<' | '=' | '>'
 //   sort    → numbers: plăcile în ordinea afișată, dir: 'asc' | 'desc', answer: ordinea corectă
-// Un tip nou: o intrare aici, o linie în `mix`-ul unui nivel din data/fulger.js și regulile lui în tests/fulger.test.js.
+// Fiecare tip poartă conceptele din data/concepts.js pe care le exersează (`concepts`); „fără / cu trecere” se verifică în teste.
+// Un tip nou: o intrare aici, o linie în `mix`-ul unui nivel al unei teme din data/fulger.js și regulile lui în tests/fulger.test.js.
 
 import { calc, relation } from '../core/expr.js';
 import { trecere } from '../core/rules.js';
 
 const PLUS = ' + ';
 const MINUS = ' − ';
+
+const FARA = 'mat.op.fara-trecere';
+const CU = 'mat.op.cu-trecere';
+const COMPARARE = 'mat.nr100.comparare';
+const ORDONARE = 'mat.nr100.ordonare';
+const EXPRESII = 'mat.op.comparare-expresii';
 
 const int = (rand, min, max) => min + Math.floor(rand() * (max - min + 1));
 const pickOne = (rand, list) => list[Math.floor(rand() * list.length)];
@@ -98,6 +105,7 @@ export const KINDS = {
     points: 1,
     fastMs: 3000,
     mode: 'choice',
+    concepts: [FARA, CU],
     generate(rand) {
       const [a, b] = [int(rand, 1, 9), int(rand, 1, 9)];
       const r = a + b;
@@ -109,6 +117,7 @@ export const KINDS = {
     points: 2,
     fastMs: 4000,
     mode: 'choice',
+    concepts: [FARA, CU],
     generate(rand) {
       const [a, b] = [int(rand, 1, 9), int(rand, 10, 20)];
       const r = a + b;
@@ -120,6 +129,7 @@ export const KINDS = {
     points: 2,
     fastMs: 4000,
     mode: 'choice',
+    concepts: [FARA],
     generate(rand) {
       const u = int(rand, 1, 9);
       const b = int(rand, 1, u);
@@ -133,6 +143,7 @@ export const KINDS = {
     points: 1,
     fastMs: 2500,
     mode: 'compare',
+    concepts: [COMPARARE],
     generate(rand) {
       const x = int(rand, 0, 20);
       const roll = rand();
@@ -150,6 +161,7 @@ export const KINDS = {
     points: 2,
     fastMs: 5000,
     mode: 'sort',
+    concepts: [ORDONARE],
     generate: (rand) => sorting('sort-3-20', rand, distinct(rand, 3, 0, 20)),
   },
   'sub-20-cu': {
@@ -157,6 +169,7 @@ export const KINDS = {
     points: 2,
     fastMs: 4000,
     mode: 'choice',
+    concepts: [CU],
     generate(rand) {
       const u = int(rand, 1, 8);
       const b = int(rand, u + 1, 9);
@@ -171,6 +184,7 @@ export const KINDS = {
     points: 3,
     fastMs: 5000,
     mode: 'choice',
+    concepts: [FARA],
     generate(rand) {
       const two = rand() < 0.8; // al doilea termen are două cifre
       const t1 = int(rand, 1, 8);
@@ -188,6 +202,7 @@ export const KINDS = {
     points: 3,
     fastMs: 6000,
     mode: 'choice',
+    concepts: [FARA],
     generate(rand) {
       const ta = int(rand, 2, 9);
       const ua = int(rand, 0, 9);
@@ -205,6 +220,7 @@ export const KINDS = {
     points: 3,
     fastMs: 5000,
     mode: 'choice',
+    concepts: [FARA, CU],
     generate(rand) {
       const [a, b, c] = [int(rand, 1, 9), int(rand, 1, 9), int(rand, 1, 9)];
       const r = a + b + c;
@@ -216,6 +232,7 @@ export const KINDS = {
     points: 2,
     fastMs: 3000,
     mode: 'compare',
+    concepts: [COMPARARE],
     generate(rand) {
       const roll = rand();
       if (roll < 0.35) {
@@ -240,6 +257,7 @@ export const KINDS = {
     points: 3,
     fastMs: 7000,
     mode: 'sort',
+    concepts: [ORDONARE],
     generate: (rand) => sorting('sort-4-100', rand, trickyFour(rand)),
   },
   'add-100-cu': {
@@ -247,6 +265,7 @@ export const KINDS = {
     points: 4,
     fastMs: 7000,
     mode: 'choice',
+    concepts: [CU],
     generate(rand) {
       for (;;) {
         const a = int(rand, 11, 89);
@@ -263,6 +282,7 @@ export const KINDS = {
     points: 5,
     fastMs: 8000,
     mode: 'choice',
+    concepts: [CU],
     generate(rand) {
       for (;;) {
         const a = rand() < 0.1 ? 100 : int(rand, 21, 99);
@@ -280,6 +300,7 @@ export const KINDS = {
     points: 5,
     fastMs: 9000,
     mode: 'choice',
+    concepts: [CU],
     generate(rand) {
       for (;;) {
         const a = int(rand, 10, 59);
@@ -296,6 +317,7 @@ export const KINDS = {
     points: 4,
     fastMs: 5000,
     mode: 'compare',
+    concepts: [EXPRESII],
     generate(rand) {
       let expr;
       let value;
@@ -318,6 +340,7 @@ export const KINDS = {
     points: 4,
     fastMs: 8000,
     mode: 'sort',
+    concepts: [ORDONARE],
     generate(rand) {
       const dir = rand() < 0.5 ? 'asc' : 'desc';
       if (rand() < 0.4) {
