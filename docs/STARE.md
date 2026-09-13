@@ -1,7 +1,7 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-13 · **Versiune:** 0.10.1 (Calcul fulger: temele desfășurate pe pagina jocului)
+- **Data:** 2026-09-13 · **Versiune:** 0.10.2 (clasamente persistente; cheia web Firebase în afara git-ului, publicare prin GitHub Actions)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -20,11 +20,11 @@
   și tot timpul; stelele de la teste); administrare (blocare, redenumire, ștergeri); pagina de confidențialitate. Fără configurarea Firebase, site-ul arată
   ca în v0.8.1, plus legătura „Confidențialitate” din subsol.
   Calitate: 76 de teste Node (plus validarea conținutului, a tabelului de acoperire, a contrastului și calibrarea stelelor din
-  Calcul fulger pe fiecare temă și nivel), 13 teste ale regulilor Firestore pe emulator, E2E 1118 verificări pe 3 ecrane + tastatură
-  (plus telefon ținut orizontal și telefon mic) și E2E pentru cont pe emulatoare, cu 59 de verificări (două dispozitive, două file,
-  blocare, clasamente pe temă, date vechi din cloud).
-- **Următorul pas:** site-ul deschis în contul real (la activare, clasamentele vechi trec pe temă și stelele de la teste revin; verificăm
-  apoi în Firestore), pe laptop, telefon și iPad, și documentul `admins/<uid>`.
+  Calcul fulger pe fiecare temă și nivel), 13 teste ale regulilor Firestore pe emulator, E2E 1115 verificări pe 3 ecrane + tastatură
+  (plus telefon ținut orizontal și telefon mic) și E2E pentru cont pe emulatoare, cu 62 de verificări (două dispozitive, două file,
+  blocare, clasamente pe temă și săptămâni trecute, date vechi din cloud).
+- **Următorul pas:** intrarea cu Google pe site, cu cheia nouă (la activare, clasamentele vechi trec pe temă și stelele de la teste
+  revin; verificăm apoi în Firestore), pe laptop, telefon și iPad; cererea la GitHub Support pentru commit-urile vechi; documentul `admins/<uid>`.
   În paralel: copilul joacă și rezolvă testele → pragurile și timpii reali. Apoi a doua temă din Calcul fulger (rețeta din
   `CLAUDE.md`), cu super-totalul pe mai multe teme, și secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul).
 
@@ -85,6 +85,11 @@
 - [x] M23 (v0.10.1): pagina Calcul fulger arată temele desfășurate, grupate: panoul temei (titlu, programă, stele și total, explicație,
   „Ce exersăm”, cele trei niveluri) și temele „în curând” la final, fără pagini separate pe temă; `#/fulger/<temă>` derulează la temă.
   npm test 76/76, E2E local 1115/1115; publicat, E2E pe site-ul live 1115/1115, tag `v0.10.1`
+- [x] M24 (v0.10.2): clasamentele persistente (săptămânile trecute rămân; intrările de dinainte de teme se mută cu scorul lor în tema
+  veche; lista `boards` până la 2000) și cheia web Firebase scoasă din git: cheia veche ștearsă, cheia nouă restricționată și ținută în
+  secretul `FIREBASE_API_KEY`, istoria rescrisă (`main`, `gh-pages`, etichete), publicare prin GitHub Actions. npm test 76/76, reguli 13/13
+  (publicate), E2E cont 62/62, E2E u1-t1 99/99; fluxul Actions: teste și publicare reușite; pe site: cheia nouă, Identity Toolkit 200 de
+  pe site și 403 din afara lui, Gemini 403; E2E pe site-ul live 1115/1115, tag `v0.10.2`
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -182,6 +187,8 @@
 | 2026-09-13 | Temele stau desfășurate pe pagina Calcul fulger, grupate (panou cu titlu, programă, stele și total, explicație, „Ce exersăm”, nivelurile), cu temele „în curând” la final; fără card spre o pagină a temei; `#/fulger/<temă>` rămâne adresă (rezultate, clasament, „Ieși din joc”), dar derulează la temă | cererea utilizatorului |
 | 2026-09-13 | Rezultatele din clasamente sunt persistente: intrările săptămânilor trecute nu se mai șterg, iar lista `boards` a profilului le ține pe toate (cel mult 2000 în reguli); intrările de dinainte de teme se mută cu scorul lor în tema veche și abia apoi se șterg | cererea utilizatorului („rezultatele trebuie să fie persistente”); curățarea după 2 săptămâni și ștergerea fără mutare pierdeau rezultate |
 | 2026-09-13 | Recenzia externă a reviziilor v0.8.0–v0.10.0: fără erori de calcul sau de securitate; reformulată cerința din u1-t1 „Cadouri și cinema” („Banii de cinema rămân deoparte”), fără versiune nouă; casetele din T2-e11 și T4-e09 nu se redenumesc | id-urile casetelor sunt interne, nevăzute de copil; redenumirea ar cere versiuni noi și ar strica ciornele și listele încercărilor |
+| 2026-09-13 | Nicio cheie în git: cheia web Firebase stă doar în secretul GitHub `FIREBASE_API_KEY` și intră în pachetul publicat prin GitHub Actions (`.github/workflows/pages.yml`); `config.js` are `apiKey: ''`; Pages publică din Actions, iar `npm run deploy` doar împinge `main` | alerta GitHub pentru cheia din `config.js` și cererea utilizatorului („rezolvat definitiv și retroactiv”); o cheie web se vede oricum în site, dar nu mai stă în repo |
+| 2026-09-13 | Cheia veche ștearsă în Google Cloud; cheia nouă restricționată (site-ul și `firebaseapp.com`; Identity Toolkit, Token Service, Cloud Firestore), fără cont de serviciu legat; istoria rescrisă cu `git filter-repo` pe `main`, `gh-pages` și toate etichetele, apoi ramura `gh-pages` ștearsă; alerta închisă ca „revoked” | doar ștergerea face cheia scursă nefolositoare; rescrierea o scoate din repo; restricțiile limitează cheia nouă, care rămâne vizibilă în JavaScript-ul site-ului |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -201,6 +208,8 @@
 - Redenumirea și ieșirea din clasament lucrează într-o tranzacție pe toată lista `boards` a profilului, iar o tranzacție Firestore are
   cel mult 500 de scrieri: după câteva sute de clasamente într-un profil (ani de runde săptămânale) vor trebui împărțite în loturi.
   Numărul clasamentelor fiecărui profil se vede în `#/admin`.
+- GitHub mai arată după SHA 13 commit-uri vechi cu cheia veche (ștearsă, deci nefolositoare), până la curățarea cerută prin GitHub
+  Support. O clonă făcută înainte de rescriere (13 septembrie) are istoria veche: `git fetch origin` și `git reset --hard origin/main`.
 
 ## Backlog
 - Scanările actuale acoperă manualul până la înmulțire; utilizatorul adaugă scanări noi după finalizarea etapei curente.
@@ -355,3 +364,15 @@
   exemplul „□ + 7 = 15” nu se mai rupe pe două rânduri. npm test 76/76, E2E local 1115/1115 (verificările paginii separate a temei au
   fost înlocuite cu cele ale panoului și ale derulării). v0.10.1 publicat, E2E pe site-ul live 1115/1115.
   **De făcut data viitoare:** vizita în cont și verificarea în Firestore; copilul joacă → pragurile; a doua temă și super-totalul.
+- **2026-09-13 (a opta sesiune, a patra continuare)** — O recenzie externă (secțiunea 0–1000, contul, Firestore, Calcul fulger, clasamentele),
+  verificată afirmație cu afirmație: fără erori de calcul sau de securitate; o cerință din u1-t1 reformulată, documentația mai precisă. La
+  cererea utilizatorului („rezultatele trebuie să fie persistente”), clasamentele săptămânilor trecute nu se mai șterg, iar intrările de
+  dinainte de teme se mută cu scorul lor în tema veche. Apoi o alertă GitHub (secret scanning) pentru cheia web Firebase din `config.js`,
+  tratată la cererea utilizatorului „definitiv și retroactiv”: nicio altă cheie în istoric (verificat pe toate reviziile); utilizatorul a
+  creat o cheie nouă restricționată și a șters-o pe cea veche; istoria rescrisă cu `git filter-repo` (`main`, `gh-pages`, 14 etichete) și
+  împinsă forțat; cheia nouă stă doar în secretul `FIREBASE_API_KEY`, iar fluxul GitHub Actions o scrie în site; Pages publică din Actions,
+  ramura `gh-pages` a fost ștearsă, alerta închisă ca „revoked”. Verificat pe site: cheia nouă, Identity Toolkit răspunde de pe site și
+  refuză din afara lui, Gemini refuză. Pe drum: `gh auth refresh` a mers și fără terminal (codul de dispozitiv, citit din jurnal). E2E pe site-ul
+  live 1115/1115; v0.10.2 publicat.
+  **De făcut data viitoare:** intrarea cu Google pe site și verificarea în Firestore (clasamentele mutate pe temă, stelele); cererea la
+  GitHub Support pentru cele 13 commit-uri vechi; copilul joacă → pragurile.
