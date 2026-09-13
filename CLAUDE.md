@@ -90,7 +90,7 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   șterge din casetele „Pentru părinți” (`clearHistory(testIds | null)` din `core/storage.js`, `refresh()` din `core/router.js`).
 - Sunete: `play('tap'|'place'|'done'|'level'|'win'|'yes'|'no')` din `core/sound.js` (WebAudio sintetizat, fără fișiere), pornite
   la gesturi; butonul din antet ține preferința în `cifruta:sound`; implicit oprite la `prefers-reduced-motion`. Calcul fulger
-  adaugă `ready`, `go`, `hit`, `star`, `combo`, `powerdown`, `tick`, `buzzer`; `play(nume, { step })` urcă tonul pe o scară pentatonică.
+  adaugă `ready`, `go`, `hit`, `star`, `combo`, `powerdown`, `tick`, `buzzer`; `play(nume, { step })` urcă tonul pe o scară pentatonică de cel mult o octavă.
 - Pagina de început e punctul de plecare: `player.js` deschide mereu intro-ul (`show(-1)`); „Continuă testul” reia de la `resumeAt`,
   „Reîncepe de la zero” șterge ciorna (cu confirmare). `#/rezultate/<test>/<încercare>` arată o anumită încercare (`getAttempt`).
 - `addAttempt()` întoarce `false` când stocarea nu scrie: încercarea rămâne în memorie (`isUnsaved`), ciorna nu se șterge, iar
@@ -122,3 +122,8 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   `engine.js` + `data/fulger.js`; pragurile de stele sunt verificate prin simulare în `tests/fulger.test.js`. Rundele stau în
   `cifruta:fulger` și se șterg din hub, nu odată cu istoricul testelor. E2E: `?debug=1` → `window.__dbg.fulger` (`state`, `force`,
   `elapse`, `setStreak`). Efectele trecătoare nu apar la mișcare redusă; bannerele se așază deasupra cardului, nu peste întrebare.
+- Calcul fulger pe dispozitive: Safari pe iOS pornește sunetul doar dintr-un gest încheiat, deci arena cheamă `unlockSound()` la
+  Start și la ridicarea degetului (răspunsurile se iau la `pointerdown`). În rundă arena umple spațiul de sub antet prin flex
+  (`body.is-game`); sub 32rem înălțime (telefon ținut orizontal) întrebarea și variantele stau una lângă alta, iar E2E verifică pe
+  ecrane joase că variantele încap fără derulare. O întrebare nu revine printre ultimele `noRepeat` (12); rezumatul rundei păstrează
+  greșelile (`mistakes`) pentru „Greșelile tale”, dar ele nu se salvează în `cifruta:fulger`.

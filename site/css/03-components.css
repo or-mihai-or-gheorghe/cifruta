@@ -51,6 +51,9 @@
 .c-logo__art { width: 2.8rem; height: 2.8rem; }
 .c-sound .c-emoji { width: 1.5rem; height: 1.5rem; margin: 0; vertical-align: middle; }
 .c-logo__sub { display: block; font-family: var(--font-body); font-size: var(--fs-0); font-weight: 400; color: var(--c-ink-soft); line-height: 1; }
+@media (max-width: 24rem) {
+  .c-logo__sub { display: none; } /* pe telefoanele foarte înguste trecea pe trei rânduri */
+}
 
 /* ——— Carduri ——— */
 .c-card {

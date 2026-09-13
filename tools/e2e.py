@@ -537,6 +537,7 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
 
 
 FULGER_READY = "window.__dbg && window.__dbg.fulger.state().enabled"
+FULGER_FIT = "(() => { const a = document.querySelector('[data-testid=fg-answers]').getBoundingClientRect(); return { bottom: Math.round(a.bottom), vh: innerHeight, scroll: document.documentElement.scrollHeight - innerHeight, x: document.documentElement.scrollWidth - innerWidth }; })()"
 
 
 def fulger_flow(run: Run, page: Page, vp: str):
@@ -568,6 +569,8 @@ def fulger_flow(run: Run, page: Page, vp: str):
     run.check(page.get_by_test_id("fg-time").inner_text() in ("2:00", "1:59"), f"[{vp}] fulger: după semafor pornește ceasul de 2 minute")
     run.layout_ok(page, f"[{vp}] fulger rundă")
     run.shot(page, f"{vp}-fulger-runda")
+    fit = page.evaluate(FULGER_FIT)
+    run.check(fit["bottom"] <= fit["vh"] and fit["scroll"] <= 1, f"[{vp}] fulger: variantele încap pe ecran, fără derulare în rundă ({fit})")
     for _ in range(5):
         answer()
     s = state()
@@ -632,6 +635,9 @@ def fulger_flow(run: Run, page: Page, vp: str):
     lit = page.locator("[data-testid=fg-results] .c-star.is-on").count()
     run.check(total >= alune and lit == sum(total >= s for s in stars), f"[{vp}] fulger: totalul {total} (bara de sus {alune}, cu precizia) și {lit} stele")
     run.check(page.get_by_test_id("fg-record").is_visible() and page.get_by_test_id("fg-medal-prima-cursa").is_visible(), f"[{vp}] fulger: prima rundă aduce recordul și medalia „Prima cursă”")
+    mistakes = page.locator("[data-testid=fg-mistakes] .fg-mistake").count()
+    target = page.get_by_test_id("fg-next-star")
+    run.check(mistakes == 2 and (lit == 3 or (target.is_visible() and "stea" in target.inner_text())), f"[{vp}] fulger: „Greșelile tale” arată cele 2 greșeli, iar ținta spune cât mai trebuie până la steaua următoare ({mistakes})")
     run.layout_ok(page, f"[{vp}] fulger rezultate")
     run.shot(page, f"{vp}-fulger-rezultate")
     page.get_by_test_id("fg-again").click()
@@ -648,6 +654,31 @@ def fulger_flow(run: Run, page: Page, vp: str):
     page.get_by_test_id("modal-confirm").click()
     page.wait_for_function("document.querySelector('[data-testid=fg-best-usor]')?.innerText.includes('Nou')")
     run.check(page.evaluate("localStorage.getItem('cifruta:fulger')") is None, f"[{vp}] fulger: ștergerea din „Pentru părinți” scoate rundele și recordul")
+
+
+def fulger_screens(run: Run, browser, base: str):
+    """Calcul fulger pe ecrane joase sau înguste (telefon ținut orizontal, telefon mic): totul încape fără derulare."""
+    screens = [
+        ("telefon culcat", {"viewport": {"width": 844, "height": 390}, "has_touch": True, "is_mobile": True}),
+        ("telefon mic", {"viewport": {"width": 360, "height": 640}, "has_touch": True, "is_mobile": True}),
+    ]
+    for name, opts in screens:
+        context = browser.new_context(locale="ro-RO", **opts)
+        page = context.new_page()
+        run.watch(page, name)
+        page.goto(f"{base}?debug=1#/fulger/avansat")
+        page.wait_for_selector("[data-testid=fg-start]")
+        box = page.get_by_test_id("fg-start").bounding_box()
+        run.check(box is not None and box["y"] + box["height"] <= opts["viewport"]["height"], f"[{name}] fulger: butonul Start încape pe ecran")
+        page.get_by_test_id("fg-start").click()
+        for kind in ("add-100-cu", "sort-4-dir", "cmp-expr"):
+            page.wait_for_function(FULGER_READY)
+            page.evaluate(f"window.__dbg.fulger.force('{kind}')")
+            page.wait_for_function(FULGER_READY)
+            fit = page.evaluate(FULGER_FIT)
+            run.check(fit["bottom"] <= fit["vh"] and fit["scroll"] <= 1 and fit["x"] <= 1, f"[{name}] fulger: la {kind} variantele încap fără derulare ({fit})")
+        run.shot(page, f"fulger-{name.replace(' ', '-')}")
+        context.close()
 
 
 def keyboard_flow(run: Run, browser, base: str):
@@ -779,6 +810,7 @@ def main() -> int:
             context.close()
         if not args.only:
             keyboard_flow(run, browser, run.base)
+            fulger_screens(run, browser, run.base)
         browser.close()
     if httpd:
         httpd.shutdown()

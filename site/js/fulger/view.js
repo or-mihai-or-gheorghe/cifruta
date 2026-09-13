@@ -3,14 +3,14 @@
 // requestAnimationFrame și stă pe loc în pauză; motorul (engine.js) hotărăște alunele și pauzele de după răspunsuri.
 
 import config from '../../data/fulger.js';
-import { confetti, levelPill, stars } from '../components/ui.js';
+import { confetti, levelInfo, levelPill, stars } from '../components/ui.js';
 import { countUp, h, pop, prefersReducedMotion } from '../core/dom.js';
 import { cantitate, formatNumber } from '../core/ro.js';
-import { play } from '../core/sound.js';
+import { play, unlockSound } from '../core/sound.js';
 import { emojiHTML } from '../visuals/emoji.js';
 import { visualSVG } from '../visuals/index.js';
 import { badge, banner, burst, flyTo, stamp } from './effects.js';
-import { createRound, levelConfig, streakTier, TURBO_FROM } from './engine.js';
+import { createRound, levelConfig, nextStar, streakTier, TURBO_FROM } from './engine.js';
 import { KINDS } from './kinds.js';
 
 const RING = 97.4; // lungimea cercului cu raza 15.5 din inel, ca în player
@@ -20,6 +20,7 @@ const SIGN_NAMES = { '<': 'mai mic decât', '=': 'egal cu', '>': 'mai mare decâ
 const KEYS = ['1', '2', '3', '4'];
 const CHEERS = { 3: 'Ai prins o serie!', 5: 'Alunele valorează dublu!', 10: 'Turbo! Alunele valorează triplu!' };
 const COMFORT = ['Nu-i nimic!', 'Data viitoare iese!', 'Respiră și continuă!'];
+const STAR_WORDS = ['Prima', 'A doua', 'A treia'];
 
 const spoken = (text) => String(text).replace(/−/g, 'minus');
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
@@ -142,6 +143,7 @@ export function mountArena(host, { level, best = null, seed, onEnd }) {
     h(
       'div',
       { class: 'fg-arena__inner' },
+      h('h1', { class: 'u-visually-hidden' }, `Calcul fulger · ${levelInfo(level)?.label ?? level}`),
       h('div', { class: 'fg-hud' }, timer, streakBox, basket, pauseBtn),
       track,
       h('div', { class: 'fg-stage' }, say, buddy, card, answers, cool),
@@ -151,8 +153,19 @@ export function mountArena(host, { level, best = null, seed, onEnd }) {
     live,
   );
   host.append(arena);
+  // pe iOS sunetul pornește doar dintr-un gest încheiat; răspunsurile se iau la pointerdown, deci deblocăm la ridicarea degetului
+  arena.addEventListener('pointerup', unlockSound);
+  arena.addEventListener('touchend', unlockSound, { passive: true });
 
   // ——— start ———
+  /** Ținta de pe panoul de start: recordul și steaua următoare. */
+  function goal() {
+    const next = nextStar(level, best ?? 0);
+    const record = best ? `Recordul tău: ${cantitate(best, 'alună', 'alune')}. ` : '';
+    const star = next ? `${STAR_WORDS[next.index]} stea: ${cantitate(next.at, 'alună', 'alune')}.` : 'Ai toate stelele: poți bate recordul?';
+    return h('p', { class: 'fg-panel__goal', 'data-testid': 'fg-goal' }, record + star);
+  }
+
   function showReady() {
     const start = h('button', { type: 'button', class: 'c-btn c-btn--primary c-btn--lg', 'data-testid': 'fg-start', onClick: () => countdown() }, 'Start');
     overlay.replaceChildren(
@@ -160,11 +173,12 @@ export function mountArena(host, { level, best = null, seed, onEnd }) {
         'div',
         { class: 'fg-panel anim-bounce-in' },
         h('div', { class: 'fg-panel__art', 'aria-hidden': 'true', html: visualSVG({ v: 'mascot', mood: 'vesela' }) }),
-        h('h1', { class: 'fg-panel__title' }, 'Calcul fulger'),
+        h('h2', { class: 'fg-panel__title' }, 'Calcul fulger'),
         levelPill(level),
         h('p', { class: 'fg-panel__text' }, 'Ai 2 minute. Răspunde corect de mai multe ori la rând: alunele cresc, iar fulgerul le dublează!'),
+        goal(),
         start,
-        h('p', { class: 'u-small u-muted' }, 'La tastatură: Enter pornește, 1–4 alege, Esc pune pauză.'),
+        h('p', { class: 'u-small u-muted fg-keys-hint' }, 'La tastatură: Enter pornește, 1–4 alege, Esc pune pauză.'),
       ),
     );
     start.focus({ preventScroll: true });
@@ -173,20 +187,20 @@ export function mountArena(host, { level, best = null, seed, onEnd }) {
   function countdown() {
     if (phase !== 'ready') return;
     phase = 'countdown';
+    unlockSound(); // încă suntem în clicul pe Start
     const lights = [0, 1, 2].map(() => h('span', { class: 'fg-light' }));
     const word = h('div', { class: 'fg-go', 'data-testid': 'fg-go' });
     overlay.replaceChildren(h('div', { class: 'fg-panel fg-panel--bare' }, h('div', { class: 'fg-lights', 'aria-hidden': 'true' }, lights), word));
     const steps = [['Pe locuri…', 'is-red', 'ready'], ['Fiți gata…', 'is-yellow', 'ready'], ['START!', 'is-green', 'go']];
     const gap = reduced ? 350 : 600;
-    steps.forEach(([text, cls, sound], i) =>
-      later(i * gap, () => {
-        lights[i].classList.add(cls);
-        word.textContent = text;
-        pop(word, 'is-slam');
-        play(sound);
-        live.textContent = text;
-      }),
-    );
+    const light = ([text, cls, sound], i) => {
+      lights[i].classList.add(cls);
+      word.textContent = text;
+      pop(word, 'is-slam');
+      play(sound);
+      live.textContent = text;
+    };
+    steps.forEach((step, i) => (i ? later(i * gap, () => light(step, i)) : light(step, i))); // prima lumină sună chiar în clic
     later(steps.length * gap + 100, startPlay);
   }
 
@@ -204,7 +218,7 @@ export function mountArena(host, { level, best = null, seed, onEnd }) {
   // ——— timpul ———
   function tick(now) {
     frame = requestAnimationFrame(tick);
-    const dt = Math.min(250, now - last); // după o oprire lungă a paginii, timpul nu sare
+    const dt = Math.max(0, Math.min(250, now - last)); // după o oprire lungă a paginii timpul nu sare, și nici nu merge înapoi
     last = now;
     if (phase === 'playing') advance(dt);
   }
@@ -232,7 +246,7 @@ export function mountArena(host, { level, best = null, seed, onEnd }) {
           live.textContent = 'Mai sunt 10 secunde. Sprint final!';
         }
         pop(timeText, 'anim-tick');
-        play('tick', { step: second <= 3 ? 7 : 0 });
+        play('tick', { step: second <= 3 ? 4 : 0 });
       }
     }
     ringFill.style.strokeDashoffset = (RING * (1 - remaining / config.durationMs)).toFixed(2);
@@ -506,6 +520,7 @@ export function mountArena(host, { level, best = null, seed, onEnd }) {
       arena.classList.remove('is-paused');
       phase = 'playing';
       last = performance.now();
+      if (document.hidden) pause(); // pagina s-a ascuns chiar în timpul lui „START!”
     });
   }
 

@@ -26,6 +26,7 @@ export default {
   // la final, cu cel puțin 10 răspunsuri: toate corecte +20%, cel puțin 90% corecte +10%
   precision: { minAnswers: 10, perfect: 0.2, high: { from: 0.9, bonus: 0.1 } },
   warmupCount: 3, // primele întrebări vin din tipurile de încălzire ale nivelului
+  noRepeat: 12, // o întrebare nu revine printre ultimele 12
   keepRounds: 30,
   levels: [
     {

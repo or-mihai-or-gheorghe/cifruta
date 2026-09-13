@@ -9,7 +9,7 @@ import { cantitate, formatDateTime, formatNumber } from '../core/ro.js';
 import { refresh } from '../core/router.js';
 import { play } from '../core/sound.js';
 import { clearFulger, getFulger, saveFulgerRound } from '../core/storage.js';
-import { levelConfig, medalsFor, practiceFor, starsFor } from '../fulger/engine.js';
+import { levelConfig, medalsFor, nextStar, practiceFor, starsFor } from '../fulger/engine.js';
 import { KINDS } from '../fulger/kinds.js';
 import { mountArena } from '../fulger/view.js';
 import { emojiHTML } from '../visuals/emoji.js';
@@ -161,6 +161,58 @@ function roundPage(container, lvl) {
 
 // ——— Rezultatele ———
 
+const STAR_WORDS = ['prima', 'a doua', 'a treia'];
+
+/** De ce lipsește bonusul de precizie (null când s-a câștigat). */
+function precisionHint(summary) {
+  const { minAnswers, high } = config.precision;
+  if (summary.precisionBonus) return null;
+  const ratio = `${Math.round(high.from * 10)} din 10 corecte`;
+  return summary.answered < minAnswers ? `de la ${minAnswers} răspunsuri, cu ${ratio}` : `cu ${ratio}`;
+}
+
+/** „Încă 12 alune și prinzi a doua stea.”: ținta pentru runda următoare. */
+function targetLine(lvl, summary) {
+  const next = nextStar(lvl.id, summary.total);
+  if (!next || !summary.answered) return null;
+  return h('p', { class: 'fg-target', 'data-testid': 'fg-next-star' }, `Încă ${alune(next.at - summary.total)} și prinzi ${STAR_WORDS[next.index]} stea.`);
+}
+
+/** Pasul următor: după 3 stele, nivelul următor; fără nicio stea (din cel puțin 5 răspunsuri), nivelul mai ușor. */
+function suggestion(lvl, summary) {
+  const i = config.levels.indexOf(lvl);
+  const target = summary.stars === 3 ? config.levels[i + 1] : summary.stars === 0 && summary.answered >= 5 ? config.levels[i - 1] : null;
+  if (!target) return null;
+  return h('a', { class: `c-btn c-btn--lg${summary.stars === 3 ? ' c-btn--accent' : ''}`, href: `#/fulger/${target.id}`, 'data-testid': 'fg-suggest' }, `Încearcă nivelul ${levelInfo(target.id)?.label ?? target.id}`);
+}
+
+/** O greșeală: operația cu răspunsul corect evidențiat și ce a ales copilul. */
+function mistake({ question: q, given }) {
+  const ok = (text) => h('strong', { class: 'fg-mistake__ok' }, text);
+  const [line, note] =
+    q.mode === 'choice'
+      ? [[q.text, ' = ', ok(String(q.answer))], `ai ales ${given}`]
+      : q.mode === 'compare'
+        ? [[q.left, ' ', ok(q.answer), ' ', q.right], `ai ales ${given}`]
+        : [[ok(q.answer.join(q.dir === 'asc' ? ' < ' : ' > '))], `ai atins ${given.at(-1)} în loc de ${q.answer[given.length - 1]}`];
+  return h('li', { class: 'fg-mistake' }, h('span', { class: 'fg-mistake__line' }, line), h('span', { class: 'fg-mistake__note' }, note));
+}
+
+/** „Greșelile tale”: ultimele 5, ca rezultatul să învețe ceva, nu doar să numere. */
+function mistakesSection(summary) {
+  if (!summary.mistakes.length) return null;
+  const shown = summary.mistakes.slice(-5);
+  const more = summary.mistakes.length - shown.length;
+  return h(
+    'section',
+    { class: 'fg-mistakes', 'data-testid': 'fg-mistakes' },
+    h('h2', { class: 'fg-h2' }, summary.mistakes.length === 1 ? 'Greșeala ta' : 'Greșelile tale'),
+    h('p', { class: 'u-small u-muted' }, 'Uită-te la răspunsul corect: data viitoare îl știi.'),
+    h('ul', { class: 'fg-mistakes__list' }, shown.map(mistake)),
+    more ? h('p', { class: 'u-small u-muted' }, `și încă ${cantitate(more, 'greșeală', 'greșeli')}`) : null,
+  );
+}
+
 function results(container, lvl, summary, pending) {
   const before = getFulger();
   const at = new Date().toISOString();
@@ -183,7 +235,7 @@ function results(container, lvl, summary, pending) {
     { nut: true, label: 'Alune din răspunsuri', value: summary.base },
     { icon: 'fulger', label: 'Bonus viteză', value: summary.speedBonus, prefix: '+' },
     { icon: 'foc', label: 'Bonus serie', value: summary.streakBonus, prefix: '+' },
-    { icon: 'tinta', label: 'Bonus precizie', value: summary.precisionBonus, prefix: '+', hint: summary.precisionBonus ? null : 'la 9 din 10 corecte' },
+    { icon: 'tinta', label: 'Bonus precizie', value: summary.precisionBonus, prefix: '+', hint: precisionHint(summary) },
   ].map((r) => {
     const num = h('span', {}, reduced ? String(r.value) : '0');
     const el = h(
@@ -245,19 +297,22 @@ function results(container, lvl, summary, pending) {
     h('ol', { class: 'fg-tally' }, rows.map((r) => r.el)),
     total,
     starBox,
+    targetLine(lvl, summary),
     ribbon,
     !record && saved?.previous ? h('p', { class: 'u-muted' }, `Recordul tău: ${alune(saved.previous)}`) : null,
   );
   const buddy = mascot(mood, message, { center: true });
   buddy.classList.add('fg-results__buddy');
   buddy.hidden = !reduced;
+  const mistakesBox = mistakesSection(summary);
+  if (mistakesBox) mistakesBox.hidden = !reduced;
   container.append(
     h(
       'div',
       { class: 'l-container l-container--narrow l-stack l-stack--lg fg-results' },
       card,
       saved && !saved.saved ? callout('warn', 'capcana', 'Runda nu s-a putut salva în acest browser (stocare plină sau blocată).') : null,
-      h('div', { class: 'l-cluster l-cluster--center' }, again, h('a', { class: 'c-btn c-btn--lg', href: '#/fulger', 'data-testid': 'fg-levels' }, 'Alt nivel')),
+      h('div', { class: 'l-cluster l-cluster--center' }, again, suggestion(lvl, summary) ?? h('a', { class: 'c-btn c-btn--lg', href: '#/fulger', 'data-testid': 'fg-levels' }, 'Alt nivel')),
       buddy,
       summary.answered
         ? h(
@@ -268,6 +323,7 @@ function results(container, lvl, summary, pending) {
             last !== null ? chip(`Data trecută: ${alune(last)}`, '', 'steag') : null,
           )
         : null,
+      mistakesBox,
       medalBox,
       summary.answered
         ? h(
@@ -339,7 +395,7 @@ function results(container, lvl, summary, pending) {
     }
     countUp(totalNum, summary.total, 0, summary.total);
     [...starBox.children].forEach((s, i) => s.classList.toggle('is-on', i < summary.stars));
-    for (const el of [ribbon, buddy, medalBox, ...medalEls]) reveal(el);
+    for (const el of [ribbon, buddy, mistakesBox, medalBox, ...medalEls]) reveal(el);
     again.focus({ preventScroll: true });
   }
   function skip(e) {

@@ -1,7 +1,7 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-13 · **Versiune:** 0.8.0
+- **Data:** 2026-09-13 · **Versiune:** 0.8.1
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -10,11 +10,11 @@
   grafic cu bare construit; `mark` cu reguli de set pentru sarcini deschise), banca vizuală (50 de desene: și grafice, pictograme,
   bețișoare, felii, tabele, podium, hartă de linii, indicator, raft, bon, listă, tabel de poziție, cuburi, medalie; 8 peisaje
   animate), sunete discrete cu buton de oprire, atelier pentru autori, jocul **Calcul fulger** (`#/fulger`: runde de 2 minute pe trei
-  niveluri, 16 tipuri de întrebări generate, alune cu bonus de viteză și de serie, Turbo, pistă spre stele și record, 6 medalii). Conținut: **4 teste de recapitulare a clasei I** (T1–T4 v2)
+  niveluri, 16 tipuri de întrebări generate, alune cu bonus de viteză și de serie, Turbo, pistă spre stele și record, 6 medalii, „Greșelile tale” și ținta următoarei stele la rezultate). Conținut: **4 teste de recapitulare a clasei I** (T1–T4 v2)
   și **6 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc), toate
   exercițiile cu desen sau emoji, fără răspunsuri „la vedere”, cu probleme în mai mulți pași și sarcini deschise la avansat.
   Calitate: 55 de teste Node (plus validarea conținutului, a tabelului de acoperire, a contrastului și calibrarea stelelor din
-  Calcul fulger), E2E 1082 de verificări pe 3 ecrane + tastatură.
+  Calcul fulger), E2E 1096 de verificări pe 3 ecrane + tastatură (plus telefon ținut orizontal și telefon mic, pentru Calcul fulger).
 - **Următorul pas:** copilul joacă Calcul fulger (câte o rundă pe nivel) → ajustăm pragurile de stele și timpii „fulger” după
   rundele reale; copilul rezolvă T1–T4 și testele noi → timpii reali și dificultatea; apoi secțiunea U2
   (Adunarea și scăderea până la 1000 · Pământul).
@@ -55,6 +55,9 @@
   scăderi cu și fără trecere, comparări, ordonări), alune cu bonus de viteză în serie, de serie și de precizie, pauza „Hopa” împotriva
   ghicitului, pistă spre stele și record, Turbo, sprint final, numărătoare de arcade, 6 medalii; publicat, E2E local 1082/1082 și pe
   site-ul live 1082/1082, tag `v0.8.0`
+- [x] M19 (v0.8.1): recenzia jocului: telefonul ținut orizontal (întrebarea și variantele una lângă alta), arena care umple ecranul,
+  sunet deblocat pe iOS, tonuri mai blânde, fără întrebări repetate recent, comparări fără numere banale, accesibilitate (numele
+  linkului, titlu în rundă); „Greșelile tale”, ținta următoarei stele, nivelul sugerat, ținta pe panoul de start; E2E local 1096/1096
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -130,6 +133,8 @@
 | 2026-09-13 | Greșeala stinge seria fără să ia alune, cu 1 s de pauză și răspunsul corect la vedere; o greșeală mai rapidă decât cititul (sub 40% din timpul „fulger”, nu la sortări) primește o pauză cât timpul „fulger” | decizia utilizatorului + simularea: doar cu 1 s, atingerile la întâmplare treceau de un copil bun (152 de alune la Avansat) |
 | 2026-09-13 | Stelele și recordul se aprind în timpul jocului, pe pistă, fără prag de acuratețe; pragurile (Ușor 30/80/175, Intermediar 35/95/215, Avansat 35/100/235) sunt verificate prin simulare în `tests/fulger.test.js` | stelele nu se mai sting; ghicitul rămâne sub prima stea prin reguli, nu prin pedeapsă |
 | 2026-09-13 | Efecte de joc în stilul Cifruța: particule, „+N” care zboară în coș, bannere deasupra cardului, Turbo, sprint final, numărătoare de arcade, medalii; tremur scurt la greșeală doar în joc; nimic trecător la mișcare redusă | cererea utilizatorului: „să fie văzută ca un joc, nu ca un test”; regula „fără zdruncinat” rămâne pentru teste |
+| 2026-09-13 | Recenzia jocului (v0.8.1): pe ecrane joase întrebarea și variantele stau una lângă alta; arena umple spațiul de sub antet; sunetul se deblochează la Start și la ridicarea degetului; tonul seriei urcă cel mult o octavă | probe pe ecrane neacoperite de E2E (pe telefonul ținut orizontal variantele ieșeau din ecran) și regulile Safari pe iOS pentru audio |
+| 2026-09-13 | O întrebare nu revine printre ultimele 12; la rezultate: „Greșelile tale” (ultimele 5, cu răspunsul corect), ținta următoarei stele, nivelul următor după 3 stele sau cel mai ușor fără nicio stea | 71% din rundele de la Ușor repetau o întrebare; rezultatul să învețe, nu doar să numere (recenzia aprobată de utilizator: „pe toate”) |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -139,6 +144,7 @@
 - T2–T4 au trecut la versiunea 2 (v0.5.0): încercările făcute pe versiunea 1 arată doar rezumatul, fără lista pe exerciții.
 - Testele u1-t1, u1-t3, u1-t4 și u1-t6 au trecut la versiunea 2 (v0.6.1), cu același efect pentru încercările făcute înainte.
 - În v0.7.0 toate cele 6 teste ale secțiunii 0–1000 au primit o versiune nouă: încercările mai vechi arată doar rezumatul.
+- Sunetul din Calcul fulger pe iPhone/iPad e deblocat după regulile Safari, dar nu a fost verificat pe un dispozitiv real.
 
 ## Backlog
 - Scanările actuale acoperă manualul până la înmulțire; utilizatorul adaugă scanări noi după finalizarea etapei curente.
@@ -233,3 +239,11 @@
   laptop și telefon, cu retușuri (bannerele deasupra cardului, cardul de pe pagina principală, medaliile pe un rând, rezultatele
   fără goluri în timpul numărătorii). npm test 55/55; v0.8.0 publicat, E2E local 1082/1082 și pe site-ul live 1082/1082.
   **De făcut data viitoare:** copilul joacă o rundă pe fiecare nivel → ajustăm pragurile de stele și timpii „fulger”; apoi U2.
+- **2026-09-13 (a șaptea sesiune, continuare)** — Recenzia jocului, la cererea utilizatorului: citirea codului, probe pe ecrane neacoperite
+  de E2E (telefon ținut orizontal, telefon mic, tabletă verticală), scenarii rare (rundă fără răspunsuri, record depășit, medalii multiple,
+  tab ascuns, plecare din rundă) și analiza întrebărilor generate. 9 erori (variantele ieșeau din ecran pe telefonul ținut orizontal,
+  derulare de 10 px pe telefoane mici, sunet probabil blocat pe iOS, tonuri stridente, întrebări repetate, comparări cu 0, indiciul de
+  precizie, numele linkului și titlul lipsă, reluarea cu tab-ul ascuns) și 6 îmbunătățiri („Greșelile tale”, nivelul sugerat, ținta
+  următoarei stele, cifrele tastelor ascunse pe tactil, E2E pe ecrane joase, subtitlul logoului pe telefoane foarte mici), aplicate
+  într-un singur lot. npm test 55/55, E2E local 1096/1096.
+  **De făcut data viitoare:** copilul joacă o rundă pe fiecare nivel (și pe iPad, pentru sunet) → ajustăm pragurile; apoi U2.

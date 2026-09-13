@@ -304,12 +304,12 @@ export const KINDS = {
         const b = rand() < 0.5 ? int(rand, 2, 9) : int(rand, 11, 100 - a);
         [expr, value] = [`${a}${PLUS}${b}`, a + b];
       } else {
-        const a = int(rand, 21, 99);
-        const b = rand() < 0.5 ? int(rand, 2, 9) : int(rand, 11, a - 1);
+        const a = int(rand, 24, 99);
+        const b = rand() < 0.5 ? int(rand, 2, 9) : int(rand, 11, a - 13); // rezultatul rămâne cel puțin 13
         [expr, value] = [`${a}${MINUS}${b}`, a - b];
       }
       const d = pickOne(rand, [-3, -2, -1, 0, 0, 1, 2, 3]);
-      const n = value + d >= 0 && value + d <= 100 ? value + d : value - d;
+      const n = value + d <= 100 ? value + d : value - d; // numărul comparat rămâne între 10 și 100
       return rand() < 0.3 ? compare('cmp-expr', n, expr) : compare('cmp-expr', expr, n);
     },
   },

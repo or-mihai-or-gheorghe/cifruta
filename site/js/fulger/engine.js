@@ -62,14 +62,21 @@ export function precisionBonus(answered, correct, alune) {
 
 export const starsFor = (level, total) => (levelConfig(level)?.stars ?? []).filter((s) => total >= s).length;
 
+/** Steaua următoare pentru un total: { index, at } (index 0 = prima stea) sau null când toate sunt prinse. */
+export function nextStar(level, total) {
+  const stars = levelConfig(level)?.stars ?? [];
+  const index = stars.findIndex((s) => total < s);
+  return index < 0 ? null : { index, at: stars[index] };
+}
+
 /** O rundă: `next()` dă întrebarea următoare, `answer(given, ms)` o închide, `summary()` face rezumatul. */
 export function createRound({ level, seed = newSeed() }) {
   const lvl = levelConfig(level);
   if (!lvl) throw new Error(`fulger: nivel necunoscut „${level}”`);
   const rand = seededRandom(seed);
   const answers = [];
+  const recent = []; // cheile ultimelor întrebări, ca să nu revină prea curând
   let question = null;
-  let lastKey = null;
   let asked = 0;
   let streak = 0;
 
@@ -89,13 +96,14 @@ export function createRound({ level, seed = newSeed() }) {
     get streak() {
       return streak;
     },
-    /** Întrebarea următoare (sau una de tipul dat); aceeași întrebare nu vine de două ori la rând. */
+    /** Întrebarea următoare (sau una de tipul dat); nu repetă nicio întrebare dintre ultimele `config.noRepeat`. */
     next(kind = null) {
       const id = kind ?? pickKind();
       let q = KINDS[id].generate(rand);
-      for (let i = 0; i < 20 && q.key === lastKey; i++) q = KINDS[id].generate(rand);
+      for (let i = 0; i < 30 && recent.includes(q.key); i++) q = KINDS[id].generate(rand);
+      recent.push(q.key);
+      if (recent.length > config.noRepeat) recent.shift();
       question = q;
-      lastKey = q.key;
       asked++;
       return q;
     },
@@ -107,7 +115,7 @@ export function createRound({ level, seed = newSeed() }) {
       const correct = isCorrect(q, given);
       streak = correct ? streak + 1 : 0;
       const score = correct ? scoreAnswer({ kind: q.kind, ms, streak }) : { alune: 0, base: 0, speedExtra: 0, streakExtra: 0, speed: null };
-      answers.push({ kind: q.kind, correct, ms: Math.round(ms), ...score });
+      answers.push({ kind: q.kind, correct, ms: Math.round(ms), ...score, ...(correct ? {} : { question: q, given }) });
       return {
         question: q,
         correct,
@@ -156,6 +164,7 @@ export function createRound({ level, seed = newSeed() }) {
         fast: answers.filter((a) => a.speed === 'fulger').length,
         byKind,
         stars: starsFor(level, total),
+        mistakes: answers.filter((a) => !a.correct).map((a) => ({ question: a.question, given: a.given })),
       };
     },
   };

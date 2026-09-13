@@ -20,12 +20,12 @@ const NOTES = {
   star: [[1319, 0, 0.08, 'sine', 0.07], [1760, 0.08, 0.16, 'sine', 0.06]],
   combo: [[523, 0, 0.07], [659, 0.06, 0.07], [784, 0.12, 0.07], [1047, 0.18, 0.18]],
   powerdown: [[660, 0, 0.32, 'sine', 0.07, 220]],
-  tick: [[1175, 0, 0.035, 'square', 0.02]],
+  tick: [[880, 0, 0.05, 'triangle', 0.06]],
   buzzer: [[392, 0, 0.16, 'triangle', 0.1], [262, 0.16, 0.34, 'triangle', 0.1]],
 };
 
-// `step` urcă sunetul pe o scară pentatonică (seria din Calcul fulger sună tot mai sus)
-const PENTATONIC = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
+// `step` urcă sunetul pe o scară pentatonică de cel mult o octavă (seria din Calcul fulger sună tot mai sus, fără să devină stridentă)
+const PENTATONIC = [0, 2, 4, 7, 9, 12];
 
 let ctx = null;
 const saved = getPref('sound', null);
@@ -60,6 +60,17 @@ export function play(name, { step = 0 } = {}) {
 }
 
 export const soundEnabled = () => enabled;
+
+/** Pornește sunetul chiar în timpul unui gest (clic, ridicarea degetului): Safari pe iOS nu pornește audio din alte momente. */
+export function unlockSound() {
+  if (!enabled) return;
+  try {
+    ctx ??= new (window.AudioContext ?? window.webkitAudioContext)();
+    if (ctx.state === 'suspended') ctx.resume();
+  } catch {
+    /* fără audio */
+  }
+}
 
 export function setSoundEnabled(on) {
   enabled = on;

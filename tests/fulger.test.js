@@ -5,7 +5,7 @@ import config from '../site/data/fulger.js';
 import { calc, relation } from '../site/js/core/expr.js';
 import { seededRandom } from '../site/js/core/rng.js';
 import { trecere } from '../site/js/core/rules.js';
-import { createRound, medalsFor, milestone, pauseAfter, practiceFor, precisionBonus, scoreAnswer, starsFor } from '../site/js/fulger/engine.js';
+import { createRound, medalsFor, milestone, nextStar, pauseAfter, practiceFor, precisionBonus, scoreAnswer, starsFor } from '../site/js/fulger/engine.js';
 import { KINDS } from '../site/js/fulger/kinds.js';
 import { EMOJI } from '../site/js/visuals/emoji.js';
 
@@ -42,7 +42,7 @@ const RULES = {
   'sub-100-cu': ({ text, answer }) => terms(text)[0] <= 100 && answer >= 1 && trecere('-', ...terms(text)),
   'add-3op-100': ({ text, answer }) => terms(text).length === 3 && answer <= 100 && terms(text).reduce((s, x) => s + (x % 10), 0) >= 10,
   'cmp-expr': ({ left, right }) =>
-    [left, right].some((x) => /[+−]/.test(x)) && Math.abs(calc(left) - calc(right)) <= 3 && [left, right].every((x) => inRange(calc(x), 0, 100)),
+    [left, right].some((x) => /[+−]/.test(x)) && Math.abs(calc(left) - calc(right)) <= 3 && [left, right].every((x) => inRange(calc(x), 10, 100)),
   'sort-4-dir': ({ numbers }) => numbers.length === 4 && numbers.every((x) => inRange(x, 0, 100)),
 };
 
@@ -133,7 +133,7 @@ test('fulger: pragurile de serie și Turbo', () => {
   assert.equal(milestone(35).label, 'Legendar!');
 });
 
-test('fulger: runda e deterministă, începe cu încălzirea și nu repetă o întrebare la rând', () => {
+test('fulger: runda e deterministă, începe cu încălzirea și nu repetă întrebările recente', () => {
   const keys = (seed) => {
     const round = createRound({ level: 'intermediar', seed });
     return Array.from({ length: 40 }, () => round.answer(round.next().answer, 2000).question.key);
@@ -142,12 +142,13 @@ test('fulger: runda e deterministă, începe cu încălzirea și nu repetă o î
   assert.notDeepEqual(keys(42), keys(43));
   for (const lvl of config.levels) {
     const round = createRound({ level: lvl.id, seed: 7 });
-    let previous = null;
+    const recent = [];
     for (let i = 0; i < 1500; i++) {
       const q = round.next();
       if (i < config.warmupCount) assert.ok(lvl.warmup.includes(q.kind), `${lvl.id}: încălzirea începe cu ${q.kind}`);
-      assert.notEqual(q.key, previous, `${lvl.id}: aceeași întrebare de două ori la rând`);
-      previous = q.key;
+      assert.ok(!recent.includes(q.key), `${lvl.id}: ${q.key} revine printre ultimele ${config.noRepeat} întrebări`);
+      recent.push(q.key);
+      if (recent.length > config.noRepeat) recent.shift();
       round.answer(q.answer, 1000);
     }
   }
@@ -170,6 +171,9 @@ test('fulger: rezumatul adună alunele, seria cea mai lungă și bonusul de prec
   assert.equal(s.total, s.alune + s.precisionBonus);
   assert.equal(s.stars, starsFor('usor', s.total));
   assert.equal(Object.values(s.byKind).reduce((n, k) => n + k.total, 0), 12);
+  assert.equal(s.mistakes.length, 1); // greșelile, pentru „Greșelile tale”
+  assert.equal(s.mistakes[0].question.key, results[4].question.key);
+  assert.notDeepEqual(s.mistakes[0].given, results[4].question.answer);
 });
 
 test('fulger: bonusul de precizie și stelele', () => {
@@ -180,6 +184,9 @@ test('fulger: bonusul de precizie și stelele', () => {
   assert.equal(starsFor('usor', 29), 0);
   assert.equal(starsFor('usor', 30), 1);
   assert.equal(starsFor('avansat', 235), 3);
+  assert.deepEqual(nextStar('usor', 29), { index: 0, at: 30 });
+  assert.deepEqual(nextStar('usor', 80), { index: 2, at: 175 });
+  assert.equal(nextStar('usor', 175), null);
 });
 
 test('fulger: configurația trimite doar la tipuri, iconițe și statistici cunoscute', () => {

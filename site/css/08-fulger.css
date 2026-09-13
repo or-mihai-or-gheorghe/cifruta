@@ -5,7 +5,8 @@
 .c-nav-fulger .c-emoji { width: 1.25rem; height: 1.25rem; margin: 0; }
 @media (max-width: 30rem) {
   .c-nav-fulger { width: 2.5rem; padding: 0; }
-  .c-nav-fulger__text { display: none; }
+  /* ascuns doar vizual: linkul își păstrează numele pentru cititoarele de ecran */
+  .c-nav-fulger__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
 
 .fg-home {
@@ -108,14 +109,17 @@
 .fg-medal.is-won .fg-medal__icon { filter: none; opacity: 1; background: var(--c-accent); box-shadow: 0 0 0 3px var(--c-surface), 0 0 0 5px var(--c-accent-dark); }
 
 /* ——— Arena rundei ——— */
+/* în rundă, arena umple exact spațiul de sub antet, oricât de înalt ar fi antetul */
+body.is-game .l-app { min-height: 100vh; min-height: 100dvh; }
 body.is-game .l-footer { display: none; }
-body.is-game .l-main { padding-block: 0; }
+body.is-game .l-main { display: flex; flex-direction: column; padding-block: 0; }
+body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 
 .fg-arena {
   position: relative;
   isolation: isolate;
   display: flex;
-  min-height: calc(100dvh - 4rem - 2px);
+  flex: 1;
   overflow: hidden;
   background: linear-gradient(180deg, var(--c-level-bg) 0%, var(--c-paper) 75%);
   touch-action: manipulation;
@@ -469,6 +473,7 @@ body.is-game .l-main { padding-block: 0; }
 .fg-panel__art svg { width: 100%; height: auto; }
 .fg-panel__title { font-size: var(--fs-4); }
 .fg-panel__text { color: var(--c-ink-soft); }
+.fg-panel__goal { font-family: var(--font-title); font-weight: 700; color: var(--c-brand-dark); }
 .fg-lights { display: flex; gap: var(--sp-3); padding: 0.6rem 0.9rem; border-radius: var(--r-pill); background: var(--c-ink); }
 .fg-light { width: 2.6rem; height: 2.6rem; border-radius: 50%; background: var(--v-coal); transition: background-color var(--dur-1), box-shadow var(--dur-1); }
 .fg-light.is-red { background: var(--v-red); box-shadow: 0 0 18px var(--v-red); }
@@ -530,7 +535,15 @@ body.is-game .l-main { padding-block: 0; }
 .fg-ribbon.is-in { animation: anim-slam 450ms var(--ease-spring) both; }
 .fg-again { animation: anim-pulse 1.2s ease-in-out 3; }
 .fg-new-medals .fg-medal.is-in { animation: anim-flip-in 400ms var(--ease-out) both; }
-.fg-results__buddy.is-in { animation: anim-fade-up var(--dur-3) var(--ease-out) both; }
+.fg-results__buddy.is-in,
+.fg-mistakes.is-in { animation: anim-fade-up var(--dur-3) var(--ease-out) both; }
+.fg-target { font-family: var(--font-title); font-weight: 700; color: var(--c-brand-dark); }
+.fg-mistakes { display: grid; gap: var(--sp-2); padding: var(--sp-4); border: 2px solid var(--c-line); border-radius: var(--r-3); background: var(--c-surface); }
+.fg-mistakes__list { display: grid; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
+.fg-mistake { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.25rem var(--sp-3); padding: 0.45rem 0.8rem; border-radius: var(--r-2); background: var(--c-surface-2); }
+.fg-mistake__line { font-family: var(--font-title); font-weight: 700; font-size: var(--fs-2); font-variant-numeric: tabular-nums; }
+.fg-mistake__ok { padding: 0 0.35rem; border-radius: var(--r-1); background: var(--c-ok-bg); color: var(--c-ok-ink); }
+.fg-mistake__note { font-size: var(--fs-0); color: var(--c-ink-soft); }
 .fg-results .is-waiting { visibility: hidden; }
 .fg-table-wrap { overflow-x: auto; }
 .fg-table { width: 100%; border-collapse: collapse; font-size: var(--fs-0); }
@@ -541,3 +554,37 @@ body.is-game .l-main { padding-block: 0; }
 
 /* ascuns cu atributul hidden, deși are display în acest strat */
 .fg-overlay[hidden] { display: none; }
+
+/* pe ecrane tactile, cifrele tastelor nu ajută */
+@media (hover: none) {
+  .fg-opt__key,
+  .fg-keys-hint { display: none; }
+}
+
+/* ——— Ecrane joase (telefon ținut orizontal): întrebarea și variantele stau una lângă alta ——— */
+@media (max-height: 32rem) {
+  body.is-game .l-header__inner { min-height: 3rem; }
+  body.is-game .c-logo__art { width: 2rem; height: 2rem; }
+  body.is-game .c-logo__sub { display: none; }
+  .fg-arena__inner { gap: 0.4rem; padding-block: 0.4rem 0.6rem; }
+  .fg-timer { gap: 0.3rem; font-size: var(--fs-1); }
+  .fg-timer .c-countdown__ring { width: 2.2rem; height: 2.2rem; }
+  .fg-streak__flame,
+  .fg-streak__fire .c-emoji { width: 1.8rem; height: 1.8rem; }
+  .fg-basket__art { width: 2rem; height: 2rem; }
+  .fg-basket__num { font-size: var(--fs-2); }
+  .fg-pause { width: 2.5rem; min-height: 2.5rem; }
+  .fg-track { height: 1.5rem; }
+  .fg-track__runner { width: 1.7rem; height: 1.7rem; margin: -1.1rem 0 0 -0.85rem; }
+  .fg-stage { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: 'card answers' 'cool cool'; align-items: center; gap: 0.4rem var(--sp-3); }
+  .fg-card { grid-area: card; min-height: 0; padding: var(--sp-3); }
+  .fg-answers { grid-area: answers; gap: var(--sp-2); }
+  .fg-cooldown { grid-area: cool; min-height: 1.6rem; }
+  .fg-q { font-size: clamp(1.8rem, 1.2rem + 3vh, 2.4rem); }
+  .fg-q--sort { font-size: 1.25rem; }
+  .fg-opt { min-height: 3.3rem; font-size: 1.6rem; }
+  .fg-overlay { place-items: safe center; overflow-y: auto; padding: var(--sp-2); }
+  .fg-panel { gap: var(--sp-2); padding: var(--sp-4); }
+  .fg-panel__art { display: none; }
+  .fg-panel__title { font-size: var(--fs-3); }
+}
