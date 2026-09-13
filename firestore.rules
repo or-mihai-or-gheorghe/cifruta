@@ -20,8 +20,9 @@ service cloud.firestore {
     function account() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
+    // blocarea stă în blocked/{uid}, pe care doar adminul îl scrie: supraviețuiește ștergerii și recreării documentului users/{uid}
     function notBlocked() {
-      return account().get('blocked', false) == false;
+      return !exists(/databases/$(database)/documents/blocked/$(request.auth.uid));
     }
 
     // ——— validări ———
@@ -70,6 +71,12 @@ service cloud.firestore {
         && isInt(data().wrong, 0, 500)
         && isInt(data().stars, 0, 3);
     }
+    // state/fulger: recordurile, medaliile și cea mai bună rundă a săptămânii pe niveluri; state/tests: stelele pe teste
+    function validState(id) {
+      return (id == 'fulger' && onlyKeys(['best', 'medals', 'week']) && data().best is map && data().medals is map
+                && data().get('week', {}) is map)
+        || (id == 'tests' && onlyKeys(['best']) && data().best is map);
+    }
 
     // ——— clasamente ———
     function isFulgerBoard(board) {
@@ -110,6 +117,13 @@ service cloud.firestore {
       allow get: if isOwner(uid);
     }
 
+    match /blocked/{uid} {
+      allow get: if isOwner(uid) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAdmin() && onlyKeys(['at']) && data().at == request.time;
+      allow delete: if isAdmin();
+    }
+
     match /users/{uid} {
       allow get: if isOwner(uid) || isAdmin();
       allow list: if isAdmin();
@@ -119,12 +133,11 @@ service cloud.firestore {
         && data().name is string && data().name.size() <= 80
         && data().createdAt == request.time
         && data().lastSeenAt == request.time;
-      allow update: if (isOwner(uid)
-          && changedOnly(['name', 'lastSeenAt', 'consentAt'])
-          && data().name is string && data().name.size() <= 80
-          && data().lastSeenAt is timestamp
-          && data().get('consentAt', request.time) is timestamp)
-        || (isAdmin() && changedOnly(['blocked']) && data().blocked is bool);
+      allow update: if isOwner(uid)
+        && changedOnly(['name', 'lastSeenAt', 'consentAt'])
+        && data().name is string && data().name.size() <= 80
+        && data().lastSeenAt is timestamp
+        && data().get('consentAt', request.time) is timestamp;
       allow delete: if isOwner(uid) || isAdmin();
 
       match /profiles/{pid} {
@@ -151,8 +164,7 @@ service cloud.firestore {
         }
         match /state/{id} {
           allow get, list: if isOwner(uid) || isAdmin();
-          allow create, update: if isOwner(uid) && notBlocked() && id == 'fulger'
-            && onlyKeys(['best', 'medals']) && data().best is map && data().medals is map;
+          allow create, update: if isOwner(uid) && notBlocked() && validState(id);
           allow delete: if isOwner(uid) || isAdmin();
         }
       }

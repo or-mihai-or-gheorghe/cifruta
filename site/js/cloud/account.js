@@ -51,6 +51,21 @@ function refreshIfSafe() {
   refresh();
 }
 
+// Ieșirea voluntară din altă filă șterge sesiunea comună (cifruta:session). Fila asta află prin evenimentul `storage`, oprește
+// sincronizarea și își șterge ea copiile profilurilor: ștergerea făcută de cealaltă filă se poate pierde dacă fila asta tocmai scria.
+if (typeof addEventListener === 'function') {
+  addEventListener('storage', (e) => {
+    if (e.key !== 'cifruta:session' || e.newValue !== null || !state.user) return;
+    const { uid } = state.user;
+    adoption++; // o preluare a contului aflată în curs se oprește
+    stopSync();
+    setScope(null);
+    clearAccountCopies(uid);
+    set({ ...OFF, notice: 'Ai ieșit din cont în altă filă. Rezultatele noi se păstrează doar în acest browser.' });
+    refreshIfSafe();
+  });
+}
+
 /** La pornire, înainte de prima pagină: scopul datelor vine din sesiunea salvată, iar contul se confirmă în fundal. */
 export function bootAccount() {
   const session = readSession();
@@ -93,14 +108,16 @@ async function adopt(user) {
   const token = ++adoption;
   const session = readSession();
   if (!user) {
+    // Scopul revine mereu la „fără cont”, ca nimic să nu mai intre în profil. Fără sesiune comună, dar cu fila încă în cont, altă filă
+    // a ieșit voluntar: ștergem și aici copiile profilurilor (fila asta le-a putut rescrie între timp). Cu sesiunea încă prezentă
+    // (intrarea a expirat), copiile rămân, ca rezultatele din coadă să urce la intrarea următoare.
     stopSync();
-    if (session) {
-      // sesiunea din browser nu mai e valabilă: copiile profilului rămân, ca rezultatele din coadă să urce la intrarea următoare
-      writeSession(null);
-      setScope(null);
-      set({ ...OFF, notice: 'Ai ieșit din cont. Rezultatele noi se păstrează doar în acest browser.' });
-      refreshIfSafe();
-    } else set({ ...OFF, notice: state.notice, error: state.error });
+    const wasIn = Boolean(session || state.user);
+    if (!session && state.user) clearAccountCopies(state.user.uid);
+    writeSession(null);
+    setScope(null);
+    set({ ...OFF, notice: wasIn ? 'Ai ieșit din cont. Rezultatele noi se păstrează doar în acest browser.' : state.notice, error: wasIn ? null : state.error });
+    if (wasIn) refreshIfSafe();
     return;
   }
   const { db, f } = fb;
@@ -119,14 +136,15 @@ async function adopt(user) {
     } else {
       f.updateDoc(ref, { lastSeenAt: f.serverTimestamp() }).catch(() => {});
     }
-    const [adminSnap, profilesSnap] = await Promise.all([
+    const [adminSnap, blockedSnap, profilesSnap] = await Promise.all([
       f.getDoc(f.doc(db, 'admins', me.uid)).catch(() => null),
+      f.getDoc(f.doc(db, 'blocked', me.uid)).catch(() => null),
       f.getDocs(f.collection(db, 'users', me.uid, 'profiles')),
     ]);
     if (token !== adoption) return;
     const account = snap.exists() ? snap.data() : {};
     const profiles = profilesSnap.docs.map((d) => ({ ...d.data(), id: d.id })).sort(byId);
-    set({ status: 'ready', consent: Boolean(account.consentAt), admin: Boolean(adminSnap?.exists()), blocked: account.blocked === true, profiles, notice: null });
+    set({ status: 'ready', consent: Boolean(account.consentAt), admin: Boolean(adminSnap?.exists()), blocked: Boolean(blockedSnap?.exists()), profiles, notice: null });
     const current = readSession();
     await activate(profiles.some((p) => p.id === current?.pid) ? current.pid : (profiles[0]?.id ?? null));
   } catch (err) {

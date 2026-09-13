@@ -188,3 +188,42 @@ export function enqueue(queue, op) {
 
 /** Scoate operația făcută; dacă a fost pusă din nou între timp (alt `seq`), rămâne pentru următoarea trimitere. */
 export const dequeue = (queue, op) => queue.filter((q) => !(opKey(q) === opKey(op) && (op.seq === undefined || q.seq === op.seq)));
+
+// ——— ce se publică în clasamente, din starea completă a profilului (cloud), nu doar din ce e în browser ———
+
+/** Stelele unei încercări: câte niveluri au stea (0–3). */
+export const attemptStars = (attempt) => Object.values(attempt.levels ?? {}).filter((l) => l?.star).length;
+
+/** Totalul din state/tests (cele mai multe stele pe fiecare test): { stars, tests }. */
+export const starsTotal = (best = {}) => ({ stars: Object.values(best).reduce((sum, n) => sum + (Number(n) || 0), 0), tests: Object.keys(best).length });
+
+/** state/tests după o încercare urcată: testul își păstrează cele mai multe stele; null dacă nu se schimbă nimic. */
+export function withAttemptStars(best = {}, attempt) {
+  const stars = attemptStars(attempt);
+  if ((best[attempt.testId] ?? -1) >= stars) return null;
+  return { ...best, [attempt.testId]: stars };
+}
+
+/** Cea mai bună rundă a săptămânii pe fiecare nivel (state/fulger.week), după o rundă urcată; null dacă nu se schimbă. */
+export function withWeekBest(week = {}, round) {
+  const id = isoWeek(new Date(round.at));
+  const prev = week[round.level];
+  if (prev && (prev.id > id || (prev.id === id && prev.alune >= round.total))) return null;
+  return { ...week, [round.level]: { id, alune: round.total, correct: round.correct ?? 0, bestStreak: round.bestStreak ?? 0, at: round.at } };
+}
+
+/**
+ * Intrările Calcul fulger ale unui nivel: „tot timpul” din recordul permanent (state.best), săptămâna curentă din state.week sau din
+ * rundele din browser ale săptămânii (cea mai mare dintre ele). [[board, { score, correct, bestStreak }], …], doar scoruri pozitive.
+ */
+export function fulgerCandidates(level, { best = {}, week = {} } = {}, rounds = [], weekId = isoWeek()) {
+  const out = [];
+  const record = best[level];
+  if (record?.alune > 0) out.push([`fulger-${level}-all`, { score: record.alune, correct: record.correct ?? 0, bestStreak: record.bestStreak ?? 0 }]);
+  const local = bestRound(rounds.filter((r) => r.level === level && r.total > 0 && isoWeek(new Date(r.at)) === weekId));
+  const saved = week[level]?.id === weekId ? week[level] : null;
+  const options = [saved && { score: saved.alune, correct: saved.correct ?? 0, bestStreak: saved.bestStreak ?? 0 }, local && { score: local.total, correct: local.correct ?? 0, bestStreak: local.bestStreak ?? 0 }];
+  const top = options.filter(Boolean).reduce((a, b) => (!a || b.score > a.score ? b : a), null);
+  if (top?.score > 0) out.push([`fulger-${level}-${weekId}`, top]);
+  return out;
+}

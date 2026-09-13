@@ -275,16 +275,16 @@ export default {
           id: 'b',
           concepts: ['mat.mas.distanta', 'mat.op.cu-trecere'],
           type: 'fill',
-          prompt: 'Câți kilometri are drumul ales?',
+          prompt: 'Câți kilometri are cel mai scurt drum care trece pe la Benzinărie?',
           rows: ['Kilometri: [[a]]'],
           checks: ['25 + 32 + 27 = [[a]]'],
-          blanks: { a: { answer: 84, feedback: [{ if: 75, text: '75 km are drumul prin Pădure, dar el nu trece pe la Benzinărie.' }] } },
+          blanks: { a: { answer: 84, feedback: [{ if: 75, text: '75 km are drumul prin Pădure, dar el nu trece pe la Benzinărie.' }, { if: 135, text: 'Și drumul de 135 km trece pe la Benzinărie, dar nu e cel mai scurt.' }] } },
         },
         {
           id: 'c',
           concepts: ['mat.op.cu-trecere', 'mat.pb.doua-operatii'],
           type: 'fill',
-          prompt: 'Cu câți kilometri e mai lung decât cel mai scurt drum de pe hartă, care ocolește Benzinăria?',
+          prompt: 'Cu câți kilometri e mai lung cel mai scurt drum prin Benzinărie decât cel mai scurt drum de pe hartă, care o ocolește?',
           rows: ['Kilometri în plus: [[b]]'],
           checks: ['84 - 75 = [[b]]'],
           blanks: { b: { answer: 9 } },
@@ -319,7 +319,7 @@ export default {
       explain: {
         idea: 'Citește fiecare bară pe scara din stânga, din 20 în 20, apoi adună zilele pe rând.',
         steps: ['luni 100, marți 40, miercuri 120, joi 20.', 'Toată excursia: 100 + 40 + 120 + 20 = 280 de km.', 'Pe rând: după luni 100, după marți 140, după miercuri 260, mai mult decât 250: benzina s-a terminat miercuri.', 'Miercuri față de luni: 120 − 100 = 20 km.'],
-        trap: 'Benzina nu se termină în ziua cu cei mai mulți kilometri, ci în ziua în care totalul trece de 250.',
+        trap: 'Adună kilometrii zilelor în ordine și găsește ziua în care se consumă cei 250 km ai primului plin.',
       },
     },
     {

@@ -1,13 +1,15 @@
-// Sincronizarea profilului care joacă. La activare aduce din Firestore încercările, rundele și starea Calcul fulger, apoi trimite
-// fiecare scriere anunțată de core/storage.js (onWrite). Ce nu ajunge (fără internet, limita de frecvență a clasamentului) rămâne
-// în coada profilului (cifruta:p:<uid>:<pid>:pending) și se reia: la revenirea internetului, după o pauză, la activarea următoare.
-// Tot ce ține împreună (încercare + contor, rundă + stare + contor, intrări + lista clasamentelor) se scrie într-o tranzacție.
+// Sincronizarea profilului care joacă. Scrierile anunțate de core/storage.js (onWrite) intră în coada profilului imediat, chiar
+// înainte ca Firebase să se încarce sau fără internet. Când contul e confirmat, startSync aduce datele din cloud (îmbinate cu coada)
+// și trimite coada. Ce nu ajunge (fără internet, limita de frecvență a clasamentului) rămâne în cifruta:p:<uid>:<pid>:pending și
+// se reia: la revenirea internetului, după o pauză, la activarea următoare. Tot ce ține împreună (încercare + contor + stelele pe
+// teste, rundă + stare + contor, intrări + lista clasamentelor) se scrie într-o tranzacție. Clasamentele se calculează din starea
+// completă din cloud (state/fulger, state/tests), nu doar din ce e în browser.
 
 import config from '../../data/fulger.js';
-import { getAttempt, getFulger, getScoped, listAttempts, onWrite, readScopeData, setScoped, writeScopeData } from '../core/storage.js';
+import { currentProfile, getAttempt, getFulger, getScoped, onWrite, readScopeData, setScoped, writeScopeData } from '../core/storage.js';
 import {
-  bestRound, dequeue, enqueue, entryId, fromCloudAttempt, isoWeek, LEVELS, mergeAttempts, mergeFulger, mergeFulgerState, pruneBoards,
-  roundId, sameData, testStars, TESTS_BOARD, toCloudAttempt, toCloudRound,
+  dequeue, enqueue, entryId, fromCloudAttempt, fulgerCandidates, LEVELS, mergeAttempts, mergeFulger, mergeFulgerState, pruneBoards,
+  roundId, sameData, starsTotal, TESTS_BOARD, toCloudAttempt, toCloudRound, withAttemptStars, withWeekBest,
 } from './logic.js';
 
 const RETRY_MS = [20_000, 100_000, 300_000]; // a doua încercare trece de limita de 90 s a clasamentului
@@ -16,7 +18,6 @@ const COUNTED = new Set(['permission-denied', 'invalid-argument', 'failed-precon
 const GONE = 'cifruta/gone';
 
 let ctx = null; // { db, f, uid, pid, blocked(), onProfile(changes), onGone() }
-let unsubscribe = null;
 let running = null;
 let timer = 0;
 let failures = 0;
@@ -32,6 +33,7 @@ function refs({ db, f, uid, pid }) {
     rounds: () => f.collection(db, ...base, 'fulger'),
     round: (id) => f.doc(db, ...base, 'fulger', id),
     state: () => f.doc(db, ...base, 'state', 'fulger'),
+    tests: () => f.doc(db, ...base, 'state', 'tests'),
     entry: (board) => f.doc(db, 'leaderboards', board, 'entries', entryId(uid, pid)),
   };
 }
@@ -48,7 +50,7 @@ async function deleteAll({ db, f }, docRefs) {
 
 // ——— starea, pentru pagina contului ———
 
-export const syncStatus = () => ({ ...status, pending: ctx ? getScoped('pending', []).length : 0 });
+export const syncStatus = () => ({ ...status, pending: currentProfile() ? getScoped('pending', []).length : 0 });
 
 export function onSyncChange(fn) {
   listeners.add(fn);
@@ -67,7 +69,7 @@ function describe(err) {
   return 'Nu am putut trimite rezultatele. Reîncerc mai târziu.';
 }
 
-// ——— coada ———
+// ——— coada: se scrie oricând scopul e un profil, se trimite doar cu sincronizarea pornită ———
 
 function add(op) {
   setScoped('pending', enqueue(getScoped('pending', []), op));
@@ -79,7 +81,7 @@ function schedule(ms = 800) {
 }
 
 function onStorageWrite(e) {
-  if (!ctx) return;
+  if (!currentProfile()) return; // fără cont nu se înregistrează nimic
   if (e.type === 'attempt') {
     add({ type: 'attempt', id: e.attempt.id });
     if (e.created) add({ type: 'stars' });
@@ -93,8 +95,10 @@ function onStorageWrite(e) {
     add({ type: 'clear-fulger' });
   } else return;
   setStatus({});
-  schedule();
+  if (ctx) schedule();
 }
+
+onWrite(onStorageWrite);
 
 const onOnline = () => flush();
 
@@ -103,7 +107,6 @@ export async function startSync(context) {
   stopSync();
   ctx = context;
   const mine = ctx;
-  unsubscribe = onWrite(onStorageWrite);
   addEventListener('online', onOnline);
   failures = 0;
   let changed = false;
@@ -112,13 +115,13 @@ export async function startSync(context) {
   } catch (err) {
     if (ctx === mine) setStatus({ syncing: false, error: describe(err) });
   }
-  if (ctx === mine) flush();
+  if (ctx !== mine) return changed;
+  add({ type: 'boards' }); // o dată pe activare: clasamentele se aliniază cu starea completă (alte dispozitive, reveniri)
+  flush();
   return changed;
 }
 
 export function stopSync() {
-  unsubscribe?.();
-  unsubscribe = null;
   if (typeof removeEventListener === 'function') removeEventListener('online', onOnline);
   clearTimeout(timer);
   ctx = null;
@@ -128,25 +131,26 @@ export function stopSync() {
 
 /** Rezultatele din browser ale profilului (de exemplu, cele mutate de fără cont) intră în coadă și pleacă spre cloud. */
 export function uploadAll() {
-  if (!ctx) return;
-  const { attempts, fulger } = readScopeData({ uid: ctx.uid, pid: ctx.pid });
+  const p = currentProfile();
+  if (!p) return;
+  const { attempts, fulger } = readScopeData(p);
   for (const a of attempts) add({ type: 'attempt', id: a.id });
   for (const r of fulger.rounds) add({ type: 'round', id: roundId(r) });
   add({ type: 'boards' });
   setStatus({});
-  schedule(0);
+  if (ctx) schedule(0);
 }
 
 /** Intrările în clasamente, din nou (după ce profilul revine în clasament). */
 export function requestBoards() {
-  if (!ctx) return;
+  if (!currentProfile()) return;
   add({ type: 'boards' });
-  schedule(0);
+  if (ctx) schedule(0);
 }
 
 /** Trimite coada; întoarce câte operații au rămas. Cu `timeout`, nu așteaptă mai mult (trimiterea continuă în fundal). */
 export function flush({ timeout = 0 } = {}) {
-  if (!ctx) return Promise.resolve(0);
+  if (!ctx) return Promise.resolve(syncStatus().pending);
   const job = (running ??= drain(ctx).finally(() => {
     if (running === job) running = null;
   }));
@@ -176,6 +180,7 @@ async function drain(c) {
           c.onGone?.();
           return 0;
         }
+        console.warn(`Cifruța: sincronizarea „${op.type}” a eșuat (${err?.code ?? 'fără cod'}): ${err?.message ?? err}`);
         const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
         const tries = (op.tries ?? 0) + (!offline && (COUNTED.has(err?.code) || !err?.code) ? 1 : 0);
         const queue = getScoped('pending', []);
@@ -261,6 +266,8 @@ async function readProfile(tx, r) {
   return snap.data();
 }
 
+const dataOf = (snap) => (snap.exists() ? snap.data() : {});
+
 async function pushAttempt(c, id) {
   const attempt = getAttempt(id);
   if (!attempt) return; // ștearsă între timp
@@ -268,8 +275,11 @@ async function pushAttempt(c, id) {
   await c.f.runTransaction(c.db, async (tx) => {
     const profile = await readProfile(tx, r);
     const existing = await tx.get(r.attempt(id));
+    const tests = await tx.get(r.tests());
     tx.set(r.attempt(id), toCloudAttempt(attempt));
     if (!existing.exists()) tx.update(r.profile(), { attempts: (profile.attempts ?? 0) + 1 });
+    const best = withAttemptStars(dataOf(tests).best, attempt);
+    if (best) tx.set(r.tests(), { best });
   });
 }
 
@@ -280,11 +290,14 @@ async function clearAttempts(c, testIds) {
     ? await Promise.all(chunks(testIds, 30).map((ids) => f.getDocs(f.query(r.attempts(), f.where('testId', 'in', ids)))))
     : [await f.getDocs(r.attempts())];
   const docs = snaps.flatMap((s) => s.docs);
-  if (!docs.length) return;
   await deleteAll(c, docs.map((d) => d.ref));
   await f.runTransaction(c.db, async (tx) => {
     const profile = await readProfile(tx, r);
-    tx.update(r.profile(), { attempts: Math.max(0, (profile.attempts ?? 0) - docs.length) });
+    const tests = await tx.get(r.tests());
+    const best = { ...(dataOf(tests).best ?? {}) };
+    for (const id of testIds ?? Object.keys(best)) delete best[id];
+    if (docs.length) tx.update(r.profile(), { attempts: Math.max(0, (profile.attempts ?? 0) - docs.length) });
+    tx.set(r.tests(), { best });
   });
 }
 
@@ -296,9 +309,10 @@ async function pushRound(c, id) {
   await c.f.runTransaction(c.db, async (tx) => {
     const profile = await readProfile(tx, r);
     const existing = await tx.get(r.round(id));
-    const state = await tx.get(r.state());
+    const cloud = dataOf(await tx.get(r.state()));
+    const week = withWeekBest(cloud.week, round) ?? cloud.week ?? {};
     tx.set(r.round(id), toCloudRound(round));
-    tx.set(r.state(), mergeFulgerState(state.exists() ? state.data() : {}, local));
+    tx.set(r.state(), { ...mergeFulgerState(cloud, local), week });
     if (!existing.exists()) tx.update(r.profile(), { rounds: (profile.rounds ?? 0) + 1 });
   });
 }
@@ -315,29 +329,24 @@ async function clearRounds(c) {
 
 const entryBase = (c, profile) => ({ uid: c.uid, pid: c.pid, nickname: profile.nickname, avatar: profile.avatar, updatedAt: c.f.serverTimestamp() });
 
-/** Cea mai bună rundă din browser pe fiecare nivel, în clasamentul de tot timpul și în cel al săptămânii; scorul doar crește. */
+/** Calcul fulger: „tot timpul” din recordul permanent, săptămâna din cea mai bună rundă a ei; scorul doar crește. */
 async function pushBoards(c, levels) {
-  const { rounds } = getFulger();
-  const week = isoWeek();
-  const wanted = levels.flatMap((level) => {
-    const mine = rounds.filter((x) => x.level === level && x.total > 0);
-    return [
-      [`fulger-${level}-all`, bestRound(mine)],
-      [`fulger-${level}-${week}`, bestRound(mine.filter((x) => isoWeek(new Date(x.at)) === week))],
-    ].filter(([, best]) => best);
-  });
-  if (!wanted.length) return;
+  const local = getFulger();
   const r = refs(c);
   const boards = await c.f.runTransaction(c.db, async (tx) => {
     const profile = await readProfile(tx, r);
+    const cloud = dataOf(await tx.get(r.state()));
     if (!profile.showOnBoards) return null;
+    const { best } = mergeFulgerState(cloud, local);
+    const wanted = levels.flatMap((level) => fulgerCandidates(level, { best, week: cloud.week }, local.rounds));
+    if (!wanted.length) return null;
     const entries = [];
     for (const [board] of wanted) entries.push(await tx.get(r.entry(board)));
-    const writes = wanted.filter(([, best], i) => !entries[i].exists() || best.total > entries[i].data().score);
+    const writes = wanted.filter(([, top], i) => !entries[i].exists() || top.score > entries[i].data().score);
     if (!writes.length) return null;
     const { keep, dropped } = pruneBoards([...(profile.boards ?? []), ...writes.map(([board]) => board)]);
-    for (const [board, best] of writes) {
-      tx.set(r.entry(board), { ...entryBase(c, profile), score: Math.min(best.total, 3000), correct: Math.min(best.correct ?? 0, 500), bestStreak: Math.min(best.bestStreak ?? 0, 500) });
+    for (const [board, top] of writes) {
+      tx.set(r.entry(board), { ...entryBase(c, profile), score: Math.min(top.score, 3000), correct: Math.min(top.correct, 500), bestStreak: Math.min(top.bestStreak, 500) });
     }
     for (const board of dropped) tx.delete(r.entry(board));
     if (!sameData(keep, profile.boards ?? [])) tx.update(r.profile(), { boards: keep });
@@ -346,14 +355,15 @@ async function pushBoards(c, levels) {
   if (boards) c.onProfile?.({ boards });
 }
 
-/** Stelele de la teste (cea mai bună încercare a fiecărui test); la 0 stele intrarea dispare. */
+/** Stelele de la teste, din state/tests (toate încercările profilului, de pe orice dispozitiv); la 0 stele intrarea dispare. */
 async function pushStars(c) {
-  const { stars, tests } = testStars(listAttempts());
   const r = refs(c);
   const boards = await c.f.runTransaction(c.db, async (tx) => {
     const profile = await readProfile(tx, r);
+    const saved = await tx.get(r.tests());
     const entry = await tx.get(r.entry(TESTS_BOARD));
     if (!profile.showOnBoards) return null;
+    const { stars, tests } = starsTotal(dataOf(saved).best);
     const had = entry.exists();
     if (had ? entry.data().score === stars && entry.data().tests === tests : stars === 0) return null;
     let next = profile.boards ?? [];
@@ -381,6 +391,7 @@ export async function deleteProfileCloud({ db, f }, uid, pid, boards = []) {
     ...attempts.docs.map((d) => d.ref),
     ...rounds.docs.map((d) => d.ref),
     f.doc(db, ...base, 'state', 'fulger'),
+    f.doc(db, ...base, 'state', 'tests'),
     f.doc(db, ...base),
   ]);
 }

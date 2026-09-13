@@ -196,7 +196,16 @@ def account_flow(run: Run, browser):
     run.check(flushed(page2), "dispozitiv 2: runda nouă și autoevaluarea au urcat")
     run.check(len(docs(f"{base}/fulger")) == 2 and (doc(base) or {}).get("rounds") == 2, "cloud: a doua rundă și contorul")
     run.check((doc(f"{base}/attempts/{ATTEMPT_ID}") or {}).get("feeling") == "vesel", "cloud: autoevaluarea încercării")
+    saved = doc(f"{base}/attempts/{ATTEMPT_ID}") or {}
+    run.check(saved.get("activeMs") == 600000 and saved.get("startedAt") and saved.get("submittedAt"), "cloud: încercarea păstrează timpul de rezolvare")
     run.check((doc(f"leaderboards/fulger-usor-all/entries/{uid}_p1") or {}).get("score") == 120, "clasament: o rundă mai slabă nu scade scorul")
+
+    page2.wait_for_timeout(5500)  # intrarea cu stele tocmai a fost creată, iar regulile o lasă să se schimbe cel mult o dată la 5 s
+    other = {**attempt(2), "id": "u1-t2-1757757600000", "testId": "u1-t2"}
+    storage(page2, f"m.addAttempt({json.dumps(other)});")
+    run.check(flushed(page2), "dispozitiv 2: un test nou a urcat")
+    tests_entry = doc(f"leaderboards/teste-stele/entries/{uid}_p1") or {}
+    run.check(tests_entry.get("score") == 5 and tests_entry.get("tests") == 2, f"clasament: stelele adună testele din cloud, de pe ambele dispozitive ({tests_entry.get('score')})")
 
     storage(page2, "m.clearHistory();")
     run.check(flushed(page2), "dispozitiv 2: ștergerea istoricului a urcat")
@@ -254,6 +263,24 @@ def account_flow(run: Run, browser):
     run.check(doc(f"users/{uid}") is None, "cloud: contul șters")
     for c in (ctx, ctx2, phone):
         c.close()
+    tabs_flow(run, browser)
+
+
+def tabs_flow(run: Run, browser):
+    print("\n[cont] ieșirea dintr-o filă: cealaltă filă nu mai scrie în profil")
+    ctx, page, uid = parent(run, browser, "fila 1", "file@example.com", "Părinte", "Tabi", "arici")
+    tab2 = ctx.new_page()
+    run.watch(tab2, "fila 2")
+    run.goto(tab2, "")
+    tab2.wait_for_function("window.__cloud && window.__cloud.state().pid === 'p1'", timeout=30000)
+    run.goto(page, "profil")
+    page.get_by_test_id("sign-out").click()
+    expect(page.get_by_test_id("sign-in-card")).to_be_visible()
+    tab2.wait_for_function("window.__cloud.state().user === null", timeout=20000)
+    play_round(tab2, 70)
+    where = tab2.evaluate(f"[(JSON.parse(localStorage.getItem('cifruta:fulger') || '{{}}').rounds || []).length, Object.keys(localStorage).filter((k) => k.startsWith('cifruta:p:{uid}:')).length]")
+    run.check(where == [1, 0], f"fila 2: după ieșirea din fila 1, runda intră în istoricul fără cont ({where})")
+    ctx.close()
 
 
 def boards_admin_flow(run: Run, browser):
@@ -302,7 +329,7 @@ def boards_admin_flow(run: Run, browser):
     ana.get_by_test_id(f"admin-block-{uid_b}").click()
     ana.get_by_test_id("modal-confirm").click()
     expect(ana.get_by_test_id(f"admin-user-{uid_b}")).to_contain_text("blocat")
-    run.check((doc(f"users/{uid_b}") or {}).get("blocked") is True and doc(f"leaderboards/fulger-usor-all/entries/{uid_b}_p1") is None, "admin: contul blocat, intrările scoase")
+    run.check(doc(f"blocked/{uid_b}") is not None and doc(f"leaderboards/fulger-usor-all/entries/{uid_b}_p1") is None, "admin: contul blocat, intrările scoase")
     run.goto(ana, "clasament/fulger/usor/all")
     expect(ana.get_by_test_id("lb-list").locator("li")).to_have_count(1)
 
@@ -320,7 +347,7 @@ def boards_admin_flow(run: Run, browser):
     run.goto(ana, "admin")
     ana.get_by_test_id(f"admin-block-{uid_b}").click()
     expect(ana.get_by_test_id(f"admin-user-{uid_b}")).not_to_contain_text("blocat")
-    run.check((doc(f"users/{uid_b}") or {}).get("blocked") is False, "admin: contul deblocat")
+    run.check(doc(f"blocked/{uid_b}") is None, "admin: contul deblocat")
     for c in (anon_ctx, ctx_a, ctx_b):
         c.close()
 

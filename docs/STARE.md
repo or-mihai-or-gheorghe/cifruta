@@ -1,7 +1,7 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-13 · **Versiune:** 0.9.0 (contul familiei e gata și verificat pe emulatoare; apare pe site după configurarea proiectului Firebase)
+- **Data:** 2026-09-13 · **Versiune:** 0.9.1 (contul familiei e publicat; remedierile din recenzia reviziei 49b623c)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -18,13 +18,13 @@
   rezultatelor fără cont); clasament doar pentru cei din cont (Calcul fulger pe nivel, săptămâna aceasta și tot timpul, plus stelele
   de la teste); administrare (blocare, redenumire, ștergeri); pagina de confidențialitate. Fără configurarea Firebase, site-ul arată
   ca în v0.8.1, plus legătura „Confidențialitate” din subsol.
-  Calitate: 70 de teste Node (plus validarea conținutului, a tabelului de acoperire, a contrastului și calibrarea stelelor din
-  Calcul fulger), 11 teste ale regulilor Firestore pe emulator, E2E 1096 de verificări pe 3 ecrane + tastatură (plus telefon ținut
-  orizontal și telefon mic) și E2E pentru cont pe emulatoare, cu 45 de verificări.
-- **Următorul pas:** utilizatorul face pașii din consola Firebase (`docs/cloud.md`, „Pornirea proiectului Firebase”) → completez
-  `PRODUCTION` în `js/cloud/config.js`, public regulile (`npm run deploy:rules`) și site-ul, apoi verificarea cu un cont Google real
-  (laptop, telefon, iPad) și documentul `admins/<uid>`. În paralel: copilul joacă Calcul fulger și rezolvă testele → pragurile și
-  timpii reali; apoi secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul).
+  Calitate: 72 de teste Node (plus validarea conținutului, a tabelului de acoperire, a contrastului și calibrarea stelelor din
+  Calcul fulger), 12 teste ale regulilor Firestore pe emulator, E2E 1096 de verificări pe 3 ecrane + tastatură (plus telefon ținut
+  orizontal și telefon mic) și E2E pentru cont pe emulatoare, cu 49 de verificări (două dispozitive, două file, blocare, clasamente).
+- **Următorul pas:** verificarea cu un cont Google real pe site-ul publicat (laptop, telefon, iPad) și documentul `admins/<uid>`;
+  apoi Calcul fulger pe teme (acum adunări, scăderi și comparări; mai târziu numere mai mari, înmulțire, împărțire, ecuații simple),
+  cu plan aprobat înainte, pentru că schimbă și clasamentele. În paralel: copilul joacă și rezolvă testele → pragurile și timpii
+  reali; apoi secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul).
 
 ## Etape
 - [x] M0 Schelet: git, `_surse/`, `.gitignore`, `package.json`, `CLAUDE.md`, docs (curriculum, cercetare)
@@ -66,10 +66,15 @@
   sunet deblocat pe iOS, tonuri mai blânde, fără întrebări repetate recent, comparări fără numere banale, accesibilitate (numele
   linkului, titlu în rundă); „Greșelile tale”, ținta următoarei stele, nivelul sugerat, ținta pe panoul de start; publicat, E2E local 1096/1096 și pe
   site-ul live 1096/1096, tag `v0.8.1`
-- [ ] M20 (v0.9.0): contul familiei: intrare cu Google, profiluri de copii cu acordul părintelui, sincronizarea rezultatelor cu Cloud
+- [x] M20 (v0.9.0): contul familiei: intrare cu Google, profiluri de copii cu acordul părintelui, sincronizarea rezultatelor cu Cloud
   Firestore (coadă, tranzacții, mutarea rezultatelor fără cont), clasament doar pentru cei din cont (Calcul fulger pe nivel și perioadă,
-  stelele de la teste), administrare, pagina de confidențialitate; regulile Firestore cu 11 teste pe emulator, E2E pentru cont 45/45,
-  E2E local 1096/1096. Rămas: configurarea proiectului Firebase, publicarea regulilor și a site-ului, verificarea cu un cont real, tag `v0.9.0`
+  stelele de la teste), administrare, pagina de confidențialitate; proiectul `primary-school-math` configurat, regulile publicate prin
+  API-ul Firebase Rules, clasament fără index compus; E2E local cu configurația reală 1096/1096 și pe site-ul live 1096/1096, tag `v0.9.0`
+- [ ] M21 (v0.9.1): recenzia reviziei 49b623c, 8 probleme confirmate și reparate: scrierile intră în coadă înainte de pornirea
+  sincronizării, blocarea în `blocked/{uid}` (nu se mai anulează prin ștergerea și recrearea contului), stelele din `state/tests`,
+  „tot timpul” și săptămâna din `state/fulger`, ieșirea dintr-o filă; T1-e09c, T3-e09, T5-e09 și T3-e10 lămurite; pastila cu cel mai
+  bun scor nu mai iese din card. Reguli 12/12 (publicate), E2E cont 49/49, E2E local 1096/1096. Rămas: publicarea site-ului, E2E pe
+  site-ul live, tag `v0.9.1`
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -153,6 +158,11 @@
 | 2026-09-13 | Rezultatele rămân în `localStorage`, pe profil, iar `cloud/sync.js` le urcă printr-o coadă cu reîncercări, în tranzacții pentru tot ce ține împreună | paginile citesc sincron ca înainte; lecțiile din exemplu (contoare pierdute, succes raportat la eșec, fără tranzacții) |
 | 2026-09-13 | Administrare în `#/admin` pentru contul din `admins/{uid}` (creat din consolă, nu un e-mail scris în repo): blocare, redenumire, ștergeri | decizia utilizatorului; repo-ul e public |
 | 2026-09-13 | Firebase JS SDK 12.19.0 de pe gstatic, încărcat doar la nevoie: singura excepție de la „fără dependențe la rulare” | fără build; vizitatorii fără cont nu încarcă nimic de la Google |
+| 2026-09-13 | Regulile se publică prin API-ul Firebase Rules (`npm run deploy:rules`, cu cheia contului de serviciu); clasamentul ordonează doar după scor pe server, egalitățile în browser | contul de serviciu al Admin SDK nu are dreptul `serviceusage` cerut de `firebase deploy` și nu poate crea indexuri |
+| 2026-09-13 | Blocarea stă în `blocked/{uid}`, scris doar de admin | recenzia: un cont blocat își putea șterge și recrea documentul `users/{uid}` fără `blocked` |
+| 2026-09-13 | Coada spre cloud se scrie oricând scopul e un profil, și înainte ca Firebase să se încarce; clasamentele se calculează din `state/tests` și `state/fulger` (`best` cu `correct` și `bestStreak`, `week`), cu o aliniere la fiecare activare | recenzia: rezultate pierdute la reconectare, stele greșite pe două dispozitive, record pierdut după ultimele 30 de runde |
+| 2026-09-13 | O altă filă află de ieșirea din cont prin evenimentul `storage` și își șterge singură copiile profilurilor | recenzia și diagnosticul: ștergerea făcută de prima filă se pierdea când a doua tocmai scria |
+| 2026-09-13 | Enunțurile cer explicit „cel mai scurt drum care…” și scriu restricțiile (fără să treci de două ori prin același raion); fără versiune nouă, pentru că răspunsurile nu se schimbă | recenzia: calcule corecte respinse din cauza unor restricții nespuse |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -283,3 +293,14 @@
   E2E cont 45/45, E2E local 1096/1096.
   **De făcut data viitoare:** utilizatorul face pașii din consola Firebase → `PRODUCTION`, `npm run deploy:rules`, `npm run deploy`,
   verificarea cu un cont real și `admins/<uid>`, tag `v0.9.0`; copilul joacă Calcul fulger → pragurile.
+- **2026-09-13 (a opta sesiune, continuare)** — Configurația reală (aplicația web „Cifruța” din `primary-school-math`), regulile publicate
+  prin API-ul Firebase Rules (`firebase deploy` cere un drept pe care contul de serviciu nu îl are), clasament fără index compus; v0.9.0
+  publicat, E2E pe site-ul live 1096/1096. O recenzie a reviziei 49b623c a găsit 8 probleme, toate confirmate: rezultatele scrise înainte
+  de pornirea sincronizării se pierdeau la reconectare, blocarea se putea anula prin recrearea contului, stelele erau greșite pe două
+  dispozitive, recordul „tot timpul” se pierdea după 30 de runde, o filă scria în profilul ieșit din cont, iar patru enunțuri sau
+  explicații erau ambigue (T1-e09c, T3-e09, T5-e09, T3-e10). Plus două observații ale utilizatorului: timpul de rezolvare (se păstra deja;
+  acum verificat și în E2E) și pastila cu cel mai bun scor, care ieșea din card. Pe drum, E2E-ul a arătat că ștergerea făcută de o filă se
+  pierde când cealaltă tocmai scrie (reparat prin evenimentul `storage`), iar un pas prea rapid lovea limita de 5 s a clasamentului; o
+  ipoteză greșită despre `getAfter` a fost verificată cu un diagnostic și retrasă. npm test 72/72, reguli 12/12 (publicate), E2E cont
+  49/49, E2E local 1096/1096.
+  **De făcut data viitoare:** verificarea cu un cont real; planul pentru Calcul fulger pe teme (cerut de utilizator).

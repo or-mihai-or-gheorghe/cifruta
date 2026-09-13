@@ -28,7 +28,11 @@ un profil, `cifruta:p:<uid>:<pid>:…`. Sunetul rămâne comun. Paginile citesc 
 reîncarcă doar paginile liniștite (`#/`, secțiunile, hub-ul Calcul fulger), niciodată un test sau o rundă în desfășurare.
 
 Fiecare scriere (`addAttempt`, `updateAttempt`, `clearHistory`, `saveFulgerRound`, `clearFulger`) se anunță prin `onWrite`.
-`sync.js` o pune în coada profilului (`…:pending`, cel mult 200 de operații, cu număr de ordine) și o trimite după 0,8 s.
+Cât scopul e un profil, `sync.js` o pune imediat în coada profilului (`…:pending`, cel mult 200 de operații, cu număr de ordine), chiar
+dacă Firebase nu s-a încărcat încă sau nu e internet; o trimite după 0,8 s, când sincronizarea e pornită. La fiecare activare se
+adaugă și o operație `boards`, care aliniază clasamentele cu starea completă din cloud (alte dispozitive, reveniri în clasament).
+O altă filă a aceluiași browser află de ieșirea voluntară din evenimentul `storage` (sesiunea comună dispare), oprește sincronizarea
+și își șterge și ea copiile profilurilor.
 
 - **Operații:** `attempt`, `clear-attempts`, `stars`, `round`, `board`, `boards`, `clear-fulger`.
 - **La eșec:** operația rămâne în coadă, iar trimiterea se reia după 20 s, 100 s și apoi 5 min, la evenimentul `online` și la activarea
@@ -44,11 +48,13 @@ Fiecare scriere (`addAttempt`, `updateAttempt`, `clearHistory`, `saveFulgerRound
 | Cale | Acces | Conținut |
 |-|-|-|
 | `admins/{uid}` | fiecare își citește doar documentul propriu; se creează din consolă | `{}` |
-| `users/{uid}` | proprietarul și adminul; `blocked` îl schimbă doar adminul | `email` (din token), `name`, `createdAt`, `lastSeenAt`, `consentAt`, `blocked` |
+| `blocked/{uid}` | proprietarul își vede blocarea; doar adminul o pune și o scoate | `at`; stă separat de cont, ca ștergerea și recrearea lui `users/{uid}` să n-o anuleze |
+| `users/{uid}` | proprietarul și adminul | `email` (din token), `name`, `createdAt`, `lastSeenAt`, `consentAt` |
 | `users/{uid}/profiles/{p1…p6}` | proprietarul, adminul (adminul schimbă doar `nickname`) | `nickname`, `avatar`, `showOnBoards`, `createdAt`, `attempts`, `rounds`, `boards` |
-| `…/attempts/{id}` | proprietarul, adminul | încercarea; `answers` ca text JSON (Firestore nu acceptă liste în liste) |
+| `…/attempts/{id}` | proprietarul, adminul | încercarea, cu timpul de rezolvare (`activeMs`, `msByExercise`, `startedAt`, `submittedAt`); `answers` ca text JSON (Firestore nu acceptă liste în liste) |
 | `…/fulger/{nivel-ms}` | proprietarul, adminul | runda: `level`, `at`, `total`, `correct`, `wrong`, `bestStreak`, `fast`, `stars`, `byKind` |
-| `…/state/fulger` | proprietarul, adminul | `best` pe niveluri și `medals` |
+| `…/state/fulger` | proprietarul, adminul | `best` pe niveluri (recordul, cu `correct` și `bestStreak`), `medals`, `week` (cea mai bună rundă a săptămânii, pe nivel) |
+| `…/state/tests` | proprietarul, adminul | `best`: cele mai multe stele pe fiecare test, din toate încercările profilului, de pe orice dispozitiv |
 | `leaderboards/{board}/entries/{uid}_{pid}` | orice cont autentificat citește; proprietarul scrie, validat; adminul redenumește și șterge | `uid`, `pid`, `nickname`, `avatar`, `score`, `updatedAt`; la fulger și `correct`, `bestStreak`; la teste și `tests` |
 
 **Clasamentele:**
@@ -66,7 +72,8 @@ Fiecare scriere (`addAttempt`, `updateAttempt`, `clearHistory`, `saveFulgerRound
 
 ## Regulile, pe scurt
 
-- Orice nu e permis explicit e refuzat. Adminul e `exists(/admins/$(uid))`, iar un cont blocat citește, dar nu mai scrie.
+- Orice nu e permis explicit e refuzat. Adminul e `exists(/admins/$(uid))`. Un cont blocat (documentul `blocked/{uid}`, scris doar de
+  admin) citește, dar nu mai scrie; blocarea rămâne și dacă proprietarul își șterge și își recreează documentul `users/{uid}`.
 - Contul se creează doar pentru sine, cu e-mailul din token și `createdAt == request.time`. Proprietarul schimbă doar `name`,
   `lastSeenAt` și `consentAt`.
 - Profilurile au id-uri `^p[1-6]$`, cer acordul în cont, o poreclă de 2–20 caractere (litere, cifre, spațiu, `.'-`) și un avatar

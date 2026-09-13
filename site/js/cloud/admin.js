@@ -1,15 +1,20 @@
 // Administrarea, doar pentru contul din admins/{uid}: conturile, blocarea, poreclele nepotrivite și ștergerea datelor.
-// Regulile Firestore îi permit adminului doar atât: `blocked` pe cont, `nickname` pe profil și pe intrări, citiri și ștergeri.
+// Regulile Firestore îi permit adminului doar atât: blocked/{uid} (creare, ștergere), `nickname` pe profil și pe intrări, citiri
+// și ștergeri. Blocarea stă separat de contul users/{uid}, ca proprietarul să n-o poată anula ștergându-și și recreându-și contul.
 
 import { entryId } from './logic.js';
 import { deleteProfileCloud } from './sync.js';
 
 const toDate = (t) => (t?.toDate ? t.toDate() : null);
 
-/** Conturile, cele văzute recent primele. */
+/** Conturile, cele văzute recent primele, cu starea blocării. */
 export async function listUsers({ db, f }, max = 100) {
-  const snap = await f.getDocs(f.query(f.collection(db, 'users'), f.orderBy('lastSeenAt', 'desc'), f.limit(max)));
-  return snap.docs.map((d) => ({ ...d.data(), uid: d.id, lastSeen: toDate(d.data().lastSeenAt) }));
+  const [snap, blocked] = await Promise.all([
+    f.getDocs(f.query(f.collection(db, 'users'), f.orderBy('lastSeenAt', 'desc'), f.limit(max))),
+    f.getDocs(f.collection(db, 'blocked')),
+  ]);
+  const ids = new Set(blocked.docs.map((d) => d.id));
+  return snap.docs.map((d) => ({ ...d.data(), uid: d.id, blocked: ids.has(d.id), lastSeen: toDate(d.data().lastSeenAt) }));
 }
 
 export async function listProfiles({ db, f }, uid) {
@@ -24,7 +29,9 @@ export async function setBlocked(fb, uid, blocked) {
   const { db, f } = fb;
   const refs = blocked ? entryRefs(fb, uid, await listProfiles(fb, uid)) : [];
   const batch = f.writeBatch(db);
-  batch.update(f.doc(db, 'users', uid), { blocked });
+  const mark = f.doc(db, 'blocked', uid);
+  if (blocked) batch.set(mark, { at: f.serverTimestamp() });
+  else batch.delete(mark);
   for (const ref of refs) batch.delete(ref);
   await batch.commit();
 }
@@ -49,7 +56,7 @@ export async function removeEntries(fb, uid, profile) {
   await batch.commit();
 }
 
-/** Datele din cloud ale unui cont: profilurile cu tot ce țin de ele, apoi documentul contului. Contul Google se oprește din consolă. */
+/** Datele din cloud ale unui cont: profilurile cu tot ce țin de ele, apoi documentul contului. Blocarea rămâne; contul Google se oprește din consolă. */
 export async function deleteUserData(fb, uid) {
   for (const p of await listProfiles(fb, uid)) await deleteProfileCloud(fb, uid, p.id, p.boards ?? []);
   await fb.f.deleteDoc(fb.f.doc(fb.db, 'users', uid));

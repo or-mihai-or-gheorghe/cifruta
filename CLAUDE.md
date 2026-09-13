@@ -135,4 +135,7 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   runde sau clasamente cere aceeași schimbare în `firestore.rules` și în cheile din `cloud/logic.js`, plus un test în
   `tests/cloud/firestore.rules.mjs`. Comenzi: `npm run test:rules` (emulator Firestore), `npm run e2e:cloud` (emulatoare Auth +
   Firestore, `?emulator=1`, `window.__cloud.signInAs`), `npm run deploy:rules`; emulatoarele cer Java 21 (`tools/with-java21.sh`).
-  `replaceChildren(null)` scrie textul „null”: listele de noduri se filtrează înainte.
+  `replaceChildren(null)` scrie textul „null”: listele de noduri se filtrează înainte. Blocarea stă în `blocked/{uid}`, nu în
+  `users/{uid}`. Clasamentele se calculează din starea completă din cloud (`state/fulger` cu `best` și `week`, `state/tests`), nu din ce
+  e în browser. Limitele de frecvență ale intrărilor (5 s la stele, 90 s la Calcul fulger) înseamnă reîncercări automate; un E2E care
+  schimbă aceeași intrare de două ori la rând trebuie să aștepte.

@@ -141,3 +141,48 @@ test('cloud: avatarele există în bancă, iar regulile folosesc aceleași avata
   }
   assert.ok(rules.includes("'^p[1-6]$'"));
 });
+
+test('cloud: stelele pe teste și recordurile săptămânii vin din starea completă, nu din ultimele runde', async () => {
+  const { fulgerCandidates, starsTotal, withAttemptStars, withWeekBest } = await import('../site/js/cloud/logic.js');
+  const attempt = (testId, stars) => ({ testId, levels: { usor: { star: stars > 0 }, intermediar: { star: stars > 1 }, avansat: { star: stars > 2 } } });
+  let best = withAttemptStars({}, attempt('t1', 3));
+  best = withAttemptStars(best, attempt('t2', 3)); // alt test, de pe alt dispozitiv
+  assert.equal(withAttemptStars(best, attempt('t1', 1)), null); // o încercare mai slabă nu schimbă nimic
+  assert.deepEqual(starsTotal(best), { stars: 6, tests: 2 });
+  assert.deepEqual(starsTotal(withAttemptStars(best, attempt('t3', 0))), { stars: 6, tests: 3 });
+
+  const r = (day, total) => ({ level: 'usor', at: `2026-09-${day}T10:00:00.000Z`, total, correct: total / 10, bestStreak: 5 });
+  let week = withWeekBest({}, r(14, 100)); // luni: 2026-W38
+  assert.equal(week.usor.id, '2026-W38');
+  assert.equal(withWeekBest(week, r(15, 90)), null);
+  week = withWeekBest(week, r(16, 150));
+  assert.equal(week.usor.alune, 150);
+  assert.equal(withWeekBest(week, r(10, 500)), null); // o rundă întârziată din săptămâna trecută nu înlocuiește săptămâna curentă
+  assert.equal(withWeekBest(week, r(21, 20)).usor.alune, 20); // săptămână nouă
+
+  const state = { best: { usor: { alune: 500, correct: 60, bestStreak: 30 } }, week };
+  assert.deepEqual(fulgerCandidates('usor', state, [r(16, 100)], '2026-W38'), [
+    ['fulger-usor-all', { score: 500, correct: 60, bestStreak: 30 }], // recordul, deși runda lui nu mai e în browser
+    ['fulger-usor-2026-W38', { score: 150, correct: 15, bestStreak: 5 }],
+  ]);
+  assert.deepEqual(fulgerCandidates('usor', { best: {} }, [r(21, 40)], '2026-W39'), [['fulger-usor-2026-W39', { score: 40, correct: 4, bestStreak: 5 }]]);
+  assert.deepEqual(fulgerCandidates('avansat', state, [r(16, 100)], '2026-W38'), []);
+});
+
+test('cloud: scrierile unui profil intră în coadă înainte ca sincronizarea să pornească', async () => {
+  const map = new Map();
+  globalThis.localStorage = { getItem: (k) => map.get(k) ?? null, setItem: (k, v) => map.set(k, String(v)), removeItem: (k) => map.delete(k), get length() { return map.size; }, key: (i) => [...map.keys()][i] ?? null };
+  const storage = await import('../site/js/core/storage.js');
+  await import('../site/js/cloud/sync.js');
+  storage.setScope(null);
+  storage.addAttempt({ id: 'anon-1', testId: 't1', score: 50 });
+  assert.equal(storage.getScoped('pending'), null); // fără cont nu se înregistrează nimic
+  storage.setScope({ uid: 'u1', pid: 'p1' });
+  assert.deepEqual(storage.currentProfile(), { uid: 'u1', pid: 'p1' });
+  storage.addAttempt({ id: 'a1', testId: 't1', score: 80 });
+  storage.saveFulgerRound({ level: 'usor', at: '2026-09-13T10:00:00.000Z', total: 50, correct: 10, wrong: 0, bestStreak: 10, fast: 2, stars: 1, byKind: {} });
+  assert.deepEqual(storage.getScoped('pending').map((op) => op.type), ['attempt', 'stars', 'round', 'board']);
+  assert.deepEqual(storage.getFulger().best.usor, { alune: 50, at: '2026-09-13T10:00:00.000Z', correct: 10, bestStreak: 10 });
+  storage.setScope(null);
+  delete globalThis.localStorage;
+});

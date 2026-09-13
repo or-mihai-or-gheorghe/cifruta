@@ -13,7 +13,7 @@ function testCard(test) {
   const draft = getDraft(test.id);
   const status =
     best >= 0
-      ? chip(`cel mai bun scor: ${best} · ${gradeFor(best).label}`, '', 'stea')
+      ? [chip(`cel mai bun scor: ${best}`, '', 'stea'), chip(gradeFor(best).label)] // două pastile: rândul se rupe între ele, nu iese din card
       : draft?.version === test.version
         ? chip('început — continuă', 'c-chip--soon')
         : chip('nou');

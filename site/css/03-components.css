@@ -110,7 +110,7 @@
   background: var(--c-surface-2);
   color: var(--c-ink-soft);
   font-size: var(--fs-0);
-  white-space: nowrap;
+  max-width: 100%; /* o pastilă mai lată decât cardul își împarte textul pe rânduri, nu iese din card */
 }
 .c-chip--soon { background: var(--c-brand-soft); color: var(--c-brand-dark); border-color: transparent; }
 .c-chip--ok { background: var(--c-ok-bg); color: var(--c-ok-ink); border-color: transparent; }
