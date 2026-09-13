@@ -11,6 +11,18 @@ export const FILL_COLORS = { rosu: C.red, albastru: C.blue, galben: C.yellow, ve
 
 const yes = (v) => v === true || v === 'true';
 const norm = (g) => ({ ...g, rot: num(g.rot, 0), flip: yes(g.flip), open: yes(g.open) });
+const r2 = (v) => Math.round(v * 100) / 100;
+
+// figurile numărate (`count`): pozițiile, ca pe zar, și cât se micșorează fiecare figură ca să nu se atingă
+const COUNT_SPOTS = {
+  1: [[50, 50]],
+  2: [[30, 30], [70, 70]],
+  3: [[26, 26], [50, 50], [74, 74]],
+  4: [[30, 30], [70, 30], [30, 70], [70, 70]],
+  5: [[27, 27], [73, 27], [50, 50], [27, 73], [73, 73]],
+  6: [[30, 22], [70, 22], [30, 50], [70, 50], [30, 78], [70, 78]],
+};
+const COUNT_SCALE = { 1: 0.5, 2: 0.38, 3: 0.34, 4: 0.38, 5: 0.3, 6: 0.26 };
 
 /** Erorile unei figuri (formă, variantă, umplere, culoare, mărime, rotire, axă). */
 export function glyphErrors(g, where = '') {
@@ -23,22 +35,29 @@ export function glyphErrors(g, where = '') {
   if (g.size && !SIZES.includes(g.size)) e.push(`${where}mărime necunoscută: ${g.size}`);
   if (g.rot !== undefined && (!Number.isInteger(Number(g.rot)) || Number(g.rot) % 45 !== 0)) e.push(`${where}rotirea trebuie să fie multiplu de 45°: ${g.rot}`);
   if (g.axis && !LINES.includes(g.axis)) e.push(`${where}linie necunoscută: ${g.axis}`);
+  if (g.count !== undefined && !COUNT_SPOTS[g.count]) e.push(`${where}count trebuie să fie între 1 și 6: ${g.count}`);
   return e;
 }
 
-/** Desenul unei figuri în cutia 100 × 100 (fără <svg>); id-urile încep cu `id`. */
+/** Desenul unei figuri în cutia 100 × 100 (fără <svg>); id-urile încep cu `id`. Cu `count`, figura se repetă micșorată, ca pe zar. */
 export function glyphBody(raw, id) {
   const g = norm(raw);
-  const pts = outline(g).map(([x, y]) => `${x},${y}`).join(' ');
+  const count = COUNT_SPOTS[g.count] ? Number(g.count) : 0;
+  const k = count ? COUNT_SCALE[count] : 1;
   const fill = g.fill ?? 'plin';
   const color = FILL_COLORS[g.color] ?? C.blue;
   let defs = '';
   let paint = fill === 'gol' ? C.white : color;
   if (fill === 'dungi') {
-    defs = `<defs><pattern id="${id}-d" width="11" height="11" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="11" height="11" fill="${C.white}"/><rect width="6" height="11" fill="${color}"/></pattern></defs>`;
+    // dungile păstrează aceeași lățime în cutie și la figurile micșorate
+    const [tile, band] = [r2(11 / k), r2(6 / k)];
+    defs = `<defs><pattern id="${id}-d" width="${tile}" height="${tile}" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="${tile}" height="${tile}" fill="${C.white}"/><rect width="${band}" height="${tile}" fill="${color}"/></pattern></defs>`;
     paint = `url(#${id}-d)`;
   }
-  const shape = g.open ? `<polyline points="${pts}" fill="none" ${st(4)}/>` : `<polygon points="${pts}" fill="${paint}" ${st(fill === 'gol' ? 3.5 : 3)}/>`;
+  const pts = outline(count ? { ...g, size: 'mare' } : g).map(([x, y]) => `${x},${y}`).join(' ');
+  const width = r2((g.open ? 4 : fill === 'gol' ? 3.5 : 3) * (count ? 0.75 / k : 1));
+  const shape = g.open ? `<polyline points="${pts}" fill="none" ${st(width)}/>` : `<polygon points="${pts}" fill="${paint}" ${st(width)}/>`;
+  if (count) return defs + COUNT_SPOTS[count].map(([cx, cy]) => `<g transform="translate(${r2(cx - 50 * k)} ${r2(cy - 50 * k)}) scale(${k})">${shape}</g>`).join('');
   let axis = '';
   if (g.axis) {
     const [[x1, y1], [x2, y2]] = axisLine(g, g.axis);
@@ -61,6 +80,8 @@ registerVisual('glyph', {
     { shape: 'dreptunghi', color: 'galben', axis: 'd1' },
     { shape: 'stea', color: 'mov', size: 'mic' },
     { shape: 'patrat', fill: 'gol', open: true },
+    { shape: 'stea', color: 'galben', count: 5 },
+    { shape: 'triunghi', fill: 'dungi', color: 'verde', count: 3 },
   ],
 });
 

@@ -165,6 +165,7 @@ Notă: bancnota de **20 de lei** circulă din 2021, dar programa din 2013 nu o l
 | Ordonare după indicii („înainte / după / imediat după”); „toți / unii / niciunul” | I | ➕ | `mat.log.ordonare-indicii` |
 | „Ce s-ar întâmpla dacă…?” | I | 📜 | — |
 | Grafice cu bare (conținut), diagrama Venn | II | 📜 | `mat.log.grafic-bare`, `mat.log.venn` |
+| Analogii cu figuri (A → B, C → ?) și tabele 3 × 3 cu reguli (Jocuri fulger) | II | ➕ | `mat.log.analogii` |
 
 ### 7. Explorarea mediului
 

@@ -135,15 +135,15 @@ function gamePage(container, focus = null) {
   if (target) requestAnimationFrame(() => target.scrollIntoView({ block: 'start', behavior: 'instant' }));
 }
 
-/** O întrebare-exemplu ca plăcuță: 7 + 5, 14 ◻ 17, 12 · 9 · 15 sau o miniatură a desenului. */
+/** O întrebare-exemplu ca plăcuță: 7 + 5, 14 ◻ 17, 12 · 9 · 15 sau o miniatură a desenului (fără desen: cele 4 variante). */
 function sample(kind, seed) {
   const q = KINDS[kind].generate(seededRandom(seed));
   if (q.mode === 'figure') {
-    const art = q.figure ?? q.options[q.choices[0]];
+    const arts = q.figure ? [q.figure] : q.choices.map((c) => q.options[c]);
     return h(
       'li',
-      { class: 'fg-sample fg-sample--art' },
-      h('span', { class: 'fg-sample__art', 'aria-hidden': 'true', style: { '--ar': String(aspect(art)) }, html: artHTML(art) }),
+      { class: `fg-sample fg-sample--art${q.figure ? '' : ' fg-sample--options'}` },
+      arts.map((art) => h('span', { class: 'fg-sample__art', 'aria-hidden': 'true', style: { '--ar': String(aspect(art)) }, html: artHTML(art) })),
       h('span', { class: 'u-visually-hidden' }, q.prompt),
     );
   }
@@ -278,8 +278,8 @@ function suggestion(topic, lvl, summary) {
 }
 
 /** Miniatura unui desen din „Greșelile tale” (o variantă-text rămâne text). */
-const mistakeArt = (spec) =>
-  spec.v || spec.emoji ? h('span', { class: 'fg-mistake__art', 'aria-hidden': 'true', style: { '--ar': String(aspect(spec)) }, html: artHTML(spec) }) : h('span', {}, spec.text);
+const mistakeArt = (spec, cls = 'fg-mistake__art') =>
+  spec.v || spec.emoji ? h('span', { class: cls, 'aria-hidden': 'true', style: { '--ar': String(aspect(spec)) }, html: artHTML(spec) }) : h('span', {}, spec.text);
 
 /** O greșeală: operația sau desenul, cu răspunsul corect evidențiat, și ce a ales copilul. */
 function mistake({ question: q, given }) {
@@ -294,7 +294,7 @@ function mistake({ question: q, given }) {
         'span',
         { class: 'fg-mistake__line' },
         h('span', { class: 'fg-mistake__prompt' }, q.prompt),
-        q.solved || q.figure ? mistakeArt(q.solved ?? q.figure) : null,
+        q.solved || q.figure ? mistakeArt(q.solved ?? q.figure, 'fg-mistake__fig') : null,
         ok([mistakeArt(right), h('span', { class: 'u-visually-hidden' }, ` Răspunsul corect: ${artName(right)}.`)]),
       ),
       chosen ? h('span', { class: 'fg-mistake__note' }, 'ai ales ', mistakeArt(chosen), h('span', { class: 'u-visually-hidden' }, artName(chosen))) : null,

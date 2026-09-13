@@ -1,15 +1,18 @@
-// Calcul fulger: tipurile de întrebări. Fiecare tip generează, cu un generator cu sămânță (`rand`, din core/rng.js),
-// o întrebare cu răspunsul calculat din text (`calc`) și variante greșite plauzibile. Pur: se poate importa din Node.
+// Jocuri fulger: tipurile de întrebări. Fiecare tip generează, cu un generator cu sămânță (`rand`, din core/rng.js),
+// o întrebare cu răspunsul calculat și variante greșite plauzibile. Pur: se poate importa din Node.
 //
 // Forma întrebării: { kind, mode, key, answer, … }
 //   choice  → text: '38 + 47', choices: [75, 84, 85, 95] (crescător)
 //   compare → left: '35 + 8', right: '42', answer: '<' | '=' | '>'
 //   sort    → numbers: plăcile în ordinea afișată, dir: 'asc' | 'desc', answer: ordinea corectă
+//   figure  → prompt, figure?, solved?, choices: id-urile desenelor, options: { id: desen }, answer: id (tipurile din kinds-forme.js)
 // Fiecare tip poartă conceptele din data/concepts.js pe care le exersează (`concepts`); „fără / cu trecere” se verifică în teste.
-// Un tip nou: o intrare aici, o linie în `mix`-ul unui nivel al unei teme din data/fulger.js și regulile lui în tests/fulger.test.js.
+// Un tip nou: o intrare aici (cu figuri: în kinds-forme.js), o linie în `mix`-ul unui nivel al unei teme din data/fulger.js și regulile
+// lui în tests/fulger.test.js (cu figuri: în tests/fulger-forme.rules.js).
 
 import { calc, relation } from '../core/expr.js';
 import { trecere } from '../core/rules.js';
+import { SHAPE_KINDS } from './kinds-forme.js';
 import { distinct, int, pickOne, shuffle } from './rand.js';
 
 const PLUS = ' + ';
@@ -332,4 +335,5 @@ export const KINDS = {
       return sorting('sort-4-dir', rand, trickyFour(rand), dir);
     },
   },
+  ...SHAPE_KINDS,
 };

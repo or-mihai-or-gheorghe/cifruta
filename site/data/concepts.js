@@ -122,6 +122,7 @@ export default {
   'mat.log.modele': { domain: 'mat', title: 'Modele care se repetă și modele care cresc', grade: 1, competencies: ['3.1'], source: ['programa', 'en2'] },
   'mat.log.adevarat-fals': { domain: 'mat', title: 'Afirmații adevărate sau false', grade: 1, competencies: ['4.2'], source: ['manual', 'auxiliar'] },
   'mat.log.venn': { domain: 'mat', title: 'Diagrama Venn', grade: 2, competencies: ['5.1'], source: ['programa'] },
+  'mat.log.analogii': { domain: 'mat', title: 'Analogii cu figuri și tabele cu reguli', grade: 2, competencies: ['3.1'], source: ['imbogatire'] },
 
   // ——— 7. Explorarea mediului ———
   'med.corp.organe': { domain: 'med', title: 'Organele interne și rolul lor', grade: 1, competencies: ['3.1'], source: ['manual', 'auxiliar', 'programa'] },

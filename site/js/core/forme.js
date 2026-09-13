@@ -31,38 +31,44 @@ function fit(points) {
   return points.map(([x, y]) => [round(50 + (x - 50) * k), round(50 + (y - 50) * k)]);
 }
 
-// gender: m/f pentru acordul adjectivelor; program: figură din programă; curved: are laturi curbe
+// gender: m/f pentru acordul adjectivelor (la plural toate cer forma de feminin: „cercuri pline”); program: figură din programă;
+// curved: are laturi curbe
 export const SHAPES = {
-  patrat: { name: 'pătrat', gender: 'm', program: true, points: () => [[19, 19], [81, 19], [81, 81], [19, 81]] },
+  patrat: { name: 'pătrat', plural: 'pătrate', gender: 'm', program: true, points: () => [[19, 19], [81, 19], [81, 81], [19, 81]] },
   dreptunghi: {
     name: 'dreptunghi',
+    plural: 'dreptunghiuri',
     gender: 'm',
     program: true,
     points: () => [[8, 30], [92, 30], [92, 70], [8, 70]],
     variants: { ingust: () => [[6, 38], [94, 38], [94, 62], [6, 62]] },
+    variantNames: { ingust: ['dreptunghi îngust', 'dreptunghiuri înguste'] },
   },
   triunghi: {
     name: 'triunghi',
+    plural: 'triunghiuri',
     gender: 'm',
     program: true,
     points: () => ring(3, 44, 44),
     variants: { ascutit: () => [[50, 6], [70, 94], [30, 94]], dreptunghic: () => [[18, 18], [18, 82], [82, 82]] },
+    variantNames: { ascutit: ['triunghi înalt', 'triunghiuri înalte'], dreptunghic: ['triunghi dreptunghic', 'triunghiuri dreptunghice'] },
   },
-  cerc: { name: 'cerc', gender: 'm', program: true, curved: true, points: () => ring(48, 42, 42) },
-  semicerc: { name: 'semicerc', gender: 'm', program: true, curved: true, points: () => Array.from({ length: 25 }, (_, i) => polar(44, 180 + 7.5 * i, 50, 64)) },
-  oval: { name: 'oval', gender: 'm', curved: true, points: () => ring(48, 44, 28) },
-  romb: { name: 'romb', gender: 'm', points: () => [[50, 6], [78, 50], [50, 94], [22, 50]] },
-  trapez: { name: 'trapez', gender: 'm', points: () => [[32, 28], [68, 28], [90, 72], [10, 72]] },
-  paralelogram: { name: 'paralelogram', gender: 'm', points: () => [[28, 30], [90, 30], [72, 70], [10, 70]] },
-  sageata: { name: 'săgeată', gender: 'f', points: () => [[8, 40], [56, 40], [56, 18], [92, 50], [56, 82], [56, 60], [8, 60]] },
-  stea: { name: 'stea', gender: 'f', points: () => Array.from({ length: 10 }, (_, i) => polar(i % 2 ? 18 : 44, -90 + 36 * i)) },
-  inima: { name: 'inimă', gender: 'f', curved: true, points: () => heart() },
+  cerc: { name: 'cerc', plural: 'cercuri', gender: 'm', program: true, curved: true, points: () => ring(48, 42, 42) },
+  semicerc: { name: 'semicerc', plural: 'semicercuri', gender: 'm', program: true, curved: true, points: () => Array.from({ length: 25 }, (_, i) => polar(44, 180 + 7.5 * i, 50, 64)) },
+  oval: { name: 'oval', plural: 'ovale', gender: 'm', curved: true, points: () => ring(48, 44, 28) },
+  romb: { name: 'romb', plural: 'romburi', gender: 'm', points: () => [[50, 6], [78, 50], [50, 94], [22, 50]] },
+  trapez: { name: 'trapez', plural: 'trapeze', gender: 'm', points: () => [[32, 28], [68, 28], [90, 72], [10, 72]] },
+  paralelogram: { name: 'paralelogram', plural: 'paralelograme', gender: 'm', points: () => [[28, 30], [90, 30], [72, 70], [10, 70]] },
+  sageata: { name: 'săgeată', plural: 'săgeți', gender: 'f', points: () => [[8, 40], [56, 40], [56, 18], [92, 50], [56, 82], [56, 60], [8, 60]] },
+  stea: { name: 'stea', plural: 'stele', gender: 'f', points: () => Array.from({ length: 10 }, (_, i) => polar(i % 2 ? 18 : 44, -90 + 36 * i)) },
+  inima: { name: 'inimă', plural: 'inimi', gender: 'f', curved: true, points: () => heart() },
   cruce: {
     name: 'cruce',
+    plural: 'cruci',
     gender: 'f',
     points: () => [[36, 8], [64, 8], [64, 36], [92, 36], [92, 64], [64, 64], [64, 92], [36, 92], [36, 64], [8, 64], [8, 36], [36, 36]],
   },
-  casa: { name: 'casă', gender: 'f', points: () => [[50, 6], [88, 40], [88, 90], [12, 90], [12, 40]] },
+  casa: { name: 'casă', plural: 'case', gender: 'f', points: () => [[50, 6], [88, 40], [88, 90], [12, 90], [12, 40]] },
 };
 
 const baseCache = new Map();
@@ -132,16 +138,28 @@ export function canonical({ shape, variant = null, rot = 0, flip = false, open =
   return canonCache.get(id);
 }
 
-/** Cheia canonică: două figuri care arată la fel au aceeași cheie (la umplerea „gol”, culoarea nu contează). */
+/**
+ * Cheia canonică: două figuri care arată la fel au aceeași cheie (la umplerea „gol”, culoarea nu contează). Cu `count` (1–6), figura
+ * e desenată de atâtea ori, micșorată (șirurile care cresc), iar mărimea nu mai contează.
+ */
 export function glyphKey(g) {
   const { rot, flip } = canonical(g);
   const fill = g.fill ?? 'plin';
   const color = fill === 'gol' ? '-' : (g.color ?? 'albastru');
-  return [`${g.shape}${g.variant ? `~${g.variant}` : ''}`, fill, color, g.size ?? 'mare', `${rot}${flip ? 'f' : ''}${g.open ? 'o' : ''}`].join('.');
+  const size = g.count ? `x${g.count}` : (g.size ?? 'mare');
+  return [`${g.shape}${g.variant ? `~${g.variant}` : ''}`, fill, color, size, `${rot}${flip ? 'f' : ''}${g.open ? 'o' : ''}`].join('.');
 }
 
-const COLOR_WORDS = { rosu: ['roșu', 'roșie'], albastru: ['albastru', 'albastră'], galben: ['galben', 'galbenă'], verde: ['verde', 'verde'], mov: ['mov', 'mov'], portocaliu: ['portocaliu', 'portocalie'] };
-const FILL_WORDS = { plin: ['plin', 'plină'], gol: ['gol', 'goală'], dungi: ['cu dungi', 'cu dungi'] };
+// [masculin, feminin, plural]; la plural, numele figurilor cer forma de feminin („cercuri pline”)
+const COLOR_WORDS = {
+  rosu: ['roșu', 'roșie', 'roșii'],
+  albastru: ['albastru', 'albastră', 'albastre'],
+  galben: ['galben', 'galbenă', 'galbene'],
+  verde: ['verde', 'verde', 'verzi'],
+  mov: ['mov', 'mov', 'mov'],
+  portocaliu: ['portocaliu', 'portocalie', 'portocalii'],
+};
+const FILL_WORDS = { plin: ['plin', 'plină', 'pline'], gol: ['gol', 'goală', 'goale'], dungi: ['cu dungi', 'cu dungi', 'cu dungi'] };
 const TURN_WORDS = {
   45: ['înclinat', 'înclinată'],
   90: ['întors spre dreapta', 'întoarsă spre dreapta'],
@@ -152,16 +170,18 @@ const TURN_WORDS = {
   315: ['înclinat', 'înclinată'],
 };
 
-/** Numele figurii pentru cititorul de ecran: „stea mică, galbenă, cu dungi”. */
+/** Numele figurii pentru cititorul de ecran: „stea mică, galbenă, cu dungi”; cu `count`: „3 cercuri, roșii, pline”. */
 export function glyphName(g) {
   const s = SHAPES[g.shape];
-  const i = s.gender === 'f' ? 1 : 0;
+  const count = Number(g.count) || 0;
+  const i = count > 1 ? 2 : s.gender === 'f' ? 1 : 0;
   const { rot, flip } = canonical(g);
   const fill = g.fill ?? 'plin';
-  const parts = [`${s.name}${g.size === 'mic' ? ` ${i ? 'mică' : 'mic'}` : ''}`];
+  const [name, plural] = g.variant ? s.variantNames[g.variant] : [s.name, s.plural];
+  const parts = [count ? `${count} ${count > 1 ? plural : name}` : `${name}${g.size === 'mic' ? ` ${i ? 'mică' : 'mic'}` : ''}`];
   if (fill !== 'gol') parts.push(COLOR_WORDS[g.color ?? 'albastru'][i]);
   parts.push(FILL_WORDS[fill][i]);
-  if (rot) parts.push(TURN_WORDS[rot][i]);
+  if (rot && !count) parts.push(TURN_WORDS[rot][i]);
   if (flip) parts.push('în oglindă');
   if (g.open) parts.push(i ? 'deschisă' : 'deschis');
   return parts.join(', ');

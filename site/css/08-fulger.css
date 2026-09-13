@@ -87,8 +87,11 @@
   font-variant-numeric: tabular-nums;
 }
 .fg-box { display: inline-block; width: 0.9em; height: 0.9em; border: 2px dashed currentColor; border-radius: 0.2em; vertical-align: -0.1em; }
-.fg-sample--art { padding: 0.25rem 0.45rem; border: 2px solid var(--c-level-bg); background: var(--c-surface); }
-.fg-sample__art { display: block; height: 2.2rem; width: calc(2.2rem * var(--ar, 1)); max-width: 100%; }
+/* miniaturile cu figuri nu depășesc cardul (un șir lung se micșorează); fără desen, cele 4 variante, mai mici */
+.fg-sample--art { min-width: 0; max-width: 100%; padding: 0.25rem 0.45rem; border: 2px solid var(--c-level-bg); background: var(--c-surface); }
+.fg-sample__art { display: block; min-width: 0; height: 2.2rem; width: calc(2.2rem * var(--ar, 1)); max-width: 100%; }
+.fg-sample--options { gap: 0.15rem; }
+.fg-sample--options .fg-sample__art { height: 1.7rem; width: calc(1.7rem * var(--ar, 1)); }
 .fg-level__best { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); font-family: var(--font-title); font-weight: 700; }
 
 /* ——— Temele, desfășurate pe pagina jocului ——— */
@@ -287,10 +290,12 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 .fg-slot.is-shown { border-style: solid; border-color: var(--c-ok); background: var(--c-ok-bg); color: var(--c-ok-ink); }
 .fg-sign { color: var(--c-ink-soft); }
 /* întrebări cu figuri: desenele se dimensionează prin container, pentru că stratul visuals (.v-svg { width: 100% }) vine după acesta */
-.fg-q--figure { flex-direction: column; gap: var(--sp-2); font-size: var(--fs-2); }
+/* (lățimea întreagă a cardului: altfel cardul, cu justify-items: center, o strânge la lățimea implicită a desenului, 300 px) */
+.fg-q--figure { width: 100%; flex-direction: column; gap: var(--sp-2); font-size: var(--fs-2); }
 .fg-prompt { margin: 0; font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem); text-align: center; }
 .fg-fig { --fig-h: clamp(5.5rem, 26vh, 13rem); width: min(100%, calc(var(--fig-h) * var(--ar, 1))); }
 .fg-fig.is-shown { animation: anim-pop var(--dur-3) var(--ease-spring); }
+.fg-mistake__fig { display: inline-block; width: min(100%, calc(4.2rem * var(--ar, 1))); } /* desenul întrebării în „Greșelile tale” */
 
 .fg-bolt { display: flex; align-items: center; gap: 0.4rem; width: min(15rem, 80%); transition: opacity var(--dur-2); }
 .fg-bolt .c-emoji { width: 1.3rem; height: 1.3rem; margin: 0; }
@@ -332,10 +337,8 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 .fg-opt:active { transform: translateY(3px); box-shadow: var(--sh-edge-active) var(--edge); }
 .fg-opt__key { position: absolute; top: 0.3rem; left: 0.55rem; font-family: var(--font-body); font-weight: 400; font-size: 0.72rem; color: var(--c-ink-soft); }
 .fg-opt__label { margin-top: 0.25rem; font-family: var(--font-body); font-weight: 400; font-size: 0.78rem; color: var(--c-ink-soft); }
-.fg-answers--figure { grid-template-columns: repeat(2, 1fr); }
-@media (min-width: 40rem) {
-  .fg-answers--figure { grid-template-columns: repeat(var(--n, 4), 1fr); }
-}
+/* variantele cu figuri stau pe un singur rând și pe telefon: desenele sunt aproape pătrate, iar rândul economisit încape pe ecranele mici */
+.fg-answers--figure { grid-template-columns: repeat(var(--n, 4), 1fr); }
 .fg-opt__art { --opt-h: clamp(2.8rem, 10vh, 5rem); display: block; width: min(100%, calc(var(--opt-h) * var(--ar, 1))); }
 .fg-opt__art .c-emoji { display: block; width: 100%; height: auto; margin: 0; }
 .fg-opt.is-correct,

@@ -61,4 +61,10 @@ test('forme: numele pentru cititorul de ecran', () => {
   assert.equal(glyphName({ shape: 'triunghi', fill: 'gol', rot: 180 }), 'triunghi, gol, răsturnat');
   assert.equal(glyphName({ shape: 'patrat', fill: 'plin', color: 'albastru', rot: 90 }), 'pătrat, albastru, plin'); // rotit, dar arată la fel
   assert.equal(glyphName({ shape: 'sageata', fill: 'plin', color: 'verde', rot: 270 }), 'săgeată, verde, plină, întoarsă spre stânga');
+  assert.equal(glyphName({ shape: 'cerc', fill: 'plin', color: 'rosu', count: 3 }), '3 cercuri, roșii, pline');
+  assert.equal(glyphName({ shape: 'stea', fill: 'gol', count: 1 }), '1 stea, goală');
+  assert.equal(glyphName({ shape: 'triunghi', variant: 'dreptunghic', fill: 'gol', count: 2 }), '2 triunghiuri dreptunghice, goale');
+  assert.equal(glyphName({ shape: 'dreptunghi', variant: 'ingust', color: 'verde', size: 'mic' }), 'dreptunghi îngust mic, verde, plin');
+  assert.notEqual(glyphKey({ shape: 'cerc', count: 3 }), glyphKey({ shape: 'cerc', count: 4 }));
+  assert.equal(glyphKey({ shape: 'cerc', count: 3, size: 'mic' }), glyphKey({ shape: 'cerc', count: 3 }));
 });

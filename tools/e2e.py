@@ -95,7 +95,7 @@ class Run:
 
 
 def smoke(run: Run, page: Page, vp: str):
-    for route, name in [("", "acasa"), ("sectiune/recapitulare", "sectiune"), ("fulger", "calcul-fulger"), ("fulger/adunari-scaderi-100", "calcul-fulger-tema"),("atelier/componente", "atelier-componente"), ("atelier/vizualuri", "atelier-vizualuri"), ("atelier/tipuri", "atelier-tipuri"), ("nu-exista", "404")]:
+    for route, name in [("", "acasa"), ("sectiune/recapitulare", "sectiune"), ("fulger", "calcul-fulger"), ("fulger/adunari-scaderi-100", "calcul-fulger-tema"), ("fulger/siruri-intrusi", "fulger-siruri-intrusi"), ("atelier/componente", "atelier-componente"), ("atelier/vizualuri", "atelier-vizualuri"), ("atelier/tipuri", "atelier-tipuri"), ("nu-exista", "404")]:
         run.goto(page, route)
         page.wait_for_function("document.querySelector('main')?.innerText.trim().length > 0")
         page.wait_for_timeout(300)
@@ -656,10 +656,10 @@ def fulger_flow(run: Run, page: Page, vp: str):
     page.wait_for_timeout(200)
     top = page.get_by_test_id(f"fg-topic-{FULGER_TOPIC}").bounding_box()["y"]
     run.check(0 <= top < 160, f"[{vp}] fulger: #/fulger/<temă> e aceeași pagină, derulată la temă ({round(top)} px de sus)")
-    best = page.get_by_test_id("fg-best-usor").inner_text()
+    best = page.get_by_test_id(f"fg-topic-{FULGER_TOPIC}").get_by_test_id("fg-best-usor").inner_text()
     page.reload()
     page.wait_for_selector("[data-testid=fg-best-usor]")
-    kept = page.get_by_test_id("fg-best-usor").inner_text() == best
+    kept = page.get_by_test_id(f"fg-topic-{FULGER_TOPIC}").get_by_test_id("fg-best-usor").inner_text() == best
     run.goto(page, "fulger")
     card = page.get_by_test_id(f"fg-topic-{FULGER_TOPIC}").inner_text()
     won = page.get_by_test_id("fg-medal-prima-cursa").get_attribute("class").endswith("is-won")
@@ -679,7 +679,7 @@ def fulger_flow(run: Run, page: Page, vp: str):
         page.wait_for_selector("[data-testid=fg-start]")
         moved = page.evaluate("location.hash")
         run.goto(page, f"fulger/{FULGER_TOPIC}")
-        old_best = page.get_by_test_id("fg-best-usor").inner_text()
+        old_best = page.get_by_test_id(f"fg-topic-{FULGER_TOPIC}").get_by_test_id("fg-best-usor").inner_text()
         run.shot(page, f"{vp}-fulger-tema")
         run.goto(page, "fulger")
         old_medal = page.get_by_test_id("fg-medal-prima-cursa").get_attribute("class").endswith("is-won")
@@ -687,28 +687,87 @@ def fulger_flow(run: Run, page: Page, vp: str):
         page.evaluate("localStorage.removeItem('cifruta:fulger')")
 
 
+# temele ale căror tipuri au doar figuri, cu tipurile lor
+SHAPE_TOPICS = """Promise.all([import('./data/fulger.js'), import('./js/fulger/kinds.js')]).then(([{ default: c }, { KINDS }]) => c.topics
+  .filter((t) => !t.soon && t.levels.every((l) => l.mix.every((m) => KINDS[m.kind].mode === 'figure')))
+  .map((t) => ({ id: t.id, kinds: [...new Set(t.levels.flatMap((l) => l.mix.map((m) => m.kind)))] })))"""
+
+
+def fulger_shapes_flow(run: Run, page: Page, vp: str):
+    """Jocuri fulger cu figuri, pe fiecare temă cu figuri: exemplele desenate de pe carduri, fiecare tip (desenul și cele 4 variante
+    încap pe ecran), răspunsul corect cu desenul rezolvat, cel greșit cu varianta bună arătată și „Greșelile tale” cu desene."""
+    run.goto(page, "")
+    page.evaluate("localStorage.removeItem('cifruta:fulger')")
+    state = lambda: page.evaluate("window.__dbg.fulger.state()")
+    for topic in page.evaluate(SHAPE_TOPICS):
+        tid, kinds = topic["id"], topic["kinds"]
+        run.goto(page, f"fulger/{tid}")
+        samples = page.get_by_test_id(f"fg-topic-{tid}").locator("li.fg-sample--art")
+        undrawn = page.get_by_test_id(f"fg-topic-{tid}").locator("li.fg-sample--art:not(:has(svg))").count()
+        overflow = page.get_by_test_id(f"fg-topic-{tid}").locator(".fg-level").evaluate_all("cards => cards.filter((c) => [...c.querySelectorAll('.fg-sample')].some((s) => s.getBoundingClientRect().right > c.getBoundingClientRect().right + 1)).length")
+        run.check(samples.count() == 6 and undrawn == 0 and overflow == 0, f"[{vp}] {tid}: exemplele de pe cele 3 carduri sunt desene și încap în carduri ({samples.count()} exemple, {undrawn} fără desen, {overflow} carduri depășite)")
+        run.shot(page, f"{vp}-fulger-{tid}-tema")
+        run.goto(page, f"fulger/{tid}/avansat", debug=True)
+        page.get_by_test_id("fg-start").click()
+        for i, kind in enumerate(kinds):
+            page.wait_for_function(FULGER_READY)
+            page.evaluate(f"window.__dbg.fulger.force('{kind}')")
+            page.wait_for_function(FULGER_READY)
+            s = state()
+            fit = page.evaluate(FULGER_FIT)
+            arts = page.locator("[data-testid=fg-answers] .fg-opt__art svg").count()
+            figure = page.get_by_test_id("fg-figure")
+            # desenul are mărimea lui: toată lățimea cardului sau o înălțime mare (nu lățimea implicită a unui SVG, 300 px)
+            drawn = not s["figure"] or (figure.count() == 1 and page.evaluate("(() => { const f = document.querySelector('[data-testid=fg-figure]'); const r = f.getBoundingClientRect(); return r.width >= 0.9 * f.parentElement.getBoundingClientRect().width || r.height >= 88; })()"))
+            run.check(s["kind"] == kind and arts == 4 and drawn and fit["bottom"] <= fit["vh"] and fit["scroll"] <= 1 and fit["x"] <= 1,
+                      f"[{vp}] {tid}: {kind} — desenul și cele 4 variante încap pe ecran ({fit})")
+            run.shot(page, f"{vp}-fulger-{kind}")
+            if i % 2 == 0:
+                page.get_by_test_id(f"fg-opt-{s['answerIndex']}").click()
+                shown = page.locator("[data-testid=fg-figure].is-shown").count() == 1
+                run.check(page.locator(".fg-opt.is-correct").count() == 1 and shown == s["solved"], f"[{vp}] {tid}: {kind} — răspunsul corect, cu desenul rezolvat")
+                if s["solved"]:
+                    run.shot(page, f"{vp}-fulger-{kind}-rezolvat")
+            else:
+                page.get_by_test_id(f"fg-opt-{s['wrongIndex']}").click()
+                run.check(page.locator(".fg-opt.is-wrong").count() == 1 and page.locator(".fg-opt.is-answer").count() == 1, f"[{vp}] {tid}: {kind} — la greșeală se vede varianta bună")
+                page.evaluate("window.__dbg.fulger.elapse(9500)")  # peste pauza „Hopa”
+        page.evaluate("window.__dbg.fulger.elapse(window.__dbg.fulger.state().remainingMs + 50)")
+        page.wait_for_selector("[data-testid=fg-results]")
+        page.get_by_test_id("fg-results").click()  # sare peste numărătoare
+        page.wait_for_timeout(300)
+        mistakes = page.locator("[data-testid=fg-mistakes] .fg-mistake--figure").count()
+        arts = page.locator("[data-testid=fg-mistakes] .fg-mistake__art svg").count()
+        run.check(mistakes == min(5, len(kinds) // 2) and arts >= 2 * mistakes, f"[{vp}] {tid}: „Greșelile tale” arată greșelile cu desene ({mistakes} greșeli, {arts} desene)")
+        run.layout_ok(page, f"[{vp}] {tid} rezultate")
+        run.shot(page, f"{vp}-fulger-{tid}-rezultate")
+    page.evaluate("localStorage.removeItem('cifruta:fulger')")
+
+
 def fulger_screens(run: Run, browser, base: str):
-    """Calcul fulger pe ecrane joase sau înguste (telefon ținut orizontal, telefon mic): totul încape fără derulare."""
+    """Jocuri fulger pe ecrane joase sau înguste (telefon ținut orizontal, telefon mic): totul încape fără derulare, și la figuri."""
     screens = [
         ("telefon culcat", {"viewport": {"width": 844, "height": 390}, "has_touch": True, "is_mobile": True}),
         ("telefon mic", {"viewport": {"width": 360, "height": 640}, "has_touch": True, "is_mobile": True}),
     ]
+    rounds = [(FULGER_TOPIC, ("add-100-cu", "sort-4-dir", "cmp-expr")), ("siruri-intrusi", ("matrice", "analogie", "sir-doua"))]
     for name, opts in screens:
         context = browser.new_context(locale="ro-RO", **opts)
         page = context.new_page()
         run.watch(page, name)
-        page.goto(f"{base}?debug=1#/fulger/{FULGER_TOPIC}/avansat")
-        page.wait_for_selector("[data-testid=fg-start]")
-        box = page.get_by_test_id("fg-start").bounding_box()
-        run.check(box is not None and box["y"] + box["height"] <= opts["viewport"]["height"], f"[{name}] fulger: butonul Start încape pe ecran")
-        page.get_by_test_id("fg-start").click()
-        for kind in ("add-100-cu", "sort-4-dir", "cmp-expr"):
-            page.wait_for_function(FULGER_READY)
-            page.evaluate(f"window.__dbg.fulger.force('{kind}')")
-            page.wait_for_function(FULGER_READY)
-            fit = page.evaluate(FULGER_FIT)
-            run.check(fit["bottom"] <= fit["vh"] and fit["scroll"] <= 1 and fit["x"] <= 1, f"[{name}] fulger: la {kind} variantele încap fără derulare ({fit})")
-        run.shot(page, f"fulger-{name.replace(' ', '-')}")
+        for topic, kinds in rounds:
+            page.goto(f"{base}?debug=1#/fulger/{topic}/avansat")
+            page.wait_for_selector("[data-testid=fg-start]")
+            box = page.get_by_test_id("fg-start").bounding_box()
+            run.check(box is not None and box["y"] + box["height"] <= opts["viewport"]["height"], f"[{name}] fulger {topic}: butonul Start încape pe ecran")
+            page.get_by_test_id("fg-start").click()
+            for kind in kinds:
+                page.wait_for_function(FULGER_READY)
+                page.evaluate(f"window.__dbg.fulger.force('{kind}')")
+                page.wait_for_function(FULGER_READY)
+                fit = page.evaluate(FULGER_FIT)
+                run.check(fit["bottom"] <= fit["vh"] and fit["scroll"] <= 1 and fit["x"] <= 1, f"[{name}] fulger: la {kind} variantele încap fără derulare ({fit})")
+                run.shot(page, f"fulger-{name.replace(' ', '-')}-{kind}")
         context.close()
 
 
@@ -813,7 +872,7 @@ def keyboard_flow(run: Run, browser, base: str):
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--only", help="rulează doar testul cu acest id")
+    parser.add_argument("--only", help="rulează doar testul cu acest id (sau „fulger”: doar fluxurile Jocurilor fulger)")
     parser.add_argument("--shots", action="store_true", help="salvează capturi în test-results/")
     parser.add_argument("--base-url", help="testează un site publicat în loc de serverul local")
     parser.add_argument("--viewports", default="laptop,tableta,telefon")
@@ -821,6 +880,7 @@ def main() -> int:
 
     httpd, base = (None, args.base_url) if args.base_url else serve()
     run = Run(base if base.endswith("/") else base + "/", args.shots)
+    fulger_only = args.only == "fulger"
     tests = [t for t in catalog_tests() if not args.only or t["id"] == args.only]
 
     with sync_playwright() as pw:
@@ -833,7 +893,9 @@ def main() -> int:
             if not args.only:
                 smoke(run, page, vp)
                 types_flow(run, page, vp)
+            if not args.only or fulger_only:
                 fulger_flow(run, page, vp)
+                fulger_shapes_flow(run, page, vp)
             if tests:
                 pages_flow(run, page, tests[0], vp)
             for test in tests:
@@ -841,6 +903,7 @@ def main() -> int:
             context.close()
         if not args.only:
             keyboard_flow(run, browser, run.base)
+        if not args.only or fulger_only:
             fulger_screens(run, browser, run.base)
         browser.close()
     if httpd:
