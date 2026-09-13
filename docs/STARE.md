@@ -82,9 +82,9 @@
   clasamente pe temă și nivel plus totalul temei, cele vechi șterse; rutele vechi redirecționate; stelele încercărilor urcate de
   v0.9.0 revin în clasament. npm test 76/76, reguli 13/13 (publicate), E2E cont 59/59, E2E local 1118/1118; publicat, E2E pe
   site-ul live 1118/1118, tag `v0.10.0`
-- [ ] M23 (v0.10.1): pagina Calcul fulger arată temele desfășurate, grupate: panoul temei (titlu, programă, stele și total, explicație,
+- [x] M23 (v0.10.1): pagina Calcul fulger arată temele desfășurate, grupate: panoul temei (titlu, programă, stele și total, explicație,
   „Ce exersăm”, cele trei niveluri) și temele „în curând” la final, fără pagini separate pe temă; `#/fulger/<temă>` derulează la temă.
-  npm test 76/76, E2E local 1115/1115
+  npm test 76/76, E2E local 1115/1115; publicat, E2E pe site-ul live 1115/1115, tag `v0.10.1`
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -348,5 +348,5 @@
   „Ieși din joc”) și derulează la temă; la capturi, derularea ieșea dublată (un `scroll-margin` peste `scroll-padding`-ul din bază).
   Măsurat între 320 și 1440 px: nivelurile stau câte trei pe rând de la ~1000 px, cu stelele lângă pastila „Intermediar”, fără depășiri;
   exemplul „□ + 7 = 15” nu se mai rupe pe două rânduri. npm test 76/76, E2E local 1115/1115 (verificările paginii separate a temei au
-  fost înlocuite cu cele ale panoului și ale derulării).
+  fost înlocuite cu cele ale panoului și ale derulării). v0.10.1 publicat, E2E pe site-ul live 1115/1115.
   **De făcut data viitoare:** vizita în cont și verificarea în Firestore; copilul joacă → pragurile; a doua temă și super-totalul.
