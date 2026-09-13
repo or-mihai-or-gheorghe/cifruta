@@ -185,6 +185,52 @@ export default {
       ],
     },
     {
+      id: 'figuri-corpuri',
+      title: 'Figuri și corpuri',
+      short: 'Figuri și corpuri',
+      text: 'Recunoaște figurile oricum ar fi așezate, găsește corpurile din jurul tău, numără figurile dintr-un desen și pliază desfășurări.',
+      icon: 'echer',
+      grade: 2,
+      concepts: ['mat.geo.figuri', 'mat.geo.corpuri', 'mat.geo.numarare-figuri', 'mat.geo.desfasurari'],
+      levels: [
+        {
+          id: 'usor',
+          warmup: ['figura', 'corpuri'],
+          mix: [
+            { kind: 'figura', weight: 3 },
+            { kind: 'corpuri', weight: 3 },
+            { kind: 'figura-capcana', weight: 1 },
+            { kind: 'numara-figuri', weight: 1 },
+          ],
+          stars: [28, 72, 170],
+        },
+        {
+          id: 'intermediar',
+          warmup: ['figura', 'corpuri'],
+          mix: [
+            { kind: 'figura-capcana', weight: 2.5 },
+            { kind: 'corpuri', weight: 2 },
+            { kind: 'numara-figuri', weight: 2 },
+            { kind: 'desfasurare', weight: 1.5 },
+            { kind: 'figura', weight: 1 },
+          ],
+          stars: [29, 78, 195],
+        },
+        {
+          id: 'avansat',
+          warmup: ['figura-capcana', 'numara-figuri'],
+          mix: [
+            { kind: 'desfasurare', weight: 2.5 },
+            { kind: 'numara-figuri', weight: 2.5 },
+            { kind: 'figura-capcana', weight: 2 },
+            { kind: 'corpuri', weight: 1.5 },
+            { kind: 'figura', weight: 0.5 },
+          ],
+          stars: [29, 77, 205],
+        },
+      ],
+    },
+    {
       id: 'numere-1000',
       title: 'Numere până la 1000',
       short: 'Până la 1000',

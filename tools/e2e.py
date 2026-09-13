@@ -703,7 +703,7 @@ def fulger_shapes_flow(run: Run, page: Page, vp: str):
         tid, kinds = topic["id"], topic["kinds"]
         run.goto(page, f"fulger/{tid}")
         samples = page.get_by_test_id(f"fg-topic-{tid}").locator("li.fg-sample--art")
-        undrawn = page.get_by_test_id(f"fg-topic-{tid}").locator("li.fg-sample--art:not(:has(svg))").count()
+        undrawn = page.get_by_test_id(f"fg-topic-{tid}").locator("li.fg-sample--art:not(:has(svg, img))").count()
         overflow = page.get_by_test_id(f"fg-topic-{tid}").locator(".fg-level").evaluate_all("cards => cards.filter((c) => [...c.querySelectorAll('.fg-sample')].some((s) => s.getBoundingClientRect().right > c.getBoundingClientRect().right + 1)).length")
         run.check(samples.count() == 6 and undrawn == 0 and overflow == 0, f"[{vp}] {tid}: exemplele de pe cele 3 carduri sunt desene și încap în carduri ({samples.count()} exemple, {undrawn} fără desen, {overflow} carduri depășite)")
         run.shot(page, f"{vp}-fulger-{tid}-tema")
@@ -716,7 +716,7 @@ def fulger_shapes_flow(run: Run, page: Page, vp: str):
             s = state()
             fit = page.evaluate(FULGER_FIT)
             # fiecare variantă are un desen sau un text (la „Câte axe…” variantele sunt numere)
-            arts = page.evaluate("[...document.querySelectorAll('[data-testid=fg-answers] .fg-opt')].filter((b) => b.querySelector('.fg-opt__art svg') || [...b.children].some((c) => !c.classList.contains('fg-opt__key') && c.textContent.trim())).length")
+            arts = page.evaluate("[...document.querySelectorAll('[data-testid=fg-answers] .fg-opt')].filter((b) => b.querySelector('.fg-opt__art svg, .fg-opt__art img') || [...b.children].some((c) => !c.classList.contains('fg-opt__key') && c.textContent.trim())).length")
             figure = page.get_by_test_id("fg-figure")
             # desenul are mărimea lui: toată lățimea cardului sau o înălțime mare (nu lățimea implicită a unui SVG, 300 px)
             drawn = not s["figure"] or (figure.count() == 1 and page.evaluate("(() => { const f = document.querySelector('[data-testid=fg-figure]'); const r = f.getBoundingClientRect(); return r.width >= 0.9 * f.parentElement.getBoundingClientRect().width || r.height >= 88; })()"))
@@ -738,8 +738,9 @@ def fulger_shapes_flow(run: Run, page: Page, vp: str):
         page.get_by_test_id("fg-results").click()  # sare peste numărătoare
         page.wait_for_timeout(300)
         mistakes = page.locator("[data-testid=fg-mistakes] .fg-mistake--figure").count()
-        arts = page.locator("[data-testid=fg-mistakes] .fg-mistake__art svg").count()
-        run.check(mistakes == min(5, len(kinds) // 2) and arts >= 2 * mistakes, f"[{vp}] {tid}: „Greșelile tale” arată greșelile cu desene ({mistakes} greșeli, {arts} desene)")
+        # fiecare greșeală arată răspunsul bun: un desen, un emoji sau un text (la numărat, variantele sunt numere)
+        shown = page.evaluate("[...document.querySelectorAll('[data-testid=fg-mistakes] .fg-mistake--figure .fg-mistake__ok')].filter((ok) => ok.querySelector('svg, img') || [...ok.children].some((c) => !c.classList.contains('u-visually-hidden') && c.textContent.trim())).length")
+        run.check(mistakes == min(5, len(kinds) // 2) and shown == mistakes, f"[{vp}] {tid}: „Greșelile tale” arată răspunsul bun la fiecare greșeală ({mistakes} greșeli, {shown} cu răspunsul arătat)")
         run.layout_ok(page, f"[{vp}] {tid} rezultate")
         run.shot(page, f"{vp}-fulger-{tid}-rezultate")
     page.evaluate("localStorage.removeItem('cifruta:fulger')")
@@ -755,6 +756,7 @@ def fulger_screens(run: Run, browser, base: str):
         (FULGER_TOPIC, ("add-100-cu", "sort-4-dir", "cmp-expr")),
         ("siruri-intrusi", ("matrice", "analogie", "sir-doua")),
         ("puzzle-forme", ("simetrie-jumatate", "piesa-rotita", "axe-cate")),
+        ("figuri-corpuri", ("desfasurare", "numara-figuri", "corpuri")),
     ]
     for name, opts in screens:
         context = browser.new_context(locale="ro-RO", **opts)

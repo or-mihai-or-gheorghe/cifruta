@@ -237,7 +237,97 @@ export const SHAPE_RULES = {
     }
     return q.options[q.answer].text === String(count);
   },
+  figura: (q) => {
+    const s = namedFigure(q);
+    // o singură variantă e figura cerută; formele sunt diferite, la fel colorate, și fără pătrat când se cere un dreptunghi
+    return Boolean(s) && s.good.length === 1 && s.good[0] === q.answer && new Set(s.opts.map((o) => o.shape)).size === 4
+      && new Set(s.opts.map((o) => `${o.fill}|${o.color}`)).size === 1 && !(s.shape === 'dreptunghi' && s.opts.some((o) => o.shape === 'patrat'));
+  },
+  'figura-capcana': (q) => {
+    const s = namedFigure(q);
+    // capcanele: figuri care seamănă cu cea cerută (sau ea însăși, desenată cu contur deschis)
+    const traps = { patrat: ['romb', 'trapez', 'dreptunghi', 'patrat'], dreptunghi: ['paralelogram', 'trapez', 'romb', 'dreptunghi'], triunghi: ['triunghi', 'casa', 'trapez', 'semicerc'], cerc: ['oval', 'semicerc', 'inima'], semicerc: ['cerc', 'oval', 'triunghi', 'semicerc'] };
+    return Boolean(s) && s.good.length === 1 && s.good[0] === q.answer && q.choices.every((c) => c === q.answer || traps[s.shape].includes(q.options[c].shape))
+      && !(s.shape === 'dreptunghi' && s.opts.some((o) => o.shape === 'patrat'));
+  },
+  corpuri: (q) => {
+    const f = q.figure;
+    const opts = optionList(q);
+    const one = (test) => {
+      const good = q.choices.filter((c) => test(q.options[c]));
+      return good.length === 1 && good[0] === q.answer;
+    };
+    if (f?.emoji) return Boolean(OBJECT_SOLID[f.emoji]) && one((o) => o.v === 'solid' && o.name === OBJECT_SOLID[f.emoji]); // obiect → corp
+    if (f?.v !== 'solid') return false;
+    if (opts.every((o) => o.emoji)) return one((o) => OBJECT_SOLID[o.emoji] === f.name); // corp → obiect
+    return Boolean(FOOTPRINT[f.name]) && opts.every((o) => o.v === 'glyph') && one((o) => o.shape === FOOTPRINT[f.name]); // urma
+  },
+  'numara-figuri': (q) => {
+    const f = q.figure;
+    const numbers = optionList(q).map((o) => Number(o.text));
+    const target = /^Câte (\S+)/.exec(q.prompt)?.[1];
+    // numărul figurilor, din formule: perechile de puncte de pe baza evantaiului, pătratele de 1 × 1 și 2 × 2, dreptunghiurile dintr-o fâșie
+    let count;
+    if (f?.v === 'triangle-fan' && target === 'triunghiuri') count = ((f.cuts + 2) * (f.cuts + 1)) / 2;
+    else if (f?.v === 'square-grid' && target === 'pătrate') count = (f.n * (f.n + 1) * (2 * f.n + 1)) / 6;
+    else if (f?.v === 'rect-strip' && target === 'dreptunghiuri') count = (f.parts * (f.parts + 1)) / 2;
+    else if (f?.v === 'glyph-cells' && PLURALS[target]) count = f.cells.filter((c) => c.shape === PLURALS[target]).length;
+    const ascending = numbers.every((n, i) => Number.isInteger(n) && n >= 1 && (i === 0 || n > numbers[i - 1]));
+    return count !== undefined && ascending && q.options[q.answer].text === String(count);
+  },
+  desfasurare: (q) => {
+    const f = q.figure;
+    const opts = optionList(q);
+    if (f?.v === 'net') return opts.every((o) => o.v === 'solid') && opts.map((o) => o.name).sort().join(',') === 'cilindru,con,cub,cuboid' && q.options[q.answer].name === f.name;
+    const good = q.choices.filter((c) => foldsToCube(q.options[c].cells ?? []));
+    return !f && sameBox(opts) && opts.every((o) => o.cells?.length === 6) && good.length === 1 && good[0] === q.answer;
+  },
 };
+
+// ——— figuri și corpuri ———
+
+const TARGETS = { pătrat: 'patrat', dreptunghi: 'dreptunghi', triunghi: 'triunghi', cerc: 'cerc', semicerc: 'semicerc' };
+const PLURALS = { triunghiuri: 'triunghi', pătrate: 'patrat', cercuri: 'cerc' };
+const OBJECT_SOLID = { zar: 'cub', gheata: 'cub', cutie: 'cuboid', carte: 'cuboid', conserva: 'cilindru', baterie: 'cilindru', minge: 'sfera', glob: 'sfera', baschet: 'sfera', inghetata: 'con', petrecere: 'con' };
+const FOOTPRINT = { cub: 'patrat', cuboid: 'dreptunghi', cilindru: 'cerc', con: 'cerc' };
+
+/** „Care este un pătrat?”: figura cerută, variantele (doar figuri) și variantele bune (figura cerută, cu contur închis). */
+function namedFigure(q) {
+  const shape = TARGETS[/^Care este un (\S+)\?$/.exec(q.prompt)?.[1]];
+  const opts = optionList(q);
+  if (!shape || q.figure || !opts.every((o) => o.v === 'glyph')) return null;
+  return { shape, opts, good: q.choices.filter((c) => q.options[c].shape === shape && !q.options[c].open) };
+}
+
+/**
+ * Hârtia se pliază într-un cub: fiecare căsuță primește direcția în care privește fața ei (normala), pornind de la o față așezată jos;
+ * pliată spre dreapta, fața vecină privește spre dreapta, iar „dreapta” ei urcă. O desfășurare bună folosește toate cele 6 direcții.
+ */
+function foldsToCube(cells) {
+  if (cells.length !== 6) return false;
+  const key = (r, c) => `${r},${c}`;
+  const inside = new Set(cells.map(([r, c]) => key(r, c)));
+  const neg = (v) => v.map((x) => -x);
+  const frames = new Map([[key(...cells[0]), { n: [0, 0, -1], right: [1, 0, 0], down: [0, 1, 0] }]]);
+  const queue = [cells[0]];
+  while (queue.length) {
+    const [r, c] = queue.shift();
+    const f = frames.get(key(r, c));
+    const steps = [
+      [0, 1, { n: f.right, right: neg(f.n), down: f.down }],
+      [0, -1, { n: neg(f.right), right: f.n, down: f.down }],
+      [1, 0, { n: f.down, right: f.right, down: neg(f.n) }],
+      [-1, 0, { n: neg(f.down), right: f.right, down: f.n }],
+    ];
+    for (const [dr, dc, next] of steps) {
+      if (inside.has(key(r + dr, c + dc)) && !frames.has(key(r + dr, c + dc))) {
+        frames.set(key(r + dr, c + dc), next);
+        queue.push([r + dr, c + dc]);
+      }
+    }
+  }
+  return frames.size === 6 && new Set([...frames.values()].map((f) => f.n.join(','))).size === 6;
+}
 
 // ——— piese și simetrii, scrise din nou aici, independent de generatoare ———
 

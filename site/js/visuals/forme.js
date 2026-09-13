@@ -256,3 +256,60 @@ registerVisual('cell-grid', {
     { rows: 4, cols: 4, grid: true, axis: 'v', color: 'mov', cells: [[0, 1], [1, 0], [1, 1], [3, 0]] },
   ],
 });
+
+// ——— figuri de numărat și desfășurări ———
+
+// dreptunghi mare împărțit în dreptunghiuri înalte (niciunul pătrat, ca numărarea să nu ceară „pătratul e și el dreptunghi”)
+registerVisual('rect-strip', {
+  group: GROUP,
+  defaults: { parts: 3 },
+  label: (p) => `dreptunghi mare împărțit în ${Math.round(num(p.parts, 3))} dreptunghiuri mai mici`,
+  render: (p) => {
+    const parts = Math.round(num(p.parts, 3));
+    let out = `<rect x="6" y="20" width="88" height="60" fill="${C.cream}" ${st(3)}/>`;
+    for (let i = 1; i < parts; i++) out += `<line x1="${r2(6 + (88 * i) / parts)}" y1="20" x2="${r2(6 + (88 * i) / parts)}" y2="80" ${st(2.5)}/>`;
+    return out;
+  },
+  check: (p) => {
+    const parts = num(p.parts, NaN);
+    return Number.isInteger(parts) && parts >= 2 && parts <= 4 ? [] : [`parts trebuie să fie între 2 și 4: ${p.parts}`];
+  },
+  demos: [{ parts: 2 }, { parts: 3 }],
+});
+
+// desfășurările: numele desenului spune din ce figuri e făcută, nu corpul (acela e răspunsul)
+const NETS = {
+  cub: {
+    label: 'desfășurare din 6 pătrate',
+    viewBox: '0 0 88 114',
+    draw: () => [[0, 1], [1, 0], [1, 1], [1, 2], [2, 1], [3, 1]].map(([r, c]) => `<rect x="${5 + c * 26}" y="${5 + r * 26}" width="26" height="26" fill="${C.blue}" ${st(2.5)}/>`).join(''),
+  },
+  cuboid: {
+    label: 'desfășurare din 6 dreptunghiuri',
+    viewBox: '0 0 106 60',
+    draw: () =>
+      [[19, 5, 34, 14], [5, 19, 14, 22], [19, 19, 34, 22], [53, 19, 14, 22], [67, 19, 34, 22], [19, 41, 34, 14]]
+        .map(([x, y, w, h]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${C.green}" ${st(2.5)}/>`)
+        .join(''),
+  },
+  cilindru: {
+    label: 'desfășurare dintr-un dreptunghi și două cercuri',
+    viewBox: '0 0 100 88',
+    draw: () => `<rect x="20" y="26" width="60" height="36" fill="${C.orange}" ${st(2.5)}/><circle cx="36" cy="16.5" r="9.5" fill="${C.yellow}" ${st(2.5)}/><circle cx="36" cy="71.5" r="9.5" fill="${C.yellow}" ${st(2.5)}/>`,
+  },
+  con: {
+    label: 'desfășurare dintr-o bucată de cerc și un cerc mic',
+    viewBox: '0 0 100 96',
+    draw: () => `<path d="M50 12 L79.87 61.72 A58 58 0 0 1 20.13 61.72 Z" fill="${C.purple}" ${st(2.5)}/><circle cx="50" cy="80" r="10" fill="${C.purpleLight}" ${st(2.5)}/>`,
+  },
+};
+
+registerVisual('net', {
+  group: GROUP,
+  defaults: { name: 'cub' },
+  viewBox: (p) => (NETS[p.name] ?? NETS.cub).viewBox,
+  label: (p) => (NETS[p.name] ?? NETS.cub).label,
+  render: (p) => (NETS[p.name] ?? NETS.cub).draw(),
+  check: (p) => (NETS[p.name] ? [] : [`desfășurare necunoscută: ${p.name}`]),
+  demos: Object.keys(NETS).map((name) => ({ name })),
+});

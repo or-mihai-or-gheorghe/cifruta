@@ -340,7 +340,10 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 /* variantele cu figuri stau pe un singur rând și pe telefon: desenele sunt aproape pătrate, iar rândul economisit încape pe ecranele mici */
 .fg-answers--figure { grid-template-columns: repeat(var(--n, 4), 1fr); }
 .fg-opt__art { --opt-h: clamp(2.8rem, 10vh, 5rem); display: block; width: min(100%, calc(var(--opt-h) * var(--ar, 1))); }
-.fg-opt__art .c-emoji { display: block; width: 100%; height: auto; margin: 0; }
+.fg-opt__art .c-emoji,
+.fg-fig .c-emoji,
+.fg-sample__art .c-emoji,
+.fg-mistake__fig .c-emoji { display: block; width: 100%; height: auto; margin: 0; } /* emoji-urile iau mărimea containerului, ca desenele */
 .fg-opt.is-correct,
 .fg-opt.is-answer { --edge: var(--c-ok-ink); background: var(--c-ok-bg); color: var(--c-ok-ink); }
 .fg-opt.is-correct { animation: anim-pop var(--dur-3) var(--ease-spring); }

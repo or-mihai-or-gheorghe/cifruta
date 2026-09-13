@@ -93,3 +93,29 @@ export function polyominoes(n) {
   }
   return polyCache.get(n);
 }
+
+/**
+ * Cele 6 căsuțe se pliază într-un cub: rostogolim un cub de la o căsuță la vecinele ei și ținem minte fața de jos; o desfășurare
+ * bună pune fiecare față jos o singură dată. Starea cubului: [jos, nord, est], iar fața opusă lui f este 5 − f.
+ */
+export function isCubeNet(cells) {
+  if (cells.length !== 6 || !connected(cells)) return false;
+  const key = ([r, c]) => `${r}.${c}`;
+  const inside = new Set(cells.map(key));
+  const state = new Map([[key(cells[0]), [0, 1, 2]]]);
+  const queue = [cells[0]];
+  while (queue.length) {
+    const [r, c] = queue.shift();
+    const [down, north, east] = state.get(key([r, c]));
+    // spre est coboară fața de est, iar cea de sus ajunge la est; la fel pe celelalte laturi
+    const rolls = [[0, 1, [east, north, 5 - down]], [0, -1, [5 - east, north, down]], [1, 0, [5 - north, down, east]], [-1, 0, [north, 5 - down, east]]];
+    for (const [dr, dc, next] of rolls) {
+      const k = key([r + dr, c + dc]);
+      if (inside.has(k) && !state.has(k)) {
+        state.set(k, next);
+        queue.push([r + dr, c + dc]);
+      }
+    }
+  }
+  return new Set([...state.values()].map(([down]) => down)).size === 6;
+}

@@ -1,9 +1,9 @@
-// Piesele din căsuțe (core/grile.js): rotiri, oglindiri, orientări și numărul pieselor de n căsuțe.
+// Piesele din căsuțe (core/grile.js): rotiri, oglindiri, orientări, numărul pieselor de n căsuțe și desfășurările cubului.
 
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { cellsKey, connected, freeKey, isChiral, mirror, orientations, polyominoes, rotate, rotations, sameFree, sameRotated, size } from '../site/js/core/grile.js';
+import { cellsKey, connected, freeKey, isChiral, isCubeNet, mirror, orientations, polyominoes, rotate, rotations, sameFree, sameRotated, size } from '../site/js/core/grile.js';
 
 const L = [[0, 0], [1, 0], [2, 0], [2, 1]];
 const T = [[0, 0], [0, 1], [0, 2], [1, 1]];
@@ -26,4 +26,13 @@ test('grile: piesele diferite de 1–6 căsuțe', () => {
   for (const piece of polyominoes(5)) assert.ok(piece.length === 5 && connected(piece) && cellsKey(piece) === freeKey(piece), cellsKey(piece));
   // în oglindă diferite: L și S dintre cele de 4 căsuțe; F, L, N, P, Y, Z dintre cele de 5
   assert.deepEqual([polyominoes(4).filter(isChiral).length, polyominoes(5).filter(isChiral).length], [2, 6]);
+});
+
+test('grile: desfășurările cubului', () => {
+  assert.equal(polyominoes(6).filter(isCubeNet).length, 11);
+  const cross = [[0, 1], [1, 0], [1, 1], [1, 2], [2, 1], [3, 1]];
+  assert.ok(isCubeNet(cross) && isCubeNet(mirror(rotate(cross))));
+  assert.ok(!isCubeNet([[0, 0], [0, 1], [0, 2], [1, 0], [1, 1], [1, 2]])); // 2 × 3
+  assert.ok(!isCubeNet([[0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [1, 0]])); // 5 pe un rând
+  assert.ok(!isCubeNet(cross.slice(0, 5)));
 });

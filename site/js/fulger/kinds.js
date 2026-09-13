@@ -13,7 +13,7 @@
 import { calc, relation } from '../core/expr.js';
 import { trecere } from '../core/rules.js';
 import { SHAPE_KINDS } from './kinds-forme.js';
-import { distinct, int, pickOne, shuffle } from './rand.js';
+import { distinct, int, pickOne, shuffle, withChoices } from './rand.js';
 
 const PLUS = ' + ';
 const MINUS = ' − ';
@@ -33,24 +33,6 @@ function twoDigits(rand) {
 
 /** Numărul cu cifrele inversate (43 → 34), pentru greșeli tipice. */
 const reversed = (n) => (n >= 10 && n <= 99 && n % 10 !== 0 ? (n % 10) * 10 + Math.floor(n / 10) : null);
-
-/**
- * Patru variante în ordine crescătoare: răspunsul și trei greșeli. Poziția răspunsului se alege întâi, la întâmplare
- * (altfel ar sta mereu la mijloc), apoi greșelile de sub și de peste el; greșelile tipice au întâietate față de vecinii ±1, ±2, ±3, ±10.
- */
-export function withChoices(rand, answer, typical = [], { max = 100 } = {}) {
-  const ok = (w) => Number.isInteger(w) && w >= 0 && w <= max && w !== answer;
-  const near = [1, 2, 3, 10].flatMap((d) => [answer - d, answer + d]);
-  const side = (inSide) => [
-    ...new Set([...shuffle(rand, typical.filter((w) => ok(w) && inSide(w))), ...shuffle(rand, near.filter((w) => ok(w) && inSide(w)))]),
-  ];
-  const below = side((w) => w < answer);
-  const above = side((w) => w > answer);
-  for (const pos of shuffle(rand, [0, 1, 2, 3])) {
-    if (below.length >= pos && above.length >= 3 - pos) return [...below.slice(0, pos), answer, ...above.slice(0, 3 - pos)].sort((a, b) => a - b);
-  }
-  throw new Error(`fulger: nu găsesc variante pentru ${answer}`);
-}
 
 function choice(kind, rand, text, typical, max) {
   const answer = calc(text);

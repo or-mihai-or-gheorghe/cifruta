@@ -6,8 +6,8 @@
 // tests/fulger-forme.rules.js.
 
 import { axesCount, canonical, COLORS, FILLS, glyphKey, isAxis, linesFor, normRot, ROTS, SHAPES, SIZES } from '../core/forme.js';
-import { cellsKey, connected, freeKey, isChiral, mirror, normalize, orientations, polyominoes, rotations, size } from '../core/grile.js';
-import { int, pickOne, shuffle } from './rand.js';
+import { cellsKey, connected, freeKey, isChiral, isCubeNet, mirror, normalize, orientations, polyominoes, rotations, size } from '../core/grile.js';
+import { int, pickOne, shuffle, withChoices } from './rand.js';
 
 const MODELE = 'mat.log.modele';
 const CLASIFICARE = 'mat.log.clasificare';
@@ -16,6 +16,9 @@ const ANALOGII = 'mat.log.analogii';
 const COMPUNERE = 'mat.geo.compunere';
 const ROTIRE = 'mat.geo.rotire';
 const SIMETRIE = 'mat.geo.simetrie';
+const CORPURI = 'mat.geo.corpuri';
+const NUMARARE = 'mat.geo.numarare-figuri';
+const DESFASURARI = 'mat.geo.desfasurari';
 
 // figuri ușor de deosebit și de numit
 const EASY = ['patrat', 'cerc', 'triunghi', 'stea', 'inima', 'cruce', 'romb', 'semicerc', 'casa'];
@@ -615,7 +618,209 @@ export const SHAPE_KINDS = {
       }
     },
   },
+  figura: {
+    label: 'Recunoaște figura',
+    points: 1,
+    fastMs: 3500,
+    mode: 'figure',
+    concepts: [FIGURI],
+    generate(rand) {
+      for (;;) {
+        const target = pickOne(rand, PROGRAM);
+        const color = pickOne(rand, COLORS);
+        // distractori: celelalte figuri din programă, desenate și ele neobișnuit (fără pătrat când se cere un dreptunghi: și el e dreptunghi)
+        const answer = glyph({ ...unusual(rand, target), color });
+        const wrong = shuffle(rand, PROGRAM.filter((s) => s !== target && !(target === 'dreptunghi' && s === 'patrat'))).map((s) => glyph({ ...unusual(rand, s), color }));
+        const q = figureQuestion('figura', rand, { prompt: `Care este un ${SHAPES[target].name}?`, key: [answer, ...wrong].map(bareId).join(','), answer, distractors: wrong });
+        if (q) return q;
+      }
+    },
+  },
+  'figura-capcana': {
+    label: 'Figura printre capcane',
+    points: 3,
+    fastMs: 5500,
+    mode: 'figure',
+    concepts: [FIGURI],
+    generate(rand) {
+      for (;;) {
+        const target = pickOne(rand, PROGRAM);
+        const color = pickOne(rand, COLORS);
+        const answer = glyph({ ...unusual(rand, target), color });
+        // capcanele seamănă cu figura, dar le lipsește ceva: unghiurile drepte, laturile egale, conturul închis sau laturile drepte
+        const traps = shuffle(rand, TRAPS[target]).map((make) => {
+          const g = make(rand);
+          return g.open ? { ...glyph({ ...g, color }), open: true } : glyph({ ...g, color });
+        });
+        const q = figureQuestion('figura-capcana', rand, { prompt: `Care este un ${SHAPES[target].name}?`, key: [answer, ...traps].map(bareId).join(','), answer, distractors: traps });
+        if (q) return q;
+      }
+    },
+  },
+  corpuri: {
+    label: 'Corpuri și obiecte',
+    points: 2,
+    fastMs: 4500,
+    mode: 'figure',
+    concepts: [CORPURI],
+    generate(rand) {
+      for (;;) {
+        const roll = rand();
+        const solidArt = (name) => ({ v: 'solid', name });
+        let q;
+        if (roll < 0.4) {
+          // obiect → corp; capcane: corpul cu care se încurcă și figura plană care seamănă (cerc pentru minge)
+          const solid = pickOne(rand, Object.keys(OBJECTS));
+          const object = pickOne(rand, OBJECTS[solid]);
+          const plane = PLANE_TRAP[solid] ? glyph({ shape: PLANE_TRAP[solid], color: pickOne(rand, COLORS) }) : null;
+          const others = shuffle(rand, SOLIDS.filter((s) => s !== solid && s !== TWIN[solid])).map(solidArt);
+          q = figureQuestion('corpuri', rand, { prompt: 'Ce formă are obiectul?', figure: { emoji: object }, key: `obiect:${object}`, answer: solidArt(solid), distractors: [solidArt(TWIN[solid]), plane, ...others] });
+        } else if (roll < 0.7) {
+          // corp → obiect
+          const solid = pickOne(rand, Object.keys(OBJECTS));
+          const others = [TWIN[solid], ...shuffle(rand, SOLIDS.filter((s) => s !== solid && s !== TWIN[solid]))];
+          q = figureQuestion('corpuri', rand, {
+            prompt: 'Ce obiect are această formă?',
+            figure: solidArt(solid),
+            key: `corp:${solid}`,
+            answer: { emoji: pickOne(rand, OBJECTS[solid]) },
+            distractors: others.map((s) => ({ emoji: pickOne(rand, OBJECTS[s]) })),
+          });
+        } else {
+          // urma lăsată pe nisip de fața de jos (capcana: triunghiul, cum se vede conul din lateral)
+          const solid = pickOne(rand, Object.keys(FOOTPRINTS));
+          const color = pickOne(rand, COLORS);
+          const shapes = shuffle(rand, ['patrat', 'dreptunghi', 'cerc', 'triunghi'].filter((s) => s !== FOOTPRINTS[solid]));
+          q = figureQuestion('corpuri', rand, { prompt: 'Ce urmă lasă pe nisip?', figure: solidArt(solid), key: `urma:${solid}`, answer: glyph({ shape: FOOTPRINTS[solid], color }), distractors: shapes.map((shape) => glyph({ shape, color })) });
+        }
+        if (q) return q;
+      }
+    },
+  },
+  'numara-figuri': {
+    label: 'Numără figurile',
+    points: 3,
+    fastMs: 7000,
+    mode: 'figure',
+    concepts: [NUMARARE],
+    generate(rand) {
+      const roll = rand();
+      let figure;
+      let prompt;
+      let answer;
+      let typical;
+      // răspunsul e între 4 și 6, ca să poată sta pe oricare dintre cele 4 locuri ale variantelor (care sunt în ordine crescătoare)
+      if (roll < 0.12) {
+        // greșelile tipice: doar triunghiurile mici, apoi cele mici și cel mare
+        [figure, prompt, answer, typical] = [{ v: 'triangle-fan', cuts: 2 }, 'Câte triunghiuri sunt în desen?', 6, [3, 4]];
+      } else if (roll < 0.2) {
+        [figure, prompt, answer, typical] = [{ v: 'square-grid', n: 2 }, 'Câte pătrate sunt în desen?', 5, [4, 6]];
+      } else if (roll < 0.3) {
+        [figure, prompt, answer, typical] = [{ v: 'rect-strip', parts: 3 }, 'Câte dreptunghiuri sunt în desen?', 6, [3, 4]];
+      } else {
+        // figuri amestecate: cele cerute, unele rotite sau mici, printre figuri care seamănă; culorile nu ajută
+        const target = pickOne(rand, ['triunghi', 'patrat', 'cerc']);
+        answer = int(rand, 4, 6);
+        const wanted = Array.from({ length: answer }, () => unusual(rand, target));
+        const others = Array.from({ length: 8 - answer }, () => ({ ...pickOne(rand, LOOKALIKES[target]), rot: pickOne(rand, [0, 90, 180, 270]) }));
+        const cells = shuffle(rand, [...wanted, ...others]).map((g) => cellOf(glyph({ ...g, color: pickOne(rand, COLORS) })));
+        const turned = wanted.filter((g) => canonical(g).rot !== 0).length;
+        figure = { v: 'glyph-cells', cols: 4, cells };
+        prompt = `Câte ${SHAPES[target].plural} sunt în desen?`;
+        typical = [answer - turned, answer + others.filter((g) => g.shape === CONFUSED[target]).length, answer + 1, answer - 1];
+      }
+      const options = withChoices(rand, answer, typical, { min: 1, max: 9 }).map((n) => ({ text: String(n) }));
+      return {
+        kind: 'numara-figuri',
+        mode: 'figure',
+        key: `numara-figuri:${figure.cells ? figure.cells.map((c) => bareId(glyph(c))).join(',') : JSON.stringify(figure)}`,
+        prompt,
+        figure,
+        choices: options.map(artId),
+        options: Object.fromEntries(options.map((o) => [artId(o), o])),
+        answer: artId({ text: String(answer) }),
+      };
+    },
+  },
+  desfasurare: {
+    label: 'Desfășurări',
+    points: 4,
+    fastMs: 9000,
+    mode: 'figure',
+    concepts: [DESFASURARI],
+    generate(rand) {
+      for (;;) {
+        if (rand() < 0.4) {
+          // desfășurare → corp: variantele sunt mereu cele 4 corpuri care se pot desfășura
+          const name = pickOne(rand, NET_SOLIDS);
+          const q = figureQuestion('desfasurare', rand, {
+            prompt: 'Ce corp obții dacă o pliezi?',
+            figure: { v: 'net', name },
+            key: `corp:${name}`,
+            answer: { v: 'solid', name },
+            distractors: NET_SOLIDS.filter((s) => s !== name).map((s) => ({ v: 'solid', name: s })),
+          });
+          if (q) return q;
+          continue;
+        }
+        // care piesă de 6 căsuțe se pliază într-un cub; celelalte arată plauzibil (fără 2 × 2 căsuțe pline, cel mult 5 pe un rând)
+        const fits = (p) => Math.max(...size(p)) <= 5;
+        const hexes = polyominoes(6).filter(fits);
+        const net = pickOne(rand, orientations(pickOne(rand, hexes.filter(isCubeNet))));
+        const wrong = shuffle(rand, hexes.filter((p) => !isCubeNet(p) && !hasBlock(p))).map((p) => pickOne(rand, orientations(p)));
+        const box = boxFor([net, ...wrong.slice(0, 3)]);
+        const color = pickOne(rand, COLORS);
+        const q = figureQuestion('desfasurare', rand, {
+          prompt: 'Care se pliază într-un cub?',
+          key: `cub:${cellsKey(net)}|${wrong.slice(0, 3).map(cellsKey).join('|')}`,
+          answer: pieceArt(net, box, color),
+          distractors: wrong.slice(0, 3).map((p) => pieceArt(p, box, color)),
+        });
+        if (q) return q;
+      }
+    },
+  },
 };
+
+// ——— figuri și corpuri (folosite doar în generatoare, deci pot sta după tipuri) ———
+
+const PROGRAM = ['patrat', 'dreptunghi', 'triunghi', 'cerc', 'semicerc'];
+
+/** Figura cerută, desenată neobișnuit: rotită, alungită sau mică. */
+function unusual(rand, shape) {
+  if (shape === 'patrat') return { shape, rot: pickOne(rand, [0, 45, 45]), size: pickOne(rand, SIZES) };
+  if (shape === 'dreptunghi') return { shape, variant: rand() < 0.5 ? 'ingust' : null, rot: pickOne(rand, [0, 45, 90, 135]) };
+  if (shape === 'triunghi') return { shape, variant: pickOne(rand, [null, 'ascutit', 'dreptunghic']), rot: pickOne(rand, ROTS) };
+  if (shape === 'cerc') return { shape, size: pickOne(rand, SIZES) };
+  return { shape, rot: pickOne(rand, [0, 90, 180, 270]) };
+}
+
+const TRAPS = {
+  patrat: [(rand) => ({ shape: 'romb', rot: pickOne(rand, [0, 90]) }), (rand) => ({ shape: 'trapez', rot: pickOne(rand, [0, 180]) }), (rand) => ({ shape: 'dreptunghi', rot: pickOne(rand, [0, 90]) }), (rand) => ({ shape: 'patrat', rot: pickOne(rand, [0, 45]), open: true })],
+  dreptunghi: [(rand) => ({ shape: 'paralelogram', rot: pickOne(rand, [0, 90]) }), (rand) => ({ shape: 'trapez', rot: pickOne(rand, [0, 90]) }), () => ({ shape: 'romb', rot: 90 }), (rand) => ({ shape: 'dreptunghi', rot: pickOne(rand, [0, 90]), open: true })],
+  triunghi: [(rand) => ({ shape: 'triunghi', rot: pickOne(rand, [0, 90, 180]), open: true }), (rand) => ({ shape: 'casa', rot: pickOne(rand, [0, 180]) }), () => ({ shape: 'trapez' }), (rand) => ({ shape: 'semicerc', rot: pickOne(rand, [0, 180]) })],
+  cerc: [(rand) => ({ shape: 'oval', rot: pickOne(rand, [0, 90]) }), (rand) => ({ shape: 'semicerc', rot: pickOne(rand, [0, 90, 180, 270]) }), () => ({ shape: 'inima' })],
+  semicerc: [() => ({ shape: 'cerc' }), (rand) => ({ shape: 'oval', rot: pickOne(rand, [0, 90]) }), (rand) => ({ shape: 'triunghi', rot: pickOne(rand, [0, 180]) }), (rand) => ({ shape: 'semicerc', rot: pickOne(rand, [0, 90, 180, 270]), open: true })],
+};
+
+// figurile care seamănă cu cele numărate, și cea care se încurcă cel mai des cu ele
+const LOOKALIKES = {
+  triunghi: [{ shape: 'casa' }, { shape: 'trapez' }, { shape: 'semicerc' }, { shape: 'romb' }],
+  patrat: [{ shape: 'romb' }, { shape: 'dreptunghi' }, { shape: 'trapez' }, { shape: 'cerc' }],
+  cerc: [{ shape: 'oval' }, { shape: 'semicerc' }, { shape: 'inima' }, { shape: 'patrat' }],
+};
+const CONFUSED = { triunghi: 'trapez', patrat: 'romb', cerc: 'oval' };
+
+// obiectele au în numele lor doar obiectul, nu corpul (fără „cub de gheață”)
+const SOLIDS = ['cub', 'cuboid', 'cilindru', 'sfera', 'con'];
+const OBJECTS = { cub: ['zar'], cuboid: ['cutie', 'carte'], cilindru: ['conserva', 'baterie'], sfera: ['minge', 'glob', 'baschet'], con: ['inghetata', 'petrecere'] };
+const TWIN = { cub: 'cuboid', cuboid: 'cub', cilindru: 'con', con: 'cilindru', sfera: 'cilindru' };
+const PLANE_TRAP = { cub: 'patrat', cuboid: 'dreptunghi', cilindru: null, sfera: 'cerc', con: 'triunghi' };
+const FOOTPRINTS = { cub: 'patrat', cuboid: 'dreptunghi', cilindru: 'cerc', con: 'cerc' };
+const NET_SOLIDS = ['cub', 'cuboid', 'cilindru', 'con'];
+
+/** Piesa are un pătrat de 2 × 2 căsuțe pline (se vede imediat că nu se pliază). */
+const hasBlock = (p) => p.some(([r, c]) => [[r, c + 1], [r + 1, c], [r + 1, c + 1]].every(([a, b]) => p.some(([x, y]) => x === a && y === b)));
 
 // ——— simetrii (folosite doar în generatoare, deci pot sta după tipuri) ———
 

@@ -85,9 +85,10 @@ export default {
   'mat.pb.compunere': { domain: 'mat', title: 'Compunerea și schimbarea problemelor', grade: 1, competencies: ['5.2'], source: ['manual', 'auxiliar', 'programa'] },
 
   // ——— 4. Geometrie și orientare în spațiu ———
-  'mat.geo.figuri': { domain: 'mat', title: 'Figuri plane: pătrat, dreptunghi, triunghi, cerc', grade: 1, competencies: ['2.2'], source: ['manual', 'programa', 'en2'] },
-  'mat.geo.corpuri': { domain: 'mat', title: 'Corpuri: cub, cuboid, cilindru, sferă', grade: 1, competencies: ['2.2'], source: ['manual', 'programa'] },
+  'mat.geo.figuri': { domain: 'mat', title: 'Figuri plane: pătrat, dreptunghi, triunghi, cerc, semicerc', grade: 1, competencies: ['2.2'], source: ['manual', 'programa', 'en2'] },
+  'mat.geo.corpuri': { domain: 'mat', title: 'Corpuri: cub, cuboid, cilindru, sferă, con', grade: 1, competencies: ['2.2'], source: ['manual', 'programa'] },
   'mat.geo.numarare-figuri': { domain: 'mat', title: 'Numărarea figurilor dintr-un desen compus', grade: 2, competencies: ['2.2'], source: ['manual', 'programa'] },
+  'mat.geo.desfasurari': { domain: 'mat', title: 'Desfășurări: cub, cuboid, cilindru, con', grade: 2, competencies: ['2.2'], source: ['programa'] },
   'mat.geo.pozitii': { domain: 'mat', title: 'Poziții: stânga, dreapta, sus, jos, între', grade: 1, competencies: ['2.1'], source: ['programa', 'en2'] },
   'mat.geo.interior-exterior': { domain: 'mat', title: 'Interior, exterior, frontieră', grade: 1, competencies: ['2.1'], source: ['programa'] },
   'mat.geo.trasee': { domain: 'mat', title: 'Trasee pe rețea cu săgeți', grade: 1, competencies: ['2.1'], source: ['imbogatire'] },

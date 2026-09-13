@@ -131,6 +131,7 @@ Ce altă documentare am folosit (exemple de exerciții, aplicații, UX): `docs/c
 | Axa de simetrie, semicerc, con, desfășurări | II | 📜 | `mat.geo.simetrie` |
 | Compunerea figurilor din piese (tangram, piesa care lipsește) | II | 📜 | `mat.geo.compunere` |
 | Figuri rotite și figuri în oglindă (Jocuri fulger) | II | ➕ | `mat.geo.rotire` |
+| Desfășurarea cubului, a cuboidului, a cilindrului și a conului | II | 📜 | `mat.geo.desfasurari` |
 | Coordonate (rând, coloană) | II | 📜 | `mat.geo.coordonate` |
 
 ### 5. Măsurări, timp și bani

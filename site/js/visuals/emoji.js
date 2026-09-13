@@ -65,6 +65,7 @@ export const EMOJI = {
   carte: { char: '📕', code: '1f4d5', label: 'carte' },
   creion: { char: '✏️', code: '270f', label: 'creion' },
   rigla: { char: '📏', code: '1f4cf', label: 'riglă' },
+  echer: { char: '📐', code: '1f4d0', label: 'echer' },
   // piață și legume
   salata: { char: '🥬', code: '1f96c', label: 'salată' },
   ardei: { char: '🫑', code: '1fad1', label: 'ardei' },
