@@ -57,7 +57,8 @@
   site-ul live 1082/1082, tag `v0.8.0`
 - [x] M19 (v0.8.1): recenzia jocului: telefonul ținut orizontal (întrebarea și variantele una lângă alta), arena care umple ecranul,
   sunet deblocat pe iOS, tonuri mai blânde, fără întrebări repetate recent, comparări fără numere banale, accesibilitate (numele
-  linkului, titlu în rundă); „Greșelile tale”, ținta următoarei stele, nivelul sugerat, ținta pe panoul de start; E2E local 1096/1096
+  linkului, titlu în rundă); „Greșelile tale”, ținta următoarei stele, nivelul sugerat, ținta pe panoul de start; publicat, E2E local 1096/1096 și pe
+  site-ul live 1096/1096, tag `v0.8.1`
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -245,5 +246,5 @@
   derulare de 10 px pe telefoane mici, sunet probabil blocat pe iOS, tonuri stridente, întrebări repetate, comparări cu 0, indiciul de
   precizie, numele linkului și titlul lipsă, reluarea cu tab-ul ascuns) și 6 îmbunătățiri („Greșelile tale”, nivelul sugerat, ținta
   următoarei stele, cifrele tastelor ascunse pe tactil, E2E pe ecrane joase, subtitlul logoului pe telefoane foarte mici), aplicate
-  într-un singur lot. npm test 55/55, E2E local 1096/1096.
+  într-un singur lot. npm test 55/55; v0.8.1 publicat, E2E local 1096/1096 și pe site-ul live 1096/1096.
   **De făcut data viitoare:** copilul joacă o rundă pe fiecare nivel (și pe iPad, pentru sunet) → ajustăm pragurile; apoi U2.
