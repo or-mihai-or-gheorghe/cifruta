@@ -1,7 +1,7 @@
 // Mascota originală „Veverița Cifruța” și iconițele nivelurilor.
 
 import { registerVisual } from './index.js';
-import { C, st, txt } from './palette.js';
+import { C, num, st, txt } from './palette.js';
 
 const GROUP = 'Mascotă și niveluri';
 const MOODS = {
@@ -118,4 +118,24 @@ registerVisual('level-icon', {
     return `<circle cx="50" cy="50" r="46" fill="${lvl.bg}" ${st(2.5)}/>${lvl.draw()}`;
   },
   demos: Object.keys(LEVELS).map((level) => ({ level })),
+});
+
+// Alunele din Calcul fulger (coșul, particulele, totalul): 1–3 alune, desenate ca aluna din lăbuțele mascotei.
+const bigNut = (x, y, s) =>
+  `<ellipse cx="${x}" cy="${y}" rx="${8 * s}" ry="${9 * s}" fill="${C.brown}" ${st(2.5)}/>` +
+  `<path d="M${x - 8 * s} ${y - 3 * s} C${x - 7 * s} ${y - 12 * s} ${x + 7 * s} ${y - 12 * s} ${x + 8 * s} ${y - 3 * s} C${x + 3 * s} ${y - 5 * s} ${x - 3 * s} ${y - 5 * s} ${x - 8 * s} ${y - 3 * s} Z" fill="${C.brownLight}" ${st(2.5)}/>` +
+  `<ellipse cx="${x - 3 * s}" cy="${y + 2 * s}" rx="${1.6 * s}" ry="${2.8 * s}" fill="${C.white}" opacity=".35"/>`;
+const NUT_PILES = {
+  1: [[50, 58, 3.6]],
+  2: [[33, 62, 2.4], [67, 58, 2.4]],
+  3: [[50, 46, 2.1], [28, 68, 2.1], [72, 68, 2.1]],
+};
+const nutCount = (p) => Math.min(3, Math.max(1, Math.round(num(p.n, 1))));
+
+registerVisual('alune', {
+  group: GROUP,
+  defaults: { n: 1 },
+  label: (p) => (nutCount(p) === 1 ? 'o alună' : `${nutCount(p)} alune`),
+  render: (p) => NUT_PILES[nutCount(p)].map(([x, y, s]) => bigNut(x, y, s)).join(''),
+  demos: [{ n: 1 }, { n: 2 }, { n: 3 }],
 });

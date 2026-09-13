@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { addAttempt, clearHistory, getAttempt, isUnsaved, lastAttempt, listAttempts, listDrafts, saveDraft, updateAttempt } from '../site/js/core/storage.js';
+import { addAttempt, clearFulger, clearHistory, getAttempt, getFulger, isUnsaved, lastAttempt, listAttempts, listDrafts, saveDraft, saveFulgerRound, updateAttempt } from '../site/js/core/storage.js';
 import { formatDateTime } from '../site/js/core/ro.js';
 
 /** Un localStorage de test; cu `full: true` orice scriere aruncă (spațiu plin sau stocare blocată). */
@@ -49,6 +49,29 @@ test('storage: ciornele se listează și se șterg odată cu istoricul', () => {
   assert.deepEqual(listDrafts().map((d) => d.testId), ['t2']);
   clearHistory();
   assert.deepEqual(listDrafts(), []);
+  delete globalThis.localStorage;
+});
+
+test('storage: calcul fulger păstrează recordul pe nivel, ultimele runde și medaliile', () => {
+  globalThis.localStorage = fakeStorage();
+  const empty = { best: {}, rounds: [], medals: {} };
+  assert.deepEqual(getFulger(), empty);
+  const round = (level, total, at) => ({ level, total, at });
+  assert.deepEqual(saveFulgerRound(round('usor', 50, 't1'), { keep: 2, medals: ['prima-cursa'] }), { saved: true, record: true, previous: null });
+  assert.deepEqual(saveFulgerRound(round('usor', 40, 't2'), { keep: 2, medals: ['prima-cursa'] }), { saved: true, record: false, previous: 50 });
+  assert.deepEqual(saveFulgerRound(round('usor', 60, 't3'), { keep: 2 }), { saved: true, record: true, previous: 50 });
+  assert.deepEqual(saveFulgerRound(round('avansat', 0, 't4'), { keep: 2 }), { saved: true, record: false, previous: null });
+  const data = getFulger();
+  assert.deepEqual(data.best, { usor: { alune: 60, at: 't3' } });
+  assert.deepEqual(data.rounds.map((r) => r.at), ['t3', 't4']);
+  assert.deepEqual(data.medals, { 'prima-cursa': 't1' }); // medalia păstrează data primei câștigări
+  clearHistory(); // istoricul testelor nu atinge jocul
+  assert.equal(getFulger().rounds.length, 2);
+  clearFulger();
+  assert.deepEqual(getFulger(), empty);
+
+  globalThis.localStorage = fakeStorage({ full: true });
+  assert.equal(saveFulgerRound(round('usor', 10, 't5')).saved, false);
   delete globalThis.localStorage;
 });
 

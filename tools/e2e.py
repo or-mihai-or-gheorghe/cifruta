@@ -95,7 +95,7 @@ class Run:
 
 
 def smoke(run: Run, page: Page, vp: str):
-    for route, name in [("", "acasa"), ("sectiune/recapitulare", "sectiune"), ("atelier/componente", "atelier-componente"), ("atelier/vizualuri", "atelier-vizualuri"), ("atelier/tipuri", "atelier-tipuri"), ("nu-exista", "404")]:
+    for route, name in [("", "acasa"), ("sectiune/recapitulare", "sectiune"), ("fulger", "calcul-fulger"), ("atelier/componente", "atelier-componente"), ("atelier/vizualuri", "atelier-vizualuri"), ("atelier/tipuri", "atelier-tipuri"), ("nu-exista", "404")]:
         run.goto(page, route)
         page.wait_for_function("document.querySelector('main')?.innerText.trim().length > 0")
         page.wait_for_timeout(300)
@@ -536,6 +536,120 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
     run.check("2 încercări" in row and left == 0 and "nou" in card and page.get_by_test_id(f"clear-test-{tid}").count() == 0, f"[{vp}] {tid}: ștergerea istoricului din „Pentru părinți” golește încercările ({row!r})")
 
 
+FULGER_READY = "window.__dbg && window.__dbg.fulger.state().enabled"
+
+
+def fulger_flow(run: Run, page: Page, vp: str):
+    """Calcul fulger: cardul și hub-ul, o rundă prin ?debug=1 (serie, greșeli, sortare, Turbo, pauză, final), rezultatele și ștergerea."""
+    run.goto(page, "")
+    page.evaluate("localStorage.removeItem('cifruta:fulger')")
+    run.goto(page, "")
+    page.get_by_test_id("fulger-card").click()
+    page.wait_for_selector("[data-testid=fg-level-usor]")
+    run.check(page.locator(".fg-level").count() == 3 and page.locator(".fg-medal").count() == 6, f"[{vp}] fulger: cardul duce la hub, cu 3 niveluri și 6 medalii")
+    run.layout_ok(page, f"[{vp}] fulger hub")
+
+    run.goto(page, "fulger/usor", debug=True)
+    page.get_by_test_id("fg-start").click()
+    state = lambda: page.evaluate("window.__dbg.fulger.state()")
+    ready = lambda: page.wait_for_function(FULGER_READY)
+
+    def answer(key="answerIndex"):
+        ready()
+        s = state()
+        if s["mode"] == "sort" and key == "answerIndex":
+            for i in s["order"]:
+                page.get_by_test_id(f"fg-opt-{i}").click()
+        else:
+            page.get_by_test_id(f"fg-opt-{s[key]}").click()
+        return s
+
+    ready()
+    run.check(page.get_by_test_id("fg-time").inner_text() in ("2:00", "1:59"), f"[{vp}] fulger: după semafor pornește ceasul de 2 minute")
+    run.layout_ok(page, f"[{vp}] fulger rundă")
+    run.shot(page, f"{vp}-fulger-runda")
+    for _ in range(5):
+        answer()
+    s = state()
+    mult = page.get_by_test_id("fg-mult").inner_text()
+    banners = page.locator("[data-testid=fg-banner]").count()
+    run.check(s["streak"] == 5 and mult == "×2" and banners == 1, f"[{vp}] fulger: 5 răspunsuri corecte → seria 5, alune ×2 și banner (serie {s['streak']}, {mult}, bannere {banners})")
+    page.wait_for_timeout(900)
+    run.check(page.get_by_test_id("fg-alune").inner_text() == str(s["alune"]) and page.locator(".fg-fly, .fg-particle").count() == 0, f"[{vp}] fulger: coșul arată {s['alune']} alune, iar efectele trecătoare au dispărut")
+
+    ready()
+    page.evaluate("window.__dbg.fulger.force('add-1c')")
+    ready()
+    page.wait_for_timeout(1300)
+    answer("wrongIndex")
+    wrong = state()
+    shown = page.locator(".fg-opt.is-answer").count()
+    busy = page.get_by_test_id("fg-answers").get_attribute("aria-busy")
+    page.wait_for_timeout(1400)
+    run.check(wrong["streak"] == 0 and wrong["alune"] == s["alune"] and shown == 1 and busy == "true" and state()["enabled"], f"[{vp}] fulger: o greșeală oprește seria fără să ia alune, arată răspunsul corect și blochează variantele ~1 s")
+
+    ready()
+    page.evaluate("window.__dbg.fulger.force('add-1c')")
+    answer("wrongIndex")
+    page.wait_for_timeout(1600)
+    hopa = page.get_by_test_id("fg-hopa").inner_text()
+    run.check("prea repede" in hopa and not state()["enabled"], f"[{vp}] fulger: o greșeală imediată primește pauza lungă „Hopa, prea repede!” ({hopa!r})")
+
+    page.wait_for_function(FULGER_READY, timeout=6000)
+    page.evaluate("window.__dbg.fulger.force('sort-3-20')")
+    answer()
+    run.check(page.locator(".fg-slot.is-shown").count() == 3 and state()["streak"] == 1, f"[{vp}] fulger: plăcile atinse în ordine umplu căsuțele sortării")
+    ready()
+    page.evaluate("window.__dbg.fulger.force('cmp-20')")
+    ready()
+    run.check(page.locator("[data-testid=fg-answers] .fg-opt").count() == 3, f"[{vp}] fulger: comparația are trei butoane (<, =, >)")
+    page.evaluate("window.__dbg.fulger.setStreak(9)")
+    answer()
+    run.check(page.locator(".fg-arena.is-turbo").count() == 1 and state()["streak"] == 10, f"[{vp}] fulger: la 10 răspunsuri corecte la rând pornește Turbo")
+
+    ready()
+    page.get_by_test_id("fg-pause").click()
+    before = state()["remainingMs"]
+    page.wait_for_timeout(700)
+    after = state()["remainingMs"]
+    hidden = page.evaluate("getComputedStyle(document.querySelector('.fg-stage')).visibility")
+    page.get_by_test_id("fg-resume").click()
+    page.wait_for_function("window.__dbg.fulger.state().phase === 'playing'")
+    run.check(before == after and hidden == "hidden", f"[{vp}] fulger: pauza oprește ceasul și ascunde întrebarea ({before} → {after}, {hidden})")
+
+    page.evaluate("window.__dbg.fulger.elapse(window.__dbg.fulger.state().remainingMs - 9000)")
+    page.wait_for_timeout(100)
+    sprint = page.locator(".fg-arena.is-final").count() == 1
+    alune = state()["alune"]
+    page.evaluate("window.__dbg.fulger.elapse(10000)")
+    stamp = page.get_by_test_id("fg-stamp").count()
+    run.check(sprint and stamp == 1, f"[{vp}] fulger: în ultimele 10 secunde vine sprintul final, la 0 ștampila „TIMP!”")
+    page.wait_for_selector("[data-testid=fg-results]")
+    page.get_by_test_id("fg-results").click()  # sare peste numărătoare
+    page.wait_for_timeout(300)
+    total = int(page.get_by_test_id("fg-total").inner_text())
+    stars = page.evaluate("import('./data/fulger.js').then((m) => m.default.levels[0].stars)")
+    lit = page.locator("[data-testid=fg-results] .c-star.is-on").count()
+    run.check(total >= alune and lit == sum(total >= s for s in stars), f"[{vp}] fulger: totalul {total} (bara de sus {alune}, cu precizia) și {lit} stele")
+    run.check(page.get_by_test_id("fg-record").is_visible() and page.get_by_test_id("fg-medal-prima-cursa").is_visible(), f"[{vp}] fulger: prima rundă aduce recordul și medalia „Prima cursă”")
+    run.layout_ok(page, f"[{vp}] fulger rezultate")
+    run.shot(page, f"{vp}-fulger-rezultate")
+    page.get_by_test_id("fg-again").click()
+    page.wait_for_selector("[data-testid=fg-start]")
+    run.check(True, f"[{vp}] fulger: „Mai joc o dată” pornește o rundă nouă")
+
+    run.goto(page, "fulger")
+    best = page.get_by_test_id("fg-best-usor").inner_text()
+    page.reload()
+    page.wait_for_selector("[data-testid=fg-best-usor]")
+    run.check(str(total) in best and page.get_by_test_id("fg-best-usor").inner_text() == best and page.get_by_test_id("fg-medal-prima-cursa").get_attribute("class").endswith("is-won"), f"[{vp}] fulger: recordul ({best}) și medalia rămân după reîncărcare")
+    page.get_by_test_id("parents").locator("summary").click()
+    page.get_by_test_id("fg-clear").click()
+    page.get_by_test_id("modal-confirm").click()
+    page.wait_for_function("document.querySelector('[data-testid=fg-best-usor]')?.innerText.includes('Nou')")
+    run.check(page.evaluate("localStorage.getItem('cifruta:fulger')") is None, f"[{vp}] fulger: ștergerea din „Pentru părinți” scoate rundele și recordul")
+
+
 def keyboard_flow(run: Run, browser, base: str):
     """Doar tastatura + animații reduse: pornește T1, răspunde la primul exercițiu, trece mai departe."""
     context = browser.new_context(locale="ro-RO", reduced_motion="reduce", viewport={"width": 1280, "height": 800})
@@ -611,6 +725,27 @@ def keyboard_flow(run: Run, browser, base: str):
     key("[data-testid=bar-mere-plus]", "Enter")
     key("[data-testid=bar-mere-plus]", "Space")
     run.check((answer("chart") or {}).get("mere") == 2 and page.locator("[data-testid=bar-mere]").get_attribute("aria-valuenow") == "2", f"[tastatură] bara urcă cu Enter/Space ({answer('chart')})")
+
+    # Calcul fulger doar la tastatură, cu mișcare redusă
+    page.goto(f"{base}?debug=1#/fulger/usor")
+    page.wait_for_selector("[data-testid=fg-start]")
+    page.keyboard.press("Enter")
+    page.wait_for_function(FULGER_READY)
+    s = page.evaluate("window.__dbg.fulger.state()")
+    for i in s["order"] if s["mode"] == "sort" else [s["answerIndex"]]:
+        page.keyboard.press(str(i + 1))
+    page.wait_for_timeout(100)
+    streak = page.evaluate("window.__dbg.fulger.state().streak")
+    run.check(streak == 1 and page.locator(".fg-fly, .fg-particle").count() == 0, f"[tastatură] fulger: tastele 1–4 răspund, fără efecte zburătoare la mișcare redusă (serie {streak})")
+    page.wait_for_function(FULGER_READY)
+    page.keyboard.press("Escape")
+    paused = page.evaluate("window.__dbg.fulger.state().phase") == "paused"
+    page.keyboard.press("Escape")
+    page.wait_for_function("window.__dbg.fulger.state().phase === 'playing'")
+    page.evaluate("window.__dbg.fulger.elapse(120000)")
+    page.wait_for_selector("[data-testid=fg-results]")
+    page.wait_for_timeout(200)
+    run.check(paused and page.get_by_test_id("fg-total").inner_text() != "0" and page.locator(".anim-confetti").count() == 0, "[tastatură] fulger: Esc pune pauză și reia; rezultatele apar direct, fără confetti")
     context.close()
 
 
@@ -636,6 +771,7 @@ def main() -> int:
             if not args.only:
                 smoke(run, page, vp)
                 types_flow(run, page, vp)
+                fulger_flow(run, page, vp)
             if tests:
                 pages_flow(run, page, tests[0], vp)
             for test in tests:

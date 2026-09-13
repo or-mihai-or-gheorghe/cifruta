@@ -13,6 +13,7 @@ const PAGES = {
   test: () => import('./pages/player.js'),
   rezultate: () => import('./pages/review.js'),
   atelier: () => import('./pages/atelier.js'),
+  fulger: () => import('./pages/fulger.js'),
 };
 
 // butonul de sunet („Sunete” apăsat = pornite)
@@ -42,7 +43,18 @@ app.replaceChildren(
         art({ v: 'mascot', mood: 'vesela', decorative: true }, { cls: 'c-logo__art' }),
         h('span', {}, 'Cifruța', h('span', { class: 'c-logo__sub' }, 'exerciții pentru clasa a II-a')),
       ),
-      h('nav', { class: 'l-cluster', 'aria-label': 'Navigare' }, h('a', { class: 'c-btn c-btn--ghost c-btn--sm', href: '#/' }, 'Teste'), soundBtn),
+      h(
+        'nav',
+        { class: 'l-cluster', 'aria-label': 'Navigare' },
+        h('a', { class: 'c-btn c-btn--ghost c-btn--sm', href: '#/' }, 'Teste'),
+        h(
+          'a',
+          { class: 'c-btn c-btn--ghost c-btn--sm c-nav-fulger', href: '#/fulger', 'data-testid': 'nav-fulger', title: 'Calcul fulger' },
+          h('span', { 'aria-hidden': 'true', html: emojiHTML('fulger') }),
+          h('span', { class: 'c-nav-fulger__text' }, 'Calcul fulger'),
+        ),
+        soundBtn,
+      ),
     ),
   ),
   main,

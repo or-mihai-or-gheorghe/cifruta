@@ -57,16 +57,21 @@ export function pop(el, cls = 'anim-pop') {
   });
 }
 
-/** Numără de la 0 la `to` în textul elementului (ease-out); sare direct la final la mișcare redusă. */
-export function countUp(el, to, ms = 700) {
-  if (prefersReducedMotion() || !(to > 0)) {
+const counting = new WeakMap(); // ultima numărătoare pornită pe fiecare element
+
+/** Numără de la `from` la `to` în textul elementului (ease-out); sare direct la final la mișcare redusă. */
+export function countUp(el, to, ms = 700, from = 0) {
+  const token = {};
+  counting.set(el, token); // o numărătoare nouă o oprește pe cea veche
+  if (prefersReducedMotion() || !(to > from)) {
     el.textContent = String(to);
     return;
   }
   const start = performance.now();
   const tick = (now) => {
+    if (counting.get(el) !== token) return;
     const t = Math.min(1, (now - start) / ms);
-    el.textContent = String(Math.round(to * (1 - (1 - t) ** 3)));
+    el.textContent = String(Math.round(from + (to - from) * (1 - (1 - t) ** 3)));
     if (t < 1) requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);

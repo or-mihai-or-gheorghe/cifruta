@@ -130,6 +130,10 @@ export const EMOJI = {
   // interfață
   sunet: { char: '🔊', code: '1f50a', label: 'sunete pornite' },
   mut: { char: '🔇', code: '1f507', label: 'sunete oprite' },
+  // calcul fulger
+  fulger: { char: '⚡', code: '26a1', label: 'fulger' },
+  steag: { char: '🏁', code: '1f3c1', label: 'steag de sosire' },
+  tinta: { char: '🎯', code: '1f3af', label: 'țintă' },
 };
 
 export const hasEmoji = (name) => Object.hasOwn(EMOJI, name);

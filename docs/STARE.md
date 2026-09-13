@@ -1,7 +1,7 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-12 · **Versiune:** 0.7.0
+- **Data:** 2026-09-13 · **Versiune:** 0.8.0
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -9,11 +9,14 @@
   revizuire cu explicații, rezolvare, „Mai încerc o dată” repetabil), 13 tipuri de exerciții (cu traseu pe harta liniilor și
   grafic cu bare construit; `mark` cu reguli de set pentru sarcini deschise), banca vizuală (50 de desene: și grafice, pictograme,
   bețișoare, felii, tabele, podium, hartă de linii, indicator, raft, bon, listă, tabel de poziție, cuburi, medalie; 8 peisaje
-  animate), sunete discrete cu buton de oprire, atelier pentru autori. Conținut: **4 teste de recapitulare a clasei I** (T1–T4 v2)
+  animate), sunete discrete cu buton de oprire, atelier pentru autori, jocul **Calcul fulger** (`#/fulger`: runde de 2 minute pe trei
+  niveluri, 16 tipuri de întrebări generate, alune cu bonus de viteză și de serie, Turbo, pistă spre stele și record, 6 medalii). Conținut: **4 teste de recapitulare a clasei I** (T1–T4 v2)
   și **6 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc), toate
   exercițiile cu desen sau emoji, fără răspunsuri „la vedere”, cu probleme în mai mulți pași și sarcini deschise la avansat.
-  Calitate: 41 de teste Node (plus validarea conținutului, a tabelului de acoperire și a contrastului), E2E 1005 verificări pe 3 ecrane + tastatură.
-- **Următorul pas:** copilul rezolvă T1–T4 și testele noi → notăm timpii reali și dificultatea; apoi secțiunea U2
+  Calitate: 55 de teste Node (plus validarea conținutului, a tabelului de acoperire, a contrastului și calibrarea stelelor din
+  Calcul fulger), E2E 1082 de verificări pe 3 ecrane + tastatură.
+- **Următorul pas:** copilul joacă Calcul fulger (câte o rundă pe nivel) → ajustăm pragurile de stele și timpii „fulger” după
+  rundele reale; copilul rezolvă T1–T4 și testele noi → timpii reali și dificultatea; apoi secțiunea U2
   (Adunarea și scăderea până la 1000 · Pământul).
 
 ## Etape
@@ -48,6 +51,9 @@
   timp la schimbări, drum cu benzinărie, cros cu ștampilă), interpretare de grafice (prețuri cu reduceri, kilometri pe zile, două
   clase, bară greșită față de tabel, ultima probă, pași pe zile), sarcini deschise mai strânse; fracțiile scoase; `route` cu
   `segments`, `transfer`, `maxTotal` și cheie împreună cu reguli; `pie` pe categorii; publicat, E2E local 1005/1005 și pe site-ul live 1005/1005, tag `v0.7.0`
+- [x] M18 (v0.8.0): jocul „Calcul fulger” (`#/fulger`): runde de 2 minute pe trei niveluri, 16 tipuri de întrebări generate (adunări,
+  scăderi cu și fără trecere, comparări, ordonări), alune cu bonus de viteză în serie, de serie și de precizie, pauza „Hopa” împotriva
+  ghicitului, pistă spre stele și record, Turbo, sprint final, numărătoare de arcade, 6 medalii; E2E local 1082/1082
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -118,6 +124,11 @@
 | 2026-09-12 | Nivelul avansat devine mai greu prin raționament în mai mulți pași, nu prin materie nouă; în secțiunea 0–1000 fără fracții, înmulțire sau operații cu trecere peste ordin până la 1000 | cererea utilizatorului |
 | 2026-09-12 | Traseele au lungimi pe segmente (pași, minute, km, metri), timp la schimbarea liniei și cel mai scurt drum după lungime; cheia se poate combina cu reguli | cererea utilizatorului: trasee cu mai multe ramuri |
 | 2026-09-12 | Diagrama circulară se citește fără fracții: felii egale pe categorii, fiecare felie valorează un număr de copii | cererea inițială de diagrame circulare, păstrată fără concepte viitoare |
+| 2026-09-13 | Modul „Calcul fulger” (`#/fulger`), separat de teste: runde de 2 minute, nivelul ales de copil (amestec fix de tipuri, ~1 întrebare din 5 de la nivelul anterior), răspunsuri alese dintre variante, sortare prin atingerea plăcilor în ordine | cererea utilizatorului (calcul pe viteză) și răspunsurile lui la cele 4 întrebări de proiectare |
+| 2026-09-13 | Punctele se numesc alune: `alunele tipului × viteză × serie`; viteza (×2 fulger, ×1,5 rapid) contează doar în serie; seria ×1,5 / ×2 / ×3 (Turbo) de la 3 / 5 / 10 răspunsuri; +10% / +20% pentru precizie | a doua trecere cerută de utilizator: joc incitant, cu punctajul validat prin simulare |
+| 2026-09-13 | Greșeala stinge seria fără să ia alune, cu 1 s de pauză și răspunsul corect la vedere; o greșeală mai rapidă decât cititul (sub 40% din timpul „fulger”, nu la sortări) primește o pauză cât timpul „fulger” | decizia utilizatorului + simularea: doar cu 1 s, atingerile la întâmplare treceau de un copil bun (152 de alune la Avansat) |
+| 2026-09-13 | Stelele și recordul se aprind în timpul jocului, pe pistă, fără prag de acuratețe; pragurile (Ușor 30/80/175, Intermediar 35/95/215, Avansat 35/100/235) sunt verificate prin simulare în `tests/fulger.test.js` | stelele nu se mai sting; ghicitul rămâne sub prima stea prin reguli, nu prin pedeapsă |
+| 2026-09-13 | Efecte de joc în stilul Cifruța: particule, „+N” care zboară în coș, bannere deasupra cardului, Turbo, sprint final, numărătoare de arcade, medalii; tremur scurt la greșeală doar în joc; nimic trecător la mișcare redusă | cererea utilizatorului: „să fie văzută ca un joc, nu ca un test”; regula „fără zdruncinat” rămâne pentru teste |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -137,6 +148,9 @@
   indicii treptate, pașii unei probleme afișați pe rând, animații legate de operație (gruparea din 5 în 5, simbolul care se desface,
   deplasarea pe axă).
 - Variante generate aleator (cu sămânță), diplomă printabilă.
+- Calcul fulger, mai departe: tipuri noi (numere până la 1000, tabla înmulțirii, ecuații □ + 7 = 15), răspuns tastat, antrenament
+  fără cronometru, magazinul Cifruței (accesorii pentru mascotă cumpărate cu alune), provocarea zilei, vibrații pe tabletă, nivel
+  adaptiv; pragurile de stele și timpii „fulger” se ajustează după runde reale.
 - Amânate la cerere: citire cu voce (TTS), tastatură numerică proprie pe ecran.
 - Din feedback-ul nr. 2, neaplicate: săgeți sus/jos la butoanele radio (Tab + Space merg); explicații vizuale interactive
   (evidențieri pas cu pas în desen); ceas și termometru cu tragere directă; validator care leagă desenele cu date de răspunsuri.
@@ -208,3 +222,13 @@
   mutabile pe segment; `pie` pe categorii; inel de evidențiere mai mic. Lucrul s-a făcut în bucăți mici, după o limită de ieșire atinsă.
   v0.7.0 publicat, E2E local 1005/1005 și pe site-ul live 1005/1005.
   **De făcut data viitoare:** copilul rezolvă un test avansat din secțiunea nouă → timpii reali (7 minute pe exercițiu?) și ce e prea greu; apoi U2.
+- **2026-09-13 (a șaptea sesiune)** — Planificarea și construirea jocului „Calcul fulger”, la cererea utilizatorului (calcul pe viteză).
+  Patru întrebări de proiectare (amestec fix pe nivel, 1 s de pauză la greșeală, sortare prin atingeri, 2 minute), apoi o a doua trecere
+  cerută de utilizator („să fie văzută ca un joc, nu ca un test”): repere din jocuri asemănătoare (Times Tables Rock Stars, Hit the
+  Button), din cercetarea despre calculul cronometrat și din „game feel”, plus o simulare a punctajului pe profiluri de copii. Simularea
+  a arătat că doar pauza de 1 s lăsa atingerile la întâmplare peste un copil bun; au intrat viteza doar în serie, pauza „Hopa” și
+  bonusul de precizie, iar stelele se aprind în timpul jocului, pe pistă. Implementare: motor pur și testat (16 generatoare pe 500 de
+  semințe, calibrarea stelelor cu motorul real), arena cu efecte, hub, rezultate, medalii, sunete noi, desenul alunelor; capturi pe
+  laptop și telefon, cu retușuri (bannerele deasupra cardului, cardul de pe pagina principală, medaliile pe un rând, rezultatele
+  fără goluri în timpul numărătorii). npm test 55/55, E2E local 1082/1082.
+  **De făcut data viitoare:** copilul joacă o rundă pe fiecare nivel → ajustăm pragurile de stele și timpii „fulger”; apoi U2.

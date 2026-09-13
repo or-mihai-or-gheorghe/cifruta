@@ -92,3 +92,29 @@ export function clearHistory(testIds = null) {
 
 export const bestScore = (testId) =>
   listAttempts(testId).reduce((best, a) => Math.max(best, a.score), -1);
+
+// ——— Calcul fulger: recordurile pe niveluri, ultimele runde și medaliile (cifruta:fulger) ———
+
+export function getFulger() {
+  const data = read('fulger', {});
+  return { best: data.best ?? {}, rounds: data.rounds ?? [], medals: data.medals ?? {} };
+}
+
+/** Salvează o rundă terminată și medaliile câștigate acum; întoarce { saved, record, previous }. */
+export function saveFulgerRound(round, { keep = 30, medals = [] } = {}) {
+  const data = getFulger();
+  const previous = data.best[round.level]?.alune ?? null;
+  const record = round.total > (previous ?? 0);
+  if (record) data.best[round.level] = { alune: round.total, at: round.at };
+  data.rounds = [...data.rounds, round].slice(-keep);
+  for (const id of medals) data.medals[id] ??= round.at;
+  return { saved: write('fulger', data), record, previous };
+}
+
+export function clearFulger() {
+  try {
+    localStorage.removeItem(`${PREFIX}fulger`);
+  } catch {
+    /* stocare blocată */
+  }
+}

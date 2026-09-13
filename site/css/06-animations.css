@@ -61,6 +61,49 @@
   from { stroke-dashoffset: var(--len, 400); }
   to { stroke-dashoffset: 0; }
 }
+/* Calcul fulger (clasele sunt în 08-fulger.css) */
+@keyframes anim-shake {
+  0%, 100% { transform: none; }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+@keyframes anim-pulse {
+  50% { transform: scale(1.05); }
+}
+@keyframes anim-slam {
+  0% { opacity: 0; transform: scale(1.8) rotate(var(--rot, -6deg)); }
+  60% { opacity: 1; transform: scale(0.94) rotate(var(--rot, -6deg)); }
+  100% { opacity: 1; transform: scale(1) rotate(var(--rot, -6deg)); }
+}
+@keyframes anim-burst {
+  from { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }
+  to { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.4) rotate(var(--rot, 180deg)); }
+}
+@keyframes anim-fly {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  25% { opacity: 1; transform: translate(-50%, -110%) scale(1.15); }
+  100% { opacity: 0.3; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.5); }
+}
+@keyframes anim-banner {
+  0% { opacity: 0; transform: translate(-50%, -100%) scale(2) rotate(-8deg); }
+  25% { opacity: 1; transform: translate(-50%, -100%) scale(0.95) rotate(-4deg); }
+  35%, 80% { opacity: 1; transform: translate(-50%, -100%) scale(1) rotate(-4deg); }
+  100% { opacity: 0; transform: translate(-50%, -130%) scale(0.9) rotate(-4deg); }
+}
+@keyframes anim-card-in {
+  from { opacity: 0; transform: translateX(40px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes anim-stripes { to { transform: translateX(60px); } }
+@keyframes anim-flame {
+  from { transform: scale(1) rotate(-5deg); }
+  to { transform: scale(1.12) rotate(5deg); }
+}
+@keyframes anim-vignette {
+  50% { opacity: 1; }
+}
 @keyframes anim-confetti {
   0% { opacity: 1; transform: translate3d(0, -10vh, 0) rotate(0deg); }
   90% { opacity: 1; }

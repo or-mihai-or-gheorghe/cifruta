@@ -13,7 +13,19 @@ const NOTES = {
   win: [[523, 0, 0.12], [659, 0.12, 0.12], [784, 0.24, 0.12], [1047, 0.36, 0.32]],
   yes: [[660, 0, 0.1], [990, 0.1, 0.18]],
   no: [[220, 0, 0.22, 'sine', 0.08, 160]],
+  // Calcul fulger
+  ready: [[392, 0, 0.14, 'triangle', 0.08]],
+  go: [[784, 0, 0.1, 'triangle', 0.09], [1047, 0.1, 0.24, 'triangle', 0.09]],
+  hit: [[659, 0, 0.08, 'triangle', 0.07]],
+  star: [[1319, 0, 0.08, 'sine', 0.07], [1760, 0.08, 0.16, 'sine', 0.06]],
+  combo: [[523, 0, 0.07], [659, 0.06, 0.07], [784, 0.12, 0.07], [1047, 0.18, 0.18]],
+  powerdown: [[660, 0, 0.32, 'sine', 0.07, 220]],
+  tick: [[1175, 0, 0.035, 'square', 0.02]],
+  buzzer: [[392, 0, 0.16, 'triangle', 0.1], [262, 0.16, 0.34, 'triangle', 0.1]],
 };
+
+// `step` urcă sunetul pe o scară pentatonică (seria din Calcul fulger sună tot mai sus)
+const PENTATONIC = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
 
 let ctx = null;
 const saved = getPref('sound', null);
@@ -34,13 +46,14 @@ function tone(freq, at, dur, type = 'sine', gain = 0.11, slideTo) {
   osc.stop(t + dur + 0.02);
 }
 
-/** Cântă un sunet după nume (tap, place, done, level, win, yes, no). */
-export function play(name) {
+/** Cântă un sunet după nume (tap, place, done, level, win, yes, no; în Calcul fulger și ready, go, hit, star, combo, powerdown, tick, buzzer). */
+export function play(name, { step = 0 } = {}) {
   if (!enabled || !NOTES[name]) return;
   try {
     ctx ??= new (window.AudioContext ?? window.webkitAudioContext)();
     if (ctx.state === 'suspended') ctx.resume();
-    for (const note of NOTES[name]) tone(...note);
+    const k = 2 ** (PENTATONIC[Math.min(Math.max(0, step), PENTATONIC.length - 1)] / 12);
+    for (const [freq, at, dur, type, gain, slideTo] of NOTES[name]) tone(freq * k, at, dur, type, gain, slideTo && slideTo * k);
   } catch {
     /* fără audio (browser vechi, politici de redare): continuăm în liniște */
   }

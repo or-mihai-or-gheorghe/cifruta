@@ -1,11 +1,37 @@
 // Pagina principală: salutul mascotei și secțiunile.
 
+import fulgerConfig from '../../data/fulger.js';
 import { h } from '../core/dom.js';
 import { allTests, catalog } from '../core/loader.js';
 import { historyBox } from '../components/history.js';
 import { cantitate } from '../core/ro.js';
-import { art, chip, mascot } from '../components/ui.js';
+import { getFulger } from '../core/storage.js';
+import { art, chip, levelInfo, mascot } from '../components/ui.js';
 import { emojiHTML } from '../visuals/emoji.js';
+
+/** Cardul jocului Calcul fulger, cu recordurile pe niveluri. */
+function fulgerCard() {
+  const { best } = getFulger();
+  return h(
+    'a',
+    { class: 'fg-home anim-fade-up', href: '#/fulger', 'data-testid': 'fulger-card' },
+    h('div', { class: 'fg-home__bolt', 'aria-hidden': 'true', html: emojiHTML('fulger') }),
+    h(
+      'div',
+      { class: 'fg-home__body l-stack l-stack--sm' },
+      h('h2', { class: 'fg-home__title' }, 'Calcul fulger'),
+      h('p', { class: 'fg-home__text' }, 'Câte operații rezolvi în 2 minute? Strânge alune, fă serii și bate-ți recordul!'),
+    ),
+    h(
+      'div',
+      { class: 'fg-home__levels l-cluster' },
+      fulgerConfig.levels.map((l) =>
+        best[l.id] ? chip(`${levelInfo(l.id).label}: ${cantitate(best[l.id].alune, 'alună', 'alune')}`, '', 'trofeu') : chip(`${levelInfo(l.id).label}: nou`, 'c-chip--soon'),
+      ),
+    ),
+    h('span', { class: 'c-btn c-btn--accent c-btn--lg fg-home__cta', 'aria-hidden': 'true' }, 'Joacă'),
+  );
+}
 
 export default function home(container) {
   document.title = 'Cifruța — exerciții pentru clasa a II-a';
@@ -43,6 +69,7 @@ export default function home(container) {
           h('p', { class: 'c-hero__text' }, 'Adun alune și rezolv probleme. Alege un test și hai să gândim împreună! La final vezi rezultatele și explicațiile.'),
         ),
       ),
+      fulgerCard(),
       h('div', { class: 'l-grid anim-stagger', style: { '--grid-min': '15rem' } }, sections),
       mascot('incurajeaza', 'Sfat: citește cu atenție fiecare cerință. Poți sări peste un exercițiu și poți reveni la el oricând.'),
       historyBox(allTests(), {

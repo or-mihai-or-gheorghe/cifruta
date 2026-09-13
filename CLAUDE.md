@@ -26,7 +26,9 @@ site/                      ← publicat
   js/types/<tip>/logic.js  logică pură (Node o poate importa): validate · count · answered · empty · solution · evaluate
   js/types/<tip>/view.js   DOM: mount(el, part, ctx) → { get, set, mode, showResult, destroy }
   js/visuals/              banca vizuală: registerVisual(nume, {render, label, demos}); all.js le importă pe toate
-  data/catalog.js          secțiuni → grupuri → teste · concepts.js (ID-uri de concepte) · scoring.js · demo.js
+  js/fulger/               Calcul fulger (joc de calcul pe viteză, #/fulger): kinds (întrebări generate cu sămânță) · engine
+                           (runda și punctajul, pur) · view (arena) · effects (particule, bannere); pagina e pages/fulger.js
+  data/catalog.js          secțiuni → grupuri → teste · concepts.js (ID-uri de concepte) · scoring.js · demo.js · fulger.js (jocul)
   data/tests/<grup>/tN-nume.js   testele (NU le numi test-*.js)
 docs/  STARE.md · curriculum.md (harta conceptelor + surse) · cercetare.md · ghid-autor.md
 tests/ *.test.js (node --test)   tools/ e2e.py (Playwright), acoperire.mjs (tabelul teste × concepte), fetch_assets.py
@@ -61,6 +63,9 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
 - **Vizual nou:** `registerVisual` într-un modul din `js/visuals/`, culori din variabile `--v-*`, `demos` pentru atelier.
 - **Desen nou într-un exercițiu publicat:** `context.visual` / `part.visual` / `itemVisual` / `item.visual` / `bin.visual` din bancă;
   **nu** cere versiune nouă (răspunsurile și ciornele nu sunt afectate); `npm test` verifică numele desenului.
+- **Tip nou în Calcul fulger:** o intrare în `KINDS` (`js/fulger/kinds.js`: `label`, `points`, `fastMs`, `mode`, `generate(rand)` cu
+  răspunsul calculat și variante din greșeli tipice), o linie în `mix`-ul unui nivel din `data/fulger.js` și regulile tipului în
+  `RULES` din `tests/fulger.test.js`; testul de calibrare spune dacă pragurile de stele mai sunt potrivite.
 
 ## Capcane știute
 - `node --test` fără argumente ar prinde fișiere `test-*.js` — rulăm explicit `tests/**/*.test.js`.
@@ -84,7 +89,8 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   player numără invers din `draft.activeMs` (doar cât e afișat un exercițiu); la 0 nu trimite nimic. Istoricul (încercări + ciorne) se
   șterge din casetele „Pentru părinți” (`clearHistory(testIds | null)` din `core/storage.js`, `refresh()` din `core/router.js`).
 - Sunete: `play('tap'|'place'|'done'|'level'|'win'|'yes'|'no')` din `core/sound.js` (WebAudio sintetizat, fără fișiere), pornite
-  la gesturi; butonul din antet ține preferința în `cifruta:sound`; implicit oprite la `prefers-reduced-motion`.
+  la gesturi; butonul din antet ține preferința în `cifruta:sound`; implicit oprite la `prefers-reduced-motion`. Calcul fulger
+  adaugă `ready`, `go`, `hit`, `star`, `combo`, `powerdown`, `tick`, `buzzer`; `play(nume, { step })` urcă tonul pe o scară pentatonică.
 - Pagina de început e punctul de plecare: `player.js` deschide mereu intro-ul (`show(-1)`); „Continuă testul” reia de la `resumeAt`,
   „Reîncepe de la zero” șterge ciorna (cu confirmare). `#/rezultate/<test>/<încercare>` arată o anumită încercare (`getAttempt`).
 - `addAttempt()` întoarce `false` când stocarea nu scrie: încercarea rămâne în memorie (`isUnsaved`), ciorna nu se șterge, iar
@@ -110,3 +116,9 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   trece prin…”). În timpul rezolvării nu se afișează lungimea drumului ales (ar da răspunsul subpunctului următor).
 - Secțiunea 0–1000 nu folosește concepte viitoare (înmulțire, împărțire, fracții, operații până la 1000 cu trecere): avansatul se
   îngreunează prin pași, nu prin materie nouă. Diagrama circulară se citește prin felii care valorează un număr (`pie {groups, names}`).
+- Calcul fulger: timpul rundei curge doar în bucla `requestAnimationFrame` din `js/fulger/view.js` și stă pe loc în pauză; ce ține
+  de timpul rundei (întârzierea de la apariție, pauzele după răspuns) se programează cu `after()` pe acest timp, nu cu `setTimeout`.
+  Punctajul (viteza contează doar în serie), pauzele (1 s; „Hopa” la greșeli mai rapide decât cititul) și stelele vin din
+  `engine.js` + `data/fulger.js`; pragurile de stele sunt verificate prin simulare în `tests/fulger.test.js`. Rundele stau în
+  `cifruta:fulger` și se șterg din hub, nu odată cu istoricul testelor. E2E: `?debug=1` → `window.__dbg.fulger` (`state`, `force`,
+  `elapse`, `setStreak`). Efectele trecătoare nu apar la mișcare redusă; bannerele se așază deasupra cardului, nu peste întrebare.
