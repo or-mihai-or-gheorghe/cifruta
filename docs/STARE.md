@@ -77,10 +77,11 @@
   „tot timpul” și săptămâna din `state/fulger`, ieșirea dintr-o filă; T1-e09c, T3-e09, T5-e09 și T3-e10 lămurite; pastila cu cel mai
   bun scor nu mai iese din card. Reguli 12/12 (publicate), E2E cont 49/49, E2E local 1096/1096; publicat, E2E pe site-ul live
   1096/1096, tag `v0.9.1`
-- [ ] M22 (v0.10.0): Calcul fulger pe teme: lista temelor și hub-ul temei, cu „Ce exersăm” (conceptele din programă, pe fiecare tip de
+- [x] M22 (v0.10.0): Calcul fulger pe teme: lista temelor și hub-ul temei, cu „Ce exersăm” (conceptele din programă, pe fiecare tip de
   întrebare); tema „Adunări și scăderi până la 100” și patru teme „în curând”; recorduri pe „temă:nivel”, normalizate la citire;
   clasamente pe temă și nivel plus totalul temei, cele vechi șterse; rutele vechi redirecționate; stelele încercărilor urcate de
-  v0.9.0 revin în clasament. npm test 76/76, reguli 13/13, E2E cont 59/59, E2E local 1118/1118
+  v0.9.0 revin în clasament. npm test 76/76, reguli 13/13 (publicate), E2E cont 59/59, E2E local 1118/1118; publicat, E2E pe
+  site-ul live 1118/1118, tag `v0.10.0`
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -333,5 +334,7 @@
   seria din runda recordului, cu un test pe forma aceasta. După prima publicare (regulile, apoi site-ul), a doua citire din producție a
   arătat că intrarea din `teste-stele` dispăruse încă de dinainte: la 16:48, cu v0.9.1, browserul contului nu găsise `state/tests`
   (încercările urcaseră cu v0.9.0) și socotise 0 stele. Încercările erau în cloud; acum un `state/tests` lipsă se reface din încercările
-  din browser (E2E pe emulatoare cu aceeași stare). npm test 76/76, reguli 13/13, E2E cont 59/59, E2E local 1118/1118.
-  **De făcut data viitoare:** verificarea cu un cont real; copilul joacă → pragurile; a doua temă și super-totalul.
+  din browser (E2E pe emulatoare cu aceeași stare), publicată din nou. npm test 76/76, reguli 13/13, E2E cont 59/59, E2E local
+  1118/1118; v0.10.0 publicat, E2E pe site-ul live 1118/1118. Datele din producție trec pe teme la prima activare a contului.
+  **De făcut data viitoare:** după o vizită în cont, verificăm în Firestore clasamentele pe temă și stelele; copilul joacă → pragurile;
+  a doua temă și super-totalul.
