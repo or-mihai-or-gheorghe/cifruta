@@ -1,4 +1,4 @@
-/* Calcul fulger: cardul de pe pagina principală, hub-ul, arena rundei și rezultatele.
+/* Jocuri fulger: cardul de pe pagina principală, pagina jocului, arena rundei și rezultatele.
    Mișcare doar prin transform/opacity; particulele și zborul „+N” nu se creează la mișcare redusă. */
 
 /* ——— Antet și pagina principală ——— */
@@ -87,6 +87,8 @@
   font-variant-numeric: tabular-nums;
 }
 .fg-box { display: inline-block; width: 0.9em; height: 0.9em; border: 2px dashed currentColor; border-radius: 0.2em; vertical-align: -0.1em; }
+.fg-sample--art { padding: 0.25rem 0.45rem; border: 2px solid var(--c-level-bg); background: var(--c-surface); }
+.fg-sample__art { display: block; height: 2.2rem; width: calc(2.2rem * var(--ar, 1)); max-width: 100%; }
 .fg-level__best { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); font-family: var(--font-title); font-weight: 700; }
 
 /* ——— Temele, desfășurate pe pagina jocului ——— */
@@ -284,6 +286,11 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 .fg-slot.is-filled { border-style: solid; border-color: var(--c-level); background: var(--c-level-bg); color: var(--c-level-ink); animation: anim-pop var(--dur-3) var(--ease-spring); }
 .fg-slot.is-shown { border-style: solid; border-color: var(--c-ok); background: var(--c-ok-bg); color: var(--c-ok-ink); }
 .fg-sign { color: var(--c-ink-soft); }
+/* întrebări cu figuri: desenele se dimensionează prin container, pentru că stratul visuals (.v-svg { width: 100% }) vine după acesta */
+.fg-q--figure { flex-direction: column; gap: var(--sp-2); font-size: var(--fs-2); }
+.fg-prompt { margin: 0; font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem); text-align: center; }
+.fg-fig { --fig-h: clamp(5.5rem, 26vh, 13rem); width: min(100%, calc(var(--fig-h) * var(--ar, 1))); }
+.fg-fig.is-shown { animation: anim-pop var(--dur-3) var(--ease-spring); }
 
 .fg-bolt { display: flex; align-items: center; gap: 0.4rem; width: min(15rem, 80%); transition: opacity var(--dur-2); }
 .fg-bolt .c-emoji { width: 1.3rem; height: 1.3rem; margin: 0; }
@@ -325,6 +332,12 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 .fg-opt:active { transform: translateY(3px); box-shadow: var(--sh-edge-active) var(--edge); }
 .fg-opt__key { position: absolute; top: 0.3rem; left: 0.55rem; font-family: var(--font-body); font-weight: 400; font-size: 0.72rem; color: var(--c-ink-soft); }
 .fg-opt__label { margin-top: 0.25rem; font-family: var(--font-body); font-weight: 400; font-size: 0.78rem; color: var(--c-ink-soft); }
+.fg-answers--figure { grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 40rem) {
+  .fg-answers--figure { grid-template-columns: repeat(var(--n, 4), 1fr); }
+}
+.fg-opt__art { --opt-h: clamp(2.8rem, 10vh, 5rem); display: block; width: min(100%, calc(var(--opt-h) * var(--ar, 1))); }
+.fg-opt__art .c-emoji { display: block; width: 100%; height: auto; margin: 0; }
 .fg-opt.is-correct,
 .fg-opt.is-answer { --edge: var(--c-ok-ink); background: var(--c-ok-bg); color: var(--c-ok-ink); }
 .fg-opt.is-correct { animation: anim-pop var(--dur-3) var(--ease-spring); }
@@ -567,6 +580,14 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 .fg-mistake__line { font-family: var(--font-title); font-weight: 700; font-size: var(--fs-2); font-variant-numeric: tabular-nums; }
 .fg-mistake__ok { padding: 0 0.35rem; border-radius: var(--r-1); background: var(--c-ok-bg); color: var(--c-ok-ink); }
 .fg-mistake__note { font-size: var(--fs-0); color: var(--c-ink-soft); }
+.fg-mistake--figure { align-items: center; }
+.fg-mistake--figure .fg-mistake__line,
+.fg-mistake--figure .fg-mistake__note { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.fg-mistake--figure .fg-mistake__line { font-size: var(--fs-1); }
+.fg-mistake__art { display: inline-block; height: 2.6rem; width: calc(2.6rem * var(--ar, 1)); max-width: 100%; }
+.fg-mistake__art .c-emoji { display: block; width: 100%; height: auto; margin: 0; }
+.fg-mistake__ok .fg-mistake__art { height: 2.2rem; width: calc(2.2rem * var(--ar, 1)); }
+.fg-mistake__note .fg-mistake__art { height: 2rem; width: calc(2rem * var(--ar, 1)); }
 .fg-results .is-waiting { visibility: hidden; }
 .fg-table-wrap { overflow-x: auto; }
 .fg-table { width: 100%; border-collapse: collapse; font-size: var(--fs-0); }
@@ -606,6 +627,9 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
   .fg-q { font-size: clamp(1.8rem, 1.2rem + 3vh, 2.4rem); }
   .fg-q--sort { font-size: 1.25rem; }
   .fg-opt { min-height: 3.3rem; font-size: 1.6rem; }
+  .fg-prompt { font-size: 1.05rem; }
+  .fg-fig { --fig-h: clamp(5rem, 42vh, 9rem); }
+  .fg-opt__art { --opt-h: clamp(2.2rem, 13vh, 3.4rem); }
   .fg-overlay { place-items: safe center; overflow-y: auto; padding: var(--sp-2); }
   .fg-panel { gap: var(--sp-2); padding: var(--sp-4); }
   .fg-panel__art { display: none; }

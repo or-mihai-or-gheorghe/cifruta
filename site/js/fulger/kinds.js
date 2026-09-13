@@ -10,6 +10,7 @@
 
 import { calc, relation } from '../core/expr.js';
 import { trecere } from '../core/rules.js';
+import { distinct, int, pickOne, shuffle } from './rand.js';
 
 const PLUS = ' + ';
 const MINUS = ' − ';
@@ -19,25 +20,6 @@ const CU = 'mat.op.cu-trecere';
 const COMPARARE = 'mat.nr100.comparare';
 const ORDONARE = 'mat.nr100.ordonare';
 const EXPRESII = 'mat.op.comparare-expresii';
-
-const int = (rand, min, max) => min + Math.floor(rand() * (max - min + 1));
-const pickOne = (rand, list) => list[Math.floor(rand() * list.length)];
-
-function shuffle(rand, list) {
-  const out = [...list];
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(rand() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
-}
-
-/** `count` numere diferite între `min` și `max`. */
-function distinct(rand, count, min, max) {
-  const set = new Set();
-  while (set.size < count) set.add(int(rand, min, max));
-  return [...set];
-}
 
 /** Două cifre diferite, de la 1 la 9. */
 function twoDigits(rand) {

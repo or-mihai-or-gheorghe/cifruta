@@ -84,7 +84,7 @@ export default function profil(container) {
         { class: 'c-list' },
         h('li', {}, 'Rezultatele copiilor se păstrează în cont și apar pe orice dispozitiv.'),
         h('li', {}, 'Fiecare copil are profilul lui, cu poreclă și avatar.'),
-        h('li', {}, 'Clasamentul de la Calcul fulger și stelele de la teste, doar cu porecla.'),
+        h('li', {}, 'Clasamentul de la Jocuri fulger și stelele de la teste, doar cu porecla.'),
       ),
       h(
         'button',
@@ -134,7 +134,7 @@ export default function profil(container) {
         },
       },
       h('h1', {}, `Bun venit${s.user.name ? `, ${s.user.name.split(' ')[0]}` : ''}!`),
-      h('p', {}, 'Înainte de primul profil: Cifruța păstrează în cont porecla și avatarul fiecărui copil și rezultatele lui (încercările la teste și rundele de Calcul fulger). În clasament apar doar porecla, avatarul și scorul, și doar pentru cei intrați în cont.'),
+      h('p', {}, 'Înainte de primul profil: Cifruța păstrează în cont porecla și avatarul fiecărui copil și rezultatele lui (încercările la teste și rundele de la Jocuri fulger). În clasament apar doar porecla, avatarul și scorul, și doar pentru cei intrați în cont.'),
       h('label', { class: 'acc-check', for: id }, check, h('span', {}, 'Sunt părintele sau tutorele copiilor care vor juca și sunt de acord ca aceste date să fie păstrate, cum scrie în ', h('a', { href: '#/confidentialitate' }, 'pagina de confidențialitate'), '.')),
       error,
       h('div', { class: 'l-cluster' }, go),
@@ -285,7 +285,7 @@ export default function profil(container) {
             editing = null;
             const anon = anonymousCounts();
             if (accountState().profiles.length === 1 && (anon.attempts || anon.rounds)) {
-              const parts = [anon.attempts ? `${cantitate(anon.attempts, 'încercare', 'încercări')} la teste` : null, anon.rounds ? `${cantitate(anon.rounds, 'rundă', 'runde')} de Calcul fulger` : null].filter(Boolean).join(' și ');
+              const parts = [anon.attempts ? `${cantitate(anon.attempts, 'încercare', 'încercări')} la teste` : null, anon.rounds ? `${cantitate(anon.rounds, 'rundă', 'runde')} de la Jocuri fulger` : null].filter(Boolean).join(' și ');
               const move = await confirmModal({ title: 'Adaugi rezultatele din acest browser?', text: `Aici sunt salvate fără cont ${parts}. Le adaugi în profilul **${escapeHTML(created.nickname)}**?`, confirm: 'Da, adaugă-le', cancel: 'Nu' });
               if (move) await moveAnonymousInto(created.id);
             }

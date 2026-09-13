@@ -1,5 +1,5 @@
-// Calcul fulger: jocul de calcul pe viteză (date, fără funcții). Generatoarele întrebărilor sunt în js/fulger/kinds.js.
-// Jocul e împărțit pe teme din programă; fiecare temă are cele 3 niveluri, cu amestecul de tipuri și pragurile de stele.
+// Jocuri fulger: jocurile pe viteză (date, fără funcții). Generatoarele întrebărilor sunt în js/fulger/kinds.js (calcule) și
+// js/fulger/kinds-forme.js (figuri). Jocul e împărțit pe teme; fiecare temă are cele 3 niveluri, cu amestecul de tipuri și pragurile de stele.
 // Pragurile de stele sunt calibrate prin simulare (tests/fulger.test.js): un copil rapid ia 3 stele, unul bun 2,
 // unul încet dar sigur 1, iar atingerile la întâmplare niciuna.
 
@@ -28,7 +28,7 @@ export default {
   precision: { minAnswers: 10, perfect: 0.2, high: { from: 0.9, bonus: 0.1 } },
   warmupCount: 3, // primele întrebări vin din tipurile de încălzire ale nivelului
   noRepeat: 12, // o întrebare nu revine printre ultimele 12
-  keepRounds: 30,
+  keepRounds: 60, // rundele păstrate, din toate temele
   // Id-ul unei teme publicate nu se mai schimbă: intră în cheile recordurilor („temă:nivel”) și în id-urile clasamentelor, iar temele
   // jucabile apar și în firestore.rules (fulgerTopics). Temele `soon` n-au niveluri: se văd pe carduri „în curând”.
   topics: [

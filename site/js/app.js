@@ -95,9 +95,9 @@ app.replaceChildren(
         h('a', { class: 'c-btn c-btn--ghost c-btn--sm c-nav-home', href: '#/' }, 'Teste'),
         h(
           'a',
-          { class: 'c-btn c-btn--ghost c-btn--sm c-nav-fulger', href: '#/fulger', 'data-testid': 'nav-fulger', title: 'Calcul fulger' },
+          { class: 'c-btn c-btn--ghost c-btn--sm c-nav-fulger', href: '#/fulger', 'data-testid': 'nav-fulger', title: 'Jocuri fulger' },
           h('span', { 'aria-hidden': 'true', html: emojiHTML('fulger') }),
-          h('span', { class: 'c-nav-fulger__text' }, 'Calcul fulger'),
+          h('span', { class: 'c-nav-fulger__text' }, 'Jocuri fulger'),
         ),
         boardsLink,
         accountLink,

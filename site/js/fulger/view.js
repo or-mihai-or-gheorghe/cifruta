@@ -1,4 +1,4 @@
-// Calcul fulger: arena unei runde (DOM). Semaforul de start, bara de sus (timp, serie, alune, pauză), pista spre stele și
+// Jocuri fulger: arena unei runde (DOM). Semaforul de start, bara de sus (timp, serie, alune, pauză), pista spre stele și
 // record, întrebarea cu variantele sau plăcile, efectele și sunetele. Timpul rundei curge într-o singură buclă
 // requestAnimationFrame și stă pe loc în pauză; motorul (engine.js) hotărăște alunele și pauzele de după răspunsuri.
 
@@ -9,6 +9,7 @@ import { cantitate, formatNumber } from '../core/ro.js';
 import { play, unlockSound } from '../core/sound.js';
 import { emojiHTML } from '../visuals/emoji.js';
 import { visualSVG } from '../visuals/index.js';
+import { artHTML, artName, aspect } from './art.js';
 import { badge, banner, burst, flyTo, stamp } from './effects.js';
 import { createRound, levelConfig, nextStar, streakTier, TURBO_FROM } from './engine.js';
 import { KINDS } from './kinds.js';
@@ -27,6 +28,7 @@ const pick = (list) => list[Math.floor(Math.random() * list.length)];
 
 /** Răspunsul corect, scris pentru copil. */
 function answerText(q) {
+  if (q.mode === 'figure') return artName(q.options[q.answer]);
   if (q.mode === 'choice') return String(q.answer);
   if (q.mode === 'compare') return `${q.left} ${q.answer} ${q.right}`;
   return q.answer.join(q.dir === 'asc' ? ' < ' : ' > ');
@@ -43,6 +45,12 @@ function press(el, fn) {
   el.addEventListener('click', () => {
     if (performance.now() - downAt > 700) fn();
   });
+}
+
+/** Desenul unei variante în buton; o variantă-text rămâne text, ca cifrele. */
+function optionArt(spec) {
+  if (!spec.v && !spec.emoji) return h('span', {}, spec.text);
+  return h('span', { class: 'fg-opt__art', 'aria-hidden': 'true', style: { '--ar': String(aspect(spec)) }, html: artHTML(spec) });
 }
 
 export function mountArena(host, { topic, topicTitle = '', level, best = null, seed, onEnd }) {
@@ -72,6 +80,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
   let buttons = [];
   let slot = null;
   let slots = [];
+  let figure = null; // desenul unei întrebări cu figuri; la răspuns devine desenul rezolvat
   let bolt = null;
   let boltBar = null;
   let cooldown = null;
@@ -143,7 +152,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     h(
       'div',
       { class: 'fg-arena__inner' },
-      h('h1', { class: 'u-visually-hidden' }, `Calcul fulger · ${topicTitle ? `${topicTitle} · ` : ''}${levelInfo(level)?.label ?? level}`),
+      h('h1', { class: 'u-visually-hidden' }, `Jocuri fulger · ${topicTitle ? `${topicTitle} · ` : ''}${levelInfo(level)?.label ?? level}`),
       h('div', { class: 'fg-hud' }, timer, streakBox, basket, pauseBtn),
       track,
       h('div', { class: 'fg-stage' }, say, buddy, card, answers, cool),
@@ -173,7 +182,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
         'div',
         { class: 'fg-panel anim-bounce-in' },
         h('div', { class: 'fg-panel__art', 'aria-hidden': 'true', html: visualSVG({ v: 'mascot', mood: 'vesela' }) }),
-        h('h2', { class: 'fg-panel__title' }, 'Calcul fulger'),
+        h('h2', { class: 'fg-panel__title' }, 'Jocuri fulger'),
         topicTitle ? h('p', { class: 'u-small u-muted', 'data-testid': 'fg-topic' }, topicTitle) : null,
         levelPill(level),
         h('p', { class: 'fg-panel__text' }, 'Ai 2 minute. Răspunde corect de mai multe ori la rând: alunele cresc, iar fulgerul le dublează!'),
@@ -283,8 +292,12 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
   function renderQuestion(q) {
     slot = null;
     slots = [];
+    figure = null;
     let body;
-    if (q.mode === 'choice') {
+    if (q.mode === 'figure') {
+      figure = q.figure ? h('div', { class: 'fg-fig', 'data-testid': 'fg-figure', 'aria-hidden': 'true', style: { '--ar': String(aspect(q.figure)) }, html: artHTML(q.figure) }) : null;
+      body = h('div', { class: 'fg-q fg-q--figure', 'data-testid': 'fg-question' }, h('p', { class: 'fg-prompt' }, q.prompt), figure);
+    } else if (q.mode === 'choice') {
       slot = h('span', { class: 'fg-q__slot' }, '?');
       body = h('div', { class: 'fg-q', 'data-testid': 'fg-question' }, h('span', {}, q.text), h('span', { 'aria-hidden': 'true' }, '='), slot);
     } else if (q.mode === 'compare') {
@@ -308,17 +321,19 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     if (!reduced) pop(card, 'is-enter');
 
     const options =
-      q.mode === 'choice'
-        ? q.choices.map((v) => ({ text: String(v), name: String(v) }))
-        : q.mode === 'compare'
-          ? SIGNS.map((s) => ({ text: s, name: SIGN_NAMES[s], label: SIGN_LABELS[s] }))
-          : q.numbers.map((n) => ({ text: String(n), name: `placa ${n}` }));
+      q.mode === 'figure'
+        ? q.choices.map((id) => ({ art: q.options[id], name: artName(q.options[id]) }))
+        : q.mode === 'choice'
+          ? q.choices.map((v) => ({ text: String(v), name: String(v) }))
+          : q.mode === 'compare'
+            ? SIGNS.map((s) => ({ text: s, name: SIGN_NAMES[s], label: SIGN_LABELS[s] }))
+            : q.numbers.map((n) => ({ text: String(n), name: `placa ${n}` }));
     buttons = options.map((o, i) => {
       const btn = h(
         'button',
         { type: 'button', class: 'fg-opt', 'data-testid': `fg-opt-${i}`, 'aria-label': o.name },
         h('span', { class: 'fg-opt__key', 'aria-hidden': 'true' }, KEYS[i]),
-        h('span', {}, o.text),
+        o.art ? optionArt(o.art) : h('span', {}, o.text),
         o.label ? h('span', { class: 'fg-opt__label', 'aria-hidden': 'true' }, o.label) : null,
       );
       press(btn, () => choose(i));
@@ -329,11 +344,13 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     answers.setAttribute('aria-busy', 'true');
     answers.replaceChildren(...buttons);
     live.textContent =
-      q.mode === 'choice'
-        ? `${spoken(q.text)} fac?`
-        : q.mode === 'compare'
-          ? `Compară ${spoken(q.left)} cu ${spoken(q.right)}.`
-          : `Ordonează ${q.dir === 'asc' ? 'crescător' : 'descrescător'}: ${q.numbers.join(', ')}.`;
+      q.mode === 'figure'
+        ? `${q.prompt}${q.figure ? ` ${artName(q.figure)}.` : ''} Variante: ${options.map((o) => o.name).join('; ')}.`
+        : q.mode === 'choice'
+          ? `${spoken(q.text)} fac?`
+          : q.mode === 'compare'
+            ? `Compară ${spoken(q.left)} cu ${spoken(q.right)}.`
+            : `Ordonează ${q.dir === 'asc' ? 'crescător' : 'descrescător'}: ${q.numbers.join(', ')}.`;
   }
 
   function choose(i) {
@@ -341,7 +358,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     const q = question;
     const btn = buttons[i];
     if (q.mode !== 'sort') {
-      finish(q.mode === 'choice' ? q.choices[i] : SIGNS[i], btn);
+      finish(q.mode === 'compare' ? SIGNS[i] : q.choices[i], btn);
       return;
     }
     const value = q.numbers[i];
@@ -371,6 +388,10 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
   }
 
   function reveal(q) {
+    if (figure && q.solved) {
+      figure.innerHTML = artHTML(q.solved);
+      figure.classList.add('is-shown');
+    }
     if (slot) {
       slot.textContent = String(q.answer);
       slot.classList.add('is-shown');
@@ -414,7 +435,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     const q = res.question;
     reveal(q);
     btn.classList.add('is-wrong');
-    if (q.mode === 'choice') buttons[q.choices.indexOf(q.answer)].classList.add('is-answer');
+    if (q.choices) buttons[q.choices.indexOf(q.answer)].classList.add('is-answer');
     if (q.mode === 'compare') buttons[SIGNS.indexOf(q.answer)].classList.add('is-answer');
     play('no');
     paintStreak(0);
@@ -583,9 +604,11 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
         remainingMs: Math.max(0, Math.round(config.durationMs - elapsed)),
         kind: q?.kind ?? null,
         mode: q?.mode ?? null,
-        answerIndex: !q ? null : q.mode === 'choice' ? q.choices.indexOf(q.answer) : q.mode === 'compare' ? SIGNS.indexOf(q.answer) : null,
-        wrongIndex: !q ? null : q.mode === 'choice' ? q.choices.findIndex((c) => c !== q.answer) : q.mode === 'compare' ? SIGNS.findIndex((s) => s !== q.answer) : q.numbers.findIndex((n) => n !== q.answer[0]),
+        answerIndex: !q ? null : q.choices ? q.choices.indexOf(q.answer) : q.mode === 'compare' ? SIGNS.indexOf(q.answer) : null,
+        wrongIndex: !q ? null : q.choices ? q.choices.findIndex((c) => c !== q.answer) : q.mode === 'compare' ? SIGNS.findIndex((s) => s !== q.answer) : q.numbers.findIndex((n) => n !== q.answer[0]),
         order: q?.mode === 'sort' ? q.answer.map((v) => q.numbers.indexOf(v)) : null,
+        figure: Boolean(q?.figure),
+        solved: Boolean(q?.solved),
       };
     },
     start: () => countdown(),

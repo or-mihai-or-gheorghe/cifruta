@@ -9,7 +9,7 @@ import { art, chip, mascot } from '../components/ui.js';
 import { playableTopics, topicTotal } from '../fulger/engine.js';
 import { emojiHTML } from '../visuals/emoji.js';
 
-/** Cardul jocului Calcul fulger, cu totalul recordurilor pe fiecare temă. */
+/** Cardul Jocurilor fulger, cu totalul recordurilor pe fiecare temă. */
 function fulgerCard() {
   const { best } = getFulger();
   return h(
@@ -19,8 +19,8 @@ function fulgerCard() {
     h(
       'div',
       { class: 'fg-home__body l-stack l-stack--sm' },
-      h('h2', { class: 'fg-home__title' }, 'Calcul fulger'),
-      h('p', { class: 'fg-home__text' }, 'Câte operații rezolvi în 2 minute? Alege o temă, strânge alune, fă serii și bate-ți recordul!'),
+      h('h2', { class: 'fg-home__title' }, 'Jocuri fulger'),
+      h('p', { class: 'fg-home__text' }, 'Câte întrebări rezolvi în 2 minute? Calcule, șiruri, puzzle-uri cu forme și drumuri. Strânge alune, fă serii și bate-ți recordul!'),
     ),
     h(
       'div',

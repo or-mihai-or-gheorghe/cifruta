@@ -43,7 +43,7 @@ export default function clasament(container, [game = 'fulger', first, second, th
     return h(
       'div',
       { class: 'l-stack l-stack--sm' },
-      h('nav', { class: 'c-tabs', 'aria-label': 'Jocul' }, tab(route({}), 'Calcul fulger', fulger, 'lb-tab-fulger'), tab('#/clasament/teste', 'Stele la teste', !fulger, 'lb-tab-teste')),
+      h('nav', { class: 'c-tabs', 'aria-label': 'Jocul' }, tab(route({}), 'Jocuri fulger', fulger, 'lb-tab-fulger'), tab('#/clasament/teste', 'Stele la teste', !fulger, 'lb-tab-teste')),
       fulger
         ? [
             h('div', { class: 'l-cluster', role: 'group', 'aria-label': 'Tema' }, topics.map((t) => pill(route({ topic: t.id }), t.short, t.id === view.topic, `lb-topic-${t.id}`))),

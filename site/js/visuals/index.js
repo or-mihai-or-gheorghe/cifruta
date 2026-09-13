@@ -46,6 +46,15 @@ export function visualSVG(spec) {
   return `<svg class="v-svg v-${escapeHTML(v)}${cls ? ` ${escapeHTML(cls)}` : ''}" viewBox="${viewBox}" role="img" aria-label="${escapeHTML(label)}" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
 }
 
+/** viewBox-ul unui desen, fără să-l randeze (pentru proporțiile containerului). */
+export function visualViewBox(spec) {
+  const { v, ...params } = spec ?? {};
+  const def = registry.get(v);
+  if (!def) return '0 0 100 100';
+  const p = { ...(def.defaults ?? {}), ...params };
+  return typeof def.viewBox === 'function' ? def.viewBox(p) : (def.viewBox ?? '0 0 100 100');
+}
+
 export function visualLabel(spec) {
   const { v, ...params } = spec ?? {};
   const def = registry.get(v);

@@ -1,4 +1,4 @@
-// Calcul fulger: pagina jocului (#/fulger) cu temele desfășurate (titlul, explicația, „Ce exersăm” și nivelurile fiecărei teme),
+// Jocuri fulger: pagina jocului (#/fulger) cu temele desfășurate (titlul, explicația, „Ce exersăm” și nivelurile fiecărei teme),
 // runda (#/fulger/<temă>/<nivel>) și rezultatele ei. #/fulger/<temă> e aceeași pagină, derulată la temă; rutele de dinainte de
 // teme (#/fulger/<nivel>) duc la tema în care au intrat rezultatele vechi.
 
@@ -13,6 +13,7 @@ import { cantitate, formatDateTime, formatNumber } from '../core/ro.js';
 import { redirect, refresh } from '../core/router.js';
 import { play } from '../core/sound.js';
 import { clearFulger, getFulger, saveFulgerRound } from '../core/storage.js';
+import { artHTML, artName, aspect } from '../fulger/art.js';
 import { levelConfig, medalsFor, nextStar, playableTopics, practiceFor, starsFor, topicConfig, topicStars, topicTotal } from '../fulger/engine.js';
 import { KINDS } from '../fulger/kinds.js';
 import { LEGACY_TOPIC, LEVEL_IDS, recordKey } from '../fulger/records.js';
@@ -36,7 +37,7 @@ export default function fulger(container, [first, second] = []) {
 // ——— Pagina jocului: temele desfășurate ———
 
 const HOW = [
-  ['cronometru', '2 minute', 'Rezolvă cât mai multe operații.'],
+  ['cronometru', '2 minute', 'Răspunde corect la cât mai multe întrebări.'],
   ['foc', 'Serii', 'Corect de mai multe ori la rând: alunele cresc de 1,5, de 2, apoi de 3 ori.'],
   ['fulger', 'Fulgere', 'Repede și în serie: alune duble.'],
 ];
@@ -112,7 +113,7 @@ function soonSection(topics) {
 
 /** #/fulger și #/fulger/<temă>: toate temele pe aceeași pagină; cu o temă dată, pagina se derulează la ea. */
 function gamePage(container, focus = null) {
-  document.title = 'Calcul fulger — Cifruța';
+  document.title = 'Jocuri fulger — Cifruța';
   const data = getFulger();
   const playable = playableTopics();
   container.append(
@@ -120,7 +121,7 @@ function gamePage(container, focus = null) {
       'div',
       { class: 'l-container l-stack l-stack--lg' },
       backLink('#/', 'Pagina de început'),
-      hero('Calcul fulger', 'Câte operații rezolvi în 2 minute? Alege tema și nivelul, strânge alune, fă serii și bate-ți recordul!'),
+      hero('Jocuri fulger', 'Câte întrebări rezolvi în 2 minute? Alege tema și nivelul, strânge alune, fă serii și bate-ți recordul!'),
       howTo(),
       playable.map((t) => topicSection(t, data)),
       playable[0] ? boardLink(`fulger/${playable[0].id}/total/week`, { row: 'center' }) : null,
@@ -134,16 +135,26 @@ function gamePage(container, focus = null) {
   if (target) requestAnimationFrame(() => target.scrollIntoView({ block: 'start', behavior: 'instant' }));
 }
 
-/** O întrebare-exemplu ca plăcuță: 7 + 5, 14 ◻ 17, 12 · 9 · 15. */
+/** O întrebare-exemplu ca plăcuță: 7 + 5, 14 ◻ 17, 12 · 9 · 15 sau o miniatură a desenului. */
 function sample(kind, seed) {
   const q = KINDS[kind].generate(seededRandom(seed));
+  if (q.mode === 'figure') {
+    const art = q.figure ?? q.options[q.choices[0]];
+    return h(
+      'li',
+      { class: 'fg-sample fg-sample--art' },
+      h('span', { class: 'fg-sample__art', 'aria-hidden': 'true', style: { '--ar': String(aspect(art)) }, html: artHTML(art) }),
+      h('span', { class: 'u-visually-hidden' }, q.prompt),
+    );
+  }
   const content = q.mode === 'choice' ? q.text : q.mode === 'compare' ? [q.left, h('span', { class: 'fg-box', 'aria-label': 'căsuță' }), q.right] : q.numbers.join(' · ');
   return h('li', { class: 'fg-sample' }, content);
 }
 
 function levelCard(topic, lvl, data) {
   const best = data.best[recordKey(topic.id, lvl.id)]?.alune ?? null;
-  const examples = ['choice', 'compare', 'sort'].map((mode) => lvl.mix.find((m) => KINDS[m.kind].mode === mode)?.kind).filter(Boolean);
+  const byMode = ['choice', 'compare', 'sort'].map((mode) => lvl.mix.find((m) => KINDS[m.kind].mode === mode)?.kind).filter(Boolean);
+  const examples = byMode.length ? byMode : lvl.mix.map((m) => m.kind).slice(0, 2); // la temele cu figuri: primele două tipuri din amestec
   return h(
     'article',
     { class: 'c-card fg-level', 'data-level': lvl.id, 'data-testid': `fg-card-${lvl.id}` },
@@ -204,7 +215,7 @@ function parentsBox(rounds) {
         : h('p', { class: 'u-muted' }, 'Nu există runde salvate.'),
       practice.length ? h('p', {}, h('strong', {}, 'De exersat: '), practice.map((p) => `${p.label} (${p.correct} din ${p.total})`).join(' · ')) : null,
       rounds.length
-        ? h('div', { class: 'l-cluster' }, clearHistoryButton({ label: 'Șterge rundele', title: 'Ștergi rundele?', text: 'Se șterg rundele, recordurile și medaliile de la Calcul fulger, din toate temele.', testid: 'fg-clear', action: clearFulger }))
+        ? h('div', { class: 'l-cluster' }, clearHistoryButton({ label: 'Șterge rundele', title: 'Ștergi rundele?', text: 'Se șterg rundele, recordurile și medaliile de la Jocuri fulger, din toate temele.', testid: 'fg-clear', action: clearFulger }))
         : null,
     ),
   );
@@ -213,7 +224,7 @@ function parentsBox(rounds) {
 // ——— Runda ———
 
 function roundPage(container, topic, lvl) {
-  document.title = `Calcul fulger · ${topic.short} · ${levelLabel(lvl.id)} — Cifruța`;
+  document.title = `Jocuri fulger · ${topic.short} · ${levelLabel(lvl.id)} — Cifruța`;
   document.body.classList.add('is-game');
   const pending = new Set(); // opririle numărătorii de la rezultate
   let arena = mountArena(container, {
@@ -266,9 +277,29 @@ function suggestion(topic, lvl, summary) {
   return h('a', { class: `c-btn c-btn--lg${summary.stars === 3 ? ' c-btn--accent' : ''}`, href: `#/fulger/${topic.id}/${target.id}`, 'data-testid': 'fg-suggest' }, `Încearcă nivelul ${levelLabel(target.id)}`);
 }
 
-/** O greșeală: operația cu răspunsul corect evidențiat și ce a ales copilul. */
+/** Miniatura unui desen din „Greșelile tale” (o variantă-text rămâne text). */
+const mistakeArt = (spec) =>
+  spec.v || spec.emoji ? h('span', { class: 'fg-mistake__art', 'aria-hidden': 'true', style: { '--ar': String(aspect(spec)) }, html: artHTML(spec) }) : h('span', {}, spec.text);
+
+/** O greșeală: operația sau desenul, cu răspunsul corect evidențiat, și ce a ales copilul. */
 function mistake({ question: q, given }) {
   const ok = (text) => h('strong', { class: 'fg-mistake__ok' }, text);
+  if (q.mode === 'figure') {
+    const right = q.options[q.answer];
+    const chosen = q.options[given];
+    return h(
+      'li',
+      { class: 'fg-mistake fg-mistake--figure' },
+      h(
+        'span',
+        { class: 'fg-mistake__line' },
+        h('span', { class: 'fg-mistake__prompt' }, q.prompt),
+        q.solved || q.figure ? mistakeArt(q.solved ?? q.figure) : null,
+        ok([mistakeArt(right), h('span', { class: 'u-visually-hidden' }, ` Răspunsul corect: ${artName(right)}.`)]),
+      ),
+      chosen ? h('span', { class: 'fg-mistake__note' }, 'ai ales ', mistakeArt(chosen), h('span', { class: 'u-visually-hidden' }, artName(chosen))) : null,
+    );
+  }
   const [line, note] =
     q.mode === 'choice'
       ? [[q.text, ' = ', ok(String(q.answer))], `ai ales ${given}`]
