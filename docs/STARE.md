@@ -70,11 +70,11 @@
   Firestore (coadă, tranzacții, mutarea rezultatelor fără cont), clasament doar pentru cei din cont (Calcul fulger pe nivel și perioadă,
   stelele de la teste), administrare, pagina de confidențialitate; proiectul `primary-school-math` configurat, regulile publicate prin
   API-ul Firebase Rules, clasament fără index compus; E2E local cu configurația reală 1096/1096 și pe site-ul live 1096/1096, tag `v0.9.0`
-- [ ] M21 (v0.9.1): recenzia reviziei 49b623c, 8 probleme confirmate și reparate: scrierile intră în coadă înainte de pornirea
+- [x] M21 (v0.9.1): recenzia reviziei 49b623c, 8 probleme confirmate și reparate: scrierile intră în coadă înainte de pornirea
   sincronizării, blocarea în `blocked/{uid}` (nu se mai anulează prin ștergerea și recrearea contului), stelele din `state/tests`,
   „tot timpul” și săptămâna din `state/fulger`, ieșirea dintr-o filă; T1-e09c, T3-e09, T5-e09 și T3-e10 lămurite; pastila cu cel mai
-  bun scor nu mai iese din card. Reguli 12/12 (publicate), E2E cont 49/49, E2E local 1096/1096. Rămas: publicarea site-ului, E2E pe
-  site-ul live, tag `v0.9.1`
+  bun scor nu mai iese din card. Reguli 12/12 (publicate), E2E cont 49/49, E2E local 1096/1096; publicat, E2E pe site-ul live
+  1096/1096, tag `v0.9.1`
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
