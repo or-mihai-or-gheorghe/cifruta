@@ -27,7 +27,7 @@
   fulger pe fiecare temă și nivel și regulile independente ale celor 24 de tipuri cu figuri), 13 teste ale regulilor Firestore pe emulator,
   E2E 1358 de verificări pe 3 ecrane + tastatură (plus telefon ținut orizontal și telefon mic) și E2E pentru cont pe emulatoare, cu 62 de
   verificări (două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute, date vechi din cloud).
-- **Următorul pas:** publicarea v0.11.0 (`npm run deploy:rules`, apoi `npm run deploy`) și E2E pe site-ul live; copilul joacă temele cu
+- **Următorul pas:** v0.11.0 e publicat (E2E pe site-ul live 1358/1358); copilul joacă temele cu
   figuri → `fastMs` și pragurile de stele din runde reale. Rămân: intrarea cu Google pe site (la activare, clasamentele vechi trec pe temă
   și stelele de la teste revin; verificăm în Firestore), cererea la GitHub Support pentru commit-urile vechi, documentul `admins/<uid>`.
   Apoi secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul) și temele „în curând” din Jocuri fulger.
@@ -100,7 +100,8 @@
   „Poziții și trasee” (stânga, dreapta, sus, jos și între, înăuntru sau afară, drumul robotului, căsuțe cu litere și cifre). Module pure
   `core/forme.js` și `core/grile.js`; desenele `glyph`, `glyph-cells`, `cell-grid`, `rect-strip`, `net` și `robot-grid`; modul de
   întrebare `figure` în arenă, pe cardurile nivelurilor și în „Greșelile tale”; regulile independente din `tests/fulger-forme.rules.js`;
-  `#/atelier/fulger` (288 de întrebări, cu răspunsul încadrat). npm test 83/83, reguli 13/13, E2E 1358/1358, E2E cont 62/62
+  `#/atelier/fulger` (288 de întrebări, cu răspunsul încadrat). npm test 83/83, reguli 13/13, E2E 1358/1358, E2E cont 62/62; publicat: întâi regulile
+  (ruleset `dc52ff06`), apoi site-ul prin GitHub Actions (rularea 34787882913); E2E pe site-ul live 1358/1358, tag `v0.11.0`
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -402,6 +403,7 @@
   independentă pentru fiecare tip, `#/atelier/fulger`. Capturile au prins: șirul desenat la 300 px (cardul îl strângea), variantele pe două
   rânduri care nu încăpeau pe telefonul mic, linia „deplasată” prea aproape de mijloc la figurile înguste, emoji-ul din întrebare prea mic,
   cutia din emoji care arată ca un cub; testul de nume a prins variante care sunau la fel pentru cititorul de ecran (rotiri, linii).
-  npm test 83/83, reguli 13/13, E2E 1358/1358, E2E cont 62/62.
-  **De făcut data viitoare:** publicarea v0.11.0 (întâi regulile), apoi copilul joacă temele noi → `fastMs` și pragurile; intrarea cu Google
-  pe site; cererea la GitHub Support pentru commit-urile vechi.
+  npm test 83/83, reguli 13/13, E2E 1358/1358, E2E cont 62/62. Publicat: întâi regulile Firestore, apoi site-ul prin GitHub Actions;
+  E2E pe site-ul live 1358/1358; v0.11.0 publicat, tag `v0.11.0`.
+  **De făcut data viitoare:** copilul joacă temele noi → `fastMs` și pragurile de stele; intrarea cu Google pe site; cererea la GitHub
+  Support pentru commit-urile vechi.
