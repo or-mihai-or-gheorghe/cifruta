@@ -1,8 +1,11 @@
 name: Publicare pe GitHub Pages
 
+# Cheia web Firebase nu stă în git: vine din secretul FIREBASE_API_KEY și intră în site/js/cloud/config.js doar în pachetul publicat.
+
 on:
   push:
     branches: [main]
+    paths-ignore: ['docs/**', '**/*.md'] # documentația nu schimbă site-ul
   workflow_dispatch:
 
 permissions:
@@ -34,6 +37,14 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - name: Cheia web Firebase, din secret
+        env:
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+        run: |
+          test -n "$FIREBASE_API_KEY" || { echo "::error::Lipsește secretul FIREBASE_API_KEY"; exit 1; }
+          grep -q "apiKey: ''," site/js/cloud/config.js || { echo "::error::config.js nu mai are locul gol pentru cheie"; exit 1; }
+          sed -i "0,/apiKey: '',/s//apiKey: '${FIREBASE_API_KEY}',/" site/js/cloud/config.js
+          grep -q "apiKey: 'AIza" site/js/cloud/config.js
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

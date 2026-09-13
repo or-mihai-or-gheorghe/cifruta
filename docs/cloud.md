@@ -9,7 +9,7 @@ singura barieră** și au teste automate pe emulator.
 
 | Fișier | Rol |
 |-|-|
-| `site/js/cloud/config.js` | `firebaseConfig` (valori publice; `PRODUCTION` se completează după crearea aplicației web) și emulatoarele pentru `?emulator=1` |
+| `site/js/cloud/config.js` | `firebaseConfig` (`PRODUCTION`, cu `apiKey` gol în repo: cheia vine la publicare din secretul `FIREBASE_API_KEY`) și emulatoarele pentru `?emulator=1` |
 | `site/js/cloud/firebase.js` | încarcă Firebase JS SDK 12.19.0 de pe gstatic cu `import()`, doar la nevoie |
 | `site/js/cloud/logic.js` | logica pură (testată în Node): porecla, săptămâna ISO, clasamentele păstrate, stelele, îmbinările, coada |
 | `site/js/cloud/session.js` | sesiunea sincronă din `cifruta:session`: prima pagină arată direct datele profilului |
@@ -103,15 +103,18 @@ poate verifica pe server, așa că există moderarea din `#/admin` (redenumire, 
 3. **Firestore Database → Create database:** locația `eur3 (Europe)`, modul production. Pagina de confidențialitate spune „în
    Europa”, deci ține locația în sincron cu textul.
 4. **Project settings → Your apps → Web app** „Cifruța”, fără Hosting. Valorile `firebaseConfig` intră în `PRODUCTION` din
-   `site/js/cloud/config.js`. Sunt publice, nu secrete.
+   `site/js/cloud/config.js`, **fără `apiKey`**: cheia stă doar în secretul GitHub `FIREBASE_API_KEY` (Settings → Secrets and variables →
+   Actions), iar `.github/workflows/pages.yml` o scrie în pachetul publicat. GitHub semnalează orice cheie `AIza…` dintr-un commit.
 5. **Regulile:** `npm run deploy:rules` (`tools/deploy_rules.mjs`, prin API-ul Firebase Rules), cu `GOOGLE_APPLICATION_CREDENTIALS`
    spre cheia contului de serviciu din `_firebase_config/`. Cheia e în `.gitignore`: nu se publică și nu intră în `site/`.
    `firebase deploy` cere în plus dreptul `serviceusage.services.get`, pe care contul de serviciu al Admin SDK nu îl are. Același cont
    nu poate crea indexuri, așa că clasamentul nu folosește indexuri compuse: interogarea ordonează doar după scor, iar egalitățile se
    ordonează în browser.
 6. **Adminul:** după prima intrare pe site, creezi documentul `admins/<uid>`. `uid`-ul se vede în Authentication → Users.
-7. **Opțional:** restrângi cheia API din Google Cloud → Credentials la `https://or-mihai-or-gheorghe.github.io/*`,
-   `https://primary-school-math.firebaseapp.com/*` și `http://localhost:*/*`.
+7. **Cheia API, restricționată** (Google Cloud → APIs & Services → Credentials): Websites `https://or-mihai-or-gheorghe.github.io/*` și
+   `https://primary-school-math.firebaseapp.com/*` (fereastra Google); API restrictions: Identity Toolkit API, Token Service API, Cloud
+   Firestore API. Cheia tot o vede oricine deschide site-ul: restricțiile o fac nefolositoare în altă parte, iar datele le apără regulile.
+8. **Pages din Actions:** Settings → Pages → Source: GitHub Actions; fiecare împingere în `main` publică site-ul.
 
 ## Teste
 
@@ -132,7 +135,8 @@ poate verifica pe server, așa că există moderarea din `#/admin` (redenumire, 
 
 - `?emulator=1` folosește proiectul `demo-cifruta` și expune `window.__cloud` (`signInAs`, `state`, `flush`). Doar acolo există
   intrare fără popup.
-- Fără valori în `PRODUCTION`, legăturile spre cont și clasament nu apar deloc, iar `npm run e2e` rămâne cel de dinainte.
+- Fără `apiKey` (local sau într-un pachet fără secret), legăturile spre cont și clasament nu apar deloc, iar `npm run e2e` rămâne cel de
+  dinainte. Fluxul de publicare se oprește dacă secretul lipsește.
 - În E2E, după încărcarea Firebase nu se așteaptă `networkidle`, pentru că conexiunile spre emulatoare nu tac.
 - La ieșirea din cont, emulatorul răspunde 400 la închiderea canalelor Firestore (`TYPE=terminate`). E zgomot, iar E2E îl ignoră.
 - `replaceChildren(null)` scrie textul „null”: listele de noduri se filtrează înainte (`h()` ignoră singur valorile goale).

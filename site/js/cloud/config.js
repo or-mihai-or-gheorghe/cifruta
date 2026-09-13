@@ -1,5 +1,7 @@
-// Cifruța în cloud: configurația Firebase. Valorile sunt publice (le vede oricine deschide site-ul); accesul la date îl hotărăsc
-// regulile din firestore.rules. Cu ?emulator=1 în adresă, site-ul folosește emulatoarele locale (teste), niciodată datele reale.
+// Cifruța în cloud: configurația Firebase. Cheia web (apiKey) nu stă în git: fluxul de publicare (.github/workflows/pages.yml) o
+// scrie în pachetul publicat, din secretul FIREBASE_API_KEY. Cheia e restricționată în Google Cloud (doar site-ul și firebaseapp.com,
+// doar Identity Toolkit, Token Service și Firestore), dar tot o vede oricine deschide site-ul: accesul la date îl hotărăsc regulile
+// din firestore.rules. Fără cheie (local), site-ul merge fără conturi; cu ?emulator=1 folosește emulatoarele locale (teste).
 
 export const SDK_VERSION = '12.19.0';
 export const SDK_URL = `https://www.gstatic.com/firebasejs/${SDK_VERSION}`;

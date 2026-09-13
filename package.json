@@ -9,7 +9,7 @@
     "acoperire": "node tools/acoperire.mjs",
     "serve": "python3 -m http.server 8080 -d site",
     "e2e": "python3 tools/e2e.py",
-    "deploy": "npm test && git push origin $(git subtree split --prefix site main):refs/heads/gh-pages --force",
+    "deploy": "npm test && git push origin main",
     "test:rules": "sh tools/with-java21.sh firebase emulators:exec --only firestore --project demo-cifruta 'node --test tests/cloud/firestore.rules.mjs'",
     "e2e:cloud": "sh tools/with-java21.sh firebase emulators:exec --only auth,firestore --project demo-cifruta 'python3 tools/e2e_cloud.py'",
     "deploy:rules": "node tools/deploy_rules.mjs"

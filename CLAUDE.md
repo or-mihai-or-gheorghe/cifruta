@@ -12,6 +12,9 @@ Mascota: **Veverița Cifruța**. Repo public `or-mihai-or-gheorghe/cifruta`; sit
   Singura excepție: Firebase JS SDK (modulele oficiale de pe `www.gstatic.com`, versiune fixă în `js/cloud/config.js`), încărcat cu
   `import()` doar pentru contul familiei; fără cont nu pleacă nicio cerere spre Google, în afară de paginile contului (`#/profil`,
   `#/admin`), care încarcă modulele la deschidere (detalii: `docs/cloud.md`).
+- **Nicio cheie în git.** Cheia web Firebase stă doar în secretul GitHub `FIREBASE_API_KEY` (restricționată în Google Cloud) și intră în
+  site la publicare, deci `site/js/cloud/config.js` are `apiKey: ''`. Cheia contului de serviciu stă doar în `_firebase_config/` (ignorat).
+  Un commit publicat cu o cheie se repară doar cu o cheie nouă și rescrierea istoriei.
 - **Pragmatic**: fără soluții complicate pentru cazuri-limită (ex. localStorage simplu), **fără funcții de voce** deocamdată. Ideile „nice to have” merg în backlog.
 - Testele sunt **date declarative** (obiecte serializabile JSON, fără funcții) → vor putea fi mutate într-o bază de date.
 - Textele din teste folosesc doar **mini-markup** (`**tare**`, `==evidențiat==`, `{{e:mar}}`, `{{v:star n=47}}`, `{{z:4}}`), niciodată HTML.
@@ -53,9 +56,9 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
 - `npm run e2e` — Playwright (Chromium headless): fluxuri pe fiecare test, gesturi pe fiecare tip, tastatură, capturi în `test-results/`
   (`python3 tools/e2e.py --only recap-c1-t2 --shots`, `--viewports laptop`, `--base-url https://…` pentru site-ul publicat).
 - `python3 tools/fetch_assets.py` / `tools/fetch_fonts.py` — descarcă emoji Noto noi (după ce le adaugi în `emoji.js`) și fonturile.
-- `npm run deploy` — rulează `npm test` și publică `site/` pe ramura `gh-pages` → https://or-mihai-or-gheorghe.github.io/cifruta/
-  (build Pages ~1 min; verifică apoi cu `python3 tools/e2e.py --base-url https://or-mihai-or-gheorghe.github.io/cifruta/`).
-  Publicare automată prin Actions: necesită `gh auth refresh -h github.com -s workflow`, apoi mută `tools/github-pages-workflow.yml` în `.github/workflows/`.
+- `npm run deploy` — rulează `npm test` și împinge `main`; fluxul `.github/workflows/pages.yml` rulează testele și publică `site/` pe
+  GitHub Pages → https://or-mihai-or-gheorghe.github.io/cifruta/, cu cheia web Firebase din secretul `FIREBASE_API_KEY` (~2 min, `gh run watch`;
+  verifică apoi cu `python3 tools/e2e.py --base-url https://or-mihai-or-gheorghe.github.io/cifruta/`).
 
 ## Rețete
 - **Test nou:** fișier în `site/data/tests/<grup>/`, intrare în `data/catalog.js` (id, file, version, estMin, exercises), concepte din
