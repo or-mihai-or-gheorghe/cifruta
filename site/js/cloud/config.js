@@ -1,12 +1,8 @@
-// Cifruța în cloud: configurația Firebase. Cheia web (apiKey) nu stă în git: fluxul de publicare (.github/workflows/pages.yml) o
-// scrie în pachetul publicat, din secretul FIREBASE_API_KEY. Cheia e restricționată în Google Cloud (doar site-ul și firebaseapp.com,
-// doar Identity Toolkit, Token Service și Firestore), dar tot o vede oricine deschide site-ul: accesul la date îl hotărăsc regulile
-// din firestore.rules. Fără cheie (local), site-ul merge fără conturi; cu ?emulator=1 folosește emulatoarele locale (teste).
+// Configurația Firebase. Cheia (apiKey) e goală în git: la publicare o scrie fluxul .github/workflows/pages.yml, din secretul FIREBASE_API_KEY.
 
 export const SDK_VERSION = '12.19.0';
 export const SDK_URL = `https://www.gstatic.com/firebasejs/${SDK_VERSION}`;
 
-// Proiectul real (consola Firebase → Project settings → Your apps → Web app „Cifruța”).
 const PRODUCTION = {
   apiKey: '',
   authDomain: 'primary-school-math.firebaseapp.com',
@@ -16,6 +12,7 @@ const PRODUCTION = {
   appId: '1:966131905013:web:c3d6d308df51dccba5b0bc',
 };
 
+// ?emulator=1: emulatoarele locale (teste)
 const EMULATED = {
   apiKey: 'demo-key',
   authDomain: 'demo-cifruta.firebaseapp.com',
@@ -28,5 +25,5 @@ export const USE_EMULATOR = new URLSearchParams(search).has('emulator');
 export const firebaseConfig = USE_EMULATOR ? EMULATED : PRODUCTION;
 export const EMULATOR = { auth: 'http://127.0.0.1:9099', firestoreHost: '127.0.0.1', firestorePort: 8085 };
 
-/** Există un proiect configurat? Până atunci butonul „Intră” nu apare și site-ul merge ca înainte. */
+/** Fără cheie, contul și clasamentele nu apar. */
 export const cloudConfigured = () => Boolean(firebaseConfig.apiKey && firebaseConfig.projectId);
