@@ -53,7 +53,8 @@
   `segments`, `transfer`, `maxTotal` și cheie împreună cu reguli; `pie` pe categorii; publicat, E2E local 1005/1005 și pe site-ul live 1005/1005, tag `v0.7.0`
 - [x] M18 (v0.8.0): jocul „Calcul fulger” (`#/fulger`): runde de 2 minute pe trei niveluri, 16 tipuri de întrebări generate (adunări,
   scăderi cu și fără trecere, comparări, ordonări), alune cu bonus de viteză în serie, de serie și de precizie, pauza „Hopa” împotriva
-  ghicitului, pistă spre stele și record, Turbo, sprint final, numărătoare de arcade, 6 medalii; E2E local 1082/1082
+  ghicitului, pistă spre stele și record, Turbo, sprint final, numărătoare de arcade, 6 medalii; publicat, E2E local 1082/1082 și pe
+  site-ul live 1082/1082, tag `v0.8.0`
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -230,5 +231,5 @@
   bonusul de precizie, iar stelele se aprind în timpul jocului, pe pistă. Implementare: motor pur și testat (16 generatoare pe 500 de
   semințe, calibrarea stelelor cu motorul real), arena cu efecte, hub, rezultate, medalii, sunete noi, desenul alunelor; capturi pe
   laptop și telefon, cu retușuri (bannerele deasupra cardului, cardul de pe pagina principală, medaliile pe un rând, rezultatele
-  fără goluri în timpul numărătorii). npm test 55/55, E2E local 1082/1082.
+  fără goluri în timpul numărătorii). npm test 55/55; v0.8.0 publicat, E2E local 1082/1082 și pe site-ul live 1082/1082.
   **De făcut data viitoare:** copilul joacă o rundă pe fiecare nivel → ajustăm pragurile de stele și timpii „fulger”; apoi U2.
