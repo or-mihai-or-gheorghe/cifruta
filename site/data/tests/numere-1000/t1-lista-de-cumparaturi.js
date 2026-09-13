@@ -372,7 +372,7 @@ export default {
       title: 'Cadouri și cinema',
       context: { text: 'Bunica îi dă lui Vlad **400 de lei**. Din ei păstrează **100 de lei** pentru cinema. Cu restul cumpără **cartea** de pe listă și **cel puțin alte două** produse.', visual: { v: 'shelf', products: PRODUSE }, size: 'lg' },
       type: 'mark',
-      prompt: 'Alege produsele. Nu uita banii de cinema! Sunt mai multe răspunsuri bune.',
+      prompt: 'Alege produsele pe care le cumpără Vlad. Banii de cinema rămân deoparte. Sunt mai multe răspunsuri bune.',
       items: [
         { id: 'minge', text: 'minge, 120 de lei', emoji: 'minge', n: 120 },
         { id: 'carte', text: 'carte, 60 de lei', emoji: 'carte', n: 60 },

@@ -11,7 +11,7 @@ import { currentProfile, getAttempt, getFulger, getScoped, listAttempts, onWrite
 import { LEGACY_TOPIC, LEVEL_IDS, normalizeFulger } from '../fulger/records.js';
 import {
   dequeue, enqueue, entryId, fromCloudAttempt, fulgerCandidates, isRetiredBoard, mergeAttempts, mergeFulger, mergeFulgerState, pruneBoards,
-  roundId, sameData, starsTotal, TESTS_BOARD, toCloudAttempt, toCloudRound, withAttemptStars, withWeekBest,
+  roundId, sameData, starsTotal, TESTS_BOARD, toCloudAttempt, toCloudRound, withAttemptStars, withRetired, withWeekBest,
 } from './logic.js';
 
 const RETRY_MS = [20_000, 100_000, 300_000]; // a doua încercare trece de limita de 90 s a clasamentului
@@ -350,7 +350,8 @@ const entryBase = (c, profile) => ({ uid: c.uid, pid: c.pid, nickname: profile.n
 
 /**
  * Calcul fulger, pe temele date: pe fiecare nivel „tot timpul” din recordul permanent și săptămâna din cea mai bună rundă a ei, plus
- * totalul temei pe ambele perioade; scorul doar crește. În aceeași tranzacție se șterg intrările din clasamentele vechi sau prea vechi.
+ * totalul temei pe ambele perioade; scorul doar crește. Clasamentele săptămânilor trecute rămân; în aceeași tranzacție, intrările de
+ * dinainte de teme se mută cu scorul lor în tema veche și se șterg.
  */
 async function pushBoards(c, topics) {
   const local = getFulger();
@@ -359,8 +360,11 @@ async function pushBoards(c, topics) {
     const profile = await readProfile(tx, r);
     const cloud = normalizeFulger(dataOf(await tx.get(r.state())));
     const { best } = mergeFulgerState(cloud, local);
-    const wanted = profile.showOnBoards ? topics.flatMap((topic) => fulgerCandidates(topic, { best, week: cloud.week }, local.rounds)) : [];
-    if (!wanted.length && !(profile.boards ?? []).some(isRetiredBoard)) return null;
+    const retired = [];
+    for (const board of (profile.boards ?? []).filter(isRetiredBoard)) retired.push([board, dataOf(await tx.get(r.entry(board)))]);
+    const candidates = topics.flatMap((topic) => fulgerCandidates(topic, { best, week: cloud.week }, local.rounds));
+    const wanted = profile.showOnBoards ? withRetired(candidates, retired) : [];
+    if (!wanted.length && !retired.length) return null;
     const entries = [];
     for (const [board] of wanted) entries.push(await tx.get(r.entry(board)));
     const writes = wanted.filter(([, top], i) => !entries[i].exists() || top.score > entries[i].data().score);
@@ -393,9 +397,7 @@ async function pushStars(c) {
       next = next.filter((b) => b !== TESTS_BOARD);
     } else {
       tx.set(r.entry(TESTS_BOARD), { ...entryBase(c, profile), score: Math.min(stars, 1000), tests: Math.min(tests, 1000) });
-      const pruned = pruneBoards([...next, TESTS_BOARD]);
-      for (const board of pruned.dropped) tx.delete(r.entry(board)); // scoase din listă, deci și din clasament
-      next = pruned.keep;
+      next = [...new Set([...next, TESTS_BOARD])].sort(); // clasamentele de dinainte de teme rămân pentru `boards`, care le mută
     }
     if (!sameData(next, profile.boards ?? [])) tx.update(r.profile(), { boards: next });
     return next;

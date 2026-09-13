@@ -64,8 +64,10 @@ O altă filă a aceluiași browser află de ieșirea voluntară din evenimentul 
   săptămânii), cel mult 9000, cu numărul de niveluri.
   Se scrie în aceeași tranzacție cu intrările pe niveluri ale temei.
 - `fulger-total-<perioadă>` e rezervat pentru un super-total pe mai multe teme și nu e încă acceptat de reguli.
-- Un profil își păstrează intrările doar în ultimele 2 săptămâni ale fiecărui clasament. Cele mai vechi și cele de dinainte de teme
-  (`fulger-usor-all`, cu id-ul doar pe nivel) se șterg în aceeași tranzacție, la redenumire sau la activarea profilului.
+- Intrările rămân în toate clasamentele, și în cele ale săptămânilor trecute: rezultatele sunt persistente. Lista `boards` a profilului
+  le ține pe toate (cel mult 2000, în reguli), ca redenumirea, ieșirea din clasament și ștergerea profilului să le găsească.
+- Intrările de dinainte de teme (`fulger-usor-all`, `fulger-usor-2026-W37`) se mută cu scorul lor în clasamentele temei „Adunări și
+  scăderi până la 100” (același nivel, aceeași perioadă) și abia apoi se șterg, la activarea profilului.
 - `teste-stele`: cea mai bună încercare a fiecărui test, cu 0–3 stele, adunate. La 0 stele, intrarea se șterge.
 
 **Scrierile legate între ele merg în tranzacții:**

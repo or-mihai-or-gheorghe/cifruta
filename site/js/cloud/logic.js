@@ -8,7 +8,6 @@ export const PROFILE_IDS = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'];
 export const LEVELS = LEVEL_IDS;
 export const TESTS_BOARD = 'teste-stele';
 export const QUEUE_MAX = 200;
-export const WEEKS_KEPT = 2; // clasamentele săptămânale în care un profil își păstrează intrarea, pe fiecare nivel și total
 export const FULGER_MAX = 3000; // scorul maxim al unei intrări pe nivel; totalul unei teme are cel mult 3 × FULGER_MAX
 
 const NICKNAME = /^[\p{L}\p{N} .'-]{2,20}$/u;
@@ -77,27 +76,34 @@ export function rankEntries(entries) {
   });
 }
 
-const WEEKLY = /^(fulger-.+)-(\d{4}-W\d{2})$/; // grupul = clasamentul fără săptămână (temă și nivel sau total)
 const RETIRED = /^fulger-(usor|intermediar|avansat)-(all|\d{4}-W\d{2})$/; // clasamentele de dinainte de teme (v0.9)
 
-/** Un clasament Calcul fulger de dinainte de teme, care nu se mai scrie (intrările lui se șterg la curățenie). */
+/** Un clasament Calcul fulger de dinainte de teme, care nu se mai scrie: intrarea lui se mută în tema veche, apoi se șterge. */
 export const isRetiredBoard = (board) => RETIRED.test(board);
 
 /**
- * Clasamentele păstrate de un profil: cele de tot timpul și testele rămân; pe fiecare temă și nivel (și pe totalul temei), doar
- * ultimele WEEKS_KEPT săptămâni; clasamentele de dinainte de teme ies. `dropped` = intrările de șters.
+ * Lista clasamentelor unui profil: rămân toate, și săptămânile trecute (rezultatele sunt persistente); ies doar clasamentele de
+ * dinainte de teme, după ce `withRetired` le-a mutat scorul. `dropped` = intrările de șters.
  */
 export function pruneBoards(boards) {
   const all = [...new Set(boards)].sort();
-  const dropped = all.filter(isRetiredBoard);
-  const weeks = {};
-  for (const b of all) {
-    if (isRetiredBoard(b)) continue;
-    const m = b.match(WEEKLY);
-    if (m) (weeks[m[1]] ??= []).push(b);
+  return { keep: all.filter((b) => !isRetiredBoard(b)), dropped: all.filter(isRetiredBoard) };
+}
+
+/**
+ * Intrările din clasamentele de dinainte de teme (`[[clasament, date]]`), mutate în clasamentele temei vechi, pe același nivel și
+ * aceeași perioadă; dacă acel clasament e deja printre `wanted`, rămâne scorul mai mare.
+ */
+export function withRetired(wanted, retired) {
+  const out = new Map(wanted);
+  for (const [board, data] of retired) {
+    const m = board.match(RETIRED);
+    if (!m || !(data?.score > 0)) continue;
+    const target = fulgerBoard(LEGACY_TOPIC, m[1], m[2]);
+    const carried = capEntry(data);
+    if (!(out.get(target)?.score >= carried.score)) out.set(target, carried);
   }
-  dropped.push(...Object.values(weeks).flatMap((list) => list.slice(0, -WEEKS_KEPT)));
-  return { keep: all.filter((b) => !dropped.includes(b)), dropped };
+  return [...out];
 }
 
 /** Stelele de la teste: pentru fiecare test, cea mai bună încercare (0–3 stele), adunate. */

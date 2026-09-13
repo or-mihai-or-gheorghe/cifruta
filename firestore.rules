@@ -54,7 +54,7 @@ service cloud.firestore {
         && data().showOnBoards is bool
         && isInt(data().attempts, 0, 100000)
         && isInt(data().rounds, 0, 100000)
-        && data().boards is list && data().boards.size() <= 500;
+        && data().boards is list && data().boards.size() <= 2000; // și săptămânile trecute: intrările din clasamente nu se mai șterg
     }
     function validAttempt() {
       return onlyKeys(['id', 'testId', 'testVersion', 'seed', 'startedAt', 'submittedAt', 'activeMs', 'msByExercise', 'answers',

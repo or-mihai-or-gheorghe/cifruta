@@ -92,6 +92,10 @@ test('reguli: profilurile cer consimțământ, cel mult 6, poreclă și avatar v
   await assertFails(setDoc(doc(db, 'users/ana/profiles/p2'), { ...p, avatar: 'dragon' }));
   await assertFails(setDoc(doc(db, 'users/ana/profiles/p2'), { ...p, extra: 1 }));
   await assertSucceeds(updateDoc(doc(db, 'users/ana/profiles/p1'), { nickname: 'Ana Maria', attempts: increment(1) }));
+  // lista clasamentelor ține și săptămânile trecute (intrările nu se mai șterg): ani de runde încap, dar nu fără limită
+  const weeks = (n) => Array.from({ length: n }, (_, i) => `fulger-${TOPIC}-usor-${2026 + Math.floor(i / 52)}-W${String((i % 52) + 1).padStart(2, '0')}`);
+  await assertSucceeds(updateDoc(doc(db, 'users/ana/profiles/p1'), { boards: weeks(600) }));
+  await assertFails(updateDoc(doc(db, 'users/ana/profiles/p1'), { boards: weeks(2001) }));
   await assertFails(getDoc(doc(as('bob'), 'users/ana/profiles/p1')));
 });
 

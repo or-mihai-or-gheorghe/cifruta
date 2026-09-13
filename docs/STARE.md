@@ -180,6 +180,8 @@
 | 2026-09-13 | La publicare, regulile Firestore înaintea site-ului; temele jucabile stau și în `fulgerTopics()` din reguli, iar un test le compară cu datele | regulile vechi ar refuza rundele cu temă |
 | 2026-09-13 | Un `state/tests` lipsă se reface din încercările din browser (la activare și la următoarea încercare); unul existent rămâne sursa, deci ce s-a șters de pe alt dispozitiv nu reapare | v0.9.1 socotea 0 stele fără document și a șters o intrare reală din clasamentul stelelor; încercările urcate de v0.9.0 erau în cloud |
 | 2026-09-13 | Temele stau desfășurate pe pagina Calcul fulger, grupate (panou cu titlu, programă, stele și total, explicație, „Ce exersăm”, nivelurile), cu temele „în curând” la final; fără card spre o pagină a temei; `#/fulger/<temă>` rămâne adresă (rezultate, clasament, „Ieși din joc”), dar derulează la temă | cererea utilizatorului |
+| 2026-09-13 | Rezultatele din clasamente sunt persistente: intrările săptămânilor trecute nu se mai șterg, iar lista `boards` a profilului le ține pe toate (cel mult 2000 în reguli); intrările de dinainte de teme se mută cu scorul lor în tema veche și abia apoi se șterg | cererea utilizatorului („rezultatele trebuie să fie persistente”); curățarea după 2 săptămâni și ștergerea fără mutare pierdeau rezultate |
+| 2026-09-13 | Recenzia externă a reviziilor v0.8.0–v0.10.0: fără erori de calcul sau de securitate; reformulată cerința din u1-t1 „Cadouri și cinema” („Banii de cinema rămân deoparte”), fără versiune nouă; casetele din T2-e11 și T4-e09 nu se redenumesc | id-urile casetelor sunt interne, nevăzute de copil; redenumirea ar cere versiuni noi și ar strica ciornele și listele încercărilor |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -194,8 +196,11 @@
   (laptop, telefon, iPad). Dacă popup-ul e blocat des pe telefoane, varianta e Firebase Hosting cu login prin redirect.
 - În limitele regulilor, un client priceput poate trimite un scor inventat în clasament (fără Cloud Functions nu se verifică pe
   server); există moderarea din `#/admin`.
-- Calcul fulger păstrează ultimele 30 de runde pentru toate temele împreună: când apar teme noi, istoricul pe temă se subțiază
-  (recordurile rămân); se revede la a doua temă.
+- În browser, Calcul fulger păstrează ultimele 30 de runde pentru toate temele împreună (recordurile și medaliile rămân; în cont, toate
+  rundele rămân în cloud): când apar teme noi, istoricul pe temă se subțiază; se revede la a doua temă.
+- Redenumirea și ieșirea din clasament lucrează într-o tranzacție pe toată lista `boards` a profilului, iar o tranzacție Firestore are
+  cel mult 500 de scrieri: după câteva sute de clasamente într-un profil (ani de runde săptămânale) vor trebui împărțite în loturi.
+  Numărul clasamentelor fiecărui profil se vede în `#/admin`.
 
 ## Backlog
 - Scanările actuale acoperă manualul până la înmulțire; utilizatorul adaugă scanări noi după finalizarea etapei curente.
@@ -213,8 +218,8 @@
 - Amânate la cerere: citire cu voce (TTS), tastatură numerică proprie pe ecran.
 - Din feedback-ul nr. 2, neaplicate: săgeți sus/jos la butoanele radio (Tab + Space merg); explicații vizuale interactive
   (evidențieri pas cu pas în desen); ceas și termometru cu tragere directă; validator care leagă desenele cu date de răspunsuri.
-- Contul familiei, mai departe: App Check (reCAPTCHA) împotriva scorurilor trimise din afara site-ului; istoricul clasamentelor pe
-  săptămâni; schimbarea profilului care joacă cu un PIN al părintelui; Firebase Hosting cu login prin redirect, dacă popup-ul e blocat des.
+- Contul familiei, mai departe: App Check (reCAPTCHA) împotriva scorurilor trimise din afara site-ului; pagina cu istoricul clasamentelor pe
+  săptămâni (intrările rămân din v0.10.2); schimbarea profilului care joacă cu un PIN al părintelui; Firebase Hosting cu login prin redirect, dacă popup-ul e blocat des.
 - Publicare automată la push: `gh auth refresh -h github.com -s workflow` + mutarea workflow-ului în `.github/workflows/` + sursa Pages „GitHub Actions”.
 
 ## Jurnal de sesiuni

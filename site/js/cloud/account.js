@@ -283,7 +283,7 @@ export async function updateProfile(pid, { nickname, avatar, showOnBoards }) {
     const current = snap.data();
     const boards = current.boards ?? [];
     const entryRef = (b) => f.doc(db, 'leaderboards', b, 'entries', `${uid}_${pid}`);
-    // clasamentele de dinainte de teme nu mai sunt acceptate de reguli (nici la redenumire): intrările lor se șterg aici
+    // clasamentele de dinainte de teme nu se mai pot scrie (nici redenumi): rămân în listă, iar operația `boards` le mută în temă
     const retired = boards.filter(isRetiredBoard);
     const live = boards.filter((b) => !isRetiredBoard(b));
     const leaving = current.showOnBoards && !showOnBoards;
@@ -291,15 +291,14 @@ export async function updateProfile(pid, { nickname, avatar, showOnBoards }) {
     const entries = renamed && !leaving ? await Promise.all(live.map((b) => tx.get(entryRef(b)))) : [];
     const changes = { ...next };
     if (leaving) changes.boards = [];
-    else if (renamed) changes.boards = live.filter((_, i) => entries[i].exists());
-    else if (retired.length) changes.boards = live;
+    else if (renamed) changes.boards = [...live.filter((_, i) => entries[i].exists()), ...retired].sort();
     tx.update(ref, changes);
-    for (const b of leaving ? boards : retired) tx.delete(entryRef(b));
-    if (!leaving) for (const e of entries) if (e.exists()) tx.update(e.ref, { nickname: next.nickname, avatar: next.avatar, updatedAt: f.serverTimestamp() });
-    return { changes, joining: !current.showOnBoards && showOnBoards };
+    if (leaving) for (const b of boards) tx.delete(entryRef(b));
+    for (const e of entries) if (e.exists()) tx.update(e.ref, { nickname: next.nickname, avatar: next.avatar, updatedAt: f.serverTimestamp() });
+    return { changes, boards: !leaving && (retired.length > 0 || (!current.showOnBoards && showOnBoards)) };
   });
   patchProfile(pid, result.changes);
-  if (result.joining && pid === state.pid) requestBoards();
+  if (result.boards && pid === state.pid) requestBoards();
 }
 
 /** Șterge un profil cu toate rezultatele lui, din cloud și din browser. */

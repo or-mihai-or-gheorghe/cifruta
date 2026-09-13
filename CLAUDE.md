@@ -10,7 +10,8 @@ Mascota: **Veverița Cifruța**. Repo public `or-mihai-or-gheorghe/cifruta`; sit
 - Conținut **original** (site public): inspirat din programă, nu copiat din manuale; fără personajele manualelor.
 - **Static, fără build, fără dependențe** la rulare: HTML + CSS + ES modules. Toate căile **relative** (site-ul stă sub `/cifruta/`).
   Singura excepție: Firebase JS SDK (modulele oficiale de pe `www.gstatic.com`, versiune fixă în `js/cloud/config.js`), încărcat cu
-  `import()` doar pentru contul familiei; fără cont nu pleacă nicio cerere spre Google (detalii: `docs/cloud.md`).
+  `import()` doar pentru contul familiei; fără cont nu pleacă nicio cerere spre Google, în afară de paginile contului (`#/profil`,
+  `#/admin`), care încarcă modulele la deschidere (detalii: `docs/cloud.md`).
 - **Pragmatic**: fără soluții complicate pentru cazuri-limită (ex. localStorage simplu), **fără funcții de voce** deocamdată. Ideile „nice to have” merg în backlog.
 - Testele sunt **date declarative** (obiecte serializabile JSON, fără funcții) → vor putea fi mutate într-o bază de date.
 - Textele din teste folosesc doar **mini-markup** (`**tare**`, `==evidențiat==`, `{{e:mar}}`, `{{v:star n=47}}`, `{{z:4}}`), niciodată HTML.
@@ -150,5 +151,5 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   e în browser; doar un `state/tests` lipsă (încercări urcate de v0.9.0) se reface din încercările din browser. Limitele de frecvență ale intrărilor (5 s la stele, 90 s la Calcul fulger) înseamnă reîncercări automate; un E2E care
   schimbă aceeași intrare de două ori la rând trebuie să aștepte. Calcul fulger are teme: recordurile și cele mai bune runde ale
   săptămânii au chei „temă:nivel” (`js/fulger/records.js`), datele de dinainte de teme se normalizează la fiecare citire
-  (`normalizeFulger`), iar clasamentele sunt `fulger-<temă>-<nivel|total>-<perioadă>`; cele vechi (`fulger-<nivel>-…`) ies din lista
-  profilului și se șterg.
+  (`normalizeFulger`), iar clasamentele sunt `fulger-<temă>-<nivel|total>-<perioadă>`; cele vechi (`fulger-<nivel>-…`) se mută cu
+  scorul lor în tema veche, apoi se șterg. Clasamentele săptămânilor trecute nu se șterg: rezultatele sunt persistente.

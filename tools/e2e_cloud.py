@@ -345,7 +345,12 @@ def legacy_flow(run: Run, browser):
     patch(f"{base}/state/fulger", {"best": {"usor": record}, "medals": {}, "week": {"usor": {**record, "id": week}}})
     legacy_entry = {"uid": uid, "pid": "p1", "nickname": "Vechi", "avatar": "lup", "score": 90, "correct": 20, "bestStreak": 9, "updatedAt": "ts:2026-09-01T10:00:00Z"}
     patch(f"leaderboards/fulger-usor-all/entries/{uid}_p1", legacy_entry)
-    patch(base, {"boards": ["fulger-usor-all"]}, mask=["boards"])
+    # o săptămână trecută de dinainte de teme și două săptămâni trecute ale temei: rezultatele lor rămân
+    patch(f"leaderboards/fulger-usor-2026-W30/entries/{uid}_p1", {**legacy_entry, "score": 70, "correct": 15, "bestStreak": 6})
+    old_weeks = {"2026-W28": 50, "2026-W29": 60}
+    for w, score in old_weeks.items():
+        patch(f"{board('usor', w)}/{uid}_p1", {**legacy_entry, "score": score})
+    patch(base, {"boards": ["fulger-usor-all", "fulger-usor-2026-W30", *(f"fulger-{TOPIC}-usor-{w}" for w in old_weeks)]}, mask=["boards"])
     # încercările urcate de v0.9.0 n-au state/tests; fără el, v0.9.1 socotea 0 stele și ștergea intrarea din clasamentul stelelor
     remove(f"{base}/state/tests")
     remove(f"leaderboards/teste-stele/entries/{uid}_p1")
@@ -359,18 +364,25 @@ def legacy_flow(run: Run, browser):
     total_all = doc(f"{board('total')}/{uid}_p1") or {}
     run.check(level_all == 90 and level_week == 90 and total_all.get("score") == 90 and total_all.get("levels") == 1, f"migrare: recordul vechi ajunge în clasamentele temei, cu totalul ({level_all}, {level_week}, {total_all.get('score')})")
     run.check(doc(f"leaderboards/fulger-usor-all/entries/{uid}_p1") is None and "fulger-usor-all" not in boards, f"migrare: intrarea veche ștearsă ({boards})")
+    carried = (doc(f"{board('usor', '2026-W30')}/{uid}_p1") or {}).get("score")
+    run.check(carried == 70 and doc(f"leaderboards/fulger-usor-2026-W30/entries/{uid}_p1") is None and f"fulger-{TOPIC}-usor-2026-W30" in boards,
+              f"migrare: săptămâna trecută de dinainte de teme trece în temă, cu scorul ei ({carried})")
+    kept = [(doc(f"{board('usor', w)}/{uid}_p1") or {}).get("score") for w in old_weeks]
+    run.check(kept == list(old_weeks.values()) and all(f"fulger-{TOPIC}-usor-{w}" in boards for w in old_weeks), f"clasament: săptămânile trecute rămân ({kept})")
     stars = (doc(f"leaderboards/teste-stele/entries/{uid}_p1") or {}).get("score")
     saved = (doc(f"{base}/state/tests") or {}).get("best", {})
     run.check(stars == 2 and saved.get(TEST_ID) == 2 and "teste-stele" in boards, f"migrare: state/tests lipsă se reface din încercări, iar stelele revin în clasament ({stars}, {saved})")
 
-    # un profil cu un clasament vechi rămas în listă se poate redenumi; intrarea veche se șterge în aceeași tranzacție
+    # un profil cu un clasament vechi rămas în listă se poate redenumi; apoi operația `boards` mută intrarea veche și o șterge
     patch(f"leaderboards/fulger-usor-all/entries/{uid}_p1", legacy_entry)
     patch(base, {"boards": [*boards, "fulger-usor-all"]}, mask=["boards"])
     run.goto(page, "profil")
     rename(page, "Vechi Nou")
+    run.check(flushed(page), "migrare: după redenumire, clasamentele s-au aliniat")
     after = (doc(base) or {}).get("boards", [])
-    run.check((doc(f"{board('usor')}/{uid}_p1") or {}).get("nickname") == "Vechi Nou" and doc(f"leaderboards/fulger-usor-all/entries/{uid}_p1") is None and "fulger-usor-all" not in after,
-              f"migrare: redenumirea merge și scoate clasamentul vechi ({after})")
+    names = [(doc(f"{board('usor', w)}/{uid}_p1") or {}).get("nickname") for w in ("all", *old_weeks)]
+    run.check(names == ["Vechi Nou"] * 3 and doc(f"leaderboards/fulger-usor-all/entries/{uid}_p1") is None and "fulger-usor-all" not in after,
+              f"migrare: redenumirea schimbă porecla și în săptămânile trecute, iar clasamentul vechi iese ({names}, {after})")
     ctx.close()
 
 

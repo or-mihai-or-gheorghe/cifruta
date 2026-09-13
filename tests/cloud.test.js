@@ -36,16 +36,27 @@ test('cloud: săptămâna ISO se socotește după ora României', () => {
   assert.equal(entryId('abc', 'p2'), 'abc_p2');
 });
 
-test('cloud: un profil își păstrează ultimele două săptămâni ale fiecărui clasament; cele de dinainte de teme ies', () => {
+test('cloud: un profil își păstrează toate clasamentele, și săptămânile trecute; cele de dinainte de teme se mută în temă', async () => {
+  const { withRetired } = await import('../site/js/cloud/logic.js');
   const t = (scope, period) => fulgerBoard(T, scope, period);
   const { keep, dropped } = pruneBoards([
     t('usor', '2026-W30'), t('usor', 'all'), 'teste-stele', t('usor', '2026-W37'), t('usor', '2026-W36'),
     t('total', '2026-W35'), t('total', '2026-W36'), t('total', '2026-W37'), t('avansat', '2026-W30'),
     'fulger-usor-all', 'fulger-usor-2026-W37', t('usor', 'all'),
   ]);
-  assert.deepEqual(dropped.sort(), [t('total', '2026-W35'), t('usor', '2026-W30'), 'fulger-usor-2026-W37', 'fulger-usor-all'].sort());
-  assert.deepEqual(keep, [t('avansat', '2026-W30'), t('total', '2026-W36'), t('total', '2026-W37'), t('usor', '2026-W36'), t('usor', '2026-W37'), t('usor', 'all'), 'teste-stele'].sort());
+  assert.deepEqual(dropped, ['fulger-usor-2026-W37', 'fulger-usor-all']);
+  assert.deepEqual(keep, [t('avansat', '2026-W30'), t('total', '2026-W35'), t('total', '2026-W36'), t('total', '2026-W37'), t('usor', '2026-W30'), t('usor', '2026-W36'), t('usor', '2026-W37'), t('usor', 'all'), 'teste-stele'].sort());
   assert.ok(isRetiredBoard('fulger-avansat-all') && isRetiredBoard('fulger-intermediar-2026-W01') && !isRetiredBoard(t('avansat', 'all')) && !isRetiredBoard('teste-stele'));
+
+  // intrările de dinainte de teme trec în tema veche cu scorul lor; la același clasament rămâne scorul mai mare
+  const wanted = [[t('usor', 'all'), { score: 120, correct: 20, bestStreak: 9 }], [t('total', 'all'), { score: 120, levels: 1 }]];
+  const retired = [
+    ['fulger-usor-all', { score: 100, correct: 18, bestStreak: 7 }],
+    ['fulger-usor-2026-W30', { score: 70, correct: 15, bestStreak: 6 }],
+    ['fulger-avansat-all', {}], // intrarea nu mai există
+    ['teste-stele', { score: 3 }],
+  ];
+  assert.deepEqual(withRetired(wanted, retired), [...wanted, [t('usor', '2026-W30'), { score: 70, correct: 15, bestStreak: 6 }]]);
 });
 
 test('cloud: stelele de la teste iau cea mai bună încercare a fiecărui test', () => {
