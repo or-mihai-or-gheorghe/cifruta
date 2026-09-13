@@ -19,6 +19,10 @@ const SIMETRIE = 'mat.geo.simetrie';
 const CORPURI = 'mat.geo.corpuri';
 const NUMARARE = 'mat.geo.numarare-figuri';
 const DESFASURARI = 'mat.geo.desfasurari';
+const POZITII = 'mat.geo.pozitii';
+const INTERIOR = 'mat.geo.interior-exterior';
+const TRASEE = 'mat.geo.trasee';
+const COORDONATE = 'mat.geo.coordonate';
 
 // figuri ușor de deosebit și de numit
 const EASY = ['patrat', 'cerc', 'triunghi', 'stea', 'inima', 'cruce', 'romb', 'semicerc', 'casa'];
@@ -780,7 +784,207 @@ export const SHAPE_KINDS = {
       }
     },
   },
+  pozitii: {
+    label: 'Stânga, dreapta, sus, jos, între',
+    points: 1,
+    fastMs: 3500,
+    mode: 'figure',
+    concepts: [POZITII],
+    generate(rand) {
+      for (;;) {
+        const animals = shuffle(rand, FARM);
+        const at = (r, c) => (r >= 0 && r < 3 && c >= 0 && c < 3 ? animals[r * 3 + c] : null);
+        const pos = (a) => [Math.floor(animals.indexOf(a) / 3), animals.indexOf(a) % 3];
+        const relation = pickOne(rand, ['stanga', 'dreapta', 'sus', 'jos', 'intre']);
+        let prompt;
+        let answer;
+        let distractors;
+        if (relation === 'intre') {
+          const across = rand() < 0.5; // pe același rând sau pe aceeași coloană
+          const line = int(rand, 0, 2);
+          const [a, b] = across ? [at(line, 0), at(line, 2)] : [at(0, line), at(2, line)];
+          const [mr, mc] = across ? [line, 1] : [1, line];
+          answer = at(mr, mc);
+          prompt = `Cine este între ${FARM_NAMES[a]} și ${FARM_NAMES[b]}?`;
+          // distractori: unul dintre cei doi, vecinii celui din mijloc pe cealaltă direcție
+          distractors = shuffle(rand, [a, b]).slice(0, 1).concat(across ? [at(mr - 1, mc), at(mr + 1, mc)] : [at(mr, mc - 1), at(mr, mc + 1)], [a, b]);
+        } else {
+          // stânga și dreapta din ochii copilului, ca în desen
+          const [dr, dc] = { stanga: [0, -1], dreapta: [0, 1], sus: [-1, 0], jos: [1, 0] }[relation];
+          const ref = pickOne(rand, animals.filter((x) => at(pos(x)[0] + dr, pos(x)[1] + dc)));
+          const [r, c] = pos(ref);
+          answer = at(r + dr, c + dc);
+          prompt = `Cine este ${{ stanga: 'în stânga', dreapta: 'în dreapta', sus: 'deasupra', jos: 'dedesubtul' }[relation]} ${FARM_GENITIVE[ref]}?`;
+          // distractori: vecinul din partea opusă (stânga ↔ dreapta), vecinii de pe diagonală, vecinii pe cealaltă direcție
+          distractors = [at(r - dr, c - dc), at(r + dr + dc, c + dc + dr), at(r + dr - dc, c + dc - dr), at(r + dc, c + dr), at(r - dc, c - dr)];
+        }
+        const q = figureQuestion('pozitii', rand, {
+          prompt,
+          figure: { v: 'farm-grid', cells: animals.join(',') },
+          key: `${animals.join(',')}|${prompt}`,
+          answer: { emoji: answer },
+          distractors: distractors.filter(Boolean).map((emoji) => ({ emoji })),
+        });
+        if (q) return q;
+      }
+    },
+  },
+  interior: {
+    label: 'Înăuntru sau afară',
+    points: 2,
+    fastMs: 4500,
+    mode: 'figure',
+    concepts: [INTERIOR],
+    generate(rand) {
+      for (;;) {
+        const n = 5;
+        const region = blob(rand, n, int(rand, 8, 12));
+        const inRegion = (r, c) => region.some(([a, b]) => a === r && b === c);
+        const outside = [];
+        for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (!inRegion(r, c)) outside.push([r, c]);
+        if (!openToBorder(n, outside)) continue; // o figură cu goluri s-ar citi greșit
+        // semnele din afară: întâi cele din „golfuri” (lângă figură pe cel puțin două laturi), care par înăuntru
+        const sides = ([r, c]) => [[1, 0], [-1, 0], [0, 1], [0, -1]].filter(([dr, dc]) => inRegion(r + dr, c + dc)).length;
+        const bays = shuffle(rand, outside.filter((cell) => sides(cell) >= 2));
+        const rest = shuffle(rand, outside.filter((cell) => sides(cell) === 1));
+        const cells = [pickOne(rand, region), ...bays.slice(0, 2), rest[0] ?? bays[2]];
+        if (bays.length < 2 || cells.some((x) => !x)) continue;
+        const shapes = shuffle(rand, ['cerc', 'triunghi', 'patrat', 'stea']);
+        const colors = paint(rand, 4);
+        const marks = cells.map(([r, c], i) => ({ r, c, shape: shapes[i], color: colors[i] }));
+        const q = figureQuestion('interior', rand, {
+          prompt: 'Care semn este în interiorul figurii?',
+          figure: { v: 'robot-grid', n, region: sortCells(region), marks: [...marks].sort((a, b) => a.r - b.r || a.c - b.c) },
+          key: `${sortCells(region).map(([r, c]) => `${r}.${c}`).join(' ')}|${cells.map(([r, c]) => `${r}.${c}`).join(' ')}`,
+          answer: glyph({ shape: shapes[0], color: colors[0] }),
+          distractors: marks.slice(1).map((m) => glyph({ shape: m.shape, color: m.color })),
+        });
+        if (q) return q;
+      }
+    },
+  },
+  'robot-scurt': {
+    label: 'Drumul robotului, 2–3 pași',
+    points: 2,
+    fastMs: 5000,
+    mode: 'figure',
+    concepts: [TRASEE],
+    generate: (rand) => robotQuestion('robot-scurt', rand, 4, 2, 3),
+  },
+  coordonate: {
+    label: 'Căsuțe cu litere și cifre',
+    points: 2,
+    fastMs: 5000,
+    mode: 'figure',
+    concepts: [COORDONATE],
+    generate(rand) {
+      for (;;) {
+        const n = 4;
+        const [r, c] = [int(rand, 0, n - 1), int(rand, 0, n - 1)];
+        const code = ([a, b]) => `${'ABCD'[b]}${a + 1}`;
+        // capcanele: litera și cifra citite invers, apoi căsuțele vecine
+        const around = shuffle(rand, [[r, c - 1], [r, c + 1], [r - 1, c], [r + 1, c]]);
+        const others = [[c, r], ...around].filter(([a, b], i, all) => a >= 0 && a < n && b >= 0 && b < n && (a !== r || b !== c) && all.findIndex(([x, y]) => x === a && y === b) === i).slice(0, 3);
+        if (others.length < 3) continue;
+        const objects = shuffle(rand, FRUITS).slice(0, 4);
+        const items = [[r, c], ...others].map(([a, b], i) => ({ r: a, c: b, emoji: objects[i] })).sort((x, y) => x.r - y.r || x.c - y.c);
+        const layout = items.map((it) => `${code([it.r, it.c])}`).join(' ');
+        const q =
+          rand() < 0.5
+            ? figureQuestion('coordonate', rand, { prompt: `Ce este în ${code([r, c])}?`, figure: { v: 'robot-grid', n, labels: true, items }, key: `ce:${code([r, c])}|${layout}`, answer: { emoji: objects[0] }, distractors: objects.slice(1).map((emoji) => ({ emoji })) })
+            : figureQuestion('coordonate', rand, {
+                prompt: 'Unde este obiectul încercuit?',
+                figure: { v: 'robot-grid', n, labels: true, items, mark: { r, c } },
+                key: `unde:${code([r, c])}|${layout}`,
+                answer: { text: code([r, c]) },
+                distractors: others.map((cell) => ({ text: code(cell) })),
+              });
+        if (q) return q;
+      }
+    },
+  },
+  'robot-lung': {
+    label: 'Drumul robotului, 4–6 pași',
+    points: 4,
+    fastMs: 8000,
+    mode: 'figure',
+    concepts: [TRASEE],
+    generate: (rand) => robotQuestion('robot-lung', rand, 5, 4, 6),
+  },
 };
+
+// ——— poziții și trasee (folosite doar în generatoare, deci pot sta după tipuri) ———
+
+const FARM = ['gaina', 'pisica', 'rata', 'caine', 'cal', 'oaie', 'porc', 'vaca', 'iepure'];
+const FARM_NAMES = { gaina: 'găină', pisica: 'pisică', rata: 'rață', caine: 'câine', cal: 'cal', oaie: 'oaie', porc: 'porc', vaca: 'vacă', iepure: 'iepure' };
+const FARM_GENITIVE = { gaina: 'găinii', pisica: 'pisicii', rata: 'raței', caine: 'câinelui', cal: 'calului', oaie: 'oii', porc: 'porcului', vaca: 'vacii', iepure: 'iepurelui' };
+const FRUITS = ['mar', 'para', 'cirese', 'pepene', 'banana', 'strugure', 'portocala'];
+const STEP = { d: [0, 1], s: [0, -1], j: [1, 0], u: [-1, 0] };
+const BACK = { d: 's', s: 'd', j: 'u', u: 'j' };
+
+/** O figură legată din k căsuțe, crescută la întâmplare din mijlocul rețelei. */
+function blob(rand, n, k) {
+  const mid = Math.floor(n / 2);
+  const cells = [[mid, mid]];
+  while (cells.length < k) {
+    const [r, c] = pickOne(rand, cells);
+    const [dr, dc] = pickOne(rand, [[1, 0], [-1, 0], [0, 1], [0, -1]]);
+    if (r + dr >= 0 && r + dr < n && c + dc >= 0 && c + dc < n && !cells.some(([a, b]) => a === r + dr && b === c + dc)) cells.push([r + dr, c + dc]);
+  }
+  return cells;
+}
+
+/** Toate căsuțele din afară ajung la marginea rețelei prin căsuțe din afară (figura nu are goluri). */
+function openToBorder(n, outside) {
+  const has = (r, c) => outside.some(([a, b]) => a === r && b === c);
+  const seen = new Set(outside.filter(([r, c]) => r === 0 || c === 0 || r === n - 1 || c === n - 1).map(([r, c]) => `${r}.${c}`));
+  const queue = outside.filter(([r, c]) => seen.has(`${r}.${c}`));
+  while (queue.length) {
+    const [r, c] = queue.pop();
+    for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      if (has(r + dr, c + dc) && !seen.has(`${r + dr}.${c + dc}`)) {
+        seen.add(`${r + dr}.${c + dc}`);
+        queue.push([r + dr, c + dc]);
+      }
+    }
+  }
+  return seen.size === outside.length;
+}
+
+/**
+ * Robotul pleacă dintr-o căsuță și face `min`–`max` pași (fără să se întoarcă imediat și fără să iasă din rețea); fructele stau în căsuța
+ * de sosire și în căsuțele greșelilor tipice: fără ultimul pas, stânga ↔ dreapta, sus ↔ jos, un pas în plus, fără ultimii doi pași.
+ */
+function robotQuestion(kind, rand, n, min, max) {
+  for (;;) {
+    const start = [int(rand, 0, n - 1), int(rand, 0, n - 1)];
+    const program = [];
+    let [r, c] = start;
+    for (let i = int(rand, min, max); i > 0; i--) {
+      const [m, [dr, dc]] = pickOne(rand, Object.entries(STEP).filter(([step, [a, b]]) => r + a >= 0 && r + a < n && c + b >= 0 && c + b < n && step !== BACK[program.at(-1)]));
+      program.push(m);
+      [r, c] = [r + dr, c + dc];
+    }
+    const walk = (moves) => moves.reduce(([a, b], m) => [a + STEP[m][0], b + STEP[m][1]], start);
+    const swap = (pairs) => program.map((m) => pairs[m] ?? m);
+    const key = ([a, b]) => `${a}.${b}`;
+    const cells = [];
+    for (const cell of [[r, c], walk(program.slice(0, -1)), walk(swap({ d: 's', s: 'd' })), walk(swap({ j: 'u', u: 'j' })), walk([...program, program.at(-1)]), walk(program.slice(0, -2))]) {
+      if (cell[0] >= 0 && cell[0] < n && cell[1] >= 0 && cell[1] < n && key(cell) !== key(start) && !cells.some((x) => key(x) === key(cell))) cells.push(cell);
+    }
+    if (cells.length < 4 || key(cells[0]) !== key([r, c])) continue;
+    const fruits = shuffle(rand, FRUITS).slice(0, 4);
+    const items = cells.slice(0, 4).map(([a, b], i) => ({ r: a, c: b, emoji: fruits[i] })).sort((x, y) => x.r - y.r || x.c - y.c);
+    const q = figureQuestion(kind, rand, {
+      prompt: 'La ce fruct ajunge robotul?',
+      figure: { v: 'robot-grid', n, robot: { r: start[0], c: start[1] }, program: program.join(''), items },
+      key: `${key(start)}|${program.join('')}|${cells.slice(0, 4).map(key).join(' ')}`,
+      answer: { emoji: fruits[0] },
+      distractors: fruits.slice(1).map((emoji) => ({ emoji })),
+    });
+    if (q) return q;
+  }
+}
 
 // ——— figuri și corpuri (folosite doar în generatoare, deci pot sta după tipuri) ———
 
@@ -813,7 +1017,8 @@ const CONFUSED = { triunghi: 'trapez', patrat: 'romb', cerc: 'oval' };
 
 // obiectele au în numele lor doar obiectul, nu corpul (fără „cub de gheață”)
 const SOLIDS = ['cub', 'cuboid', 'cilindru', 'sfera', 'con'];
-const OBJECTS = { cub: ['zar'], cuboid: ['cutie', 'carte'], cilindru: ['conserva', 'baterie'], sfera: ['minge', 'glob', 'baschet'], con: ['inghetata', 'petrecere'] };
+// și doar obiecte cu forma limpede în desen (fără cutie, care arată ca un cub, fără baterie și petardă)
+const OBJECTS = { cub: ['zar'], cuboid: ['carte'], cilindru: ['conserva'], sfera: ['minge', 'glob', 'baschet'], con: ['inghetata'] };
 const TWIN = { cub: 'cuboid', cuboid: 'cub', cilindru: 'con', con: 'cilindru', sfera: 'cilindru' };
 const PLANE_TRAP = { cub: 'patrat', cuboid: 'dreptunghi', cilindru: null, sfera: 'cerc', con: 'triunghi' };
 const FOOTPRINTS = { cub: 'patrat', cuboid: 'dreptunghi', cilindru: 'cerc', con: 'cerc' };

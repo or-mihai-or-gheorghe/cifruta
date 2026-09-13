@@ -757,6 +757,7 @@ def fulger_screens(run: Run, browser, base: str):
         ("siruri-intrusi", ("matrice", "analogie", "sir-doua")),
         ("puzzle-forme", ("simetrie-jumatate", "piesa-rotita", "axe-cate")),
         ("figuri-corpuri", ("desfasurare", "numara-figuri", "corpuri")),
+        ("pozitii-trasee", ("robot-lung", "coordonate", "interior")),
     ]
     for name, opts in screens:
         context = browser.new_context(locale="ro-RO", **opts)

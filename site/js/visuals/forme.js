@@ -313,3 +313,95 @@ registerVisual('net', {
   check: (p) => (NETS[p.name] ? [] : [`desfășurare necunoscută: ${p.name}`]),
   demos: Object.keys(NETS).map((name) => ({ name })),
 });
+
+// ——— rețeaua robotului: litere și cifre, obiecte, robotul și drumul lui, o figură închisă cu semne ———
+
+const RG = 24;
+// pașii robotului: d = dreapta, s = stânga, j = jos, u = sus (în sus)
+const MOVES = { d: [0, 1, '→', 'dreapta'], s: [0, -1, '←', 'stânga'], j: [1, 0, '↓', 'jos'], u: [-1, 0, '↑', 'sus'] };
+const LETTERS = 'ABCDEF';
+const spot = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? [Number(v.r), Number(v.c)] : null);
+const robotN = (p) => Math.round(num(p.n, 4));
+const programOf = (p) => String(p.program ?? '').split('').filter(Boolean);
+const listOf = (v) => (Array.isArray(v) ? v : []);
+
+/** Numele unei căsuțe: „C2” (coloana C, rândul 2) când rețeaua are litere și cifre, altfel rândul și coloana. */
+const cellWord = (p, r, c) => (bool(p.labels) ? `${LETTERS[c]}${r + 1}` : `rândul ${r + 1}, coloana ${c + 1}`);
+
+registerVisual('robot-grid', {
+  group: GROUP,
+  defaults: { n: 4 },
+  viewBox: (p) => {
+    const pad = bool(p.labels) ? 18 : 0;
+    const width = Math.max(robotN(p) * RG, programOf(p).length * 22) + 8 + pad;
+    return `0 0 ${width} ${robotN(p) * RG + 8 + pad + (programOf(p).length ? 30 : 0)}`;
+  },
+  label: (p) => {
+    const n = robotN(p);
+    const parts = [`rețea de ${n} pe ${n}${bool(p.labels) ? ', cu litere pe coloane și cifre pe rânduri' : ''}`];
+    if (cellList(p.region).length) parts.push(`o figură închisă din ${cellList(p.region).length} căsuțe`);
+    for (const m of listOf(p.marks)) parts.push(`${glyphName(norm(m))} în ${cellWord(p, m.r, m.c)}`);
+    for (const it of listOf(p.items)) parts.push(`${EMOJI[it.emoji]?.label ?? it.emoji} în ${cellWord(p, it.r, it.c)}`);
+    if (spot(p.robot)) parts.push(`robotul în ${cellWord(p, ...spot(p.robot))}`);
+    if (spot(p.mark)) parts.push(`căsuța încercuită: ${cellWord(p, ...spot(p.mark))}`);
+    if (programOf(p).length) parts.push(`drumul: ${programOf(p).map((m) => MOVES[m]?.[3] ?? m).join(', ')}`);
+    return parts.join('; ');
+  },
+  render: (p, { uid }) => {
+    const n = robotN(p);
+    const pad = bool(p.labels) ? 18 : 0;
+    const [ox, oy] = [4 + pad, 4 + pad];
+    const at = (r, c) => [ox + c * RG, oy + r * RG];
+    const region = cellList(p.region);
+    let out = `<rect x="${ox}" y="${oy}" width="${n * RG}" height="${n * RG}" fill="${C.white}"/>`;
+    for (const [r, c] of region) out += `<rect x="${at(r, c)[0]}" y="${at(r, c)[1]}" width="${RG}" height="${RG}" fill="${C.sky}"/>`;
+    for (let i = 1; i < n; i++) out += `<path d="M${ox + i * RG} ${oy} V${oy + n * RG} M${ox} ${oy + i * RG} H${ox + n * RG}" stroke="${C.gray}" stroke-width="1"/>`;
+    // conturul figurii închise: laturile căsuțelor care nu au vecin în figură
+    for (const [r, c] of region) {
+      const [x, y] = at(r, c);
+      const sides = [[r - 1, c, x, y, x + RG, y], [r + 1, c, x, y + RG, x + RG, y + RG], [r, c - 1, x, y, x, y + RG], [r, c + 1, x + RG, y, x + RG, y + RG]];
+      for (const [nr, nc, x1, y1, x2, y2] of sides) {
+        if (!hasCell(region, nr, nc)) out += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${C.ink}" stroke-width="3" stroke-linecap="round"/>`;
+      }
+    }
+    out += `<rect x="${ox}" y="${oy}" width="${n * RG}" height="${n * RG}" fill="none" ${st(2.5)}/>`;
+    if (bool(p.labels)) {
+      for (let i = 0; i < n; i++) out += txt(ox + i * RG + RG / 2, 12, LETTERS[i], { size: 12 }) + txt(12, oy + i * RG + RG / 2, String(i + 1), { size: 12 });
+    }
+    listOf(p.marks).forEach((m, i) => {
+      const [x, y] = at(Number(m.r), Number(m.c));
+      out += `<g transform="translate(${x + 4} ${y + 4}) scale(0.16)">${glyphBody({ ...m, size: 'mare' }, `${uid}-m${i}`)}</g>`;
+    });
+    for (const it of listOf(p.items)) out += emojiImage(it.emoji, at(Number(it.r), Number(it.c))[0] + 3, at(Number(it.r), Number(it.c))[1] + 3, RG - 6);
+    if (spot(p.robot)) out += emojiImage('robot', at(...spot(p.robot))[0] + 2, at(...spot(p.robot))[1] + 2, RG - 4);
+    if (spot(p.mark)) out += `<rect x="${at(...spot(p.mark))[0] + 1.5}" y="${at(...spot(p.mark))[1] + 1.5}" width="${RG - 3}" height="${RG - 3}" rx="5" fill="none" stroke="${C.greenDark}" stroke-width="3"/>`;
+    programOf(p).forEach((m, i) => {
+      const [x, y] = [4 + pad + i * 22, oy + n * RG + 6];
+      out += `<rect x="${x}" y="${y}" width="20" height="20" rx="5" fill="${C.cream}" ${st(1.5)}/>${txt(x + 10, y + 10.5, MOVES[m]?.[2] ?? '?', { size: 14 })}`;
+    });
+    return out;
+  },
+  check: (p) => {
+    const n = robotN(p);
+    const e = [];
+    if (!(Number.isInteger(num(p.n, NaN)) && n >= 3 && n <= 6)) e.push(`n trebuie să fie între 3 și 6: ${p.n}`);
+    const inside = (r, c) => Number.isInteger(r) && Number.isInteger(c) && r >= 0 && r < n && c >= 0 && c < n;
+    for (const it of listOf(p.items)) {
+      if (!inside(Number(it.r), Number(it.c))) e.push(`obiect în afara rețelei: ${JSON.stringify(it)}`);
+      if (!EMOJI[it.emoji]) e.push(`emoji necunoscut: ${it.emoji}`);
+    }
+    for (const m of listOf(p.marks)) {
+      if (!inside(Number(m.r), Number(m.c))) e.push(`semn în afara rețelei: ${JSON.stringify(m)}`);
+      e.push(...glyphErrors(m, 'semn: '));
+    }
+    for (const [name, v] of [['robot', p.robot], ['mark', p.mark]]) if (v !== undefined && !(spot(v) && inside(...spot(v)))) e.push(`${name} în afara rețelei`);
+    if (!cellList(p.region).every(([r, c]) => inside(r, c))) e.push('region: căsuțe din rețea');
+    if (!programOf(p).every((m) => MOVES[m])) e.push(`program: doar d, s, j, u (${p.program})`);
+    return e;
+  },
+  demos: [
+    { n: 4, labels: true, items: [{ r: 1, c: 2, emoji: 'mar' }, { r: 3, c: 0, emoji: 'para' }], mark: { r: 1, c: 2 } },
+    { n: 4, robot: { r: 0, c: 0 }, program: 'djj', items: [{ r: 2, c: 1, emoji: 'cirese' }] },
+    { n: 5, region: [[1, 1], [1, 2], [2, 1], [2, 2], [2, 3], [3, 2]], marks: [{ r: 2, c: 2, shape: 'cerc', color: 'rosu' }, { r: 1, c: 3, shape: 'triunghi', color: 'albastru' }] },
+  ],
+});

@@ -282,7 +282,88 @@ export const SHAPE_RULES = {
     const good = q.choices.filter((c) => foldsToCube(q.options[c].cells ?? []));
     return !f && sameBox(opts) && opts.every((o) => o.cells?.length === 6) && good.length === 1 && good[0] === q.answer;
   },
+  pozitii: (q) => {
+    const f = q.figure;
+    const cells = String(f?.cells ?? '').split(',');
+    if (f?.v !== 'farm-grid' || cells.length !== 9 || new Set(cells).size !== 9) return false;
+    // stânga și dreapta din ochii copilului (ca în desen); „între” = vecinii de pe același rând sau aceeași coloană
+    let target = -1;
+    const between = /^Cine este între (\S+) și (\S+)\?$/.exec(q.prompt);
+    const next = /^Cine este (în stânga|în dreapta|deasupra|dedesubtul) (\S+)\?$/.exec(q.prompt);
+    if (between) {
+      const [a, b] = [cells.indexOf(BY_NAME[between[1]]), cells.indexOf(BY_NAME[between[2]])];
+      const [ra, ca, rb, cb] = [Math.floor(a / 3), a % 3, Math.floor(b / 3), b % 3];
+      if (a >= 0 && b >= 0 && ((ra === rb && Math.abs(ca - cb) === 2) || (ca === cb && Math.abs(ra - rb) === 2))) target = ((ra + rb) / 2) * 3 + (ca + cb) / 2;
+    } else if (next) {
+      const i = cells.indexOf(BY_GENITIVE[next[2]]);
+      const [dr, dc] = { 'în stânga': [0, -1], 'în dreapta': [0, 1], deasupra: [-1, 0], dedesubtul: [1, 0] }[next[1]];
+      const [r, c] = [Math.floor(i / 3) + dr, (i % 3) + dc];
+      if (i >= 0 && r >= 0 && r < 3 && c >= 0 && c < 3) target = r * 3 + c;
+    }
+    const good = q.choices.filter((c) => q.options[c].emoji === cells[target]);
+    return target >= 0 && good.length === 1 && good[0] === q.answer;
+  },
+  interior: (q) => {
+    const f = q.figure;
+    if (f?.v !== 'robot-grid' || !f.region?.length || f.marks?.length !== 4) return false;
+    const inRegion = (r, c) => f.region.some(([a, b]) => a === r && b === c);
+    // figura nu are goluri: orice căsuță din afara ei ajunge la marginea rețelei trecând doar prin căsuțe din afară
+    const outside = [];
+    for (let r = 0; r < f.n; r++) for (let c = 0; c < f.n; c++) if (!inRegion(r, c)) outside.push([r, c]);
+    const reach = new Set(outside.filter(([r, c]) => r === 0 || c === 0 || r === f.n - 1 || c === f.n - 1).map(([r, c]) => `${r},${c}`));
+    for (let grew = true; grew; ) {
+      grew = false;
+      for (const [r, c] of outside) {
+        if (!reach.has(`${r},${c}`) && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dr, dc]) => reach.has(`${r + dr},${c + dc}`))) {
+          reach.add(`${r},${c}`);
+          grew = true;
+        }
+      }
+    }
+    const markOf = (o) => f.marks.find((m) => m.shape === o.shape && m.color === o.color);
+    const inside = q.choices.filter((c) => markOf(q.options[c]) && inRegion(markOf(q.options[c]).r, markOf(q.options[c]).c));
+    return reach.size === outside.length && q.choices.every((c) => markOf(q.options[c])) && inside.length === 1 && inside[0] === q.answer;
+  },
+  'robot-scurt': walkRule(4, 2, 3),
+  'robot-lung': walkRule(5, 4, 6),
+  coordonate: (q) => {
+    const f = q.figure;
+    if (f?.v !== 'robot-grid' || f.labels !== true || !f.items?.length || new Set(f.items.map((it) => it.emoji)).size !== f.items.length) return false;
+    // litera arată coloana (A în stânga), cifra arată rândul (1 sus)
+    const asked = /^Ce este în ([A-F])([1-6])\?$/.exec(q.prompt);
+    if (asked) {
+      const item = f.items.find((it) => it.c === 'ABCDEF'.indexOf(asked[1]) && it.r === Number(asked[2]) - 1);
+      const good = q.choices.filter((c) => q.options[c].emoji === item?.emoji);
+      return Boolean(item) && good.length === 1 && good[0] === q.answer;
+    }
+    if (q.prompt !== 'Unde este obiectul încercuit?' || !f.mark || !f.items.some((it) => it.r === f.mark.r && it.c === f.mark.c)) return false;
+    const good = q.choices.filter((c) => q.options[c].text === `${'ABCDEF'[f.mark.c]}${f.mark.r + 1}`);
+    return optionList(q).every((o) => /^[A-F][1-6]$/.test(o.text ?? '')) && good.length === 1 && good[0] === q.answer;
+  },
 };
+
+// ——— poziții și trasee ———
+
+const BY_NAME = { găină: 'gaina', pisică: 'pisica', rață: 'rata', câine: 'caine', cal: 'cal', oaie: 'oaie', porc: 'porc', vacă: 'vaca', iepure: 'iepure' };
+const BY_GENITIVE = { găinii: 'gaina', pisicii: 'pisica', raței: 'rata', câinelui: 'caine', calului: 'cal', oii: 'oaie', porcului: 'porc', vacii: 'vaca', iepurelui: 'iepure' };
+
+/** Robotul merge pas cu pas, fără să iasă din rețea; răspunsul e obiectul din căsuța în care se oprește (4 obiecte, în căsuțe diferite). */
+function walkRule(n, minSteps, maxSteps) {
+  return (q) => {
+    const f = q.figure;
+    const steps = String(f?.program ?? '').split('');
+    if (f?.v !== 'robot-grid' || f.n !== n || !f.robot || steps.length < minSteps || steps.length > maxSteps || f.items?.length !== 4) return false;
+    let [r, c] = [f.robot.r, f.robot.c];
+    for (const step of steps) {
+      const [dr, dc] = { d: [0, 1], s: [0, -1], j: [1, 0], u: [-1, 0] }[step] ?? [NaN, NaN];
+      [r, c] = [r + dr, c + dc];
+      if (!(r >= 0 && r < n && c >= 0 && c < n)) return false;
+    }
+    const end = f.items.find((it) => it.r === r && it.c === c);
+    const good = q.choices.filter((ch) => q.options[ch].emoji === end?.emoji);
+    return new Set(f.items.map((it) => `${it.r},${it.c}`)).size === 4 && new Set(f.items.map((it) => it.emoji)).size === 4 && Boolean(end) && good.length === 1 && good[0] === q.answer;
+  };
+}
 
 // ——— figuri și corpuri ———
 

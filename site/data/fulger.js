@@ -231,6 +231,52 @@ export default {
       ],
     },
     {
+      id: 'pozitii-trasee',
+      title: 'Poziții și trasee',
+      short: 'Poziții și trasee',
+      text: 'Stânga, dreapta, sus, jos și între; înăuntru sau afară; drumul unui robot și căsuțele unei rețele cu litere și cifre.',
+      icon: 'robot',
+      grade: 2,
+      concepts: ['mat.geo.pozitii', 'mat.geo.interior-exterior', 'mat.geo.trasee', 'mat.geo.coordonate'],
+      levels: [
+        {
+          id: 'usor',
+          warmup: ['pozitii', 'interior'],
+          mix: [
+            { kind: 'pozitii', weight: 3 },
+            { kind: 'interior', weight: 2.5 },
+            { kind: 'robot-scurt', weight: 1.5 },
+            { kind: 'coordonate', weight: 1 },
+          ],
+          stars: [27, 66, 160],
+        },
+        {
+          id: 'intermediar',
+          warmup: ['pozitii', 'robot-scurt'],
+          mix: [
+            { kind: 'robot-scurt', weight: 2.5 },
+            { kind: 'coordonate', weight: 2.5 },
+            { kind: 'interior', weight: 1.5 },
+            { kind: 'pozitii', weight: 1.5 },
+            { kind: 'robot-lung', weight: 1 },
+          ],
+          stars: [27, 71, 175],
+        },
+        {
+          id: 'avansat',
+          warmup: ['robot-scurt', 'coordonate'],
+          mix: [
+            { kind: 'robot-lung', weight: 3 },
+            { kind: 'coordonate', weight: 2 },
+            { kind: 'robot-scurt', weight: 1.5 },
+            { kind: 'interior', weight: 1 },
+            { kind: 'pozitii', weight: 1 },
+          ],
+          stars: [27, 75, 200],
+        },
+      ],
+    },
+    {
       id: 'numere-1000',
       title: 'Numere până la 1000',
       short: 'Până la 1000',
