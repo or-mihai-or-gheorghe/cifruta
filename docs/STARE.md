@@ -21,9 +21,10 @@
   ca în v0.8.1, plus legătura „Confidențialitate” din subsol.
   Calitate: 76 de teste Node (plus validarea conținutului, a tabelului de acoperire, a contrastului și calibrarea stelelor din
   Calcul fulger pe fiecare temă și nivel), 13 teste ale regulilor Firestore pe emulator, E2E 1118 verificări pe 3 ecrane + tastatură
-  (plus telefon ținut orizontal și telefon mic) și E2E pentru cont pe emulatoare, cu 58 de verificări (două dispozitive, două file,
+  (plus telefon ținut orizontal și telefon mic) și E2E pentru cont pe emulatoare, cu 59 de verificări (două dispozitive, două file,
   blocare, clasamente pe temă, date vechi din cloud).
-- **Următorul pas:** verificarea cu un cont Google real pe site-ul publicat (laptop, telefon, iPad) și documentul `admins/<uid>`.
+- **Următorul pas:** site-ul deschis în contul real (la activare, clasamentele vechi trec pe temă și stelele de la teste revin; verificăm
+  apoi în Firestore), pe laptop, telefon și iPad, și documentul `admins/<uid>`.
   În paralel: copilul joacă și rezolvă testele → pragurile și timpii reali. Apoi a doua temă din Calcul fulger (rețeta din
   `CLAUDE.md`), cu super-totalul pe mai multe teme, și secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul).
 
@@ -78,8 +79,8 @@
   1096/1096, tag `v0.9.1`
 - [ ] M22 (v0.10.0): Calcul fulger pe teme: lista temelor și hub-ul temei, cu „Ce exersăm” (conceptele din programă, pe fiecare tip de
   întrebare); tema „Adunări și scăderi până la 100” și patru teme „în curând”; recorduri pe „temă:nivel”, normalizate la citire;
-  clasamente pe temă și nivel plus totalul temei, cele vechi șterse; rutele vechi redirecționate. npm test 76/76, reguli 13/13,
-  E2E cont 58/58, E2E local 1118/1118
+  clasamente pe temă și nivel plus totalul temei, cele vechi șterse; rutele vechi redirecționate; stelele încercărilor urcate de
+  v0.9.0 revin în clasament. npm test 76/76, reguli 13/13, E2E cont 59/59, E2E local 1118/1118
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -173,6 +174,7 @@
 | 2026-09-13 | Clasamente pe temă și nivel plus totalul temei (`fulger-<temă>-total-<perioadă>`), scrise în aceeași tranzacție; `fulger-total-<perioadă>` rămâne rezervat pentru super-total; clasamentele vechi ies din lista profilului și se șterg | decizia utilizatorului: totaluri pe temă acum, un super-total pe mai multe teme mai târziu, fără migrare |
 | 2026-09-13 | Medaliile rămân comune; „Campionul” = 3 stele la toate nivelurile unei teme; fiecare temă și fiecare tip de întrebare poartă conceptele din programă („Ce exersăm”), iar etichetele „fără / cu trecere” se verifică pe întrebările generate | decizia utilizatorului; programa ca bază pentru temele viitoare |
 | 2026-09-13 | La publicare, regulile Firestore înaintea site-ului; temele jucabile stau și în `fulgerTopics()` din reguli, iar un test le compară cu datele | regulile vechi ar refuza rundele cu temă |
+| 2026-09-13 | Un `state/tests` lipsă se reface din încercările din browser (la activare și la următoarea încercare); unul existent rămâne sursa, deci ce s-a șters de pe alt dispozitiv nu reapare | v0.9.1 socotea 0 stele fără document și a șters o intrare reală din clasamentul stelelor; încercările urcate de v0.9.0 erau în cloud |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -183,8 +185,8 @@
 - Testele u1-t1, u1-t3, u1-t4 și u1-t6 au trecut la versiunea 2 (v0.6.1), cu același efect pentru încercările făcute înainte.
 - În v0.7.0 toate cele 6 teste ale secțiunii 0–1000 au primit o versiune nouă: încercările mai vechi arată doar rezumatul.
 - Sunetul din Calcul fulger pe iPhone/iPad e deblocat după regulile Safari, dar nu a fost verificat pe un dispozitiv real.
-- Contul familiei e verificat doar pe emulatoare: intrarea reală cu Google (popup pe laptop, telefon, iPad) se verifică după
-  configurarea proiectului Firebase. Dacă popup-ul e blocat des pe telefoane, varianta e Firebase Hosting cu login prin redirect.
+- Intrarea reală cu Google a mers (în producție există un cont cu un profil, încercări și o rundă); de încercat pe toate dispozitivele
+  (laptop, telefon, iPad). Dacă popup-ul e blocat des pe telefoane, varianta e Firebase Hosting cu login prin redirect.
 - În limitele regulilor, un client priceput poate trimite un scor inventat în clasament (fără Cloud Functions nu se verifică pe
   server); există moderarea din `#/admin`.
 - Calcul fulger păstrează ultimele 30 de runde pentru toate temele împreună: când apar teme noi, istoricul pe temă se subțiază
@@ -328,5 +330,8 @@
   tranzacția în curs (400); iconița „Serii” din „Cum se joacă” se micșora lângă textul lung (eroare mai veche). O recenzie independentă
   a diferențelor (reguli, migrare, versiuni amestecate, rute, teste) nu a găsit probleme. O citire din producție, doar a formei datelor,
   fără valori personale, a arătat un profil cu date din v0.9.0: record fără serie și fără săptămână. Intrarea „tot timpul” își ia acum
-  seria din runda recordului, cu un test pe forma aceasta. npm test 76/76, reguli 13/13, E2E cont 58/58, E2E local 1118/1118.
+  seria din runda recordului, cu un test pe forma aceasta. După prima publicare (regulile, apoi site-ul), a doua citire din producție a
+  arătat că intrarea din `teste-stele` dispăruse încă de dinainte: la 16:48, cu v0.9.1, browserul contului nu găsise `state/tests`
+  (încercările urcaseră cu v0.9.0) și socotise 0 stele. Încercările erau în cloud; acum un `state/tests` lipsă se reface din încercările
+  din browser (E2E pe emulatoare cu aceeași stare). npm test 76/76, reguli 13/13, E2E cont 59/59, E2E local 1118/1118.
   **De făcut data viitoare:** verificarea cu un cont real; copilul joacă → pragurile; a doua temă și super-totalul.

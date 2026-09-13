@@ -56,7 +56,7 @@ O altă filă a aceluiași browser află de ieșirea voluntară din evenimentul 
 | `…/attempts/{id}` | proprietarul, adminul | încercarea, cu timpul de rezolvare (`activeMs`, `msByExercise`, `startedAt`, `submittedAt`); `answers` ca text JSON (Firestore nu acceptă liste în liste) |
 | `…/fulger/{nivel-ms}` | proprietarul, adminul | runda: `topic`, `level`, `at`, `total`, `correct`, `wrong`, `bestStreak`, `fast`, `stars`, `byKind` (fără `topic`, runda e din prima temă) |
 | `…/state/fulger` | proprietarul, adminul | chei „temă:nivel”: `best` (recordul, cu `correct` și `bestStreak`) și `week` (cea mai bună rundă a săptămânii); `medals`, comune temelor |
-| `…/state/tests` | proprietarul, adminul | `best`: cele mai multe stele pe fiecare test, din toate încercările profilului, de pe orice dispozitiv |
+| `…/state/tests` | proprietarul, adminul | `best`: cele mai multe stele pe fiecare test, din toate încercările profilului, de pe orice dispozitiv; dacă lipsește (încercări urcate de v0.9.0), se reface din încercările din browser |
 | `leaderboards/{board}/entries/{uid}_{pid}` | orice cont autentificat citește; proprietarul scrie, validat; adminul redenumește și șterge | `uid`, `pid`, `nickname`, `avatar`, `score`, `updatedAt`; pe un nivel și `correct`, `bestStreak`; la totalul temei `levels`; la teste `tests` |
 
 **Clasamentele:**

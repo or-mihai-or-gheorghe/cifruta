@@ -7,7 +7,7 @@
 // normalizează la fiecare citire (chei „temă:nivel”, js/fulger/records.js), așa că datele de dinainte de teme se migrează singure.
 
 import config from '../../data/fulger.js';
-import { currentProfile, getAttempt, getFulger, getScoped, onWrite, readScopeData, setScoped, writeScopeData } from '../core/storage.js';
+import { currentProfile, getAttempt, getFulger, getScoped, listAttempts, onWrite, readScopeData, setScoped, writeScopeData } from '../core/storage.js';
 import { LEGACY_TOPIC, LEVEL_IDS, normalizeFulger } from '../fulger/records.js';
 import {
   dequeue, enqueue, entryId, fromCloudAttempt, fulgerCandidates, isRetiredBoard, mergeAttempts, mergeFulger, mergeFulgerState, pruneBoards,
@@ -280,6 +280,12 @@ async function readProfile(tx, r) {
 
 const dataOf = (snap) => (snap.exists() ? snap.data() : {});
 
+/**
+ * state/tests.best. Documentul lipsește la profilurile ale căror încercări au urcat înainte de v0.9.1: atunci se reface din încercările
+ * din browser (după aducere, aceleași cu cele din cloud), ca stelele lor să nu dispară din clasament.
+ */
+const testsBest = (snap) => (snap.exists() ? (snap.data().best ?? {}) : listAttempts().reduce((best, a) => withAttemptStars(best, a) ?? best, {}));
+
 async function pushAttempt(c, id) {
   const attempt = getAttempt(id);
   if (!attempt) return; // ștearsă între timp
@@ -290,8 +296,9 @@ async function pushAttempt(c, id) {
     const tests = await tx.get(r.tests());
     tx.set(r.attempt(id), toCloudAttempt(attempt));
     if (!existing.exists()) tx.update(r.profile(), { attempts: (profile.attempts ?? 0) + 1 });
-    const best = withAttemptStars(dataOf(tests).best, attempt);
-    if (best) tx.set(r.tests(), { best });
+    const saved = testsBest(tests);
+    const best = withAttemptStars(saved, attempt) ?? saved;
+    if (best !== saved || !tests.exists()) tx.set(r.tests(), { best });
   });
 }
 
@@ -367,15 +374,17 @@ async function pushBoards(c, topics) {
   if (boards) c.onProfile?.({ boards });
 }
 
-/** Stelele de la teste, din state/tests (toate încercările profilului, de pe orice dispozitiv); la 0 stele intrarea dispare. */
+/** Stelele de la teste, din state/tests (toate încercările profilului, de pe orice dispozitiv; refăcut dacă lipsește); la 0 stele intrarea dispare. */
 async function pushStars(c) {
   const r = refs(c);
   const boards = await c.f.runTransaction(c.db, async (tx) => {
     const profile = await readProfile(tx, r);
     const saved = await tx.get(r.tests());
     const entry = await tx.get(r.entry(TESTS_BOARD));
+    const best = testsBest(saved);
+    if (!saved.exists() && Object.keys(best).length) tx.set(r.tests(), { best });
     if (!profile.showOnBoards) return null;
-    const { stars, tests } = starsTotal(dataOf(saved).best);
+    const { stars, tests } = starsTotal(best);
     const had = entry.exists();
     if (had ? entry.data().score === stars && entry.data().tests === tests : stars === 0) return null;
     let next = profile.boards ?? [];

@@ -93,6 +93,11 @@ def patch(path: str, fields: dict, mask: list | None = None):
     urllib.request.urlopen(req, timeout=10).read()
 
 
+def remove(path: str):
+    """Șterge un document cu drept de proprietar, fără reguli."""
+    urllib.request.urlopen(urllib.request.Request(f"{FS}/{path}", method="DELETE", headers=OWNER), timeout=10).read()
+
+
 def doc(path: str):
     data = rest(path)
     return {k: decode(v) for k, v in data.get("fields", {}).items()} if data else None
@@ -331,7 +336,8 @@ def tabs_flow(run: Run, browser):
 def legacy_flow(run: Run, browser):
     print("\n[cont] datele Calcul fulger de dinainte de teme din cloud: intrări noi în temă, cele vechi șterse, redenumirea merge")
     ctx, page, uid = parent(run, browser, "vechi", "vechi@example.com", "Părinte", "Vechi", "lup")
-    run.check(flushed(page), "migrare: cont nou sincronizat")
+    storage(page, f"m.addAttempt({json.dumps(attempt(2))});")
+    run.check(flushed(page), "migrare: cont nou sincronizat, cu o încercare")
     base = f"users/{uid}/profiles/p1"
     now = page.evaluate("new Date().toISOString()")
     week = this_week(page)
@@ -340,6 +346,9 @@ def legacy_flow(run: Run, browser):
     legacy_entry = {"uid": uid, "pid": "p1", "nickname": "Vechi", "avatar": "lup", "score": 90, "correct": 20, "bestStreak": 9, "updatedAt": "ts:2026-09-01T10:00:00Z"}
     patch(f"leaderboards/fulger-usor-all/entries/{uid}_p1", legacy_entry)
     patch(base, {"boards": ["fulger-usor-all"]}, mask=["boards"])
+    # încercările urcate de v0.9.0 n-au state/tests; fără el, v0.9.1 socotea 0 stele și ștergea intrarea din clasamentul stelelor
+    remove(f"{base}/state/tests")
+    remove(f"leaderboards/teste-stele/entries/{uid}_p1")
 
     page.reload()
     page.wait_for_function("window.__cloud && window.__cloud.state().pid === 'p1'", timeout=30000)
@@ -350,6 +359,9 @@ def legacy_flow(run: Run, browser):
     total_all = doc(f"{board('total')}/{uid}_p1") or {}
     run.check(level_all == 90 and level_week == 90 and total_all.get("score") == 90 and total_all.get("levels") == 1, f"migrare: recordul vechi ajunge în clasamentele temei, cu totalul ({level_all}, {level_week}, {total_all.get('score')})")
     run.check(doc(f"leaderboards/fulger-usor-all/entries/{uid}_p1") is None and "fulger-usor-all" not in boards, f"migrare: intrarea veche ștearsă ({boards})")
+    stars = (doc(f"leaderboards/teste-stele/entries/{uid}_p1") or {}).get("score")
+    saved = (doc(f"{base}/state/tests") or {}).get("best", {})
+    run.check(stars == 2 and saved.get(TEST_ID) == 2 and "teste-stele" in boards, f"migrare: state/tests lipsă se reface din încercări, iar stelele revin în clasament ({stars}, {saved})")
 
     # un profil cu un clasament vechi rămas în listă se poate redenumi; intrarea veche se șterge în aceeași tranzacție
     patch(f"leaderboards/fulger-usor-all/entries/{uid}_p1", legacy_entry)

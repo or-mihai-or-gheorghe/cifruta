@@ -145,7 +145,7 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   Firestore, `?emulator=1`, `window.__cloud.signInAs`), `npm run deploy:rules`; emulatoarele cer Java 21 (`tools/with-java21.sh`).
   `replaceChildren(null)` scrie textul „null”: listele de noduri se filtrează înainte. Blocarea stă în `blocked/{uid}`, nu în
   `users/{uid}`. Clasamentele se calculează din starea completă din cloud (`state/fulger` cu `best` și `week`, `state/tests`), nu din ce
-  e în browser. Limitele de frecvență ale intrărilor (5 s la stele, 90 s la Calcul fulger) înseamnă reîncercări automate; un E2E care
+  e în browser; doar un `state/tests` lipsă (încercări urcate de v0.9.0) se reface din încercările din browser. Limitele de frecvență ale intrărilor (5 s la stele, 90 s la Calcul fulger) înseamnă reîncercări automate; un E2E care
   schimbă aceeași intrare de două ori la rând trebuie să aștepte. Calcul fulger are teme: recordurile și cele mai bune runde ale
   săptămânii au chei „temă:nivel” (`js/fulger/records.js`), datele de dinainte de teme se normalizează la fiecare citire
   (`normalizeFulger`), iar clasamentele sunt `fulger-<temă>-<nivel|total>-<perioadă>`; cele vechi (`fulger-<nivel>-…`) ies din lista
