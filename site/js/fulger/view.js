@@ -501,7 +501,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
         h('h2', { class: 'fg-panel__title' }, 'Pauză'),
         h('p', { class: 'fg-panel__text' }, 'Ceasul stă pe loc. Continuă când ești gata.'),
         resumeBtn,
-        h('a', { class: 'c-btn c-btn--ghost', href: '#/fulger', 'data-testid': 'fg-quit' }, 'Ieși din joc'),
+        h('a', { class: 'c-btn c-btn--ghost', href: `#/fulger/${topic}`, 'data-testid': 'fg-quit' }, 'Ieși din joc'),
       ),
     );
     resumeBtn.focus({ preventScroll: true });

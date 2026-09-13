@@ -130,7 +130,9 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   de timpul rundei (întârzierea de la apariție, pauzele după răspuns) se programează cu `after()` pe acest timp, nu cu `setTimeout`.
   Punctajul (viteza contează doar în serie), pauzele (1 s; „Hopa” la greșeli mai rapide decât cititul) și stelele vin din
   `engine.js` + `data/fulger.js`; pragurile de stele sunt verificate prin simulare în `tests/fulger.test.js`. Rundele stau în
-  `cifruta:fulger` și se șterg din „Pentru părinți” de pe lista temelor (`#/fulger`, toate temele odată), nu odată cu istoricul testelor. E2E: `?debug=1` → `window.__dbg.fulger` (`state`, `force`,
+  `cifruta:fulger` și se șterg din „Pentru părinți” de pe pagina jocului (`#/fulger`, toate temele odată), nu odată cu istoricul testelor.
+  Pagina jocului arată temele desfășurate, grupate (titlu, explicație, „Ce exersăm”, nivelurile; cele „în curând” la final), fără pagini
+  separate: `#/fulger/<temă>` e aceeași pagină, derulată la temă. E2E: `?debug=1` → `window.__dbg.fulger` (`state`, `force`,
   `elapse`, `setStreak`). Efectele trecătoare nu apar la mișcare redusă; bannerele se așază deasupra cardului, nu peste întrebare.
 - Calcul fulger pe dispozitive: Safari pe iOS pornește sunetul doar dintr-un gest încheiat, deci arena cheamă `unlockSound()` la
   Start și la ridicarea degetului (răspunsurile se iau la `pointerdown`). În rundă arena umple spațiul de sub antet prin flex

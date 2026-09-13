@@ -25,8 +25,7 @@ singura barieră** și au teste automate pe emulator.
 
 `core/storage.js` are un **scop**: fără cont, cheile de până acum (`cifruta:attempts`, `cifruta:fulger`, `cifruta:draft:<test>`); pentru
 un profil, `cifruta:p:<uid>:<pid>:…`. Sunetul rămâne comun. Paginile citesc tot sincron. După aducerea datelor din cloud, `account.js`
-reîncarcă doar paginile liniștite (`#/`, secțiunile, lista temelor și hub-ul unei teme din Calcul fulger), niciodată un test sau o
-rundă în desfășurare.
+reîncarcă doar paginile liniștite (`#/`, secțiunile, pagina Calcul fulger), niciodată un test sau o rundă în desfășurare.
 
 Fiecare scriere (`addAttempt`, `updateAttempt`, `clearHistory`, `saveFulgerRound`, `clearFulger`) se anunță prin `onWrite`.
 Cât scopul e un profil, `sync.js` o pune imediat în coada profilului (`…:pending`, cel mult 200 de operații, cu număr de ordine), chiar

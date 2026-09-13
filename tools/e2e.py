@@ -547,14 +547,14 @@ def fulger_flow(run: Run, page: Page, vp: str):
     page.evaluate("localStorage.removeItem('cifruta:fulger')")
     run.goto(page, "")
     page.get_by_test_id("fulger-card").click()
-    page.wait_for_selector(f"[data-testid=fg-topic-{FULGER_TOPIC}]")
-    topics = page.evaluate("import('./data/fulger.js').then((m) => m.default.topics.length)")
-    run.check(page.locator(".fg-topic").count() == topics and page.locator(".fg-medal").count() == 6, f"[{vp}] fulger: cardul duce la lista temelor ({topics}), cu 6 medalii")
+    group = page.get_by_test_id(f"fg-topic-{FULGER_TOPIC}")
+    group.wait_for()
+    playable, soon, title = page.evaluate("import('./data/fulger.js').then(({ default: c }) => [c.topics.filter((t) => !t.soon).length, c.topics.filter((t) => t.soon).length, c.topics.find((t) => !t.soon).title])")
+    run.check(page.locator("section.fg-topic").count() == playable and page.locator(".fg-soon").count() == soon and page.locator("a.fg-topic, a.fg-soon").count() == 0 and page.locator(".fg-medal").count() == 6,
+              f"[{vp}] fulger: temele sunt desfășurate pe pagina jocului ({playable} de jucat, {soon} în curând), fără carduri spre altă pagină, cu 6 medalii")
+    run.check(group.locator("h2").inner_text() == title and group.locator(".fg-level").count() == 3 and group.get_by_test_id("fg-concepts").locator("li").count() == 5,
+              f"[{vp}] fulger: tema are titlul, explicația, „Ce exersăm” și cele 3 niveluri")
     run.layout_ok(page, f"[{vp}] fulger teme")
-    page.get_by_test_id(f"fg-topic-{FULGER_TOPIC}").click()
-    page.wait_for_selector("[data-testid=fg-level-usor]")
-    run.check(page.locator(".fg-level").count() == 3 and page.get_by_test_id("fg-concepts").locator("li").count() == 5, f"[{vp}] fulger: tema duce la hub, cu 3 niveluri și „Ce exersăm”")
-    run.layout_ok(page, f"[{vp}] fulger hub")
 
     run.goto(page, f"fulger/{FULGER_TOPIC}/usor", debug=True)
     page.get_by_test_id("fg-start").click()
@@ -653,6 +653,9 @@ def fulger_flow(run: Run, page: Page, vp: str):
     run.check(True, f"[{vp}] fulger: „Mai joc o dată” pornește o rundă nouă")
 
     run.goto(page, f"fulger/{FULGER_TOPIC}")
+    page.wait_for_timeout(200)
+    top = page.get_by_test_id(f"fg-topic-{FULGER_TOPIC}").bounding_box()["y"]
+    run.check(0 <= top < 160, f"[{vp}] fulger: #/fulger/<temă> e aceeași pagină, derulată la temă ({round(top)} px de sus)")
     best = page.get_by_test_id("fg-best-usor").inner_text()
     page.reload()
     page.wait_for_selector("[data-testid=fg-best-usor]")

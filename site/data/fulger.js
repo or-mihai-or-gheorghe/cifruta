@@ -121,7 +121,7 @@ export default {
       id: 'ecuatii',
       title: 'Ecuații simple',
       short: 'Ecuații',
-      text: 'Aflarea numărului necunoscut, de exemplu □ + 7 = 15.',
+      text: 'Aflarea numărului necunoscut, de exemplu □ + 7 = 15.', // spații nedespărțite: exemplul stă pe un rând
       icon: 'puzzle',
       grade: 1,
       concepts: ['mat.op.necunoscut'],

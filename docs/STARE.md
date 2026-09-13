@@ -1,7 +1,7 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-13 · **Versiune:** 0.10.0 (Calcul fulger pe teme legate de programă, cu clasamente pe temă)
+- **Data:** 2026-09-13 · **Versiune:** 0.10.1 (Calcul fulger: temele desfășurate pe pagina jocului)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -10,7 +10,7 @@
   grafic cu bare construit; `mark` cu reguli de set pentru sarcini deschise), banca vizuală (50 de desene: și grafice, pictograme,
   bețișoare, felii, tabele, podium, hartă de linii, indicator, raft, bon, listă, tabel de poziție, cuburi, medalie; 8 peisaje
   animate), sunete discrete cu buton de oprire, atelier pentru autori, jocul **Calcul fulger** (`#/fulger`: teme legate de programă,
-  fiecare cu trei niveluri; acum „Adunări și scăderi până la 100”, iar numerele până la 1000, înmulțirea, împărțirea și ecuațiile
+  desfășurate pe pagina jocului, fiecare cu trei niveluri; acum „Adunări și scăderi până la 100”, iar numerele până la 1000, înmulțirea, împărțirea și ecuațiile
   simple apar „în curând”; runde de 2 minute, 16 tipuri de întrebări generate, fiecare cu conceptele ei („Ce exersăm”), alune cu bonus de viteză și de serie, Turbo, pistă spre stele și record, 6 medalii, „Greșelile tale” și ținta următoarei stele la rezultate). Conținut: **4 teste de recapitulare a clasei I** (T1–T4 v2)
   și **6 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc), toate
   exercițiile cu desen sau emoji, fără răspunsuri „la vedere”, cu probleme în mai mulți pași și sarcini deschise la avansat.
@@ -82,6 +82,9 @@
   clasamente pe temă și nivel plus totalul temei, cele vechi șterse; rutele vechi redirecționate; stelele încercărilor urcate de
   v0.9.0 revin în clasament. npm test 76/76, reguli 13/13 (publicate), E2E cont 59/59, E2E local 1118/1118; publicat, E2E pe
   site-ul live 1118/1118, tag `v0.10.0`
+- [ ] M23 (v0.10.1): pagina Calcul fulger arată temele desfășurate, grupate: panoul temei (titlu, programă, stele și total, explicație,
+  „Ce exersăm”, cele trei niveluri) și temele „în curând” la final, fără pagini separate pe temă; `#/fulger/<temă>` derulează la temă.
+  npm test 76/76, E2E local 1115/1115
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -176,6 +179,7 @@
 | 2026-09-13 | Medaliile rămân comune; „Campionul” = 3 stele la toate nivelurile unei teme; fiecare temă și fiecare tip de întrebare poartă conceptele din programă („Ce exersăm”), iar etichetele „fără / cu trecere” se verifică pe întrebările generate | decizia utilizatorului; programa ca bază pentru temele viitoare |
 | 2026-09-13 | La publicare, regulile Firestore înaintea site-ului; temele jucabile stau și în `fulgerTopics()` din reguli, iar un test le compară cu datele | regulile vechi ar refuza rundele cu temă |
 | 2026-09-13 | Un `state/tests` lipsă se reface din încercările din browser (la activare și la următoarea încercare); unul existent rămâne sursa, deci ce s-a șters de pe alt dispozitiv nu reapare | v0.9.1 socotea 0 stele fără document și a șters o intrare reală din clasamentul stelelor; încercările urcate de v0.9.0 erau în cloud |
+| 2026-09-13 | Temele stau desfășurate pe pagina Calcul fulger, grupate (panou cu titlu, programă, stele și total, explicație, „Ce exersăm”, nivelurile), cu temele „în curând” la final; fără card spre o pagină a temei; `#/fulger/<temă>` rămâne adresă (rezultate, clasament, „Ieși din joc”), dar derulează la temă | cererea utilizatorului |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -338,3 +342,11 @@
   1118/1118; v0.10.0 publicat, E2E pe site-ul live 1118/1118. Datele din producție trec pe teme la prima activare a contului.
   **De făcut data viitoare:** după o vizită în cont, verificăm în Firestore clasamentele pe temă și stelele; copilul joacă → pragurile;
   a doua temă și super-totalul.
+- **2026-09-13 (a opta sesiune, a treia continuare)** — La cererea utilizatorului, temele stau desfășurate pe pagina Calcul fulger, grupate,
+  în loc de carduri spre o pagină a temei: fiecare temă de jucat într-un panou cu titlul, programa, stelele și totalul, explicația, „Ce
+  exersăm” și cele trei niveluri; temele „în curând” la final, în două coloane. `#/fulger/<temă>` rămâne adresă (rezultate, clasament,
+  „Ieși din joc”) și derulează la temă; la capturi, derularea ieșea dublată (un `scroll-margin` peste `scroll-padding`-ul din bază).
+  Măsurat între 320 și 1440 px: nivelurile stau câte trei pe rând de la ~1000 px, cu stelele lângă pastila „Intermediar”, fără depășiri;
+  exemplul „□ + 7 = 15” nu se mai rupe pe două rânduri. npm test 76/76, E2E local 1115/1115 (verificările paginii separate a temei au
+  fost înlocuite cu cele ale panoului și ale derulării).
+  **De făcut data viitoare:** vizita în cont și verificarea în Firestore; copilul joacă → pragurile; a doua temă și super-totalul.

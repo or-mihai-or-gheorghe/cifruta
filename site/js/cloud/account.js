@@ -47,7 +47,7 @@ const byId = (a, b) => a.id.localeCompare(b.id);
 
 function refreshIfSafe() {
   const route = currentRoute();
-  // lista temelor și hub-ul unei teme (#/fulger/<temă>) se pot reîncărca; runda (#/fulger/<temă>/<nivel>) nu
+  // pagina jocului (#/fulger și #/fulger/<temă>) se poate reîncărca; runda (#/fulger/<temă>/<nivel>) nu
   const quiet = QUIET.has(route.name) && (route.params.length === 0 || (route.name === 'fulger' && route.params.length === 1));
   if (!quiet || document.body.classList.contains('is-game')) return;
   refresh();

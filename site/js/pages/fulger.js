@@ -1,5 +1,6 @@
-// Calcul fulger: lista temelor (#/fulger), hub-ul unei teme cu nivelurile ei (#/fulger/<temă>), runda (#/fulger/<temă>/<nivel>)
-// și rezultatele ei. Rutele de dinainte de teme (#/fulger/<nivel>) duc la tema în care au intrat rezultatele vechi.
+// Calcul fulger: pagina jocului (#/fulger) cu temele desfășurate (titlul, explicația, „Ce exersăm” și nivelurile fiecărei teme),
+// runda (#/fulger/<temă>/<nivel>) și rezultatele ei. #/fulger/<temă> e aceeași pagină, derulată la temă; rutele de dinainte de
+// teme (#/fulger/<nivel>) duc la tema în care au intrat rezultatele vechi.
 
 import concepts, { GRADES } from '../../data/concepts.js';
 import config from '../../data/fulger.js';
@@ -23,16 +24,16 @@ const alune = (n) => cantitate(n, 'alună', 'alune');
 const levelLabel = (id) => levelInfo(id)?.label ?? id;
 
 export default function fulger(container, [first, second] = []) {
-  if (!first) return topicsPage(container);
+  if (!first) return gamePage(container);
   if (LEVEL_IDS.includes(first)) return redirect(`fulger/${LEGACY_TOPIC}/${first}`);
   const topic = topicConfig(first);
-  if (!topic || topic.soon) return redirect('fulger');
-  if (!second) return topicPage(container, topic);
-  const lvl = levelConfig(topic.id, second);
+  if (!topic) return redirect('fulger');
+  if (!second) return gamePage(container, topic);
+  const lvl = levelConfig(topic.id, second); // null și la o temă „în curând”
   return lvl ? roundPage(container, topic, lvl) : redirect(`fulger/${topic.id}`);
 }
 
-// ——— Lista temelor și hub-ul unei teme ———
+// ——— Pagina jocului: temele desfășurate ———
 
 const HOW = [
   ['cronometru', '2 minute', 'Rezolvă cât mai multe operații.'],
@@ -59,84 +60,78 @@ const howTo = () =>
     ),
   );
 
-function topicHead(topic) {
+/** Iconița, titlul și programa unei teme (h2 la o temă de jucat, h3 la temele „în curând”), plus ce stă alături. */
+function topicHead(topic, heading, extra = null) {
   return h(
     'div',
     { class: 'fg-topic__head' },
     h('span', { class: 'c-card__icon', 'aria-hidden': 'true', html: emojiHTML(topic.icon ?? 'calcul') }),
-    h('div', {}, h('h3', { class: 'c-card__title' }, topic.title), h('span', { class: 'u-small u-muted' }, `Programa: ${GRADES[topic.grade]}`)),
+    h('div', { class: 'fg-topic__name' }, h(heading, { class: 'fg-topic__title', id: `fg-tema-${topic.id}` }, topic.title), h('span', { class: 'u-small u-muted' }, `Programa: ${GRADES[topic.grade]}`)),
+    extra,
   );
 }
 
-function topicCard(topic, data) {
-  if (topic.soon) {
-    return h(
-      'article',
-      { class: 'c-card c-card--soon fg-topic', 'data-testid': `fg-topic-${topic.id}` },
-      topicHead(topic),
-      h('p', { class: 'c-card__text' }, topic.text),
-      h('div', { class: 'c-card__footer l-cluster' }, chip('în curând', 'c-chip--soon')),
-    );
-  }
+/** O temă de jucat, desfășurată: stelele și totalul ei, explicația, „Ce exersăm” și cele trei niveluri. */
+function topicSection(topic, data) {
   const total = topicTotal(topic.id, data.best);
+  const score = h(
+    'div',
+    { class: 'l-cluster fg-topic__score' },
+    chip(`${topicStars(topic.id, data.best)} din ${cantitate(topic.levels.length * 3, 'stea', 'stele')}`, '', 'stea'),
+    total ? chip(`Total: ${alune(total)}`, '', 'trofeu') : null,
+  );
   return h(
-    'a',
-    { class: 'c-card c-card--link fg-topic', href: `#/fulger/${topic.id}`, 'data-testid': `fg-topic-${topic.id}` },
-    topicHead(topic),
-    h('p', { class: 'c-card__text' }, topic.text),
+    'section',
+    { class: 'fg-topic', 'aria-labelledby': `fg-tema-${topic.id}`, 'data-testid': `fg-topic-${topic.id}` },
+    topicHead(topic, 'h2', score),
+    h('p', { class: 'fg-topic__text' }, topic.text),
     h(
       'div',
-      { class: 'c-card__footer l-cluster' },
-      chip(`${topicStars(topic.id, data.best)} din ${cantitate(topic.levels.length * 3, 'stea', 'stele')}`, '', 'stea'),
-      total ? chip(`Total: ${alune(total)}`, '', 'trofeu') : chip('Nou!', 'c-chip--soon'),
+      { class: 'fg-topic__learn' },
+      h('h3', { class: 'fg-topic__label' }, 'Ce exersăm'),
+      h('ul', { class: 'fg-concepts', 'data-testid': 'fg-concepts' }, topic.concepts.map((id) => h('li', {}, chip(concepts[id]?.title ?? id)))),
+    ),
+    h('div', { class: 'l-grid anim-stagger', style: { '--grid-min': '17.25rem' } }, topic.levels.map((l) => levelCard(topic, l, data))),
+  );
+}
+
+/** Temele care vin, grupate: titlul, programa și explicația, fără niveluri și fără legături. */
+function soonSection(topics) {
+  if (!topics.length) return null;
+  return h(
+    'section',
+    { class: 'l-stack l-stack--sm' },
+    h('h2', { class: 'fg-h2' }, 'În curând'),
+    h(
+      'div',
+      { class: 'l-grid', style: { '--grid-min': '20rem' } },
+      topics.map((t) => h('article', { class: 'c-card c-card--soon fg-soon', 'data-testid': `fg-topic-${t.id}` }, topicHead(t, 'h3'), h('p', { class: 'c-card__text' }, t.text))),
     ),
   );
 }
 
-function topicsPage(container) {
+/** #/fulger și #/fulger/<temă>: toate temele pe aceeași pagină; cu o temă dată, pagina se derulează la ea. */
+function gamePage(container, focus = null) {
   document.title = 'Calcul fulger — Cifruța';
   const data = getFulger();
-  const first = playableTopics()[0];
+  const playable = playableTopics();
   container.append(
     h(
       'div',
       { class: 'l-container l-stack l-stack--lg' },
       backLink('#/', 'Pagina de început'),
-      hero('Calcul fulger', 'Câte operații rezolvi în 2 minute? Alege o temă, strânge alune, fă serii și bate-ți recordul!'),
+      hero('Calcul fulger', 'Câte operații rezolvi în 2 minute? Alege tema și nivelul, strânge alune, fă serii și bate-ți recordul!'),
       howTo(),
-      h(
-        'section',
-        { class: 'l-stack l-stack--sm' },
-        h('h2', { class: 'fg-h2' }, 'Alege tema'),
-        h('div', { class: 'l-grid anim-stagger', style: { '--grid-min': '16rem' } }, config.topics.map((t) => topicCard(t, data))),
-      ),
-      first ? boardLink(`fulger/${first.id}/total/week`, { row: 'center' }) : null,
+      playable.map((t) => topicSection(t, data)),
+      playable[0] ? boardLink(`fulger/${playable[0].id}/total/week`, { row: 'center' }) : null,
+      soonSection(config.topics.filter((t) => t.soon)),
       medalShelf(data),
-      parentsBox(data.rounds, { clear: true }),
+      parentsBox(data.rounds),
     ),
   );
-}
-
-function topicPage(container, topic) {
-  document.title = `Calcul fulger · ${topic.short} — Cifruța`;
-  const data = getFulger();
-  container.append(
-    h(
-      'div',
-      { class: 'l-container l-stack l-stack--lg' },
-      backLink('#/fulger', 'Toate temele'),
-      hero(topic.title, topic.text),
-      h(
-        'section',
-        { class: 'l-stack l-stack--sm' },
-        h('h2', { class: 'fg-h2' }, 'Ce exersăm'),
-        h('ul', { class: 'fg-concepts', 'data-testid': 'fg-concepts' }, topic.concepts.map((id) => h('li', {}, chip(concepts[id]?.title ?? id)))),
-      ),
-      h('div', { class: 'l-grid anim-stagger', style: { '--grid-min': '15rem' } }, topic.levels.map((l) => levelCard(topic, l, data))),
-      boardLink(`fulger/${topic.id}/total/week`, { row: 'center' }),
-      parentsBox(data.rounds.filter((r) => r.topic === topic.id), { topic }),
-    ),
-  );
+  // după primul calcul al paginii, peste derularea la început făcută de router
+  const target = focus && container.querySelector(`[data-testid="fg-topic-${focus.id}"]`);
+  if (target) requestAnimationFrame(() => target.scrollIntoView({ block: 'start', behavior: 'instant' }));
 }
 
 /** O întrebare-exemplu ca plăcuță: 7 + 5, 14 ◻ 17, 12 · 9 · 15. */
@@ -180,11 +175,11 @@ function medalShelf(data) {
   );
 }
 
-/** „Pentru părinți”: ultimele runde (ale unei teme sau ale tuturor), tipurile de exersat și, pe lista temelor, ștergerea. */
-function parentsBox(rounds, { topic = null, clear = false } = {}) {
+/** „Pentru părinți”: ultimele runde din toate temele, tipurile de exersat și ștergerea rundelor. */
+function parentsBox(rounds) {
   const last = rounds.slice(-10).reverse();
   const practice = practiceFor(rounds);
-  const title = (r) => (topic ? levelLabel(r.level) : `${topicConfig(r.topic)?.short ?? r.topic} · ${levelLabel(r.level)}`);
+  const title = (r) => `${topicConfig(r.topic)?.short ?? r.topic} · ${levelLabel(r.level)}`;
   return h(
     'details',
     { class: 'c-explain', 'data-testid': 'parents' },
@@ -193,7 +188,6 @@ function parentsBox(rounds, { topic = null, clear = false } = {}) {
       'div',
       { class: 'c-explain__body' },
       h('p', { class: 'u-small u-muted' }, 'O stea înseamnă un copil sigur pe răspunsuri, trei stele unul sigur și foarte rapid; atingerile la întâmplare nu ajung la stele.'),
-      topic ? h('p', { class: 'u-small' }, `Programa: ${GRADES[topic.grade]} · ${topic.concepts.map((id) => concepts[id]?.title ?? id).join('; ')}.`) : null,
       last.length
         ? h(
             'ul',
@@ -209,7 +203,7 @@ function parentsBox(rounds, { topic = null, clear = false } = {}) {
           )
         : h('p', { class: 'u-muted' }, 'Nu există runde salvate.'),
       practice.length ? h('p', {}, h('strong', {}, 'De exersat: '), practice.map((p) => `${p.label} (${p.correct} din ${p.total})`).join(' · ')) : null,
-      clear && rounds.length
+      rounds.length
         ? h('div', { class: 'l-cluster' }, clearHistoryButton({ label: 'Șterge rundele', title: 'Ștergi rundele?', text: 'Se șterg rundele, recordurile și medaliile de la Calcul fulger, din toate temele.', testid: 'fg-clear', action: clearFulger }))
         : null,
     ),

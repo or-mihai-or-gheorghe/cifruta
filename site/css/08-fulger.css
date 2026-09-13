@@ -89,9 +89,25 @@
 .fg-box { display: inline-block; width: 0.9em; height: 0.9em; border: 2px dashed currentColor; border-radius: 0.2em; vertical-align: -0.1em; }
 .fg-level__best { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); font-family: var(--font-title); font-weight: 700; }
 
-/* ——— Temele ——— */
-.fg-topic__head { display: flex; align-items: center; gap: var(--sp-3); }
-.fg-topic__head .c-card__title { overflow-wrap: anywhere; }
+/* ——— Temele, desfășurate pe pagina jocului ——— */
+.fg-topic {
+  display: grid;
+  gap: var(--sp-4);
+  padding: clamp(1rem, 0.5rem + 1.5vw, 1.25rem);
+  border: 2px solid var(--c-line);
+  border-radius: var(--r-4);
+  background: var(--c-paper-2);
+}
+/* cele trei niveluri pe un rând (grila cere 17,25rem pe card): pastila „Intermediar” și stelele încap alături */
+.fg-topic .fg-level .c-star { width: 1.4rem; height: 1.4rem; }
+.fg-topic__head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); }
+.fg-topic__head .c-card__icon { flex: none; }
+.fg-topic__name { flex: 1 1 12rem; min-width: 0; }
+.fg-topic__title { font-size: var(--fs-3); overflow-wrap: anywhere; }
+.fg-soon .fg-topic__title { font-size: var(--fs-2); }
+.fg-topic__text { max-width: 62ch; color: var(--c-ink-soft); }
+.fg-topic__learn { display: grid; gap: 0.4rem; }
+.fg-topic__label { font-size: var(--fs-1); }
 .fg-concepts { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0; padding: 0; list-style: none; }
 .fg-level__play { margin-top: auto; }
 
