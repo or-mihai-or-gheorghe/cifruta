@@ -18,7 +18,7 @@ singura barieră** și au teste automate pe emulator.
 | `site/js/cloud/boards.js` | citirea clasamentelor: primele 20 și locul profilurilor proprii (`getCountFromServer`) |
 | `site/js/cloud/admin.js` | operațiile administratorului |
 | `site/js/pages/profil.js`, `clasament.js`, `admin.js`, `confidentialitate.js` | paginile `#/profil`, `#/clasament/…`, `#/admin`, `#/confidentialitate` |
-| `firestore.rules`, `firestore.indexes.json`, `firebase.json`, `.firebaserc` | regulile, indexul clasamentului, emulatoarele, proiectul `primary-school-math` |
+| `firestore.rules`, `firestore.indexes.json`, `firebase.json`, `.firebaserc`, `tools/deploy_rules.mjs` | regulile, indexurile (niciunul compus), emulatoarele, proiectul `primary-school-math`, publicarea regulilor |
 | `tests/cloud.test.js`, `tests/cloud/firestore.rules.mjs`, `tools/e2e_cloud.py` | testele logicii, ale regulilor și E2E pe emulatoare |
 
 ## Datele în browser
@@ -89,8 +89,11 @@ poate verifica pe server, așa că există moderarea din `#/admin` (redenumire, 
    Europa”, deci ține locația în sincron cu textul.
 4. **Project settings → Your apps → Web app** „Cifruța”, fără Hosting. Valorile `firebaseConfig` intră în `PRODUCTION` din
    `site/js/cloud/config.js`. Sunt publice, nu secrete.
-5. **Regulile și indexul:** `npm run deploy:rules`, după `npx firebase-tools login` sau cu `GOOGLE_APPLICATION_CREDENTIALS` spre cheia
-   contului de serviciu din `_firebase_config/`. Cheia e în `.gitignore`: nu se publică și nu intră în `site/`.
+5. **Regulile:** `npm run deploy:rules` (`tools/deploy_rules.mjs`, prin API-ul Firebase Rules), cu `GOOGLE_APPLICATION_CREDENTIALS`
+   spre cheia contului de serviciu din `_firebase_config/`. Cheia e în `.gitignore`: nu se publică și nu intră în `site/`.
+   `firebase deploy` cere în plus dreptul `serviceusage.services.get`, pe care contul de serviciu al Admin SDK nu îl are. Același cont
+   nu poate crea indexuri, așa că clasamentul nu folosește indexuri compuse: interogarea ordonează doar după scor, iar egalitățile se
+   ordonează în browser.
 6. **Adminul:** după prima intrare pe site, creezi documentul `admins/<uid>`. `uid`-ul se vede în Authentication → Users.
 7. **Opțional:** restrângi cheia API din Google Cloud → Credentials la `https://or-mihai-or-gheorghe.github.io/*`,
    `https://primary-school-math.firebaseapp.com/*` și `http://localhost:*/*`.

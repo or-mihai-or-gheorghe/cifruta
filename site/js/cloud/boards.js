@@ -20,8 +20,10 @@ export async function loadBoard({ db, f }, board, uid, pids = [], { force = fals
   const hit = cache.get(key);
   if (!force && hit && Date.now() - hit.at < FRESH_MS) return hit.data;
   const entries = f.collection(db, 'leaderboards', board, 'entries');
-  const snap = await f.getDocs(f.query(entries, f.orderBy('score', 'desc'), f.orderBy('updatedAt', 'asc'), f.limit(TOP)));
-  const top = rankEntries(snap.docs.map((d) => ({ ...d.data(), id: d.id })));
+  // doar după scor (index simplu, creat automat, fără index compus în consolă); la egalitate, primul ajuns stă mai sus
+  const snap = await f.getDocs(f.query(entries, f.orderBy('score', 'desc'), f.limit(TOP)));
+  const since = (e) => e.updatedAt?.toMillis?.() ?? 0;
+  const top = rankEntries(snap.docs.map((d) => ({ ...d.data(), id: d.id })).sort((a, b) => b.score - a.score || since(a) - since(b)));
   const own = [];
   for (const id of pids.map((pid) => entryId(uid, pid)).filter((id) => !top.some((e) => e.id === id))) {
     const mine = await f.getDoc(f.doc(entries, id));

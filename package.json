@@ -12,7 +12,7 @@
     "deploy": "npm test && git push origin $(git subtree split --prefix site main):refs/heads/gh-pages --force",
     "test:rules": "sh tools/with-java21.sh firebase emulators:exec --only firestore --project demo-cifruta 'node --test tests/cloud/firestore.rules.mjs'",
     "e2e:cloud": "sh tools/with-java21.sh firebase emulators:exec --only auth,firestore --project demo-cifruta 'python3 tools/e2e_cloud.py'",
-    "deploy:rules": "firebase deploy --only firestore:rules,firestore:indexes --project primary-school-math"
+    "deploy:rules": "node tools/deploy_rules.mjs"
   },
   "engines": {
     "node": ">=22"

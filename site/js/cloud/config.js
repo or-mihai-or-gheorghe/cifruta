@@ -4,14 +4,14 @@
 export const SDK_VERSION = '12.19.0';
 export const SDK_URL = `https://www.gstatic.com/firebasejs/${SDK_VERSION}`;
 
-// Proiectul real: se completează după crearea lui în consola Firebase (Project settings → Your apps → Web app).
+// Proiectul real (consola Firebase → Project settings → Your apps → Web app „Cifruța”).
 const PRODUCTION = {
   apiKey: '',
-  authDomain: '',
-  projectId: '',
-  storageBucket: '',
-  messagingSenderId: '',
-  appId: '',
+  authDomain: 'primary-school-math.firebaseapp.com',
+  projectId: 'primary-school-math',
+  storageBucket: 'primary-school-math.firebasestorage.app',
+  messagingSenderId: '966131905013',
+  appId: '1:966131905013:web:c3d6d308df51dccba5b0bc',
 };
 
 const EMULATED = {
