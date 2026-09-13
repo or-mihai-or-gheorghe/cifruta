@@ -134,6 +134,12 @@ export const EMOJI = {
   fulger: { char: '⚡', code: '26a1', label: 'fulger' },
   steag: { char: '🏁', code: '1f3c1', label: 'steag de sosire' },
   tinta: { char: '🎯', code: '1f3af', label: 'țintă' },
+  familie: { char: '👪', code: '1f46a', label: 'familie' },
+  lacat: { char: '🔒', code: '1f512', label: 'lacăt' },
+  unelte: { char: '🛠️', code: '1f6e0', label: 'unelte' },
+  aur: { char: '🥇', code: '1f947', label: 'medalie de aur' },
+  argint: { char: '🥈', code: '1f948', label: 'medalie de argint' },
+  bronz: { char: '🥉', code: '1f949', label: 'medalie de bronz' },
 };
 
 export const hasEmoji = (name) => Object.hasOwn(EMOJI, name);

@@ -1,0 +1,174 @@
+/* Contul familiei: butonul din antet, mesajul trecător, pagina #/profil (acc-) și listele simple (c-list). */
+
+/* ——— Antet ——— */
+.c-account { gap: 0.4rem; max-width: 12rem; }
+.c-account__icon .c-emoji { width: 1.5rem; height: 1.5rem; margin: 0; vertical-align: middle; }
+.c-account__text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.c-account.is-signed { --btn-edge: var(--c-line); background: var(--c-surface); }
+.c-nav-board .c-emoji { width: 1.25rem; height: 1.25rem; margin: 0; }
+@media (max-width: 30rem) {
+  /* pe telefon, cu contul disponibil, sigla duce la teste; locul rămâne pentru clasament și cont */
+  .l-header:has(.c-account:not([hidden])) .c-nav-home { display: none; }
+  .l-header:has(.c-account.is-signed) .c-logo__sub { display: none; }
+  .c-sound { width: 2.5rem; }
+  .c-nav-board { width: 2.5rem; padding: 0; }
+  .c-nav-board__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+@media (max-width: 30rem) {
+  .l-header__inner nav { --cluster-gap: 0.25rem; }
+  .c-account { width: 2.5rem; padding: 0; }
+  /* ascuns doar vizual: linkul își păstrează numele pentru cititoarele de ecran */
+  .c-account__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+
+/* ——— Mesaj trecător ——— */
+.c-toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: var(--z-overlay);
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  padding: var(--sp-3) var(--sp-5);
+  border-radius: var(--r-pill);
+  background: var(--c-ink);
+  color: var(--c-on-brand);
+  box-shadow: var(--sh-3);
+  transform: translateX(-50%);
+  animation: acc-toast var(--dur-3) var(--ease-out) both;
+}
+@keyframes acc-toast {
+  from { opacity: 0; transform: translate(-50%, 1rem); }
+}
+
+.c-list { display: grid; gap: var(--sp-2); margin: 0; padding-left: 1.3rem; }
+.c-list li::marker { color: var(--c-brand); }
+
+/* ——— Intrarea în cont ——— */
+.acc-signin { align-items: center; text-align: center; padding-block: var(--sp-6); }
+.acc-signin .c-list { max-width: 30rem; text-align: left; }
+.acc-signin__art { width: clamp(5rem, 4rem + 5vw, 7.5rem); }
+.acc-google { --btn-edge: var(--c-line-strong); gap: var(--sp-3); }
+.acc-google__g svg { width: 1.4rem; height: 1.4rem; }
+
+/* ——— Profilurile ——— */
+.acc-profiles { display: grid; gap: var(--sp-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); }
+.acc-profiles .acc-form { grid-column: 1 / -1; }
+.acc-profile { align-items: center; text-align: center; }
+.acc-profile.is-active { border-color: var(--c-ok); box-shadow: 0 0 0 3px var(--c-ok-bg), var(--sh-1); }
+.acc-profile__avatar {
+  display: grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  border: 2px solid var(--c-line);
+  border-radius: 50%;
+  background: var(--c-surface-2);
+}
+.acc-profile__avatar .c-emoji { width: 3rem; height: 3rem; margin: 0; }
+.acc-profile.is-active .acc-profile__avatar { border-color: var(--c-ok); background: var(--c-ok-bg); }
+.acc-profile__name { font-size: var(--fs-2); overflow-wrap: anywhere; }
+.acc-profile__actions { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); margin-top: auto; }
+
+.acc-add {
+  align-items: center;
+  justify-content: center;
+  min-height: 12rem;
+  border-style: dashed;
+  background: transparent;
+  box-shadow: none;
+  color: var(--c-brand-dark);
+  font-family: var(--font-title);
+  font-size: var(--fs-1);
+  font-weight: 700;
+  transition: background-color var(--dur-2), border-color var(--dur-2);
+}
+.acc-add:hover { border-color: var(--c-brand); background: var(--c-surface); }
+.acc-add__plus { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 50%; background: var(--c-brand-soft); font-size: 2rem; line-height: 1; }
+
+/* ——— Formulare ——— */
+.acc-form { gap: var(--sp-4); }
+.acc-field { display: grid; gap: 0.35rem; min-width: 0; margin: 0; padding: 0; border: 0; }
+.acc-field__label { padding: 0; font-family: var(--font-title); font-weight: 700; }
+.acc-input {
+  width: 100%;
+  max-width: 20rem;
+  min-height: var(--tap);
+  padding: 0.4rem 0.9rem;
+  border: 2px solid var(--c-line-strong);
+  border-radius: var(--r-2);
+  background: var(--c-paper-2);
+  font-size: var(--fs-2);
+}
+.acc-input:focus-visible { border-color: var(--c-focus); }
+.acc-avatars { display: grid; grid-template-columns: repeat(auto-fill, minmax(3.5rem, 1fr)); gap: var(--sp-2); max-width: 26rem; }
+.acc-avatar {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  max-width: 100%;
+  padding: 0.35rem;
+  border: 3px solid var(--c-line);
+  border-radius: var(--r-2);
+  background: var(--c-surface);
+  transition: transform var(--dur-2) var(--ease-spring), border-color var(--dur-2), background-color var(--dur-2);
+  -webkit-tap-highlight-color: transparent;
+}
+.acc-avatar .c-emoji { width: 100%; height: 100%; margin: 0; }
+.acc-avatar:hover { transform: scale(1.06); }
+.acc-avatar[aria-checked='true'] { border-color: var(--c-brand); background: var(--c-brand-soft); transform: scale(1.06); }
+.acc-check { display: flex; align-items: flex-start; gap: var(--sp-2); cursor: pointer; }
+.acc-check input { flex: none; width: 1.4rem; height: 1.4rem; margin: 0.15rem 0 0; accent-color: var(--c-brand); }
+.acc-error { color: var(--c-bad-ink); font-weight: 700; }
+.acc-error:empty { display: none; }
+.acc-danger { --btn-fg: var(--c-bad-ink); }
+.acc-parents { gap: var(--sp-3); }
+
+/* ——— Clasamentul ——— */
+.lb-title { display: flex; align-items: center; gap: var(--sp-3); }
+.lb-title .c-emoji { width: 2.4rem; height: 2.4rem; margin: 0; }
+.lb-lock .c-emoji { width: 3.5rem; height: 3.5rem; margin: 0; }
+.lb-filters { justify-content: space-between; row-gap: var(--sp-2); }
+.lb-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0.3rem 1rem;
+  border: 2px solid var(--c-level, var(--c-line-strong));
+  border-radius: var(--r-pill);
+  background: var(--c-surface);
+  color: var(--c-level-ink, var(--c-ink-soft));
+  font-family: var(--font-title);
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color var(--dur-2);
+}
+.lb-pill:hover { background: var(--c-level-bg, var(--c-surface-2)); }
+.lb-pill.is-active { border-color: var(--c-level-ink, var(--c-brand-dark)); background: var(--c-level-ink, var(--c-brand-dark)); color: var(--c-on-brand); }
+.lb-list { display: grid; gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
+.lb-list--own { margin-top: var(--sp-3); padding-top: var(--sp-3); border-top: 3px dotted var(--c-line-strong); }
+.lb-row {
+  display: grid;
+  grid-template-columns: 2.6rem 2.6rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 0.5rem var(--sp-4) 0.5rem 0.5rem;
+  border: 2px solid var(--c-line);
+  border-radius: var(--r-3);
+  background: var(--c-surface);
+}
+.lb-row.is-mine { border-color: var(--c-brand); background: var(--c-brand-soft); }
+.lb-row.is-active { box-shadow: 0 0 0 3px var(--c-brand-soft), var(--sh-1); }
+.lb-place { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 50%; background: var(--c-surface-2); font-family: var(--font-title); font-size: var(--fs-1); font-weight: 700; }
+.lb-place--medal { background: transparent; }
+.lb-place .c-emoji, .lb-avatar .c-emoji { width: 2.2rem; height: 2.2rem; margin: 0; }
+.lb-avatar { display: grid; place-items: center; }
+.lb-name { display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 0.5rem; min-width: 0; }
+.lb-score { display: grid; justify-items: end; font-family: var(--font-title); font-size: var(--fs-1); font-weight: 700; white-space: nowrap; }
+.lb-score small { font-family: var(--font-body); font-weight: 400; }
+.c-board-link__icon .c-emoji { width: 1.3rem; height: 1.3rem; margin: 0; }
+.adm-nick { max-width: 12rem; min-height: 2.5rem; font-size: var(--fs-1); }
+@media (max-width: 30rem) {
+  .lb-row { grid-template-columns: 2.1rem 2.1rem minmax(0, 1fr) auto; gap: var(--sp-2); padding-right: var(--sp-3); }
+  .lb-place, .lb-place .c-emoji, .lb-avatar .c-emoji { width: 2rem; height: 2rem; }
+}

@@ -9,6 +9,7 @@
 @import url('01-base.css') layer(base);
 @import url('02-layout.css') layer(layout);
 @import url('03-components.css') layer(components);
+@import url('09-cloud.css') layer(components);
 @import url('04-exercises.css') layer(exercises);
 @import url('08-fulger.css') layer(exercises);
 @import url('05-visuals.css') layer(visuals);

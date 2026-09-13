@@ -12,3 +12,8 @@ __pycache__/
 .DS_Store
 Thumbs.db
 .claude/settings.local.json
+
+_firebase_config/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log

@@ -1,0 +1,169 @@
+rules_version = '2';
+
+// Cifruța: regulile de securitate Firestore. Site-ul e static, deci clientul scrie direct în baza de date: aceste reguli sunt
+// singura barieră. Orice nu e permis explicit e refuzat. Teste: npm run test:rules (tests/cloud/firestore.rules.mjs).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ——— roluri ———
+    function signedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+    // administratorul are un document admins/{uid}, creat din consolă (e-mailul nu stă în repo)
+    function isAdmin() {
+      return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    function account() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function notBlocked() {
+      return account().get('blocked', false) == false;
+    }
+
+    // ——— validări ———
+    function data() {
+      return request.resource.data;
+    }
+    function onlyKeys(keys) {
+      return data().keys().hasOnly(keys);
+    }
+    function changedOnly(keys) {
+      return data().diff(resource.data).affectedKeys().hasOnly(keys);
+    }
+    function isInt(v, lo, hi) {
+      return v is int && v >= lo && v <= hi;
+    }
+    function validId(id) {
+      return id.matches('^[A-Za-z0-9_-]{1,100}$');
+    }
+    function validNickname(v) {
+      return v is string && v.matches("^[\\p{L}\\p{N} .'-]{2,20}$");
+    }
+    function validAvatar(v) {
+      return v in ['veverita', 'iepure', 'vulpe', 'urs', 'arici', 'pisica', 'caine', 'rata', 'lup', 'cal', 'oaie', 'gaina'];
+    }
+    function validProfile() {
+      return onlyKeys(['nickname', 'avatar', 'showOnBoards', 'createdAt', 'attempts', 'rounds', 'boards'])
+        && validNickname(data().nickname)
+        && validAvatar(data().avatar)
+        && data().showOnBoards is bool
+        && isInt(data().attempts, 0, 100000)
+        && isInt(data().rounds, 0, 100000)
+        && data().boards is list && data().boards.size() <= 500;
+    }
+    function validAttempt() {
+      return onlyKeys(['id', 'testId', 'testVersion', 'seed', 'startedAt', 'submittedAt', 'activeMs', 'msByExercise', 'answers',
+                       'score', 'grade', 'earnedPoints', 'totalPoints', 'levels', 'concepts', 'exercises', 'feeling', 'secondChance'])
+        && data().testId is string && data().testId.size() <= 60
+        && data().score is number && data().score >= 0 && data().score <= 100
+        && data().answers is string && data().answers.size() <= 200000;
+    }
+    function validRound() {
+      return onlyKeys(['id', 'level', 'at', 'total', 'correct', 'wrong', 'bestStreak', 'fast', 'stars', 'byKind'])
+        && data().level in ['usor', 'intermediar', 'avansat']
+        && isInt(data().total, 0, 3000)
+        && isInt(data().correct, 0, 500)
+        && isInt(data().wrong, 0, 500)
+        && isInt(data().stars, 0, 3);
+    }
+
+    // ——— clasamente ———
+    function isFulgerBoard(board) {
+      return board.matches('^fulger-(usor|intermediar|avansat)-(all|[0-9]{4}-W[0-9]{2})$');
+    }
+    // o intrare aparține contului, poartă porecla și avatarul profilului (după scrierea în lot), iar profilul vrea să apară;
+    // la Calcul fulger scorul doar crește și cel mult o dată la 90 s; la teste scorul se poate schimba, cel mult o dată la 5 s
+    function validEntry(board, entryId, creating) {
+      let fulger = isFulgerBoard(board);
+      let owned = (fulger || board == 'teste-stele')
+        && data().uid == request.auth.uid
+        && data().pid is string && data().pid.matches('^p[1-6]$')
+        && entryId == request.auth.uid + '_' + data().pid;
+      let profile = getAfter(/databases/$(database)/documents/users/$(request.auth.uid)/profiles/$(data().pid)).data;
+      let current = owned
+        && data().nickname == profile.nickname
+        && data().avatar == profile.avatar
+        && profile.showOnBoards == true
+        && data().updatedAt == request.time;
+      let renameOnly = !creating && changedOnly(['nickname', 'avatar', 'updatedAt']);
+      let fulgerScore = onlyKeys(['uid', 'pid', 'nickname', 'avatar', 'score', 'updatedAt', 'correct', 'bestStreak'])
+        && isInt(data().score, 1, 3000) && isInt(data().correct, 0, 500) && isInt(data().bestStreak, 0, 500)
+        && (creating || (data().score > resource.data.score && request.time > resource.data.updatedAt + duration.value(90, 's')));
+      let testScore = onlyKeys(['uid', 'pid', 'nickname', 'avatar', 'score', 'updatedAt', 'tests'])
+        && isInt(data().score, 0, 1000) && isInt(data().tests, 0, 1000)
+        && (creating || request.time > resource.data.updatedAt + duration.value(5, 's'));
+      return current && (renameOnly || (fulger ? fulgerScore : testScore));
+    }
+    // după id, nu după conținut: ștergerea unei intrări care nu mai există nu strică lotul în care se face curățenie
+    function ownEntry(entryId) {
+      return signedIn() && entryId in ownEntryIds(request.auth.uid);
+    }
+    function ownEntryIds(u) {
+      return [u + '_p1', u + '_p2', u + '_p3', u + '_p4', u + '_p5', u + '_p6'];
+    }
+
+    match /admins/{uid} {
+      allow get: if isOwner(uid);
+    }
+
+    match /users/{uid} {
+      allow get: if isOwner(uid) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(uid)
+        && onlyKeys(['email', 'name', 'createdAt', 'lastSeenAt'])
+        && data().email == request.auth.token.email
+        && data().name is string && data().name.size() <= 80
+        && data().createdAt == request.time
+        && data().lastSeenAt == request.time;
+      allow update: if (isOwner(uid)
+          && changedOnly(['name', 'lastSeenAt', 'consentAt'])
+          && data().name is string && data().name.size() <= 80
+          && data().lastSeenAt is timestamp
+          && data().get('consentAt', request.time) is timestamp)
+        || (isAdmin() && changedOnly(['blocked']) && data().blocked is bool);
+      allow delete: if isOwner(uid) || isAdmin();
+
+      match /profiles/{pid} {
+        allow get, list: if isOwner(uid) || isAdmin();
+        allow create: if isOwner(uid)
+          && pid.matches('^p[1-6]$')
+          && account().get('consentAt', null) != null
+          && notBlocked()
+          && validProfile()
+          && data().createdAt == request.time;
+        allow update: if (isOwner(uid) && notBlocked() && validProfile() && data().createdAt == resource.data.createdAt)
+          || (isAdmin() && changedOnly(['nickname']) && validNickname(data().nickname));
+        allow delete: if isOwner(uid) || isAdmin();
+
+        match /attempts/{id} {
+          allow get, list: if isOwner(uid) || isAdmin();
+          allow create, update: if isOwner(uid) && notBlocked() && validId(id) && validAttempt();
+          allow delete: if isOwner(uid) || isAdmin();
+        }
+        match /fulger/{id} {
+          allow get, list: if isOwner(uid) || isAdmin();
+          allow create, update: if isOwner(uid) && notBlocked() && validId(id) && validRound();
+          allow delete: if isOwner(uid) || isAdmin();
+        }
+        match /state/{id} {
+          allow get, list: if isOwner(uid) || isAdmin();
+          allow create, update: if isOwner(uid) && notBlocked() && id == 'fulger'
+            && onlyKeys(['best', 'medals']) && data().best is map && data().medals is map;
+          allow delete: if isOwner(uid) || isAdmin();
+        }
+      }
+    }
+
+    match /leaderboards/{board}/entries/{entryId} {
+      allow get, list: if signedIn();
+      allow create: if signedIn() && notBlocked() && validEntry(board, entryId, true);
+      allow update: if (signedIn() && notBlocked() && validEntry(board, entryId, false))
+        || (isAdmin() && changedOnly(['nickname']) && validNickname(data().nickname));
+      allow delete: if isAdmin() || ownEntry(entryId);
+    }
+  }
+}

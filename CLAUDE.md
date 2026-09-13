@@ -9,6 +9,8 @@ Mascota: **Veverița Cifruța**. Repo public `or-mihai-or-gheorghe/cifruta`; sit
 - Tot conținutul și interfața în **română cu diacritice corecte**: ă â î ș ț (ș/ț cu virgulă U+0219/U+021B, niciodată ş/ţ cu sedilă), text NFC.
 - Conținut **original** (site public): inspirat din programă, nu copiat din manuale; fără personajele manualelor.
 - **Static, fără build, fără dependențe** la rulare: HTML + CSS + ES modules. Toate căile **relative** (site-ul stă sub `/cifruta/`).
+  Singura excepție: Firebase JS SDK (modulele oficiale de pe `www.gstatic.com`, versiune fixă în `js/cloud/config.js`), încărcat cu
+  `import()` doar pentru contul familiei; fără cont nu pleacă nicio cerere spre Google (detalii: `docs/cloud.md`).
 - **Pragmatic**: fără soluții complicate pentru cazuri-limită (ex. localStorage simplu), **fără funcții de voce** deocamdată. Ideile „nice to have” merg în backlog.
 - Testele sunt **date declarative** (obiecte serializabile JSON, fără funcții) → vor putea fi mutate într-o bază de date.
 - Textele din teste folosesc doar **mini-markup** (`**tare**`, `==evidențiat==`, `{{e:mar}}`, `{{v:star n=47}}`, `{{z:4}}`), niciodată HTML.
@@ -127,3 +129,10 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   (`body.is-game`); sub 32rem înălțime (telefon ținut orizontal) întrebarea și variantele stau una lângă alta, iar E2E verifică pe
   ecrane joase că variantele încap fără derulare. O întrebare nu revine printre ultimele `noRepeat` (12); rezumatul rundei păstrează
   greșelile (`mistakes`) pentru „Greșelile tale”, dar ele nu se salvează în `cifruta:fulger`.
+- Contul familiei (`js/cloud/`, paginile `profil`, `clasament`, `admin`, `confidentialitate`; detalii în `docs/cloud.md`): `core/storage.js`
+  are un scop (`setScope`): fără cont, cheile de până acum; pentru un profil, `cifruta:p:<uid>:<pid>:…`. Orice scriere nouă în storage
+  se anunță cu `emit`, ca `cloud/sync.js` să o urce prin `onWrite`. Regulile Firestore sunt singura barieră: un câmp nou în încercări,
+  runde sau clasamente cere aceeași schimbare în `firestore.rules` și în cheile din `cloud/logic.js`, plus un test în
+  `tests/cloud/firestore.rules.mjs`. Comenzi: `npm run test:rules` (emulator Firestore), `npm run e2e:cloud` (emulatoare Auth +
+  Firestore, `?emulator=1`, `window.__cloud.signInAs`), `npm run deploy:rules`; emulatoarele cer Java 21 (`tools/with-java21.sh`).
+  `replaceChildren(null)` scrie textul „null”: listele de noduri se filtrează înainte.

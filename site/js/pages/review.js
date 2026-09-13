@@ -11,6 +11,7 @@ import { cantitate, formatDateTime, formatNumber } from '../core/ro.js';
 import { evaluateExercise, gradeFor, reached } from '../core/scoring.js';
 import { play } from '../core/sound.js';
 import { clearDraft, getAttempt, isUnsaved, lastAttempt, listAttempts, updateAttempt } from '../core/storage.js';
+import { boardLink } from '../components/board-link.js';
 import { mountExercise } from '../components/exercise.js';
 import { clearHistoryButton } from '../components/history.js';
 import { art, backLink, callout, chip, confetti, levelPill, stars } from '../components/ui.js';
@@ -112,6 +113,7 @@ export default async function review(container, [testId, attemptId]) {
         levels.map((l) => h('span', { class: 'ex-level-result', 'data-level': l.id }, levelPill(l.id), stars(attempt.levels[l.id].star ? 1 : 0, 1, { label: attempt.levels[l.id].star ? 'stea câștigată' : 'fără stea' }))),
       ),
       h('p', { class: 'u-muted' }, `Ai câștigat ${starCount} din ${cantitate(levels.length, 'stea', 'stele')}. O stea înseamnă cel puțin 80% dintr-un nivel.`),
+      boardLink('teste', { cls: 'c-btn c-btn--sm', row: 'start' }),
     ),
   );
 

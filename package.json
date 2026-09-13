@@ -1,6 +1,6 @@
 {
   "name": "cifruta",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "private": true,
   "description": "Cifruța — exerciții interactive pentru clasa a II-a (Matematică și explorarea mediului)",
   "type": "module",
@@ -9,10 +9,18 @@
     "acoperire": "node tools/acoperire.mjs",
     "serve": "python3 -m http.server 8080 -d site",
     "e2e": "python3 tools/e2e.py",
-    "deploy": "npm test && git push origin $(git subtree split --prefix site main):refs/heads/gh-pages --force"
+    "deploy": "npm test && git push origin $(git subtree split --prefix site main):refs/heads/gh-pages --force",
+    "test:rules": "sh tools/with-java21.sh firebase emulators:exec --only firestore --project demo-cifruta 'node --test tests/cloud/firestore.rules.mjs'",
+    "e2e:cloud": "sh tools/with-java21.sh firebase emulators:exec --only auth,firestore --project demo-cifruta 'python3 tools/e2e_cloud.py'",
+    "deploy:rules": "firebase deploy --only firestore:rules,firestore:indexes --project primary-school-math"
   },
   "engines": {
     "node": ">=22"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
+    "firebase": "^12.19.0",
+    "firebase-tools": "^15.30.0"
+  }
 }

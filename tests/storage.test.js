@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { addAttempt, clearFulger, clearHistory, getAttempt, getFulger, isUnsaved, lastAttempt, listAttempts, listDrafts, saveDraft, saveFulgerRound, updateAttempt } from '../site/js/core/storage.js';
+import {
+  addAttempt, clearAccountCopies, clearFulger, clearHistory, clearScopeData, getAttempt, getDraft, getFulger, getScoped, isUnsaved, lastAttempt,
+  listAttempts, listDrafts, moveDrafts, onWrite, readScopeData, saveDraft, saveFulgerRound, setScope, setScoped, updateAttempt, writeScopeData,
+} from '../site/js/core/storage.js';
 import { formatDateTime } from '../site/js/core/ro.js';
 
 /** Un localStorage de test; cu `full: true` orice scriere aruncă (spațiu plin sau stocare blocată). */
@@ -72,6 +75,64 @@ test('storage: calcul fulger păstrează recordul pe nivel, ultimele runde și m
 
   globalThis.localStorage = fakeStorage({ full: true });
   assert.equal(saveFulgerRound(round('usor', 10, 't5')).saved, false);
+  delete globalThis.localStorage;
+});
+
+test('storage: fiecare profil are datele lui, iar scrierile se anunță', () => {
+  globalThis.localStorage = fakeStorage();
+  setScope(null);
+  const events = [];
+  const stop = onWrite((e) => events.push(e.type));
+  const ana = { uid: 'u1', pid: 'p1' };
+  addAttempt({ id: 'a1', testId: 't', score: 50 });
+  saveDraft('t', { current: 1 });
+
+  setScope(ana);
+  assert.equal(listAttempts().length, 0);
+  assert.equal(getDraft('t'), null);
+  addAttempt({ id: 'b1', testId: 't', score: 70 });
+  updateAttempt('b1', { feeling: 'vesel' });
+  saveFulgerRound({ level: 'usor', total: 10, at: 'x' });
+  setScoped('pending', [{ type: 'attempt', id: 'b1' }]);
+  assert.equal(getFulger().best.usor.alune, 10);
+
+  setScope(null);
+  assert.deepEqual(listAttempts().map((a) => a.id), ['a1']);
+  assert.equal(getFulger().rounds.length, 0);
+  assert.equal(getScoped('pending'), null);
+  assert.equal(readScopeData(ana).attempts[0].feeling, 'vesel');
+
+  moveDrafts(null, ana); // ciornele fără cont intră în profil
+  assert.equal(getDraft('t'), null);
+  writeScopeData(ana, { attempts: [...readScopeData(ana).attempts, ...readScopeData(null).attempts], fulger: readScopeData(ana).fulger });
+  clearScopeData(null);
+  assert.equal(listAttempts().length, 0);
+  setScope(ana);
+  assert.equal(getDraft('t').current, 1);
+  assert.deepEqual(listAttempts().map((a) => a.id), ['b1', 'a1']);
+  clearFulger();
+
+  setScope(null);
+  clearAccountCopies('u1'); // la ieșirea din cont
+  assert.equal(readScopeData(ana).attempts.length, 0);
+  stop();
+  addAttempt({ id: 'c1', testId: 't', score: 1 });
+  assert.deepEqual(events, ['attempt', 'attempt', 'attempt', 'fulger-round', 'fulger-clear']);
+  delete globalThis.localStorage;
+});
+
+test('sesiunea contului se citește sincron și dă scopul profilului care joacă', async () => {
+  globalThis.localStorage = fakeStorage();
+  const { readSession, sessionProfile, writeSession } = await import('../site/js/cloud/session.js');
+  assert.equal(readSession(), null);
+  writeSession({ uid: 'u1', email: 'a@exemplu.ro', pid: 'p2', nickname: 'Ana', avatar: 'vulpe' });
+  assert.deepEqual(sessionProfile(), { uid: 'u1', pid: 'p2' });
+  writeSession({ uid: 'u1', pid: null });
+  assert.equal(sessionProfile(), null); // în cont, dar fără profil ales: rezultatele rămân cele fără cont
+  localStorage.setItem('cifruta:session', '{stricat');
+  assert.equal(readSession(), null);
+  writeSession(null);
+  assert.equal(localStorage.getItem('cifruta:session'), null);
   delete globalThis.localStorage;
 });
 

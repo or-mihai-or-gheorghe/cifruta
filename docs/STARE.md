@@ -1,7 +1,7 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-13 · **Versiune:** 0.8.1
+- **Data:** 2026-09-13 · **Versiune:** 0.9.0 (contul familiei e gata și verificat pe emulatoare; apare pe site după configurarea proiectului Firebase)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -13,11 +13,18 @@
   niveluri, 16 tipuri de întrebări generate, alune cu bonus de viteză și de serie, Turbo, pistă spre stele și record, 6 medalii, „Greșelile tale” și ținta următoarei stele la rezultate). Conținut: **4 teste de recapitulare a clasei I** (T1–T4 v2)
   și **6 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc), toate
   exercițiile cu desen sau emoji, fără răspunsuri „la vedere”, cu probleme în mai mulți pași și sarcini deschise la avansat.
-  Calitate: 55 de teste Node (plus validarea conținutului, a tabelului de acoperire, a contrastului și calibrarea stelelor din
-  Calcul fulger), E2E 1096 de verificări pe 3 ecrane + tastatură (plus telefon ținut orizontal și telefon mic, pentru Calcul fulger).
-- **Următorul pas:** copilul joacă Calcul fulger (câte o rundă pe nivel) → ajustăm pragurile de stele și timpii „fulger” după
-  rundele reale; copilul rezolvă T1–T4 și testele noi → timpii reali și dificultatea; apoi secțiunea U2
-  (Adunarea și scăderea până la 1000 · Pământul).
+  **Contul familiei** (v0.9.0, `docs/cloud.md`): părintele intră cu Google și face profiluri de copii (poreclă + avatar, cu acordul
+  părintelui); rezultatele profilului care joacă se sincronizează cu Cloud Firestore (coadă cu reîncercări, tranzacții, mutarea
+  rezultatelor fără cont); clasament doar pentru cei din cont (Calcul fulger pe nivel, săptămâna aceasta și tot timpul, plus stelele
+  de la teste); administrare (blocare, redenumire, ștergeri); pagina de confidențialitate. Fără configurarea Firebase, site-ul arată
+  ca în v0.8.1, plus legătura „Confidențialitate” din subsol.
+  Calitate: 70 de teste Node (plus validarea conținutului, a tabelului de acoperire, a contrastului și calibrarea stelelor din
+  Calcul fulger), 11 teste ale regulilor Firestore pe emulator, E2E 1096 de verificări pe 3 ecrane + tastatură (plus telefon ținut
+  orizontal și telefon mic) și E2E pentru cont pe emulatoare, cu 45 de verificări.
+- **Următorul pas:** utilizatorul face pașii din consola Firebase (`docs/cloud.md`, „Pornirea proiectului Firebase”) → completez
+  `PRODUCTION` în `js/cloud/config.js`, public regulile (`npm run deploy:rules`) și site-ul, apoi verificarea cu un cont Google real
+  (laptop, telefon, iPad) și documentul `admins/<uid>`. În paralel: copilul joacă Calcul fulger și rezolvă testele → pragurile și
+  timpii reali; apoi secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul).
 
 ## Etape
 - [x] M0 Schelet: git, `_surse/`, `.gitignore`, `package.json`, `CLAUDE.md`, docs (curriculum, cercetare)
@@ -59,6 +66,10 @@
   sunet deblocat pe iOS, tonuri mai blânde, fără întrebări repetate recent, comparări fără numere banale, accesibilitate (numele
   linkului, titlu în rundă); „Greșelile tale”, ținta următoarei stele, nivelul sugerat, ținta pe panoul de start; publicat, E2E local 1096/1096 și pe
   site-ul live 1096/1096, tag `v0.8.1`
+- [ ] M20 (v0.9.0): contul familiei: intrare cu Google, profiluri de copii cu acordul părintelui, sincronizarea rezultatelor cu Cloud
+  Firestore (coadă, tranzacții, mutarea rezultatelor fără cont), clasament doar pentru cei din cont (Calcul fulger pe nivel și perioadă,
+  stelele de la teste), administrare, pagina de confidențialitate; regulile Firestore cu 11 teste pe emulator, E2E pentru cont 45/45,
+  E2E local 1096/1096. Rămas: configurarea proiectului Firebase, publicarea regulilor și a site-ului, verificarea cu un cont real, tag `v0.9.0`
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -136,6 +147,12 @@
 | 2026-09-13 | Efecte de joc în stilul Cifruța: particule, „+N” care zboară în coș, bannere deasupra cardului, Turbo, sprint final, numărătoare de arcade, medalii; tremur scurt la greșeală doar în joc; nimic trecător la mișcare redusă | cererea utilizatorului: „să fie văzută ca un joc, nu ca un test”; regula „fără zdruncinat” rămâne pentru teste |
 | 2026-09-13 | Recenzia jocului (v0.8.1): pe ecrane joase întrebarea și variantele stau una lângă alta; arena umple spațiul de sub antet; sunetul se deblochează la Start și la ridicarea degetului; tonul seriei urcă cel mult o octavă | probe pe ecrane neacoperite de E2E (pe telefonul ținut orizontal variantele ieșeau din ecran) și regulile Safari pe iOS pentru audio |
 | 2026-09-13 | O întrebare nu revine printre ultimele 12; la rezultate: „Greșelile tale” (ultimele 5, cu răspunsul corect), ținta următoarei stele, nivelul următor după 3 stele sau cel mai ușor fără nicio stea | 71% din rundele de la Ușor repetau o întrebare; rezultatul să învețe, nu doar să numere (recenzia aprobată de utilizator: „pe toate”) |
+| 2026-09-13 | Conturi Google fără restricție de domeniu, după modelul din CS-Foundations-Tools, dar pe site-ul static: Firebase Authentication + Cloud Firestore, cu reguli testate pe emulator (proiect nou `primary-school-math`) | cererea utilizatorului; GitHub Pages nu are server, deci regulile sunt singura barieră |
+| 2026-09-13 | Contul e al părintelui, cu profiluri de copii (poreclă + avatar, cel mult 6) și acordul părintelui la primul profil; pagina `#/confidentialitate` | decizia utilizatorului; în România, sub 16 ani e nevoie de acordul părintelui |
+| 2026-09-13 | Clasament doar pentru cei intrați în cont: Calcul fulger pe nivel (săptămâna aceasta / tot timpul) și stelele de la teste, doar cu porecla și avatarul; fiecare profil poate ieși din clasament | decizia utilizatorului |
+| 2026-09-13 | Rezultatele rămân în `localStorage`, pe profil, iar `cloud/sync.js` le urcă printr-o coadă cu reîncercări, în tranzacții pentru tot ce ține împreună | paginile citesc sincron ca înainte; lecțiile din exemplu (contoare pierdute, succes raportat la eșec, fără tranzacții) |
+| 2026-09-13 | Administrare în `#/admin` pentru contul din `admins/{uid}` (creat din consolă, nu un e-mail scris în repo): blocare, redenumire, ștergeri | decizia utilizatorului; repo-ul e public |
+| 2026-09-13 | Firebase JS SDK 12.19.0 de pe gstatic, încărcat doar la nevoie: singura excepție de la „fără dependențe la rulare” | fără build; vizitatorii fără cont nu încarcă nimic de la Google |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -146,6 +163,10 @@
 - Testele u1-t1, u1-t3, u1-t4 și u1-t6 au trecut la versiunea 2 (v0.6.1), cu același efect pentru încercările făcute înainte.
 - În v0.7.0 toate cele 6 teste ale secțiunii 0–1000 au primit o versiune nouă: încercările mai vechi arată doar rezumatul.
 - Sunetul din Calcul fulger pe iPhone/iPad e deblocat după regulile Safari, dar nu a fost verificat pe un dispozitiv real.
+- Contul familiei e verificat doar pe emulatoare: intrarea reală cu Google (popup pe laptop, telefon, iPad) se verifică după
+  configurarea proiectului Firebase. Dacă popup-ul e blocat des pe telefoane, varianta e Firebase Hosting cu login prin redirect.
+- În limitele regulilor, un client priceput poate trimite un scor inventat în clasament (fără Cloud Functions nu se verifică pe
+  server); există moderarea din `#/admin`.
 
 ## Backlog
 - Scanările actuale acoperă manualul până la înmulțire; utilizatorul adaugă scanări noi după finalizarea etapei curente.
@@ -162,7 +183,8 @@
 - Amânate la cerere: citire cu voce (TTS), tastatură numerică proprie pe ecran.
 - Din feedback-ul nr. 2, neaplicate: săgeți sus/jos la butoanele radio (Tab + Space merg); explicații vizuale interactive
   (evidențieri pas cu pas în desen); ceas și termometru cu tragere directă; validator care leagă desenele cu date de răspunsuri.
-- Conturi de utilizator + bază de date (ex. Cloudflare D1 / Supabase) prin înlocuirea `core/storage.js`.
+- Contul familiei, mai departe: App Check (reCAPTCHA) împotriva scorurilor trimise din afara site-ului; istoricul clasamentelor pe
+  săptămâni; schimbarea profilului care joacă cu un PIN al părintelui; Firebase Hosting cu login prin redirect, dacă popup-ul e blocat des.
 - Publicare automată la push: `gh auth refresh -h github.com -s workflow` + mutarea workflow-ului în `.github/workflows/` + sursa Pages „GitHub Actions”.
 
 ## Jurnal de sesiuni
@@ -248,3 +270,16 @@
   următoarei stele, cifrele tastelor ascunse pe tactil, E2E pe ecrane joase, subtitlul logoului pe telefoane foarte mici), aplicate
   într-un singur lot. npm test 55/55; v0.8.1 publicat, E2E local 1096/1096 și pe site-ul live 1096/1096.
   **De făcut data viitoare:** copilul joacă o rundă pe fiecare nivel (și pe iPad, pentru sunet) → ajustăm pragurile; apoi U2.
+- **2026-09-13 (a opta sesiune)** — Conturi, rezultate în cloud și clasament, la cererea utilizatorului, după modelul din
+  CS-Foundations-Tools (citit, nemodificat): intrare cu Google fără restricție de domeniu, un proiect Firebase nou (`primary-school-math`),
+  clasament vizibil doar pentru cei din cont. Patru decizii ale utilizatorului (contul părintelui cu profiluri de copii, clasament la
+  Calcul fulger și la teste, doar porecla, pagină de administrare) și o a doua trecere pe plan. Pe un site static, regulile Firestore
+  sunt singura barieră, deci întâi regulile și testele lor pe emulator (cu un JDK 21 portabil), apoi stocarea pe profil (`setScope`,
+  `onWrite`), sesiunea sincronă, contul, sincronizarea cu coadă și tranzacții, pagina contului, clasamentul, administrarea și
+  confidențialitatea. E2E nou pe emulatoare (`tools/e2e_cloud.py`): cont, două dispozitive, ieșire, telefon, ștergeri, clasamentul văzut
+  de doi părinți, adminul. Găsite pe drum: ștergerea unei intrări care nu mai există era refuzată de reguli (verificarea se făcea după
+  conținut, acum după id), `replaceChildren(null)` scria „null” în pagină, iar antetul nu mai încăpea pe telefon cu clasamentul și
+  avatarul. Consola Firebase nu era încă pregătită (verificat cu contul de serviciu, doar citiri). npm test 70/70, reguli 11/11,
+  E2E cont 45/45, E2E local 1096/1096.
+  **De făcut data viitoare:** utilizatorul face pașii din consola Firebase → `PRODUCTION`, `npm run deploy:rules`, `npm run deploy`,
+  verificarea cu un cont real și `admins/<uid>`, tag `v0.9.0`; copilul joacă Calcul fulger → pragurile.

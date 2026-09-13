@@ -1,6 +1,7 @@
 // Calcul fulger: hub-ul cu nivelurile (#/fulger), runda (#/fulger/<nivel>) și rezultatele ei.
 
 import config from '../../data/fulger.js';
+import { boardLink } from '../components/board-link.js';
 import { clearHistoryButton } from '../components/history.js';
 import { backLink, callout, chip, confetti, levelInfo, levelPill, mascot, stars } from '../components/ui.js';
 import { countUp, h, pop, prefersReducedMotion } from '../core/dom.js';
@@ -52,6 +53,7 @@ function hubPage(container) {
         ),
       ),
       h('div', { class: 'l-grid anim-stagger', style: { '--grid-min': '15rem' } }, config.levels.map((l) => levelCard(l, data))),
+      boardLink('fulger/usor/week', { row: 'center' }),
       medalShelf(data),
       parentsBox(data),
     ),
@@ -313,6 +315,7 @@ function results(container, lvl, summary, pending) {
       card,
       saved && !saved.saved ? callout('warn', 'capcana', 'Runda nu s-a putut salva în acest browser (stocare plină sau blocată).') : null,
       h('div', { class: 'l-cluster l-cluster--center' }, again, suggestion(lvl, summary) ?? h('a', { class: 'c-btn c-btn--lg', href: '#/fulger', 'data-testid': 'fg-levels' }, 'Alt nivel')),
+      summary.answered ? boardLink(`fulger/${lvl.id}/week`, { row: 'center' }) : null,
       buddy,
       summary.answered
         ? h(
