@@ -1,4 +1,4 @@
-// Calcul fulger: efecte mici de joc — particule, „+N” care zboară în coș, insigne, bannere și ștampila de final.
+// Jocuri fulger: efecte mici de joc — particule, „+N” care zboară în coș, insigne, bannere și ștampila de final.
 // Nodurile se șterg singure. La mișcare redusă nu apar particulele și zborul; insignele și bannerele apar fără animație.
 
 import { h, prefersReducedMotion } from '../core/dom.js';

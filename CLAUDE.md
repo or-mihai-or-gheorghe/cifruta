@@ -28,13 +28,15 @@ site/                      ← publicat
   js/app.js                pornire + router
   js/core/                 expr (calcule fără eval) · rules · markup · spec (validare) · scoring · registry
                            storage (localStorage simplu) · loader · router · dom (h, pop, countUp) · ro (diacritice, cantitate) · lint · dnd · sound
+                           forme (figuri: contur, cheie canonică, nume, axe) · grile (piese din căsuțe, desfășurările cubului)
   js/components/, js/pages/  interfața (player, rezultate/revizuire, atelier)
   js/types/<tip>/logic.js  logică pură (Node o poate importa): validate · count · answered · empty · solution · evaluate
   js/types/<tip>/view.js   DOM: mount(el, part, ctx) → { get, set, mode, showResult, destroy }
   js/visuals/              banca vizuală: registerVisual(nume, {render, label, demos}); all.js le importă pe toate
-  js/fulger/               Calcul fulger (joc de calcul pe viteză, pe teme, #/fulger): kinds (întrebări generate cu sămânță, cu
-                           concepte) · engine (temele, runda și punctajul, pur) · records (chei „temă:nivel”, datele vechi) ·
-                           view (arena) · effects (particule, bannere); pagina e pages/fulger.js
+  js/fulger/               Jocuri fulger (jocuri pe viteză, pe teme, #/fulger): kinds (calcule) și kinds-forme (figuri), generate
+                           cu sămânță, cu concepte · rand · art (desenul și numele unei variante) · engine (temele, runda și
+                           punctajul, pur) · records (chei „temă:nivel”, datele vechi) · view (arena) · effects (particule, bannere);
+                           pagina e pages/fulger.js
   data/catalog.js          secțiuni → grupuri → teste · concepts.js (ID-uri de concepte) · scoring.js · demo.js · fulger.js (jocul)
   data/tests/<grup>/tN-nume.js   testele (NU le numi test-*.js)
 docs/  STARE.md · curriculum.md (harta conceptelor + surse) · cercetare.md · ghid-autor.md
@@ -70,11 +72,18 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
 - **Vizual nou:** `registerVisual` într-un modul din `js/visuals/`, culori din variabile `--v-*`, `demos` pentru atelier.
 - **Desen nou într-un exercițiu publicat:** `context.visual` / `part.visual` / `itemVisual` / `item.visual` / `bin.visual` din bancă;
   **nu** cere versiune nouă (răspunsurile și ciornele nu sunt afectate); `npm test` verifică numele desenului.
-- **Tip nou în Calcul fulger:** o intrare în `KINDS` (`js/fulger/kinds.js`: `label`, `points`, `fastMs`, `mode`, `concepts` din
+- **Tip nou în Jocuri fulger (calcule):** o intrare în `KINDS` (`js/fulger/kinds.js`: `label`, `points`, `fastMs`, `mode`, `concepts` din
   `data/concepts.js`, `generate(rand)` cu răspunsul calculat și variante din greșeli tipice), o linie în `mix`-ul unui nivel al unei
   teme din `data/fulger.js` și regulile tipului în `RULES` din `tests/fulger.test.js`; testul de calibrare spune dacă pragurile de stele
   mai sunt potrivite, iar conceptele temei trebuie să fie exact conceptele tipurilor ei (etichetele „fără / cu trecere” se verifică).
-- **Temă nouă în Calcul fulger:** tipurile ei în `KINDS`, apoi tema în `topics` din `data/fulger.js`: id permanent (fără segmentele
+- **Tip cu figuri în Jocuri fulger:** o intrare în `SHAPE_KINDS` (`js/fulger/kinds-forme.js`, `mode: 'figure'`), al cărei `generate(rand)`
+  întoarce `figureQuestion(kind, rand, { prompt, figure, solved, key, answer, distractors })`: desene din bancă (`glyph`, `glyph-cells`,
+  `cell-grid`, `robot-grid`, `net`, `solid`, `farm-grid`), emoji sau texte; distractorii vin din greșeli tipice, iar id-ul unei variante e
+  cheia ei canonică. Regula tipului stă în `tests/fulger-forme.rules.js` și găsește singură răspunsul, fără codul generatorului.
+  `fulger.test.js` mai cere: cerința de cel mult 40 de caractere, 4 variante diferite și fără culori, nume diferite pentru cititorul de
+  ecran, desene valide, răspunsul pe toate pozițiile la fel de des și aceeași întrebare după JSON. Capturile din
+  `python3 tools/e2e.py --only fulger --shots` se privesc pe fiecare tip.
+- **Temă nouă în Jocuri fulger:** tipurile ei în `KINDS`, apoi tema în `topics` din `data/fulger.js`: id permanent (fără segmentele
   `usor`, `intermediar`, `avansat`, `total`, `all`), `title`, `short`, `text`, `icon`, `grade`, `concepts` și cele 3 niveluri cu `warmup`,
   `mix`, `stars` (o temă `soon: true` n-are niveluri și apare doar ca „în curând”). Id-ul intră și în `fulgerTopics()` din
   `firestore.rules` (un test le compară). Verificare: `npm test`, `npm run test:rules`, `npm run e2e`, `npm run e2e:cloud`; la publicare
@@ -103,7 +112,7 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   player numără invers din `draft.activeMs` (doar cât e afișat un exercițiu); la 0 nu trimite nimic. Istoricul (încercări + ciorne) se
   șterge din casetele „Pentru părinți” (`clearHistory(testIds | null)` din `core/storage.js`, `refresh()` din `core/router.js`).
 - Sunete: `play('tap'|'place'|'done'|'level'|'win'|'yes'|'no')` din `core/sound.js` (WebAudio sintetizat, fără fișiere), pornite
-  la gesturi; butonul din antet ține preferința în `cifruta:sound`; implicit oprite la `prefers-reduced-motion`. Calcul fulger
+  la gesturi; butonul din antet ține preferința în `cifruta:sound`; implicit oprite la `prefers-reduced-motion`. Jocurile fulger
   adaugă `ready`, `go`, `hit`, `star`, `combo`, `powerdown`, `tick`, `buzzer`; `play(nume, { step })` urcă tonul pe o scară pentatonică de cel mult o octavă.
 - Pagina de început e punctul de plecare: `player.js` deschide mereu intro-ul (`show(-1)`); „Continuă testul” reia de la `resumeAt`,
   „Reîncepe de la zero” șterge ciorna (cu confirmare). `#/rezultate/<test>/<încercare>` arată o anumită încercare (`getAttempt`).
@@ -130,7 +139,7 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   trece prin…”). În timpul rezolvării nu se afișează lungimea drumului ales (ar da răspunsul subpunctului următor).
 - Secțiunea 0–1000 nu folosește concepte viitoare (înmulțire, împărțire, fracții, operații până la 1000 cu trecere): avansatul se
   îngreunează prin pași, nu prin materie nouă. Diagrama circulară se citește prin felii care valorează un număr (`pie {groups, names}`).
-- Calcul fulger: timpul rundei curge doar în bucla `requestAnimationFrame` din `js/fulger/view.js` și stă pe loc în pauză; ce ține
+- Jocuri fulger: timpul rundei curge doar în bucla `requestAnimationFrame` din `js/fulger/view.js` și stă pe loc în pauză; ce ține
   de timpul rundei (întârzierea de la apariție, pauzele după răspuns) se programează cu `after()` pe acest timp, nu cu `setTimeout`.
   Punctajul (viteza contează doar în serie), pauzele (1 s; „Hopa” la greșeli mai rapide decât cititul) și stelele vin din
   `engine.js` + `data/fulger.js`; pragurile de stele sunt verificate prin simulare în `tests/fulger.test.js`. Rundele stau în
@@ -138,11 +147,19 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   Pagina jocului arată temele desfășurate, grupate (titlu, explicație, „Ce exersăm”, nivelurile; cele „în curând” la final), fără pagini
   separate: `#/fulger/<temă>` e aceeași pagină, derulată la temă. E2E: `?debug=1` → `window.__dbg.fulger` (`state`, `force`,
   `elapse`, `setStreak`). Efectele trecătoare nu apar la mișcare redusă; bannerele se așază deasupra cardului, nu peste întrebare.
-- Calcul fulger pe dispozitive: Safari pe iOS pornește sunetul doar dintr-un gest încheiat, deci arena cheamă `unlockSound()` la
+- Jocuri fulger pe dispozitive: Safari pe iOS pornește sunetul doar dintr-un gest încheiat, deci arena cheamă `unlockSound()` la
   Start și la ridicarea degetului (răspunsurile se iau la `pointerdown`). În rundă arena umple spațiul de sub antet prin flex
   (`body.is-game`); sub 32rem înălțime (telefon ținut orizontal) întrebarea și variantele stau una lângă alta, iar E2E verifică pe
   ecrane joase că variantele încap fără derulare. O întrebare nu revine printre ultimele `noRepeat` (12); rezumatul rundei păstrează
   greșelile (`mistakes`) pentru „Greșelile tale”, dar ele nu se salvează în `cifruta:fulger`.
+- Jocuri fulger cu figuri: desenele se dimensionează prin containere (`.fg-fig` cu `--fig-h`, `.fg-opt__art` cu `--opt-h`, proporția
+  `--ar` din `aspect()`), pentru că `.v-svg { width: 100% }` din stratul visuals câștigă; cardul cere `.fg-q--figure { width: 100% }`
+  (altfel desenul are lățimea implicită a unui SVG, 300 px), iar emoji-urile au regula `.c-emoji` în fiecare container. Culoarea nu e
+  niciodată singurul indiciu, variantele au nume diferite (fiecare rotire și fiecare linie are numele ei), iar obiectele din desen stau
+  în ordinea căsuțelor (numele desenului le citește în ordine și ar da răspunsul). Fără copii rotite ca distractori când rotirea e
+  permisă, fără itemi care cer „pătratul e dreptunghi”, fără emoji cu forma neclară (📦 arată ca un cub). La variantele numerice în
+  ordine crescătoare, răspunsul trebuie să poată sta pe toate cele 4 locuri (la numărat, răspunsurile sunt 4–6). `#/atelier/fulger`
+  arată câte 12 întrebări din fiecare tip, cu răspunsul încadrat; `python3 tools/e2e.py --only fulger` rulează doar jocurile.
 - Contul familiei (`js/cloud/`, paginile `profil`, `clasament`, `admin`, `confidentialitate`; detalii în `docs/cloud.md`): `core/storage.js`
   are un scop (`setScope`): fără cont, cheile de până acum; pentru un profil, `cifruta:p:<uid>:<pid>:…`. Orice scriere nouă în storage
   se anunță cu `emit`, ca `cloud/sync.js` să o urce prin `onWrite`. Regulile Firestore sunt singura barieră: un câmp nou în încercări,
@@ -151,8 +168,8 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   Firestore, `?emulator=1`, `window.__cloud.signInAs`), `npm run deploy:rules`; emulatoarele cer Java 21 (`tools/with-java21.sh`).
   `replaceChildren(null)` scrie textul „null”: listele de noduri se filtrează înainte. Blocarea stă în `blocked/{uid}`, nu în
   `users/{uid}`. Clasamentele se calculează din starea completă din cloud (`state/fulger` cu `best` și `week`, `state/tests`), nu din ce
-  e în browser; doar un `state/tests` lipsă (încercări urcate de v0.9.0) se reface din încercările din browser. Limitele de frecvență ale intrărilor (5 s la stele, 90 s la Calcul fulger) înseamnă reîncercări automate; un E2E care
-  schimbă aceeași intrare de două ori la rând trebuie să aștepte. Calcul fulger are teme: recordurile și cele mai bune runde ale
+  e în browser; doar un `state/tests` lipsă (încercări urcate de v0.9.0) se reface din încercările din browser. Limitele de frecvență ale intrărilor (5 s la stele, 90 s la Jocuri fulger) înseamnă reîncercări automate; un E2E care
+  schimbă aceeași intrare de două ori la rând trebuie să aștepte. Jocurile fulger au teme: recordurile și cele mai bune runde ale
   săptămânii au chei „temă:nivel” (`js/fulger/records.js`), datele de dinainte de teme se normalizează la fiecare citire
   (`normalizeFulger`), iar clasamentele sunt `fulger-<temă>-<nivel|total>-<perioadă>`; cele vechi (`fulger-<nivel>-…`) se mută cu
   scorul lor în tema veche, apoi se șterg. Clasamentele săptămânilor trecute nu se șterg: rezultatele sunt persistente.

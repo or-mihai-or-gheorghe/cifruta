@@ -25,7 +25,7 @@ singura barieră** și au teste automate pe emulator.
 
 `core/storage.js` are un **scop**: fără cont, cheile de până acum (`cifruta:attempts`, `cifruta:fulger`, `cifruta:draft:<test>`); pentru
 un profil, `cifruta:p:<uid>:<pid>:…`. Sunetul rămâne comun. Paginile citesc tot sincron. După aducerea datelor din cloud, `account.js`
-reîncarcă doar paginile liniștite (`#/`, secțiunile, pagina Calcul fulger), niciodată un test sau o rundă în desfășurare.
+reîncarcă doar paginile liniștite (`#/`, secțiunile, pagina Jocurilor fulger), niciodată un test sau o rundă în desfășurare.
 
 Fiecare scriere (`addAttempt`, `updateAttempt`, `clearHistory`, `saveFulgerRound`, `clearFulger`) se anunță prin `onWrite`.
 Cât scopul e un profil, `sync.js` o pune imediat în coada profilului (`…:pending`, cel mult 200 de operații, cu număr de ordine), chiar
@@ -88,7 +88,7 @@ O altă filă a aceluiași browser află de ieșirea voluntară din evenimentul 
   din listă. Aceleași valori sunt și în `logic.js`, iar `tests/cloud.test.js` verifică potrivirea.
 - O intrare în clasament e a contului (`entryId == uid + '_' + pid`), are porecla și avatarul profilului (`getAfter`), vine de la un
   profil cu `showOnBoards` și are `updatedAt == request.time`.
-  - La Calcul fulger, scorul e 1–3000, doar crește și se schimbă cel mult o dată la 90 s.
+  - La Jocurile fulger, scorul e 1–3000, doar crește și se schimbă cel mult o dată la 90 s.
   - La teste, scorul e 0–1000 și se schimbă cel mult o dată la 5 s.
   - Redenumirea trece fără aceste limite.
 - Proprietarul își șterge intrările după id, deci și pe cele care nu mai există: un lot de curățare nu cade din cauza lor.

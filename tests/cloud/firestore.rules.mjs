@@ -112,6 +112,7 @@ test('reguli: încercările, rundele (cu temă) și starea le scrie doar proprie
   const { topic, ...untopical } = round;
   await assertSucceeds(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-2'), untopical)); // o filă de dinainte de teme
   await assertFails(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-3'), { ...round, topic: 'inmultirea' })); // temă „în curând”
+  await assertSucceeds(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-7'), { ...round, topic: 'pozitii-trasee' })); // o temă cu figuri
   await assertFails(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-4'), { ...round, topic: 7 }));
   await assertFails(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-5'), { ...round, total: 5000 }));
   await assertFails(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-6'), { ...round, level: 'expert' }));
@@ -143,6 +144,7 @@ test('reguli: clasamentul îl văd doar autentificații; o intrare e a contului,
   await assertSucceeds(getDocs(collection(as('bob'), board('usor'))));
   await assertSucceeds(setDoc(doc(ana, `${board('usor')}/ana_p1`), entry('ana')));
   await assertSucceeds(setDoc(doc(ana, `${board('usor', '2026-W37')}/ana_p1`), entry('ana')));
+  await assertSucceeds(setDoc(doc(ana, 'leaderboards/fulger-siruri-intrusi-avansat-all/entries/ana_p1'), entry('ana'))); // o temă cu figuri
   await assertFails(setDoc(doc(ana, `${board('expert')}/ana_p1`), entry('ana')));
   await assertFails(setDoc(doc(ana, 'leaderboards/fulger-usor-all/entries/ana_p1'), entry('ana'))); // clasament de dinainte de teme
   await assertFails(setDoc(doc(ana, 'leaderboards/fulger-inmultirea-usor-all/entries/ana_p1'), entry('ana'))); // temă „în curând”

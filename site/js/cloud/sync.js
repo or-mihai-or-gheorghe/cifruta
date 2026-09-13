@@ -3,7 +3,7 @@
 // și trimite coada. Ce nu ajunge (fără internet, limita de frecvență a clasamentului) rămâne în cifruta:p:<uid>:<pid>:pending și
 // se reia: la revenirea internetului, după o pauză, la activarea următoare. Tot ce ține împreună (încercare + contor + stelele pe
 // teste, rundă + stare + contor, intrările unei teme + totalul ei + lista clasamentelor) se scrie într-o tranzacție. Clasamentele se
-// calculează din starea completă din cloud (state/fulger, state/tests), nu doar din ce e în browser. Starea Calcul fulger se
+// calculează din starea completă din cloud (state/fulger, state/tests), nu doar din ce e în browser. Starea Jocuri fulger se
 // normalizează la fiecare citire (chei „temă:nivel”, js/fulger/records.js), așa că datele de dinainte de teme se migrează singure.
 
 import config from '../../data/fulger.js';
@@ -349,7 +349,7 @@ async function clearRounds(c) {
 const entryBase = (c, profile) => ({ uid: c.uid, pid: c.pid, nickname: profile.nickname, avatar: profile.avatar, updatedAt: c.f.serverTimestamp() });
 
 /**
- * Calcul fulger, pe temele date: pe fiecare nivel „tot timpul” din recordul permanent și săptămâna din cea mai bună rundă a ei, plus
+ * Jocuri fulger, pe temele date: pe fiecare nivel „tot timpul” din recordul permanent și săptămâna din cea mai bună rundă a ei, plus
  * totalul temei pe ambele perioade; scorul doar crește. Clasamentele săptămânilor trecute rămân; în aceeași tranzacție, intrările de
  * dinainte de teme se mută cu scorul lor în tema veche și se șterg.
  */

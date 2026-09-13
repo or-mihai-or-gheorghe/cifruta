@@ -95,7 +95,7 @@ class Run:
 
 
 def smoke(run: Run, page: Page, vp: str):
-    for route, name in [("", "acasa"), ("sectiune/recapitulare", "sectiune"), ("fulger", "calcul-fulger"), ("fulger/adunari-scaderi-100", "calcul-fulger-tema"), ("fulger/siruri-intrusi", "fulger-siruri-intrusi"), ("atelier/componente", "atelier-componente"), ("atelier/vizualuri", "atelier-vizualuri"), ("atelier/tipuri", "atelier-tipuri"), ("nu-exista", "404")]:
+    for route, name in [("", "acasa"), ("sectiune/recapitulare", "sectiune"), ("fulger", "calcul-fulger"), ("fulger/adunari-scaderi-100", "calcul-fulger-tema"), ("fulger/siruri-intrusi", "fulger-siruri-intrusi"), ("atelier/fulger", "atelier-fulger"), ("atelier/componente", "atelier-componente"), ("atelier/vizualuri", "atelier-vizualuri"), ("atelier/tipuri", "atelier-tipuri"), ("nu-exista", "404")]:
         run.goto(page, route)
         page.wait_for_function("document.querySelector('main')?.innerText.trim().length > 0")
         page.wait_for_timeout(300)
@@ -875,6 +875,17 @@ def keyboard_flow(run: Run, browser, base: str):
     page.wait_for_selector("[data-testid=fg-results]")
     page.wait_for_timeout(200)
     run.check(paused and page.get_by_test_id("fg-total").inner_text() != "0" and page.locator(".anim-confetti").count() == 0, "[tastatură] fulger: Esc pune pauză și reia; rezultatele apar direct, fără confetti")
+
+    # o întrebare cu figuri, tot doar de la tastatură
+    page.goto(f"{base}?debug=1#/fulger/siruri-intrusi/usor")
+    page.wait_for_selector("[data-testid=fg-start]")
+    page.keyboard.press("Enter")
+    page.wait_for_function(FULGER_READY)
+    s = page.evaluate("window.__dbg.fulger.state()")
+    page.keyboard.press(str(s["answerIndex"] + 1))
+    page.wait_for_timeout(100)
+    streak = page.evaluate("window.__dbg.fulger.state().streak")
+    run.check(s["mode"] == "figure" and streak == 1, f"[tastatură] fulger: la o întrebare cu figuri, tasta {s['answerIndex'] + 1} alege varianta (serie {streak})")
     context.close()
 
 

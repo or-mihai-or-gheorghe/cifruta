@@ -60,7 +60,7 @@ export function isoWeek(date = new Date()) {
 }
 
 /**
- * Id-ul unui clasament Calcul fulger: `fulger-<temă>-<usor|intermediar|avansat|total>-<all|AAAA-Wss>`.
+ * Id-ul unui clasament Jocuri fulger: `fulger-<temă>-<usor|intermediar|avansat|total>-<all|AAAA-Wss>`.
  * `fulger-total-<perioadă>` (fără temă) rămâne rezervat pentru super-totalul pe toate temele.
  */
 export const fulgerBoard = (topic, scope, period) => `fulger-${topic}-${scope}-${period}`;
@@ -78,7 +78,7 @@ export function rankEntries(entries) {
 
 const RETIRED = /^fulger-(usor|intermediar|avansat)-(all|\d{4}-W\d{2})$/; // clasamentele de dinainte de teme (v0.9)
 
-/** Un clasament Calcul fulger de dinainte de teme, care nu se mai scrie: intrarea lui se mută în tema veche, apoi se șterge. */
+/** Un clasament Jocuri fulger de dinainte de teme, care nu se mai scrie: intrarea lui se mută în tema veche, apoi se șterge. */
 export const isRetiredBoard = (board) => RETIRED.test(board);
 
 /**
@@ -122,7 +122,7 @@ export const roundId = (round) => round.id ?? `${round.level}-${Date.parse(round
 /** Runda cu cele mai multe alune (la egalitate, prima); null pentru o listă goală. */
 export const bestRound = (rounds) => rounds.reduce((best, r) => (!best || r.total > best.total ? r : best), null);
 
-/** Starea Calcul fulger de pe două dispozitive: recordul cel mai mare pe cheie și medaliile de oriunde, cu prima dată. */
+/** Starea Jocuri fulger de pe două dispozitive: recordul cel mai mare pe cheie și medaliile de oriunde, cu prima dată. */
 export function mergeFulgerState(a = {}, b = {}) {
   const best = { ...(a.best ?? {}) };
   for (const [key, v] of Object.entries(b.best ?? {})) {
@@ -152,7 +152,7 @@ export function mergeAttempts(local, cloud, pending = []) {
 }
 
 /**
- * Calcul fulger după aducerea din cloud (ambele părți deja normalizate): rundele din cloud și cele din coadă; recordurile și medaliile
+ * Jocuri fulger după aducerea din cloud (ambele părți deja normalizate): rundele din cloud și cele din coadă; recordurile și medaliile
  * locale contează doar dacă n-au urcat.
  */
 export function mergeFulger(local, cloud, pending = [], keep = 30) {
@@ -240,7 +240,7 @@ export function withWeekBest(week = {}, round) {
 const capEntry = (e) => ({ score: Math.min(e.score, FULGER_MAX), correct: Math.min(e.correct ?? 0, 500), bestStreak: Math.min(e.bestStreak ?? 0, 500) });
 
 /**
- * Intrările Calcul fulger ale unei teme, din starea normalizată (chei „temă:nivel”):
+ * Intrările Jocuri fulger ale unei teme, din starea normalizată (chei „temă:nivel”):
  * - pe fiecare nivel, „tot timpul” din recordul permanent (state.best) și săptămâna curentă din state.week sau din rundele din browser
  *   ale săptămânii (cea mai mare dintre ele): { score, correct, bestStreak };
  * - totalul temei pe fiecare perioadă, suma intrărilor pe niveluri: { score, levels }.

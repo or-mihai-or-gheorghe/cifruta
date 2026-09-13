@@ -1,4 +1,4 @@
-// Clasamentele, doar pentru cei intrați în cont: Calcul fulger pe temă și nivel sau pe totalul temei (săptămâna aceasta și tot
+// Clasamentele, doar pentru cei intrați în cont: Jocuri fulger pe temă și nivel sau pe totalul temei (săptămâna aceasta și tot
 // timpul) și stelele de la teste. Primele TOP intrări vin dintr-o interogare; locul unui profil propriu aflat mai jos, dintr-o
 // numărare pe server. Intrările le scrie cloud/sync.js; aici doar se citesc, cu o memorie scurtă, ca schimbarea filelor să nu
 // recitească tot.

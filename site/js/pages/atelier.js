@@ -8,12 +8,17 @@ import { cantitate, formatNumber } from '../core/ro.js';
 import { normalizeTest } from '../core/spec.js';
 import { mountExercise } from '../components/exercise.js';
 import { callout, chip, levelPill, mascot, stars } from '../components/ui.js';
+import { seededRandom } from '../core/rng.js';
+import { artHTML, aspect } from '../fulger/art.js';
+import { playableTopics } from '../fulger/engine.js';
+import { KINDS } from '../fulger/kinds.js';
 import { listVisuals, visualSVG } from '../visuals/index.js';
 
 const TABS = [
   ['componente', 'Componente'],
   ['vizualuri', 'Vizualuri'],
   ['tipuri', 'Tipuri de exerciții'],
+  ['fulger', 'Jocuri fulger'],
 ];
 
 function components() {
@@ -104,6 +109,47 @@ async function types(wrap, ctls) {
   }
 }
 
+/** Jocuri fulger: câte 12 întrebări (semințele 1–12) din fiecare tip cu figuri, cu varianta corectă încadrată, ca itemii nepotriviți să se vadă din ochi. */
+function fulgerReview() {
+  const art = (spec, cls) =>
+    spec.v || spec.emoji ? h('span', { class: cls, 'aria-hidden': 'true', style: { '--ar': String(aspect(spec)) }, html: artHTML(spec) }) : h('span', { class: `${cls} fg-review__text` }, spec.text);
+  return h(
+    'div',
+    { class: 'l-stack l-stack--lg' },
+    h('p', { class: 'u-muted' }, 'Câte 12 întrebări din fiecare tip cu figuri (semințele 1–12), cu varianta corectă încadrată în verde.'),
+    playableTopics().map((topic) => {
+      const kinds = [...new Set(topic.levels.flatMap((l) => l.mix.map((m) => m.kind)))].filter((kind) => KINDS[kind].mode === 'figure');
+      if (!kinds.length) return null;
+      return h(
+        'section',
+        { class: 'l-stack' },
+        h('h2', {}, topic.title),
+        kinds.map((kind) =>
+          h(
+            'div',
+            { class: 'l-stack l-stack--sm', 'data-testid': `review-${kind}` },
+            h('h3', {}, `${KINDS[kind].label} `, h('code', {}, kind)),
+            h(
+              'div',
+              { class: 'l-grid', style: { '--grid-min': '14rem' } },
+              Array.from({ length: 12 }, (_, i) => {
+                const q = KINDS[kind].generate(seededRandom(i + 1));
+                return h(
+                  'figure',
+                  { class: 'c-card fg-review' },
+                  h('figcaption', { class: 'u-small' }, h('strong', {}, `${i + 1}. `), q.prompt),
+                  q.figure ? art(q.figure, 'fg-review__fig') : null,
+                  h('div', { class: 'fg-review__opts' }, q.choices.map((c) => h('span', { class: `fg-review__opt${c === q.answer ? ' is-answer' : ''}` }, art(q.options[c], 'fg-review__art')))),
+                );
+              }),
+            ),
+          ),
+        ),
+      );
+    }),
+  );
+}
+
 export default async function atelier(container, [tab = 'componente']) {
   document.title = 'Atelier — Cifruța';
   const body = h('div', { class: 'l-stack l-stack--lg' });
@@ -118,6 +164,7 @@ export default async function atelier(container, [tab = 'componente']) {
   );
   const ctls = {};
   if (tab === 'vizualuri') body.append(visuals());
+  else if (tab === 'fulger') body.append(fulgerReview());
   else if (tab === 'tipuri') await types(body, ctls);
   else body.append(components());
   return () => {

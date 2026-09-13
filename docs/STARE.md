@@ -1,32 +1,36 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-13 · **Versiune:** 0.10.2 (clasamente persistente; cheia web Firebase în afara git-ului, publicare prin GitHub Actions)
+- **Data:** 2026-09-13 · **Versiune:** 0.11.0 (Jocuri fulger: patru teme noi cu figuri, fără calcule)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
   rezultate (scor, calificativ, stele, confetti, autoevaluare, zona pentru părinți cu lista încercărilor și concepte pe subpunct,
   revizuire cu explicații, rezolvare, „Mai încerc o dată” repetabil), 13 tipuri de exerciții (cu traseu pe harta liniilor și
-  grafic cu bare construit; `mark` cu reguli de set pentru sarcini deschise), banca vizuală (50 de desene: și grafice, pictograme,
-  bețișoare, felii, tabele, podium, hartă de linii, indicator, raft, bon, listă, tabel de poziție, cuburi, medalie; 8 peisaje
-  animate), sunete discrete cu buton de oprire, atelier pentru autori, jocul **Calcul fulger** (`#/fulger`: teme legate de programă,
-  desfășurate pe pagina jocului, fiecare cu trei niveluri; acum „Adunări și scăderi până la 100”, iar numerele până la 1000, înmulțirea, împărțirea și ecuațiile
-  simple apar „în curând”; runde de 2 minute, 16 tipuri de întrebări generate, fiecare cu conceptele ei („Ce exersăm”), alune cu bonus de viteză și de serie, Turbo, pistă spre stele și record, 6 medalii, „Greșelile tale” și ținta următoarei stele la rezultate). Conținut: **4 teste de recapitulare a clasei I** (T1–T4 v2)
+  grafic cu bare construit; `mark` cu reguli de set pentru sarcini deschise), banca vizuală (56 de desene: și grafice, pictograme,
+  bețișoare, felii, tabele, podium, hartă de linii, indicator, raft, bon, listă, tabel de poziție, cuburi, medalie, figuri cu umplere
+  și rotire, piese din căsuțe, desfășurări, rețeaua robotului; 8 peisaje animate), sunete discrete cu buton de oprire, atelier pentru
+  autori (și cu întrebările generate ale jocurilor), **Jocurile fulger** (`#/fulger`: teme desfășurate pe pagina jocului, fiecare cu trei
+  niveluri: „Adunări și scăderi până la 100” și patru teme cu figuri, fără calcule, „Șiruri și intruși”, „Puzzle cu forme”, „Figuri și
+  corpuri”, „Poziții și trasee”; numerele până la 1000, înmulțirea, împărțirea și ecuațiile simple apar „în curând”; runde de 2 minute,
+  40 de tipuri de întrebări generate (16 cu calcule, 24 cu figuri), fiecare cu conceptele ei („Ce exersăm”), alune cu bonus de viteză și
+  de serie, Turbo, pistă spre stele și record, 6 medalii, „Greșelile tale” și ținta următoarei stele la rezultate). Conținut: **4 teste
+  de recapitulare a clasei I** (T1–T4 v2)
   și **6 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc), toate
   exercițiile cu desen sau emoji, fără răspunsuri „la vedere”, cu probleme în mai mulți pași și sarcini deschise la avansat.
   **Contul familiei** (v0.9.0, `docs/cloud.md`): părintele intră cu Google și face profiluri de copii (poreclă + avatar, cu acordul
   părintelui); rezultatele profilului care joacă se sincronizează cu Cloud Firestore (coadă cu reîncercări, tranzacții, mutarea
-  rezultatelor fără cont); clasament doar pentru cei din cont (Calcul fulger pe temă: pe nivel și totalul temei, săptămâna aceasta
+  rezultatelor fără cont); clasament doar pentru cei din cont (Jocuri fulger pe temă: pe nivel și totalul temei, săptămâna aceasta
   și tot timpul; stelele de la teste); administrare (blocare, redenumire, ștergeri); pagina de confidențialitate. Fără configurarea Firebase, site-ul arată
   ca în v0.8.1, plus legătura „Confidențialitate” din subsol.
-  Calitate: 76 de teste Node (plus validarea conținutului, a tabelului de acoperire, a contrastului și calibrarea stelelor din
-  Calcul fulger pe fiecare temă și nivel), 13 teste ale regulilor Firestore pe emulator, E2E 1115 verificări pe 3 ecrane + tastatură
-  (plus telefon ținut orizontal și telefon mic) și E2E pentru cont pe emulatoare, cu 62 de verificări (două dispozitive, două file,
-  blocare, clasamente pe temă și săptămâni trecute, date vechi din cloud).
-- **Următorul pas:** intrarea cu Google pe site, cu cheia nouă (la activare, clasamentele vechi trec pe temă și stelele de la teste
-  revin; verificăm apoi în Firestore), pe laptop, telefon și iPad; cererea la GitHub Support pentru commit-urile vechi; documentul `admins/<uid>`.
-  În paralel: copilul joacă și rezolvă testele → pragurile și timpii reali. Apoi a doua temă din Calcul fulger (rețeta din
-  `CLAUDE.md`), cu super-totalul pe mai multe teme, și secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul).
+  Calitate: 83 de teste Node (plus validarea conținutului, a tabelului de acoperire, a contrastului, calibrarea stelelor din Jocurile
+  fulger pe fiecare temă și nivel și regulile independente ale celor 24 de tipuri cu figuri), 13 teste ale regulilor Firestore pe emulator,
+  E2E 1358 de verificări pe 3 ecrane + tastatură (plus telefon ținut orizontal și telefon mic) și E2E pentru cont pe emulatoare, cu 62 de
+  verificări (două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute, date vechi din cloud).
+- **Următorul pas:** publicarea v0.11.0 (`npm run deploy:rules`, apoi `npm run deploy`) și E2E pe site-ul live; copilul joacă temele cu
+  figuri → `fastMs` și pragurile de stele din runde reale. Rămân: intrarea cu Google pe site (la activare, clasamentele vechi trec pe temă
+  și stelele de la teste revin; verificăm în Firestore), cererea la GitHub Support pentru commit-urile vechi, documentul `admins/<uid>`.
+  Apoi secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul) și temele „în curând” din Jocuri fulger.
 
 ## Etape
 - [x] M0 Schelet: git, `_surse/`, `.gitignore`, `package.json`, `CLAUDE.md`, docs (curriculum, cercetare)
@@ -90,6 +94,13 @@
   secretul `FIREBASE_API_KEY`, istoria rescrisă (`main`, `gh-pages`, etichete), publicare prin GitHub Actions. npm test 76/76, reguli 13/13
   (publicate), E2E cont 62/62, E2E u1-t1 99/99; fluxul Actions: teste și publicare reușite; pe site: cheia nouă, Identity Toolkit 200 de
   pe site și 403 din afara lui, Gemini 403; E2E pe site-ul live 1115/1115, tag `v0.10.2`
+- [x] M25 (v0.11.0): „Calcul fulger” devine **Jocuri fulger**, cu patru teme noi fără calcule (24 de tipuri cu figuri): „Șiruri și
+  intruși” (șiruri, intruși, analogii, tabele 3 × 3), „Puzzle cu forme” (piesa care umple golul, piese rotite sau în oglindă, axe de
+  simetrie), „Figuri și corpuri” (figuri desenate neobișnuit, capcane, corpuri și obiecte, numărarea figurilor, desfășurări) și
+  „Poziții și trasee” (stânga, dreapta, sus, jos și între, înăuntru sau afară, drumul robotului, căsuțe cu litere și cifre). Module pure
+  `core/forme.js` și `core/grile.js`; desenele `glyph`, `glyph-cells`, `cell-grid`, `rect-strip`, `net` și `robot-grid`; modul de
+  întrebare `figure` în arenă, pe cardurile nivelurilor și în „Greșelile tale”; regulile independente din `tests/fulger-forme.rules.js`;
+  `#/atelier/fulger` (288 de întrebări, cu răspunsul încadrat). npm test 83/83, reguli 13/13, E2E 1358/1358, E2E cont 62/62
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -189,6 +200,12 @@
 | 2026-09-13 | Recenzia externă a reviziilor v0.8.0–v0.10.0: fără erori de calcul sau de securitate; reformulată cerința din u1-t1 „Cadouri și cinema” („Banii de cinema rămân deoparte”), fără versiune nouă; casetele din T2-e11 și T4-e09 nu se redenumesc | id-urile casetelor sunt interne, nevăzute de copil; redenumirea ar cere versiuni noi și ar strica ciornele și listele încercărilor |
 | 2026-09-13 | Nicio cheie în git: cheia web Firebase stă doar în secretul GitHub `FIREBASE_API_KEY` și intră în pachetul publicat prin GitHub Actions (`.github/workflows/pages.yml`); `config.js` are `apiKey: ''`; Pages publică din Actions, iar `npm run deploy` doar împinge `main` | alerta GitHub pentru cheia din `config.js` și cererea utilizatorului („rezolvat definitiv și retroactiv”); o cheie web se vede oricum în site, dar nu mai stă în repo |
 | 2026-09-13 | Cheia veche ștearsă în Google Cloud; cheia nouă restricționată (site-ul și `firebaseapp.com`; Identity Toolkit, Token Service, Cloud Firestore), fără cont de serviciu legat; istoria rescrisă cu `git filter-repo` pe `main`, `gh-pages` și toate etichetele, apoi ramura `gh-pages` ștearsă; alerta închisă ca „revoked” | doar ștergerea face cheia scursă nefolositoare; rescrierea o scoate din repo; restricțiile limitează cheia nouă, care rămâne vizibilă în JavaScript-ul site-ului |
+| 2026-09-13 | „Calcul fulger” devine „Jocuri fulger”, cu patru teme noi fără calcule: „Șiruri și intruși”, „Puzzle cu forme”, „Figuri și corpuri”, „Poziții și trasee”; ruta, cheile din storage și id-urile clasamentelor rămân `fulger` | jocurile noi nu mai sunt calcule; nimic de mutat în date |
+| 2026-09-13 | Un mod nou de întrebare, `figure`: cerință scurtă, desen, 4 variante desenate, iar id-ul variantei e cheia ei canonică; motorul, punctajul, pauzele, stelele și clasamentele rămân aceleași | motorul compară răspunsurile cu `===` și nu depinde de conținut |
+| 2026-09-13 | La figuri: doar atingere, mereu 4 variante, fără da/nu; culoarea nu e niciodată singurul indiciu; variantele au nume diferite pentru cititorul de ecran; stânga și dreapta din ochii copilului; fără itemi care cer „pătratul e dreptunghi”; imaginile în oglindă apar ca distractori doar la „aceeași piesă, doar rotită” | ghicitul să nu prindă stele; accesibilitate; greșelile tipice din studii (forma „tipică” a figurilor, oglindirea) |
+| 2026-09-13 | Fiecare tip cu figuri are în teste o regulă care găsește singură răspunsul: perioade, însușiri „3 + 1”, schimbări, reguli pe rânduri și coloane, piese, axe găsite prin încercare, formule de numărare, plierea hârtiei, robotul pas cu pas | itemii cu două răspunsuri bune se prind înainte de publicare |
+| 2026-09-13 | Pragurile de stele ale temelor noi vin din simularea copiilor, cu aceleași rapoarte ca la calcule; `fastMs` sunt valori de pornire | nu există încă runde reale |
+| 2026-09-13 | Din „Corpuri și obiecte” au ieșit obiectele cu forma neclară în emoji (cutia arată ca un cub; bateria, petarda) | o captură a arătat un item cu două răspunsuri posibile |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -220,10 +237,12 @@
   indicii treptate, pașii unei probleme afișați pe rând, animații legate de operație (gruparea din 5 în 5, simbolul care se desface,
   deplasarea pe axă).
 - Variante generate aleator (cu sămânță), diplomă printabilă.
-- Calcul fulger, mai departe: temele „în curând” (numere până la 1000, înmulțirea, împărțirea, ecuații □ + 7 = 15) și super-totalul
+- Jocuri fulger, mai departe: temele „în curând” (numere până la 1000, înmulțirea, împărțirea, ecuații □ + 7 = 15) și super-totalul
   pe mai multe teme (`fulger-total-<perioadă>`, rezervat), răspuns tastat, antrenament
   fără cronometru, magazinul Cifruței (accesorii pentru mascotă cumpărate cu alune), provocarea zilei, vibrații pe tabletă, nivel
   adaptiv; pragurile de stele și timpii „fulger” se ajustează după runde reale.
+- Jocuri fulger cu figuri, mai departe: tangram cu triunghiuri, perechi de piese care formează o figură, vederi de sus ale corpurilor,
+  emoji-urile unei teme încărcate înainte de start, `fastMs` și pragurile de stele ajustate după rundele reale.
 - Amânate la cerere: citire cu voce (TTS), tastatură numerică proprie pe ecran.
 - Din feedback-ul nr. 2, neaplicate: săgeți sus/jos la butoanele radio (Tab + Space merg); explicații vizuale interactive
   (evidențieri pas cu pas în desen); ceas și termometru cu tragere directă; validator care leagă desenele cu date de răspunsuri.
@@ -376,3 +395,13 @@
   live 1115/1115; v0.10.2 publicat.
   **De făcut data viitoare:** intrarea cu Google pe site și verificarea în Firestore (clasamentele mutate pe temă, stelele); cererea la
   GitHub Support pentru cele 13 commit-uri vechi; copilul joacă → pragurile.
+- **2026-09-13 (Jocuri fulger cu figuri)** — Plan aprobat după documentare (programa din 2013 și standardele din 2026, Common Core, Anglia,
+  Singapore; studii despre șiruri, antrenamentul spațial și forma „tipică” a figurilor; aplicații pentru copii), cu cererile utilizatorului:
+  geometrie de clasa a II-a, perspicacitate și logică, toate temele odată, numele „Jocuri fulger”. Construit în etape, cu commit la fiecare:
+  modelul figurilor și al pieselor (`core/forme.js`, `core/grile.js`), modul `figure` în arenă, 24 de tipuri în patru teme, câte o regulă
+  independentă pentru fiecare tip, `#/atelier/fulger`. Capturile au prins: șirul desenat la 300 px (cardul îl strângea), variantele pe două
+  rânduri care nu încăpeau pe telefonul mic, linia „deplasată” prea aproape de mijloc la figurile înguste, emoji-ul din întrebare prea mic,
+  cutia din emoji care arată ca un cub; testul de nume a prins variante care sunau la fel pentru cititorul de ecran (rotiri, linii).
+  npm test 83/83, reguli 13/13, E2E 1358/1358, E2E cont 62/62.
+  **De făcut data viitoare:** publicarea v0.11.0 (întâi regulile), apoi copilul joacă temele noi → `fastMs` și pragurile; intrarea cu Google
+  pe site; cererea la GitHub Support pentru commit-urile vechi.

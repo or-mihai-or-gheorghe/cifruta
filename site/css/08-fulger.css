@@ -296,6 +296,16 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 .fg-fig { --fig-h: clamp(5.5rem, 26vh, 13rem); width: min(100%, calc(var(--fig-h) * var(--ar, 1))); }
 .fg-fig.is-shown { animation: anim-pop var(--dur-3) var(--ease-spring); }
 .fg-mistake__fig { display: inline-block; width: min(100%, calc(4.2rem * var(--ar, 1))); } /* desenul întrebării în „Greșelile tale” */
+/* atelier: întrebările cu figuri generate, cu varianta corectă încadrată */
+.fg-review { display: grid; align-content: start; gap: var(--sp-2); margin: 0; }
+.fg-review__fig { display: block; width: min(100%, calc(7rem * var(--ar, 1))); margin-inline: auto; }
+.fg-review__opts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.35rem; }
+.fg-review__opt { display: grid; place-items: center; min-height: 3rem; padding: 0.25rem; border: 2px solid var(--c-line); border-radius: var(--r-2); }
+.fg-review__opt.is-answer { border-color: var(--c-ok-ink); background: var(--c-ok-bg); }
+.fg-review__art { display: block; width: min(100%, calc(2.4rem * var(--ar, 1))); }
+.fg-review__text { width: auto; font-family: var(--font-title); font-weight: 700; font-size: var(--fs-2); }
+.fg-review__fig .c-emoji,
+.fg-review__art .c-emoji { display: block; width: 100%; height: auto; margin: 0; }
 
 .fg-bolt { display: flex; align-items: center; gap: 0.4rem; width: min(15rem, 80%); transition: opacity var(--dur-2); }
 .fg-bolt .c-emoji { width: 1.3rem; height: 1.3rem; margin: 0; }

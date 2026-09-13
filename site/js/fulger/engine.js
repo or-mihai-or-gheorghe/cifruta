@@ -1,4 +1,4 @@
-// Calcul fulger: motorul unei runde (pur, fără DOM). Alege întrebările după amestecul nivelului unei teme, verifică răspunsurile și
+// Jocuri fulger: motorul unei runde (pur, fără DOM). Alege întrebările după amestecul nivelului unei teme, verifică răspunsurile și
 // socotește alunele (viteză doar în serie × serie), pauzele după greșeli, bonusul de precizie, stelele și medaliile.
 // Interfața (js/fulger/view.js) și simularea din tests/fulger.test.js folosesc aceleași funcții.
 
