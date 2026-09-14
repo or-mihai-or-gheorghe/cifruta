@@ -34,6 +34,12 @@ const PAIRS = [
   ['--c-warn-ink', '--c-paper'],
   ['--c-warn-ink', '--c-warn-bg'],
   ['--c-info-ink', '--c-info-bg'],
+  ['--c-bronz-ink', '--c-bronz-bg'],
+  ['--c-argint-ink', '--c-argint-bg'],
+  ['--c-aur-ink', '--c-aur-bg'],
+  ['--c-ink-soft', '--c-bronz-bg'],
+  ['--c-ink-soft', '--c-argint-bg'],
+  ['--c-ink-soft', '--c-aur-bg'],
 ];
 
 test('css: textul are contrast de cel puțin 4,5:1 pe fundalul lui', () => {

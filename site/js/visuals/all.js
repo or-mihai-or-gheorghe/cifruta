@@ -11,3 +11,4 @@ import './city.js';
 import './shop.js';
 import './forme.js';
 import './avatar.js';
+import './awards.js';
