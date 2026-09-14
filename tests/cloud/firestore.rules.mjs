@@ -116,7 +116,9 @@ test('reguli: încercările, rundele (cu temă) și starea le scrie doar proprie
   await assertFails(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-4'), { ...round, topic: 7 }));
   await assertFails(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-5'), { ...round, total: 5000 }));
   await assertFails(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-6'), { ...round, level: 'expert' }));
-  await assertSucceeds(setDoc(doc(db, 'users/ana/profiles/p1/state/fulger'), { best: { [`${TOPIC}:usor`]: { alune: 120 } }, medals: {}, week: { [`${TOPIC}:usor`]: { id: '2026-W37', alune: 120 } } }));
+  // medaliile din v0.13.0 (`<metal>:<temă>`, `<metal>-<treaptă>`) și una de dinainte trec prin aceleași reguli: `medals` e o hartă
+  const medals = { [`bronz:${TOPIC}`]: '2026-09-14T10:00:00.000Z', 'bronz-cupa': '2026-09-14T10:00:00.000Z', 'prima-cursa': '2026-09-01T10:00:00.000Z' };
+  await assertSucceeds(setDoc(doc(db, 'users/ana/profiles/p1/state/fulger'), { best: { [`${TOPIC}:usor`]: { alune: 120 } }, medals, week: { [`${TOPIC}:usor`]: { id: '2026-W37', alune: 120 } } }));
   await assertSucceeds(setDoc(doc(db, 'users/ana/profiles/p1/state/tests'), { best: { 'recap-c1-t1': 3 } }));
   await assertFails(setDoc(doc(db, 'users/ana/profiles/p1/state/tests'), { best: {}, extra: 1 }));
   await assertFails(setDoc(doc(db, 'users/ana/profiles/p1/state/altceva'), { best: {}, medals: {} }));

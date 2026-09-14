@@ -194,3 +194,7 @@
 [data-level='usor'] { --c-level: var(--c-usor); --c-level-bg: var(--c-usor-bg); --c-level-ink: var(--c-usor-ink); }
 [data-level='intermediar'] { --c-level: var(--c-intermediar); --c-level-bg: var(--c-intermediar-bg); --c-level-ink: var(--c-intermediar-ink); }
 [data-level='avansat'] { --c-level: var(--c-avansat); --c-level-bg: var(--c-avansat-bg); --c-level-ink: var(--c-avansat-ink); }
+/* medaliile Jocurilor fulger: metalul (culoarea vie, marginea) și perechea pentru text (fundal, cerneală) */
+[data-metal='bronz'] { --metal: var(--v-medal-bronz); --metal-dark: var(--v-medal-bronz-dark); --metal-bg: var(--c-bronz-bg); --metal-ink: var(--c-bronz-ink); }
+[data-metal='argint'] { --metal: var(--v-medal-argint); --metal-dark: var(--v-medal-argint-dark); --metal-bg: var(--c-argint-bg); --metal-ink: var(--c-argint-ink); }
+[data-metal='aur'] { --metal: var(--v-medal-aur); --metal-dark: var(--v-medal-aur-dark); --metal-bg: var(--c-aur-bg); --metal-ink: var(--c-aur-ink); }

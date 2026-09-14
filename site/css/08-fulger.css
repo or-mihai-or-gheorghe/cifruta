@@ -116,25 +116,71 @@
 .fg-concepts { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0; padding: 0; list-style: none; }
 .fg-level__play { margin-top: auto; }
 
-.fg-medals { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 8.5rem), 1fr)); gap: var(--sp-3); margin: 0; padding: 0; list-style: none; }
+/* ——— Medaliile: raftul pe metale, medalia de pe cardul nivelului și medaliile noi de la rezultate ———
+   [data-metal] dă --metal, --metal-dark, --metal-bg și --metal-ink (00-tokens.css). Câștigul nu se vede doar prin culoare: o medalie
+   necâștigată e gri, cu marginea punctată, iar una câștigată are marginea plină și bifa verde. Desenele se dimensionează prin containere. */
+.fg-shelf__intro { max-width: 62ch; color: var(--c-ink-soft); }
+.fg-metal {
+  display: grid;
+  gap: var(--sp-3);
+  padding: clamp(0.9rem, 0.5rem + 1.5vw, 1.25rem);
+  border: 2px solid var(--c-line);
+  border-top: 6px solid var(--metal-dark);
+  border-radius: var(--r-4);
+  background: linear-gradient(180deg, var(--metal-bg) 0%, var(--c-surface) 9rem);
+}
+.fg-metal__head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); }
+.fg-metal__art { flex: none; width: 3rem; }
+.fg-metal__title { font-size: var(--fs-3); color: var(--metal-ink); }
+.fg-metal__count { margin-left: auto; border-color: var(--metal-dark); background: var(--c-surface); color: var(--metal-ink); font-family: var(--font-title); font-weight: 700; }
+/* medaliile temelor și cele în plus stau una sub alta; pe ecran lat, pe un singur rând, cu căsuțe la fel de late (--n = medaliile grupului) */
+.fg-metal__groups { display: grid; gap: var(--sp-3); }
+.fg-metal__group { display: grid; align-content: start; gap: var(--sp-2); min-width: 0; padding: var(--sp-2); border-radius: var(--r-3); }
+.fg-metal__group--extra { background: var(--metal-bg); }
+.fg-metal__label { font-size: var(--fs-0); color: var(--metal-ink); }
+.fg-medals { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 7rem), 1fr)); gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
+@media (min-width: 60rem) {
+  .fg-metal__groups { display: flex; }
+  .fg-metal__group { flex: var(--n, 1) 1 0; }
+  .fg-metal__group .fg-medals { grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr)); }
+}
 .fg-medal {
+  position: relative;
   display: grid;
   justify-items: center;
   align-content: start;
-  gap: 0.25rem;
-  padding: var(--sp-3);
+  gap: 0.2rem;
+  padding: var(--sp-2) 0.35rem var(--sp-3);
   border: 2px dashed var(--c-line-strong);
   border-radius: var(--r-3);
   background: var(--c-surface);
   color: var(--c-ink-soft);
   text-align: center;
 }
-.fg-medal__icon { display: grid; place-items: center; width: 3.2rem; height: 3.2rem; border-radius: 50%; background: var(--c-surface-2); filter: grayscale(1); opacity: 0.5; }
-.fg-medal__icon .c-emoji { width: 2rem; height: 2rem; margin: 0; }
-.fg-medal__title { font-family: var(--font-title); color: var(--c-ink); }
+.fg-medal__art { display: block; width: 3.6rem; filter: grayscale(1); opacity: 0.45; }
+.fg-medal--extra .fg-medal__art { width: 4rem; }
+.fg-medal__title { font-family: var(--font-title); font-size: var(--fs-0); line-height: 1.2; color: var(--c-ink); overflow-wrap: anywhere; }
+.fg-medal__sub { font-family: var(--font-title); font-weight: 700; color: var(--metal-ink); }
 .fg-medal__text { font-size: 0.82rem; line-height: 1.3; }
-.fg-medal.is-won { border-style: solid; border-color: var(--c-accent-dark); background: #fff7df; }
-.fg-medal.is-won .fg-medal__icon { filter: none; opacity: 1; background: var(--c-accent); box-shadow: 0 0 0 3px var(--c-surface), 0 0 0 5px var(--c-accent-dark); }
+.fg-medal__progress { font-size: 0.82rem; font-weight: 700; }
+.fg-medal .c-star { width: 1.15rem; height: 1.15rem; }
+.fg-medal.is-won { border-style: solid; border-color: var(--metal-dark); background: var(--metal-bg); box-shadow: 0 3px 0 var(--metal-dark); }
+.fg-medal.is-won .fg-medal__art { filter: none; opacity: 1; }
+.fg-medal.is-won .fg-medal__progress { color: var(--metal-ink); }
+.fg-medal__check { position: absolute; top: 0.3rem; right: 0.3rem; width: 1.4rem; height: 1.4rem; border-radius: 50%; background: var(--c-ok); box-shadow: 0 0 0 2px var(--c-surface); }
+.fg-medal__check::after { content: ''; position: absolute; top: 0.27rem; left: 0.5rem; width: 0.36rem; height: 0.64rem; border: solid var(--c-surface); border-width: 0 0.17rem 0.17rem 0; transform: rotate(45deg); }
+/* pe cardul nivelului: medalia lui, mică, și ce trebuie pentru ea */
+.fg-level__medal { display: flex; align-items: center; gap: var(--sp-2); margin: 0; padding: 0.25rem 0.75rem 0.25rem 0.3rem; border: 2px dashed var(--c-line-strong); border-radius: var(--r-3); color: var(--c-ink-soft); font-size: var(--fs-0); line-height: 1.25; }
+.fg-level__medal-art { flex: none; width: 2.3rem; filter: grayscale(1); opacity: 0.5; }
+.fg-level__medal.is-won { border-style: solid; border-color: var(--metal-dark); background: var(--metal-bg); color: var(--metal-ink); font-family: var(--font-title); font-weight: 700; }
+.fg-level__medal.is-won .fg-level__medal-art { filter: none; opacity: 1; }
+@media (max-width: 30rem) {
+  .fg-medals { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.4rem; }
+  .fg-medal__art { width: 2.9rem; }
+  .fg-medal--extra .fg-medal__art { width: 3.2rem; }
+  .fg-metal__art { width: 2.4rem; }
+  .fg-metal__group { padding: 0.3rem; }
+}
 
 /* ——— Arena rundei ——— */
 /* în rundă, arena umple exact spațiul de sub antet, oricât de înalt ar fi antetul */
@@ -590,7 +636,18 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 }
 .fg-ribbon.is-in { animation: anim-slam 450ms var(--ease-spring) both; }
 .fg-again { animation: anim-pulse 1.2s ease-in-out 3; }
+/* medaliile noi, mai mari: medalia unei teme se întoarce ca o carte, o medalie în plus sare în față (fanfara și confetti vin din JS) */
+.fg-new-medals .fg-h2 { text-align: center; }
+.fg-new-medals .fg-medals { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-3); }
+.fg-new-medals .fg-medal { flex: 0 1 12rem; gap: 0.3rem; padding: var(--sp-4) var(--sp-2); }
+@media (max-width: 30rem) {
+  .fg-new-medals .fg-medal { flex-basis: 10.5rem; } /* două medalii alături și pe telefon */
+}
+.fg-new-medals .fg-medal__art { width: 5rem; }
+.fg-new-medals .fg-medal--extra .fg-medal__art { width: 5.75rem; }
+.fg-new-medals .fg-medal__title { font-size: var(--fs-1); }
 .fg-new-medals .fg-medal.is-in { animation: anim-flip-in 400ms var(--ease-out) both; }
+.fg-new-medals .fg-medal--extra.is-in { animation: anim-bounce-in 500ms var(--ease-spring) both; }
 .fg-results__buddy.is-in,
 .fg-mistakes.is-in { animation: anim-fade-up var(--dur-3) var(--ease-out) both; }
 .fg-target { font-family: var(--font-title); font-weight: 700; color: var(--c-brand-dark); }

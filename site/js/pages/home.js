@@ -7,11 +7,15 @@ import { cantitate } from '../core/ro.js';
 import { getFulger } from '../core/storage.js';
 import { art, chip, mascot } from '../components/ui.js';
 import { playableTopics, topicTotal } from '../fulger/engine.js';
+import { medalsWon } from '../fulger/medals.js';
 import { emojiHTML } from '../visuals/emoji.js';
 
-/** Cardul Jocurilor fulger, cu totalul recordurilor pe fiecare temă. */
+/** Cardul Jocurilor fulger, cu totalul recordurilor pe fiecare temă și numărul medaliilor câștigate. */
 function fulgerCard() {
-  const { best } = getFulger();
+  const { best, medals } = getFulger();
+  const won = medalsWon(best, medals).size;
+  const medalChip = won ? chip(cantitate(won, 'medalie', 'medalii'), '', 'medalie') : null;
+  if (medalChip) medalChip.dataset.testid = 'fulger-medals';
   return h(
     'a',
     { class: 'fg-home anim-fade-up', href: '#/fulger', 'data-testid': 'fulger-card' },
@@ -29,6 +33,7 @@ function fulgerCard() {
         const total = topicTotal(t.id, best);
         return total ? chip(`${t.short}: ${cantitate(total, 'alună', 'alune')}`, '', 'trofeu') : chip(`${t.short}: nou`, 'c-chip--soon');
       }),
+      medalChip,
     ),
     h('span', { class: 'c-btn c-btn--accent c-btn--lg fg-home__cta', 'aria-hidden': 'true' }, 'Joacă'),
   );

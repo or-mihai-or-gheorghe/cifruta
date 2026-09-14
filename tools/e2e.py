@@ -77,10 +77,13 @@ class Run:
         page.on("pageerror", lambda err: (self.failures.append(f"{label}: excepție: {err}"), print(f"  ✖ {label}: excepție: {err}")))
         page.on("response", lambda r: r.status >= 400 and (self.failures.append(f"{label}: {r.status} {r.url}"), print(f"  ✖ {label}: {r.status} {r.url}")))
 
-    def shot(self, page: Page, name: str):
+    def shot(self, page: Page, name: str, selector: str = ""):
         if self.shots:
             OUT.mkdir(exist_ok=True)
-            page.screenshot(path=str(OUT / f"{name}.png"), full_page=True)
+            if selector:  # doar elementul (de ex. raftul medaliilor de pe o pagină lungă), fără antetul lipit deasupra lui
+                page.locator(selector).first.screenshot(path=str(OUT / f"{name}.png"), style=".l-header { position: static !important; }")
+            else:
+                page.screenshot(path=str(OUT / f"{name}.png"), full_page=True)
 
     def goto(self, page: Page, route: str, debug: bool = False):
         page.goto(f"{self.base}{'?debug=1' if debug else ''}#/{route}")
@@ -545,7 +548,9 @@ def fulger_flow(run: Run, page: Page, vp: str):
     """Calcul fulger: cardul și hub-ul, o rundă prin ?debug=1 (serie, greșeli, sortare, Turbo, pauză, final), rezultatele și ștergerea."""
     run.goto(page, "")
     page.evaluate("localStorage.removeItem('cifruta:fulger')")
-    run.goto(page, "")
+    page.reload()
+    page.get_by_test_id("fulger-card").wait_for()
+    no_chip = page.get_by_test_id("fulger-medals").count() == 0
     page.get_by_test_id("fulger-card").click()
     group = page.get_by_test_id(f"fg-topic-{FULGER_TOPIC}")
     group.wait_for()
@@ -553,11 +558,36 @@ def fulger_flow(run: Run, page: Page, vp: str):
     run.check(page.locator("section.fg-topic").count() == playable and page.locator(".fg-soon").count() == soon and page.locator("a.fg-topic, a.fg-soon").count() == 0,
               f"[{vp}] fulger: temele sunt desfășurate pe pagina jocului ({playable} de jucat, {soon} în curând), fără carduri spre altă pagină")
     medals = page.evaluate("import('./js/fulger/medals.js').then((m) => m.medalCatalog().length)")
-    run.check(page.locator(".fg-medal").count() == medals and page.get_by_test_id("fg-medals-count").inner_text() == f"(0 din {medals})" and page.locator("[data-testid^=fg-metal-]").count() == 3,
-              f"[{vp}] fulger: raftul are toate cele {medals} de medalii, câte un panou pe metal, niciuna câștigată")
+    unwon = page.locator("[data-testid^=fg-level-medal-]:not(.is-won)").count()
+    run.check(no_chip and page.locator(".fg-medal").count() == medals and page.locator(".fg-medal.is-won").count() == 0 and page.get_by_test_id("fg-medals-count").inner_text() == f"(0 din {medals})"
+              and page.locator("[data-testid^=fg-metal-]").count() == 3 and unwon == 3 * playable,
+              f"[{vp}] fulger: raftul are toate cele {medals} de medalii, câte un panou pe metal, niciuna câștigată; cardurile nivelurilor arată medalia de câștigat ({unwon}), prima pagină nu arată medalii")
     run.check(group.locator("h2").inner_text() == title and group.locator(".fg-level").count() == 3 and group.get_by_test_id("fg-concepts").locator("li").count() == 5,
               f"[{vp}] fulger: tema are titlul, explicația, „Ce exersăm” și cele 3 niveluri")
     run.layout_ok(page, f"[{vp}] fulger teme")
+
+    # recorduri la a treia stea pe Ușor la alte 4 teme: medaliile lor de bronz, „Bronz dublu” și „Colecția de bronz” se deduc la afișare,
+    # fără să se scrie ceva, iar „Cupa de bronz” (5 teme) așteaptă runda de mai jos, din a cincea temă
+    others = page.evaluate(f"import('./data/fulger.js').then(({{ default: c }}) => c.topics.filter((t) => !t.soon && t.id !== '{FULGER_TOPIC}').slice(0, 4).map((t) => [t.id, t.levels[0].stars[2]]))")
+    seed = ", ".join(f"'{tid}:usor': {{ alune: {at}, at: '2026-09-01T10:00:00.000Z' }}" for tid, at in others)
+    page.evaluate(f"localStorage.setItem('cifruta:fulger', JSON.stringify({{ best: {{ {seed} }}, rounds: [], medals: {{}} }}))")
+    page.reload()
+    page.get_by_test_id("fg-medals").wait_for()
+    is_won = lambda testid: "is-won" in (page.get_by_test_id(testid).get_attribute("class") or "").split()
+    derived = all(is_won(f"fg-medal-bronz:{tid}") for tid, _ in others) and is_won("fg-medal-bronz-dublu") and is_won("fg-medal-bronz-colectie")
+    waiting = not is_won("fg-medal-bronz-cupa") and not is_won(f"fg-medal-bronz:{FULGER_TOPIC}")
+    cup = page.get_by_test_id("fg-medal-bronz-cupa").locator(".fg-medal__progress").inner_text()
+    count = page.get_by_test_id("fg-medals-count").inner_text()
+    stored = page.evaluate("Object.keys(JSON.parse(localStorage.getItem('cifruta:fulger')).medals).length")
+    run.check(len(others) == 4 and derived and waiting and cup == "4 din 5 teme" and count == f"(6 din {medals})" and stored == 0,
+              f"[{vp}] fulger: 4 teme cu 3 stele la Ușor dau medaliile lor de bronz, „Bronz dublu” și „Colecția de bronz”, fără să se scrie ceva; cupa arată „{cup}” ({count})")
+    theirs = page.get_by_test_id(f"fg-topic-{others[0][0]}").get_by_test_id("fg-level-medal-usor")
+    mine = page.get_by_test_id(f"fg-topic-{FULGER_TOPIC}").get_by_test_id("fg-level-medal-usor")
+    texts = [theirs.inner_text().strip(), mine.inner_text().strip()]
+    run.check("is-won" in theirs.get_attribute("class").split() and "is-won" not in mine.get_attribute("class").split() and texts == ["Ai medalia de bronz!", "Cu 3 stele câștigi medalia de bronz."],
+              f"[{vp}] fulger: cardul nivelului arată medalia lui, câștigată sau de câștigat ({texts})")
+    run.layout_ok(page, f"[{vp}] fulger medalii")
+    run.shot(page, f"{vp}-fulger-medalii", "[data-testid=fg-medals]")
 
     run.goto(page, f"fulger/{FULGER_TOPIC}/usor", debug=True)
     page.get_by_test_id("fg-start").click()
@@ -654,7 +684,12 @@ def fulger_flow(run: Run, page: Page, vp: str):
     lit = page.locator("[data-testid=fg-results] .c-star.is-on").count()
     run.check(total >= alune and lit == sum(total >= s for s in stars), f"[{vp}] fulger: totalul {total} (bara de sus {alune}, cu precizia) și {lit} stele")
     fresh = page.get_by_test_id("fg-new-medals").locator(".fg-medal").evaluate_all("els => els.map((e) => e.dataset.testid)") if page.get_by_test_id("fg-new-medals").count() else []
-    run.check(page.get_by_test_id("fg-record").is_visible() and fresh == [f"fg-medal-bronz:{FULGER_TOPIC}"], f"[{vp}] fulger: runda cu a treia stea aduce recordul și medalia de bronz a temei ({fresh})")
+    stored = page.evaluate("Object.keys(JSON.parse(localStorage.getItem('cifruta:fulger')).medals).sort()")
+    expected = sorted([f"bronz:{tid}" for tid, _ in others] + [f"bronz:{FULGER_TOPIC}", "bronz-colectie", "bronz-cupa", "bronz-dublu"])
+    run.check(page.get_by_test_id("fg-record").is_visible() and fresh == [f"fg-medal-bronz:{FULGER_TOPIC}", "fg-medal-bronz-cupa"] and stored == expected,
+              f"[{vp}] fulger: runda cu a treia stea aduce recordul, medalia de bronz a temei și „Cupa de bronz”; se salvează toate cele {len(stored)} medalii ({fresh})")
+    if fresh:
+        run.shot(page, f"{vp}-fulger-medalii-noi", "[data-testid=fg-new-medals]")
     mistakes = page.locator("[data-testid=fg-mistakes] .fg-mistake").count()
     target = page.get_by_test_id("fg-next-star")
     run.check(mistakes == 2 and (lit == 3 or (target.is_visible() and "stea" in target.inner_text())), f"[{vp}] fulger: „Greșelile tale” arată cele 2 greșeli, iar ținta spune cât mai trebuie până la steaua următoare ({mistakes})")
@@ -674,17 +709,22 @@ def fulger_flow(run: Run, page: Page, vp: str):
     page.reload()
     page.wait_for_selector("[data-testid=fg-best-usor]")
     kept = page.get_by_test_id(f"fg-topic-{FULGER_TOPIC}").get_by_test_id("fg-best-usor").inner_text() == best
+    run.goto(page, "")
+    page.get_by_test_id("fulger-card").wait_for()
+    home = page.get_by_test_id("fulger-medals").inner_text().strip() if page.get_by_test_id("fulger-medals").count() else ""
     run.goto(page, "fulger")
     card = page.get_by_test_id(f"fg-topic-{FULGER_TOPIC}").inner_text()
-    won = "is-won" in (page.get_by_test_id(f"fg-medal-bronz:{FULGER_TOPIC}").get_attribute("class") or "").split()
+    won = is_won(f"fg-medal-bronz:{FULGER_TOPIC}") and is_won("fg-medal-bronz-cupa")
     count = page.get_by_test_id("fg-medals-count").inner_text()
-    run.check(str(total) in best and kept and str(total) in card and won and count == f"(1 din {medals})", f"[{vp}] fulger: recordul ({best}), totalul temei și medalia de bronz rămân după reîncărcare ({count})")
+    run.check(str(total) in best and kept and str(total) in card and won and count == f"(8 din {medals})" and home == "8 medalii",
+              f"[{vp}] fulger: recordul ({best}), totalul temei și medaliile rămân după reîncărcare ({count}), iar prima pagină arată {home!r}")
     run.shot(page, f"{vp}-fulger-teme")
     page.get_by_test_id("parents").locator("summary").click()
     page.get_by_test_id("fg-clear").click()
     page.get_by_test_id("modal-confirm").click()
     page.wait_for_function(f"document.querySelector('[data-testid=fg-topic-{FULGER_TOPIC}]')?.innerText.includes('Nou')")
-    run.check(page.evaluate("localStorage.getItem('cifruta:fulger')") is None, f"[{vp}] fulger: ștergerea din „Pentru părinți” scoate rundele și recordul")
+    cleared = page.get_by_test_id("fg-medals-count").inner_text()
+    run.check(page.evaluate("localStorage.getItem('cifruta:fulger')") is None and cleared == f"(0 din {medals})", f"[{vp}] fulger: ștergerea din „Pentru părinți” scoate rundele, recordurile și medaliile ({cleared})")
 
     if vp == "laptop":
         # rezultatele de dinainte de teme (v0.9), cu recordul la a treia stea, și adresa veche a unei runde; medalia veche nu se mai arată
@@ -697,7 +737,7 @@ def fulger_flow(run: Run, page: Page, vp: str):
         old_best = page.get_by_test_id(f"fg-topic-{FULGER_TOPIC}").get_by_test_id("fg-best-usor").inner_text()
         run.shot(page, f"{vp}-fulger-tema")
         run.goto(page, "fulger")
-        old_medal = "is-won" in (page.get_by_test_id(f"fg-medal-bronz:{FULGER_TOPIC}").get_attribute("class") or "").split()
+        old_medal = is_won(f"fg-medal-bronz:{FULGER_TOPIC}")
         no_old = page.get_by_test_id("fg-medal-prima-cursa").count() == 0 and page.get_by_test_id("fg-medals-count").inner_text() == f"(1 din {medals})"
         run.check(moved == f"#/fulger/{FULGER_TOPIC}/usor" and str(three) in old_best and old_medal and no_old, f"[{vp}] fulger: rezultatele de dinainte de teme apar în temă, cu medalia de bronz și fără medaliile vechi, iar #/fulger/usor duce la noua adresă ({moved}, {old_best})")
         page.evaluate("localStorage.removeItem('cifruta:fulger')")

@@ -74,7 +74,7 @@ function topicHead(topic, heading, extra = null) {
 }
 
 /** O temă de jucat, desfășurată: stelele și totalul ei, explicația, „Ce exersăm” și cele trei niveluri. */
-function topicSection(topic, data) {
+function topicSection(topic, data, medals) {
   const total = topicTotal(topic.id, data.best);
   const score = h(
     'div',
@@ -93,7 +93,7 @@ function topicSection(topic, data) {
       h('h3', { class: 'fg-topic__label' }, 'Ce exersăm'),
       h('ul', { class: 'fg-concepts', 'data-testid': 'fg-concepts' }, topic.concepts.map((id) => h('li', {}, chip(concepts[id]?.title ?? id)))),
     ),
-    h('div', { class: 'l-grid anim-stagger', style: { '--grid-min': '17.25rem' } }, topic.levels.map((l) => levelCard(topic, l, data))),
+    h('div', { class: 'l-grid anim-stagger', style: { '--grid-min': '17.25rem' } }, topic.levels.map((l) => levelCard(topic, l, data, medals))),
   );
 }
 
@@ -117,6 +117,8 @@ function gamePage(container, focus = null) {
   document.title = 'Jocuri fulger — Cifruța';
   const data = getFulger();
   const playable = playableTopics();
+  // medaliile câștigate se calculează o dată, pentru cardurile nivelurilor și pentru raft
+  const medals = { catalog: medalCatalog(playable), won: medalsWon(data.best, data.medals, playable) };
   container.append(
     h(
       'div',
@@ -124,9 +126,9 @@ function gamePage(container, focus = null) {
       backLink('#/', 'Pagina de început'),
       hero('Jocuri fulger', 'Câte întrebări rezolvi în 2 minute? Alege tema și nivelul, strânge alune, fă serii și bate-ți recordul!'),
       howTo(),
-      playable.map((t) => topicSection(t, data)),
+      playable.map((t) => topicSection(t, data, medals)),
       playable[0] ? boardLink(`fulger/${playable[0].id}/total/week`, { row: 'center' }) : null,
-      medalShelf(data),
+      medalShelf(data, medals, playable),
       soonSection(config.topics.filter((t) => t.soon)),
       parentsBox(data.rounds),
     ),
@@ -152,7 +154,7 @@ function sample(kind, seed) {
   return h('li', { class: 'fg-sample' }, content);
 }
 
-function levelCard(topic, lvl, data) {
+function levelCard(topic, lvl, data, medals) {
   const best = data.best[recordKey(topic.id, lvl.id)]?.alune ?? null;
   const byMode = ['choice', 'compare', 'sort'].map((mode) => lvl.mix.find((m) => KINDS[m.kind].mode === mode)?.kind).filter(Boolean);
   const examples = byMode.length ? byMode : lvl.mix.map((m) => m.kind).slice(0, 2); // la temele cu figuri: primele două tipuri din amestec
@@ -162,7 +164,22 @@ function levelCard(topic, lvl, data) {
     h('div', { class: 'fg-level__head' }, levelPill(lvl.id), stars(best === null ? 0 : starsFor(lvl, best))),
     h('ul', { class: 'fg-samples', 'aria-label': 'Exemple de întrebări' }, examples.map((kind, i) => sample(kind, 11 + i))),
     h('p', { class: 'fg-level__best', 'data-testid': `fg-best-${lvl.id}` }, best === null ? chip('Nou!', 'c-chip--soon') : chip(`Record: ${alune(best)}`, '', 'trofeu')),
+    levelMedal(topic, lvl, medals),
     h('a', { class: 'c-btn c-btn--primary c-btn--lg fg-level__play', href: `#/fulger/${topic.id}/${lvl.id}`, 'data-testid': `fg-level-${lvl.id}` }, 'Joacă'),
+  );
+}
+
+/** Medalia nivelului, pe cardul lui: „Cu 3 stele câștigi medalia de bronz.”, apoi „Ai medalia de bronz!”. */
+function levelMedal(topic, lvl, { catalog, won }) {
+  const m = catalog.find((x) => x.kind === 'topic' && x.topic === topic.id && x.level === lvl.id);
+  const metal = metalOf(lvl.id);
+  if (!m || !metal) return null;
+  const has = won.has(m.id);
+  return h(
+    'p',
+    { class: `fg-level__medal${has ? ' is-won' : ''}`, 'data-metal': metal.id, 'data-testid': `fg-level-medal-${lvl.id}` },
+    h('span', { class: 'fg-level__medal-art', 'aria-hidden': 'true', html: visualSVG(m.visual) }),
+    has ? `Ai medalia ${metal.of}!` : `Cu ${cantitate(lvl.stars.length, 'stea', 'stele')} câștigi medalia ${metal.of}.`,
   );
 }
 
@@ -186,10 +203,7 @@ function medalCard(m, { won, progress = null, detailed = false }) {
 }
 
 /** Raftul medaliilor: câte un panou pe metal (adică pe nivel), cu medaliile temelor și medaliile în plus. */
-function medalShelf(data) {
-  const topics = playableTopics();
-  const catalog = medalCatalog(topics);
-  const won = medalsWon(data.best, data.medals, topics);
+function medalShelf(data, { catalog, won }, topics) {
   const teme = (n) => cantitate(n, 'temă', 'teme');
   const progress = (m, have) => {
     if (m.kind === 'extra') return h('span', { class: 'fg-medal__progress' }, won.has(m.id) ? teme(m.count) : `${Math.min(have, m.count)} din ${teme(m.count)}`);
@@ -204,6 +218,15 @@ function medalShelf(data) {
       const mine = catalog.filter((m) => m.metal === metal.id);
       const have = metalCount(won, metal.id, topics);
       const card = (m) => medalCard(m, { won: won.has(m.id), progress: progress(m, have) });
+      const group = (kind, label) => {
+        const list = mine.filter((m) => m.kind === kind);
+        return h(
+          'div',
+          { class: `fg-metal__group fg-metal__group--${kind}`, style: { '--n': String(list.length) } },
+          h('h4', { class: 'fg-metal__label', id: `fg-metal-${metal.id}-${kind}` }, label),
+          h('ul', { class: 'fg-medals', 'aria-labelledby': `fg-metal-${metal.id}-${kind}` }, list.map(card)),
+        );
+      };
       return h(
         'section',
         { class: 'fg-metal', 'data-metal': metal.id, 'aria-labelledby': `fg-metal-${metal.id}-titlu`, 'data-testid': `fg-metal-${metal.id}` },
@@ -215,8 +238,7 @@ function medalShelf(data) {
           levelPill(metal.level),
           chip(`${mine.filter((m) => won.has(m.id)).length} din ${mine.length}`, 'fg-metal__count'),
         ),
-        h('ul', { class: 'fg-medals', 'aria-label': 'Medaliile temelor' }, mine.filter((m) => m.kind === 'topic').map(card)),
-        h('ul', { class: 'fg-medals fg-medals--extra', 'aria-label': 'Medalii în plus' }, mine.filter((m) => m.kind === 'extra').map(card)),
+        h('div', { class: 'fg-metal__groups' }, group('topic', 'Medaliile temelor'), group('extra', 'Medalii în plus')),
       );
     }),
   );
