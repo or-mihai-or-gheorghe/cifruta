@@ -85,6 +85,15 @@
   --v-grass: #9ed98a;
   --v-grass-light: #c4ebb2;
   --v-cream: #ffebcc;
+  /* avatarele: nuanțe pentru blănuri și fundaluri */
+  --v-red-light: #f9b4ae;
+  --v-yellow-light: #ffe99e;
+  --v-teal-dark: #2ba59c;
+  --v-teal-light: #bfeee9;
+  --v-purple-dark: #7453cf;
+  --v-pink-light: #fde1e8;
+  --v-brown-dark: #7f4f2a;
+  --v-gray-dark: #8f899c;
   --v-beet: #9b2d5e;
   --v-coal: #4b4453;
   --v-coal-light: #6e6778;

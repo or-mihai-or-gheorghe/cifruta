@@ -1,4 +1,4 @@
-// Avatarul desenat: modelul din core/avatar.js (listele, textul canonic, numele, alegerea la întâmplare).
+// Avatarul desenat: modelul din core/avatar.js (listele, textul canonic, numele, alegerea la întâmplare) și desenul (visuals/avatar.js).
 
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -8,6 +8,8 @@ import {
   HATS, isAvatar, lookColor, NECKS, parseAvatar, randomLook, SLOTS,
 } from '../site/js/core/avatar.js';
 import { seededRandom } from '../site/js/core/rng.js';
+import { avatarSVG } from '../site/js/visuals/avatar.js';
+import { visualErrors } from '../site/js/visuals/index.js';
 
 const LEGACY = ['veverita', 'iepure', 'vulpe', 'urs', 'arici', 'pisica', 'caine', 'rata', 'lup', 'cal', 'oaie', 'gaina'];
 
@@ -144,4 +146,49 @@ test('avatar: un profil nou primește primul animal pe care nu-l are alt profil,
   assert.equal(defaultLook(['veverita', 'iepure.cap-coroana']).animal, 'vulpe');
   assert.equal(defaultLook(ids(ANIMALS)).animal, 'veverita');
   assert.ok(AVATAR_PATTERN.test(avatarId(defaultLook(['veverita']))));
+});
+
+// ——— desenul ———
+
+const drawing = (look) => avatarSVG(avatarId(look)).replace(/aria-label="[^"]*"/, '');
+
+test('avatar: fiecare animal, în fiecare culoare, pe fiecare fundal și cu fiecare accesoriu, dă un SVG curat, fără id-uri', () => {
+  for (const animal of ANIMALS) {
+    const looks = [
+      { animal: animal.id },
+      ...COLORS.map((c) => ({ animal: animal.id, color: c.id })),
+      ...BACKGROUNDS.map((b) => ({ animal: animal.id, background: b.id })),
+      ...SLOTS.slice(2).flatMap((s) => s.list.map((x) => ({ animal: animal.id, [s.field]: x.id }))),
+    ];
+    for (const look of looks) {
+      const svg = avatarSVG(avatarId(look));
+      const where = avatarId(look);
+      assert.ok(svg.startsWith('<svg') && svg.endsWith('</svg>'), where);
+      assert.ok(!/\sid="|href=|NaN|undefined|\[object|<script/.test(svg), `${where}: id, legătură sau valoare lipsă`);
+      assert.ok(!svg.replace('xmlns="http://www.w3.org/2000/svg"', '').includes('http'), `${where}: adresă externă`);
+    }
+  }
+});
+
+test('avatar: fiecare culoare, fundal și accesoriu schimbă desenul', () => {
+  for (const animal of ANIMALS) {
+    const colors = [null, ...ids(COLORS).filter((id) => id !== animal.natural)].map((color) => drawing({ animal: animal.id, color }));
+    assert.equal(new Set(colors).size, colors.length, `${animal.id}: două culori dau același desen`);
+  }
+  const backgrounds = ids(BACKGROUNDS).map((background) => drawing({ animal: 'vulpe', background }));
+  assert.equal(new Set(backgrounds).size, BACKGROUNDS.length, 'două fundaluri dau același desen');
+  for (const slot of SLOTS.slice(2)) {
+    const worn = [null, ...ids(slot.list)].map((id) => drawing({ animal: 'vulpe', [slot.field]: id }));
+    assert.equal(new Set(worn).size, slot.list.length + 1, `${slot.key}: două variante dau același desen`);
+  }
+});
+
+test('avatar: textul salvat nu ajunge în SVG, doar id-urile din liste; numele e cel al avatarului', () => {
+  const svg = avatarSVG('<img src=x onerror=alert(1)>.cap-"><script>');
+  assert.ok(!/<img|<script|onerror/.test(svg));
+  assert.equal(svg.replace(/aria-label="[^"]*"/, ''), drawing({ animal: 'veverita' }));
+  assert.match(avatarSVG('vulpe.cap-coroana'), /aria-label="vulpe cu coroană"/);
+  assert.match(avatarSVG('vulpe', { cls: 'x' }), /class="v-svg v-avatar x"/);
+  assert.deepEqual(visualErrors({ v: 'avatar', avatar: 'vulpe.cap-coroana' }), []);
+  assert.equal(visualErrors({ v: 'avatar', avatar: 'vulpe.culoare-portocaliu' }).length, 1);
 });

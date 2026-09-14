@@ -13,12 +13,15 @@ import { artHTML, aspect } from '../fulger/art.js';
 import { playableTopics } from '../fulger/engine.js';
 import { KINDS } from '../fulger/kinds.js';
 import { listVisuals, visualSVG } from '../visuals/index.js';
+import { ANIMALS, avatarId, BACKGROUNDS, COLORS, colorWord, SLOTS } from '../core/avatar.js';
+import { avatarSVG } from '../visuals/avatar.js';
 
 const TABS = [
   ['componente', 'Componente'],
   ['vizualuri', 'Vizualuri'],
   ['tipuri', 'Tipuri de exerciții'],
   ['fulger', 'Jocuri fulger'],
+  ['avatare', 'Avatare'],
 ];
 
 function components() {
@@ -150,6 +153,34 @@ function fulgerReview() {
   );
 }
 
+/** Avatarele: fiecare animal în fiecare culoare și cu fiecare accesoriu, plus fundalurile, ca un desen nepotrivit să se vadă din ochi. */
+function avatarReview() {
+  const cell = (look) => h('span', { class: 'av-cell', title: avatarId(look), html: avatarSVG(avatarId(look)) });
+  const matrix = (testid, heads, rows) =>
+    h(
+      'div',
+      { class: 'av-matrix-wrap' },
+      h(
+        'div',
+        { class: 'av-matrix', style: { '--cols': String(heads.length) }, 'data-testid': testid },
+        h('span'),
+        heads.map((head) => h('span', { class: 'av-matrix__head' }, head)),
+        rows.flatMap(([name, looks]) => [h('span', { class: 'av-matrix__name' }, name), ...looks.map(cell)]),
+      ),
+    );
+  const worn = SLOTS.slice(2).flatMap((slot) => slot.list.map((x) => ({ field: slot.field, id: x.id })));
+  const section = (title, content) => h('section', { class: 'l-stack' }, h('h2', {}, title), content);
+  const label = (id) => ANIMALS.find((a) => a.id === id).label;
+  return h(
+    'div',
+    { class: 'l-stack l-stack--lg', 'data-testid': 'avatar-review' },
+    h('p', { class: 'u-muted' }, 'Fiecare animal în fiecare culoare și cu fiecare accesoriu, plus fundalurile: un desen nepotrivit se vede din ochi.'),
+    section('Culorile', matrix('avatar-matrix-colors', ['naturală', ...COLORS.map((c) => colorWord(c.id, 'm'))], ANIMALS.map((a) => [a.label, [{ animal: a.id }, ...COLORS.map((c) => ({ animal: a.id, color: c.id }))]]))),
+    section('Accesoriile', matrix('avatar-matrix', worn.map((x) => x.id), ANIMALS.map((a) => [a.label, worn.map((x) => ({ animal: a.id, [x.field]: x.id }))]))),
+    section('Fundalurile', matrix('avatar-matrix-backgrounds', BACKGROUNDS.map((b) => b.id), ['veverita', 'pinguin', 'panda', 'broasca'].map((id) => [label(id), BACKGROUNDS.map((b) => ({ animal: id, background: b.id }))]))),
+  );
+}
+
 export default async function atelier(container, [tab = 'componente']) {
   document.title = 'Atelier — Cifruța';
   const body = h('div', { class: 'l-stack l-stack--lg' });
@@ -165,6 +196,7 @@ export default async function atelier(container, [tab = 'componente']) {
   const ctls = {};
   if (tab === 'vizualuri') body.append(visuals());
   else if (tab === 'fulger') body.append(fulgerReview());
+  else if (tab === 'avatare') body.append(avatarReview());
   else if (tab === 'tipuri') await types(body, ctls);
   else body.append(components());
   return () => {
