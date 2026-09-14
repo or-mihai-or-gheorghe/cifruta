@@ -41,13 +41,24 @@ export function bust(c, { top = 73, chest = true } = {}) {
   );
 }
 
-/** Ochii la (50 ± eyeDx, eyeY): `dot` ca la mascotă; `white` cu albul ochiului (pe blană închisă sau pe ochii broaștei). */
+/**
+ * Ochii la (50 ± eyeDx, eyeY): `dot` ca la mascotă, `big` mai mari (bufnița), `white` cu albul ochiului (ochii broaștei),
+ * `patch` mici și albi, pe petele închise ale pandei.
+ */
 export function eyes(a, style = 'dot') {
-  const one = (x) =>
-    style === 'white'
-      ? `<circle cx="${x}" cy="${a.eyeY}" r="5.4" fill="${C.white}" ${st(1.8)}/><circle cx="${x}" cy="${r2(a.eyeY + 0.5)}" r="3.2" fill="${C.ink}"/>` +
-        `<circle cx="${r2(x + 1.1)}" cy="${r2(a.eyeY - 0.7)}" r="1.1" fill="${C.white}"/>`
-      : `<circle cx="${x}" cy="${a.eyeY}" r="4.2" fill="${C.ink}"/><circle cx="${r2(x + 1.4)}" cy="${r2(a.eyeY - 1.4)}" r="1.4" fill="${C.white}"/>`;
+  const y = a.eyeY;
+  const one = (x) => {
+    if (style === 'white') {
+      return `<circle cx="${x}" cy="${y}" r="5.4" fill="${C.white}" ${st(1.8)}/><circle cx="${x}" cy="${r2(y + 0.5)}" r="3.2" fill="${C.ink}"/>` +
+        `<circle cx="${r2(x + 1.1)}" cy="${r2(y - 0.7)}" r="1.1" fill="${C.white}"/>`;
+    }
+    if (style === 'patch') {
+      return `<circle cx="${x}" cy="${y}" r="3.4" fill="${C.white}"/><circle cx="${x}" cy="${r2(y + 0.3)}" r="2.1" fill="${C.ink}"/>` +
+        `<circle cx="${r2(x + 0.7)}" cy="${r2(y - 0.5)}" r="0.7" fill="${C.white}"/>`;
+    }
+    const r = style === 'big' ? 5.4 : 4.2;
+    return `<circle cx="${x}" cy="${y}" r="${r}" fill="${C.ink}"/><circle cx="${r2(x + r / 3)}" cy="${r2(y - r / 3)}" r="${r2(r / 3)}" fill="${C.white}"/>`;
+  };
   return one(r2(50 - a.eyeDx)) + one(r2(50 + a.eyeDx));
 }
 

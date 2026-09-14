@@ -192,3 +192,14 @@ test('avatar: textul salvat nu ajunge în SVG, doar id-urile din liste; numele e
   assert.deepEqual(visualErrors({ v: 'avatar', avatar: 'vulpe.cap-coroana' }), []);
   assert.equal(visualErrors({ v: 'avatar', avatar: 'vulpe.culoare-portocaliu' }).length, 1);
 });
+
+test('avatar: fiecare animal din listă are desenul lui, iar cele fără culoare naturală au paleta lor', async () => {
+  const { ANIMAL_ART } = await import('../site/js/visuals/avatar-animals.js');
+  assert.deepEqual(Object.keys(ANIMAL_ART).sort(), ids(ANIMALS).sort());
+  for (const animal of ANIMALS) {
+    const art = ANIMAL_ART[animal.id];
+    assert.ok(typeof art.head === 'function' && typeof art.face === 'function', animal.id);
+    assert.equal(Boolean(art.fur), animal.natural === null, `${animal.id}: paleta proprie doar fără culoare naturală`);
+    for (const key of ['eyeY', 'eyeDx', 'top', 'headW', 'neckY']) assert.ok(Number.isFinite(art.a[key]), `${animal.id}: ancora ${key}`);
+  }
+});

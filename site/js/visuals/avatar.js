@@ -4,7 +4,7 @@
 // același avatar poate apărea de oricâte ori pe pagină. Mărimea vine din container (.v-svg are lățimea 100%).
 
 import { animalOf, avatarId, avatarLabel, isAvatar, parseAvatar } from '../core/avatar.js';
-import { ANIMAL_ART, GENERIC } from './avatar-animals.js';
+import { ANIMAL_ART } from './avatar-animals.js';
 import { bust, DISC, FUR, r2 } from './avatar-parts.js';
 import { registerVisual, visualSVG } from './index.js';
 import { C, st } from './palette.js';
@@ -129,10 +129,11 @@ const OWN_FUR = { main: C.brownLight, dark: C.brown, light: C.cream };
 
 function render(p) {
   const look = parseAvatar(p.avatar);
-  const art = ANIMAL_ART[look.animal] ?? GENERIC;
+  const art = ANIMAL_ART[look.animal] ?? ANIMAL_ART.veverita;
   const c = look.color ? FUR[look.color] : (art.fur ?? FUR[animalOf(look.animal).natural] ?? OWN_FUR);
   return [
     background(look.background),
+    art.behind ? art.behind(c, art.a) : '',
     art.bust ? art.bust(c, art.a) : bust(c),
     art.back ? art.back(c, art.a) : '',
     art.head(c, art.a),
