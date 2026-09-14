@@ -60,14 +60,14 @@ test('storage: calcul fulger păstrează recordul pe temă și nivel, ultimele r
   const empty = { best: {}, rounds: [], medals: {} };
   assert.deepEqual(getFulger(), empty);
   const round = (level, total, at) => ({ topic: 'adunari-scaderi-100', level, total, at });
-  assert.deepEqual(saveFulgerRound(round('usor', 50, 't1'), { keep: 2, medals: ['prima-cursa'] }), { saved: true, record: true, previous: null });
-  assert.deepEqual(saveFulgerRound(round('usor', 40, 't2'), { keep: 2, medals: ['prima-cursa'] }), { saved: true, record: false, previous: 50 });
+  assert.deepEqual(saveFulgerRound(round('usor', 50, 't1'), { keep: 2, medals: ['bronz:adunari-scaderi-100'] }), { saved: true, record: true, previous: null });
+  assert.deepEqual(saveFulgerRound(round('usor', 40, 't2'), { keep: 2, medals: ['bronz:adunari-scaderi-100'] }), { saved: true, record: false, previous: 50 });
   assert.deepEqual(saveFulgerRound(round('usor', 60, 't3'), { keep: 2 }), { saved: true, record: true, previous: 50 });
   assert.deepEqual(saveFulgerRound(round('avansat', 0, 't4'), { keep: 2 }), { saved: true, record: false, previous: null });
   const data = getFulger();
   assert.deepEqual(data.best, { 'adunari-scaderi-100:usor': { alune: 60, at: 't3' } });
   assert.deepEqual(data.rounds.map((r) => r.at), ['t3', 't4']);
-  assert.deepEqual(data.medals, { 'prima-cursa': 't1' }); // medalia păstrează data primei câștigări
+  assert.deepEqual(data.medals, { 'bronz:adunari-scaderi-100': 't1' }); // medalia păstrează data primei câștigări
   clearHistory(); // istoricul testelor nu atinge jocul
   assert.equal(getFulger().rounds.length, 2);
   clearFulger();

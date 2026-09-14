@@ -317,14 +317,21 @@ export default {
       soon: true,
     },
   ],
-  // stat: rounds (runde jucate) · bestStreak · fast (fulgere într-o rundă) · perfect (răspunsuri, dacă sunt toate corecte)
-  //       · levels3 (nivelurile temei rundei cu recordul la 3 stele)
-  medals: [
-    { id: 'prima-cursa', title: 'Prima cursă', text: 'Termini o rundă.', icon: 'steag', stat: 'rounds', gte: 1 },
-    { id: 'in-flacari', title: 'În flăcări', text: '10 răspunsuri corecte la rând.', icon: 'foc', stat: 'bestStreak', gte: 10 },
-    { id: 'de-neoprit', title: 'De neoprit', text: '20 de răspunsuri corecte la rând.', icon: 'racheta', stat: 'bestStreak', gte: 20 },
-    { id: 'fulgerul', title: 'Fulgerul', text: '10 fulgere într-o singură rundă.', icon: 'fulger', stat: 'fast', gte: 10 },
-    { id: 'fara-gres', title: 'Fără greș', text: 'Cel puțin 15 răspunsuri, toate corecte.', icon: 'tinta', stat: 'perfect', gte: 15 },
-    { id: 'campionul', title: 'Campionul', text: '3 stele la toate nivelurile unei teme.', icon: 'trofeu', stat: 'levels3', gte: 3 },
-  ],
+  // Medaliile: 3 stele la un nivel al unei teme aduc medalia metalului acelui nivel; aceeași medalie la mai multe teme aduce medaliile
+  // în plus. Id-urile sunt permanente (cifruta:fulger, state/fulger): „<metal>:<temă>” pentru medalia unei teme (o temă jucabilă nouă
+  // aduce singură medaliile ei) și „<metal>-<treaptă>” pentru cele în plus; legătura metal–nivel nu se schimbă. Medaliile de dinainte
+  // de v0.13.0 (prima-cursa, campionul…) rămân în date, dar nu se mai arată. Logica: js/fulger/medals.js.
+  medals: {
+    metals: [
+      { id: 'bronz', level: 'usor', of: 'de bronz', name: 'Bronz' },
+      { id: 'argint', level: 'intermediar', of: 'de argint', name: 'Argint' },
+      { id: 'aur', level: 'avansat', of: 'de aur', name: 'Aur' },
+    ],
+    // aceeași medalie la cel puțin `count` teme; id-ul treptei e și forma desenului (award)
+    extras: [
+      { id: 'dublu', count: 2, titles: { bronz: 'Bronz dublu', argint: 'Argint dublu', aur: 'Aur dublu' } },
+      { id: 'colectie', count: 3, titles: { bronz: 'Colecția de bronz', argint: 'Colecția de argint', aur: 'Colecția de aur' } },
+      { id: 'cupa', count: 5, titles: { bronz: 'Cupa de bronz', argint: 'Cupa de argint', aur: 'Cupa de aur' } },
+    ],
+  },
 };

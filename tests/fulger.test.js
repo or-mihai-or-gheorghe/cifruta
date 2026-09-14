@@ -9,7 +9,7 @@ import { lintText } from '../site/js/core/lint.js';
 import { seededRandom } from '../site/js/core/rng.js';
 import { trecere } from '../site/js/core/rules.js';
 import {
-  createRound, levelConfig, medalsFor, milestone, nextStar, pauseAfter, playableTopics, practiceFor, precisionBonus, scoreAnswer, starsFor,
+  createRound, levelConfig, milestone, nextStar, pauseAfter, playableTopics, practiceFor, precisionBonus, scoreAnswer, starsFor,
   topicConfig, topicStars, topicTotal,
 } from '../site/js/fulger/engine.js';
 import { KINDS } from '../site/js/fulger/kinds.js';
@@ -239,8 +239,7 @@ test('fulger: bonusul de precizie și stelele', () => {
   assert.equal(nextStar(usor, 175), null);
 });
 
-test('fulger: temele și nivelurile trimit doar la tipuri, concepte, iconițe și statistici cunoscute', () => {
-  const stats = new Set(['rounds', 'bestStreak', 'fast', 'perfect', 'levels3']);
+test('fulger: temele și nivelurile trimit doar la tipuri, concepte și iconițe cunoscute', () => {
   const reserved = new Set([...LEVEL_IDS, 'total', 'all']);
   const ids = config.topics.map((t) => t.id);
   assert.equal(new Set(ids).size, ids.length, 'id-urile temelor sunt unice');
@@ -269,7 +268,6 @@ test('fulger: temele și nivelurile trimit doar la tipuri, concepte, iconițe ș
   }
   assert.ok(topicConfig(LEGACY_TOPIC) && !topicConfig(LEGACY_TOPIC).soon, 'tema rezultatelor de dinainte de teme se poate juca');
   assert.deepEqual(Object.keys(KINDS).filter((k) => !used.has(k)), [], 'fiecare tip e folosit într-o temă');
-  for (const m of config.medals) assert.ok(EMOJI[m.icon] && stats.has(m.stat), `${m.id}: ${m.icon} / ${m.stat}`);
 });
 
 test('fulger: recordurile de dinainte de teme intră în tema lor; normalizarea e idempotentă', () => {
@@ -292,14 +290,9 @@ test('fulger: recordurile de dinainte de teme intră în tema lor; normalizarea 
   assert.deepEqual(splitKey('usor'), { topic: LEGACY_TOPIC, level: 'usor' });
 });
 
-test('fulger: medaliile comune temelor, totalul și stelele unei teme, tipurile de exersat', () => {
+test('fulger: totalul și stelele unei teme, tipurile de exersat', () => {
   const topic = topicConfig(LEGACY_TOPIC);
-  const summary = (extra) => ({ topic: LEGACY_TOPIC, ...extra });
-  assert.deepEqual(medalsFor(summary({ answered: 16, wrong: 0, bestStreak: 16, fast: 11 }), { rounds: 1, best: {} }), ['prima-cursa', 'in-flacari', 'fulgerul', 'fara-gres']);
   const best = Object.fromEntries(topic.levels.map((l) => [recordKey(LEGACY_TOPIC, l.id), { alune: l.stars.at(-1) }]));
-  assert.deepEqual(medalsFor(summary({ answered: 5, wrong: 2, bestStreak: 21, fast: 0 }), { rounds: 4, best }), ['prima-cursa', 'in-flacari', 'de-neoprit', 'campionul']);
-  const elsewhere = Object.fromEntries(topic.levels.map((l) => [recordKey('alta-tema', l.id), { alune: 9999 }]));
-  assert.ok(!medalsFor(summary({ answered: 5, wrong: 2, bestStreak: 1, fast: 0 }), { rounds: 4, best: elsewhere }).includes('campionul'), 'recordurile altei teme nu fac „Campionul” aici');
   assert.equal(topicTotal(LEGACY_TOPIC, best), topic.levels.reduce((sum, l) => sum + l.stars.at(-1), 0));
   assert.deepEqual([topicStars(LEGACY_TOPIC, best), topicStars(LEGACY_TOPIC, {}), topicTotal(LEGACY_TOPIC, {})], [9, 0, 0]);
   const rounds = [

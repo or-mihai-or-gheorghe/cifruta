@@ -550,8 +550,11 @@ def fulger_flow(run: Run, page: Page, vp: str):
     group = page.get_by_test_id(f"fg-topic-{FULGER_TOPIC}")
     group.wait_for()
     playable, soon, title = page.evaluate("import('./data/fulger.js').then(({ default: c }) => [c.topics.filter((t) => !t.soon).length, c.topics.filter((t) => t.soon).length, c.topics.find((t) => !t.soon).title])")
-    run.check(page.locator("section.fg-topic").count() == playable and page.locator(".fg-soon").count() == soon and page.locator("a.fg-topic, a.fg-soon").count() == 0 and page.locator(".fg-medal").count() == 6,
-              f"[{vp}] fulger: temele sunt desfășurate pe pagina jocului ({playable} de jucat, {soon} în curând), fără carduri spre altă pagină, cu 6 medalii")
+    run.check(page.locator("section.fg-topic").count() == playable and page.locator(".fg-soon").count() == soon and page.locator("a.fg-topic, a.fg-soon").count() == 0,
+              f"[{vp}] fulger: temele sunt desfășurate pe pagina jocului ({playable} de jucat, {soon} în curând), fără carduri spre altă pagină")
+    medals = page.evaluate("import('./js/fulger/medals.js').then((m) => m.medalCatalog().length)")
+    run.check(page.locator(".fg-medal").count() == medals and page.get_by_test_id("fg-medals-count").inner_text() == f"(0 din {medals})" and page.locator("[data-testid^=fg-metal-]").count() == 3,
+              f"[{vp}] fulger: raftul are toate cele {medals} de medalii, câte un panou pe metal, niciuna câștigată")
     run.check(group.locator("h2").inner_text() == title and group.locator(".fg-level").count() == 3 and group.get_by_test_id("fg-concepts").locator("li").count() == 5,
               f"[{vp}] fulger: tema are titlul, explicația, „Ce exersăm” și cele 3 niveluri")
     run.layout_ok(page, f"[{vp}] fulger teme")
@@ -626,6 +629,16 @@ def fulger_flow(run: Run, page: Page, vp: str):
     page.wait_for_function("window.__dbg.fulger.state().phase === 'playing'")
     run.check(before == after and hidden == "hidden", f"[{vp}] fulger: pauza oprește ceasul și ascunde întrebarea ({before} → {after}, {hidden})")
 
+    # cu seria lungă (Turbo), câteva adunări rapide trec runda de a treia stea, deci la rezultate vine medalia de bronz a temei
+    three = page.evaluate("import('./data/fulger.js').then((m) => m.default.topics[0].levels[0].stars[2])")
+    for _ in range(40):
+        if state()["alune"] >= three:
+            break
+        ready()
+        page.evaluate("window.__dbg.fulger.force('add-100-cu')")
+        answer()
+    run.check(state()["alune"] >= three, f"[{vp}] fulger: cu seria lungă, runda trece de a treia stea ({state()['alune']} din {three})")
+
     page.evaluate("window.__dbg.fulger.elapse(window.__dbg.fulger.state().remainingMs - 9000)")
     page.wait_for_timeout(100)
     sprint = page.locator(".fg-arena.is-final").count() == 1
@@ -640,7 +653,8 @@ def fulger_flow(run: Run, page: Page, vp: str):
     stars = page.evaluate("import('./data/fulger.js').then((m) => m.default.topics[0].levels[0].stars)")
     lit = page.locator("[data-testid=fg-results] .c-star.is-on").count()
     run.check(total >= alune and lit == sum(total >= s for s in stars), f"[{vp}] fulger: totalul {total} (bara de sus {alune}, cu precizia) și {lit} stele")
-    run.check(page.get_by_test_id("fg-record").is_visible() and page.get_by_test_id("fg-medal-prima-cursa").is_visible(), f"[{vp}] fulger: prima rundă aduce recordul și medalia „Prima cursă”")
+    fresh = page.get_by_test_id("fg-new-medals").locator(".fg-medal").evaluate_all("els => els.map((e) => e.dataset.testid)") if page.get_by_test_id("fg-new-medals").count() else []
+    run.check(page.get_by_test_id("fg-record").is_visible() and fresh == [f"fg-medal-bronz:{FULGER_TOPIC}"], f"[{vp}] fulger: runda cu a treia stea aduce recordul și medalia de bronz a temei ({fresh})")
     mistakes = page.locator("[data-testid=fg-mistakes] .fg-mistake").count()
     target = page.get_by_test_id("fg-next-star")
     run.check(mistakes == 2 and (lit == 3 or (target.is_visible() and "stea" in target.inner_text())), f"[{vp}] fulger: „Greșelile tale” arată cele 2 greșeli, iar ținta spune cât mai trebuie până la steaua următoare ({mistakes})")
@@ -662,8 +676,9 @@ def fulger_flow(run: Run, page: Page, vp: str):
     kept = page.get_by_test_id(f"fg-topic-{FULGER_TOPIC}").get_by_test_id("fg-best-usor").inner_text() == best
     run.goto(page, "fulger")
     card = page.get_by_test_id(f"fg-topic-{FULGER_TOPIC}").inner_text()
-    won = page.get_by_test_id("fg-medal-prima-cursa").get_attribute("class").endswith("is-won")
-    run.check(str(total) in best and kept and str(total) in card and won, f"[{vp}] fulger: recordul ({best}), totalul temei și medalia rămân după reîncărcare")
+    won = "is-won" in (page.get_by_test_id(f"fg-medal-bronz:{FULGER_TOPIC}").get_attribute("class") or "").split()
+    count = page.get_by_test_id("fg-medals-count").inner_text()
+    run.check(str(total) in best and kept and str(total) in card and won and count == f"(1 din {medals})", f"[{vp}] fulger: recordul ({best}), totalul temei și medalia de bronz rămân după reîncărcare ({count})")
     run.shot(page, f"{vp}-fulger-teme")
     page.get_by_test_id("parents").locator("summary").click()
     page.get_by_test_id("fg-clear").click()
@@ -672,8 +687,8 @@ def fulger_flow(run: Run, page: Page, vp: str):
     run.check(page.evaluate("localStorage.getItem('cifruta:fulger')") is None, f"[{vp}] fulger: ștergerea din „Pentru părinți” scoate rundele și recordul")
 
     if vp == "laptop":
-        # rezultatele de dinainte de teme (v0.9) și adresa veche a unei runde
-        legacy = "{ best: { usor: { alune: 77, at: '2026-09-01T10:00:00.000Z' } }, rounds: [{ level: 'usor', at: '2026-09-01T10:00:00.000Z', total: 77, correct: 20, wrong: 1, bestStreak: 9, fast: 3, stars: 0, byKind: {} }], medals: { 'prima-cursa': '2026-09-01T10:00:00.000Z' } }"
+        # rezultatele de dinainte de teme (v0.9), cu recordul la a treia stea, și adresa veche a unei runde; medalia veche nu se mai arată
+        legacy = f"{{ best: {{ usor: {{ alune: {three}, at: '2026-09-01T10:00:00.000Z' }} }}, rounds: [{{ level: 'usor', at: '2026-09-01T10:00:00.000Z', total: {three}, correct: 20, wrong: 1, bestStreak: 9, fast: 3, stars: 3, byKind: {{}} }}], medals: {{ 'prima-cursa': '2026-09-01T10:00:00.000Z' }} }}"
         page.evaluate(f"localStorage.setItem('cifruta:fulger', JSON.stringify({legacy}))")
         run.goto(page, "fulger/usor")
         page.wait_for_selector("[data-testid=fg-start]")
@@ -682,8 +697,9 @@ def fulger_flow(run: Run, page: Page, vp: str):
         old_best = page.get_by_test_id(f"fg-topic-{FULGER_TOPIC}").get_by_test_id("fg-best-usor").inner_text()
         run.shot(page, f"{vp}-fulger-tema")
         run.goto(page, "fulger")
-        old_medal = page.get_by_test_id("fg-medal-prima-cursa").get_attribute("class").endswith("is-won")
-        run.check(moved == f"#/fulger/{FULGER_TOPIC}/usor" and "77" in old_best and old_medal, f"[{vp}] fulger: rezultatele de dinainte de teme apar în temă, iar #/fulger/usor duce la noua adresă ({moved}, {old_best})")
+        old_medal = "is-won" in (page.get_by_test_id(f"fg-medal-bronz:{FULGER_TOPIC}").get_attribute("class") or "").split()
+        no_old = page.get_by_test_id("fg-medal-prima-cursa").count() == 0 and page.get_by_test_id("fg-medals-count").inner_text() == f"(1 din {medals})"
+        run.check(moved == f"#/fulger/{FULGER_TOPIC}/usor" and str(three) in old_best and old_medal and no_old, f"[{vp}] fulger: rezultatele de dinainte de teme apar în temă, cu medalia de bronz și fără medaliile vechi, iar #/fulger/usor duce la noua adresă ({moved}, {old_best})")
         page.evaluate("localStorage.removeItem('cifruta:fulger')")
 
 

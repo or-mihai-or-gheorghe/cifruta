@@ -1,5 +1,5 @@
 // Jocuri fulger: motorul unei runde (pur, fără DOM). Alege întrebările după amestecul nivelului unei teme, verifică răspunsurile și
-// socotește alunele (viteză doar în serie × serie), pauzele după greșeli, bonusul de precizie, stelele și medaliile.
+// socotește alunele (viteză doar în serie × serie), pauzele după greșeli, bonusul de precizie și stelele (medaliile: js/fulger/medals.js).
 // Interfața (js/fulger/view.js) și simularea din tests/fulger.test.js folosesc aceleași funcții.
 
 import config from '../../data/fulger.js';
@@ -190,22 +190,6 @@ export function createRound({ topic, level, seed = newSeed() }) {
       };
     },
   };
-}
-
-/**
- * Medaliile îndeplinite după o rundă: `rounds` = rundele jucate (din toate temele), `best` = recordurile salvate (cu runda aceasta).
- * „Campionul” (levels3) numără nivelurile temei rundei cu recordul la 3 stele.
- */
-export function medalsFor(summary, { rounds, best }) {
-  const topic = topicConfig(summary.topic);
-  const stats = {
-    rounds,
-    bestStreak: summary.bestStreak,
-    fast: summary.fast,
-    perfect: summary.wrong === 0 ? summary.answered : 0,
-    levels3: (topic?.levels ?? []).filter((l) => (best[recordKey(topic.id, l.id)]?.alune ?? 0) >= l.stars.at(-1)).length,
-  };
-  return config.medals.filter((m) => (stats[m.stat] ?? 0) >= m.gte).map((m) => m.id);
 }
 
 /** Tipurile de exersat, pentru părinți: sub 70% corecte în rundele date (de regulă ale unei teme), din cel puțin 5 răspunsuri. */
