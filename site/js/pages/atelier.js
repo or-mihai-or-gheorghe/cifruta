@@ -14,6 +14,7 @@ import { playableTopics } from '../fulger/engine.js';
 import { KINDS } from '../fulger/kinds.js';
 import { listVisuals, visualSVG } from '../visuals/index.js';
 import { ANIMALS, avatarId, BACKGROUNDS, COLORS, colorWord, SLOTS } from '../core/avatar.js';
+import { avatarStudio } from '../components/avatar-studio.js';
 import { avatarSVG } from '../visuals/avatar.js';
 
 const TABS = [
@@ -171,10 +172,13 @@ function avatarReview() {
   const worn = SLOTS.slice(2).flatMap((slot) => slot.list.map((x) => ({ field: slot.field, id: x.id })));
   const section = (title, content) => h('section', { class: 'l-stack' }, h('h2', {}, title), content);
   const label = (id) => ANIMALS.find((a) => a.id === id).label;
+  const code = h('code', { 'data-testid': 'avatar-code' }, 'veverita');
+  const studio = avatarStudio({ value: 'veverita', onChange: (value) => { code.textContent = value; } });
   return h(
     'div',
     { class: 'l-stack l-stack--lg', 'data-testid': 'avatar-review' },
-    h('p', { class: 'u-muted' }, 'Fiecare animal în fiecare culoare și cu fiecare accesoriu, plus fundalurile: un desen nepotrivit se vede din ochi.'),
+    section('Atelierul avatarului', h('div', { class: 'c-card l-stack' }, studio.el, h('p', { class: 'u-small u-muted' }, 'Textul salvat în profil: ', code))),
+    h('p', { class: 'u-muted' }, 'Mai jos, fiecare animal în fiecare culoare și cu fiecare accesoriu, plus fundalurile: un desen nepotrivit se vede din ochi.'),
     section('Culorile', matrix('avatar-matrix-colors', ['naturală', ...COLORS.map((c) => colorWord(c.id, 'm'))], ANIMALS.map((a) => [a.label, [{ animal: a.id }, ...COLORS.map((c) => ({ animal: a.id, color: c.id }))]]))),
     section('Accesoriile', matrix('avatar-matrix', worn.map((x) => x.id), ANIMALS.map((a) => [a.label, worn.map((x) => ({ animal: a.id, [x.field]: x.id }))]))),
     section('Fundalurile', matrix('avatar-matrix-backgrounds', BACKGROUNDS.map((b) => b.id), ['veverita', 'pinguin', 'panda', 'broasca'].map((id) => [label(id), BACKGROUNDS.map((b) => ({ animal: id, background: b.id }))]))),

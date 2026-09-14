@@ -779,6 +779,40 @@ def fulger_screens(run: Run, browser, base: str):
         context.close()
 
 
+def avatar_studio_flow(run: Run, page: Page, vp: str):
+    """Atelierul avatarului din #/atelier/avatare (același cu cel din profil): file, variante, numele, „Naturală”, „La întâmplare”."""
+    run.goto(page, "atelier/avatare")
+    page.wait_for_selector("[data-testid=avatar-studio]")
+    watch_pops(page, "[data-testid=avatar-studio]")
+    page.get_by_test_id("avatar-urs").click()
+    for tab, option in [("culoare", "verde"), ("fundal", "noapte"), ("cap", "sapca"), ("fata", "soare"), ("gat", "fular")]:
+        page.get_by_test_id(f"avatar-tab-{tab}").click()
+        page.get_by_test_id(f"avatar-{tab}-{option}").click()
+    code = page.get_by_test_id("avatar-code").inner_text()
+    name = page.get_by_test_id("avatar-name").inner_text()
+    run.check(code == "urs.culoare-verde.fundal-noapte.cap-sapca.fata-soare.gat-fular", f"[{vp}] avatar: textul canonic după alegeri ({code})")
+    run.check(name == "Urs verde cu șapcă, ochelari de soare și fular, pe fundal de noapte", f"[{vp}] avatar: numele avatarului ({name})")
+    chosen = page.locator("[data-testid=avatar-studio] [role=radio][aria-checked=true]")
+    run.check(chosen.count() == 1 and chosen.get_attribute("data-testid") == "avatar-gat-fular", f"[{vp}] avatar: în filă e aleasă o singură variantă")
+    page.get_by_test_id("avatar-tab-culoare").click()
+    page.get_by_test_id("avatar-culoare-natural").click()
+    code = page.get_by_test_id("avatar-code").inner_text()
+    run.check(code == "urs.fundal-noapte.cap-sapca.fata-soare.gat-fular", f"[{vp}] avatar: „Naturală” scoate culoarea ({code})")
+    run.check(page.get_by_test_id("avatar-culoare-maro").count() == 0, f"[{vp}] avatar: culoarea naturală a ursului nu apare de două ori")
+    page.get_by_test_id("avatar-random").click()
+    code = page.get_by_test_id("avatar-code").inner_text()
+    run.check(code.split(".")[0] == "urs", f"[{vp}] avatar: „La întâmplare” păstrează animalul ({code})")
+    run.check(page.evaluate("window.__pops") >= 5, f"[{vp}] avatar: fiecare alegere face pop")
+    run.layout_ok(page, f"[{vp}] atelierul avatarului")
+    run.shot(page, f"{vp}-avatar-studio")
+    if vp == "telefon":
+        size = page.viewport_size
+        page.set_viewport_size({"width": 360, "height": 640})
+        page.wait_for_timeout(200)
+        run.layout_ok(page, "[telefon mic 360×640] atelierul avatarului")
+        page.set_viewport_size(size)
+
+
 def keyboard_flow(run: Run, browser, base: str):
     """Doar tastatura + animații reduse: pornește T1, răspunde la primul exercițiu, trece mai departe."""
     context = browser.new_context(locale="ro-RO", reduced_motion="reduce", viewport={"width": 1280, "height": 800})
@@ -855,6 +889,19 @@ def keyboard_flow(run: Run, browser, base: str):
     key("[data-testid=bar-mere-plus]", "Space")
     run.check((answer("chart") or {}).get("mere") == 2 and page.locator("[data-testid=bar-mere]").get_attribute("aria-valuenow") == "2", f"[tastatură] bara urcă cu Enter/Space ({answer('chart')})")
 
+    # atelierul avatarului: săgețile mută între file și între variante, iar alegerea urmează focusul
+    page.goto(f"{base}#/atelier/avatare")
+    page.wait_for_selector("[data-testid=avatar-studio]")
+    page.get_by_test_id("avatar-tab-animal").focus()
+    page.keyboard.press("ArrowRight")
+    tab_ok = page.evaluate("document.activeElement?.dataset.testid") == "avatar-tab-culoare" and page.get_by_test_id("avatar-tab-culoare").get_attribute("aria-selected") == "true"
+    page.keyboard.press("Tab")
+    focused = page.evaluate("document.activeElement?.dataset.testid")
+    page.keyboard.press("ArrowRight")
+    moved = page.evaluate("document.activeElement?.dataset.testid")
+    code = page.get_by_test_id("avatar-code").inner_text()
+    run.check(tab_ok and focused == "avatar-culoare-natural" and moved == "avatar-culoare-alb" and code == "veverita.culoare-alb", f"[tastatură] avatar: săgețile schimbă fila și varianta ({focused} → {moved}, {code})")
+
     # Calcul fulger doar la tastatură, cu mișcare redusă
     page.goto(f"{base}?debug=1#/fulger/{FULGER_TOPIC}/usor")
     page.wait_for_selector("[data-testid=fg-start]")
@@ -912,6 +959,7 @@ def main() -> int:
             if not args.only:
                 smoke(run, page, vp)
                 types_flow(run, page, vp)
+                avatar_studio_flow(run, page, vp)
             if not args.only or fulger_only:
                 fulger_flow(run, page, vp)
                 fulger_shapes_flow(run, page, vp)

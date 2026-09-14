@@ -179,3 +179,43 @@
 .av-matrix__head { justify-self: center; align-self: end; writing-mode: vertical-rl; transform: rotate(180deg); font-size: var(--fs-0); color: var(--c-ink-soft); }
 .av-matrix__name { font-family: var(--font-title); font-weight: 700; overflow-wrap: anywhere; }
 .av-cell { display: block; width: 3.25rem; }
+
+/* ——— Atelierul avatarului (components/avatar-studio.js): în profil și în #/atelier/avatare ——— */
+.av-studio { display: grid; grid-template-columns: 10rem minmax(0, 1fr); gap: var(--sp-4) var(--sp-5); align-items: start; }
+.av-stage { display: grid; justify-items: center; gap: var(--sp-2); position: sticky; top: 5rem; }
+.av-stage__side { display: grid; justify-items: center; gap: var(--sp-2); }
+.av-preview { width: 10rem; }
+.av-name { margin: 0; font-family: var(--font-title); font-weight: 700; line-height: 1.25; text-align: center; overflow-wrap: anywhere; }
+.av-controls { display: grid; gap: var(--sp-3); min-width: 0; }
+.av-tabs { gap: 0.25rem; }
+.av-tab { padding-inline: 0.75rem; background: transparent; cursor: pointer; }
+.av-options { display: grid; grid-template-columns: repeat(auto-fill, minmax(4.25rem, 1fr)); gap: var(--sp-2); }
+.av-option {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 0.2rem;
+  min-width: 0;
+  padding: 0.3rem 0.2rem 0.4rem;
+  border: 3px solid var(--c-line);
+  border-radius: var(--r-2);
+  background: var(--c-surface);
+  color: var(--c-ink);
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.15;
+  cursor: pointer;
+  transition: transform var(--dur-2) var(--ease-spring), border-color var(--dur-2), background-color var(--dur-2);
+  -webkit-tap-highlight-color: transparent;
+}
+.av-option:hover { transform: scale(1.04); }
+.av-option[aria-checked='true'] { border-color: var(--c-brand); background: var(--c-brand-soft); }
+.av-option__art { display: block; width: 100%; max-width: 3.75rem; }
+.av-option__name { max-width: 100%; overflow-wrap: anywhere; }
+@media (max-width: 40rem) {
+  .av-studio { grid-template-columns: minmax(0, 1fr); }
+  .av-stage { grid-template-columns: 6.5rem minmax(0, 1fr); justify-items: start; align-items: center; top: 4.25rem; z-index: 1; padding-block: var(--sp-2); background: var(--c-surface); }
+  .av-stage__side { justify-items: start; }
+  .av-name { text-align: left; }
+  .av-preview { width: 6.5rem; }
+}
