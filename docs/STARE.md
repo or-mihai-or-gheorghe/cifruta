@@ -29,7 +29,7 @@
   verificări (două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute, date vechi din cloud).
 - **Următorul pas:** v0.11.0 e publicat (E2E pe site-ul live 1358/1358); copilul joacă temele cu
   figuri → `fastMs` și pragurile de stele din runde reale. Rămân: intrarea cu Google pe site (la activare, clasamentele vechi trec pe temă
-  și stelele de la teste revin; verificăm în Firestore), cererea la GitHub Support pentru commit-urile vechi, documentul `admins/<uid>`.
+  și stelele de la teste revin; verificăm în Firestore), cererea la GitHub Support pentru commit-urile vechi.
   Apoi secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul) și temele „în curând” din Jocuri fulger.
 
 ## Etape
@@ -427,3 +427,8 @@
   Publicat prin GitHub Actions; E2E pe site-ul live 1358/1358; tag `v0.11.1`.
   **De făcut data viitoare:** copilul joacă temele noi → `fastMs` și pragurile de stele; intrarea cu Google pe site; cererea la GitHub
   Support pentru commit-urile vechi.
+- **2026-09-14 (administrare)** — La cererea utilizatorului, documentul `admins/<uid>` a fost creat cu contul de serviciu pentru contul
+  Google al părintelui (singurul cont din Authentication, găsit după e-mail local, fără e-mailuri sau uid-uri în jurnal) și verificat;
+  pagina `#/admin` se deschide după reîncărcare, din butonul „Administrare” de pe `#/profil`.
+  **De făcut data viitoare:** copilul joacă temele noi → `fastMs` și pragurile de stele; verificarea în Firestore a clasamentelor mutate
+  pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
