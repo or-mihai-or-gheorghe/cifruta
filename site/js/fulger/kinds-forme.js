@@ -58,8 +58,12 @@ export function artId(spec) {
   return `${v}:${JSON.stringify(params)}`;
 }
 
-/** Id-ul fără culoare: două variante care diferă doar prin culoare au același id aici. */
-export const bareId = (spec) => (spec.v === 'glyph' ? artId({ ...spec, color: 'albastru' }) : artId(spec));
+/**
+ * Id-ul fără culoare și fără mărime: variantele care diferă doar prin una dintre ele au aici același id. Mărimea nu poate deosebi
+ * variantele, pentru că desenul întrebării și variantele au scări diferite (pe telefon, o figură „mare” din șir iese mai mică decât
+ * o variantă „mică”).
+ */
+export const bareId = (spec) => (spec.v === 'glyph' ? artId({ ...spec, color: 'albastru', size: 'mare' }) : artId(spec));
 
 /**
  * Întrebarea cu figuri: răspunsul și primii 3 distractori diferiți de el și între ei chiar și fără culori, în ordinea dată (greșelile
@@ -161,8 +165,9 @@ const CHANGES = [
   { id: 'gol', group: 'fill', pick: true, apply: (g) => ({ ...g, fill: 'gol' }) },
   { id: 'plin', group: 'fill', pick: true, apply: (g) => ({ ...g, fill: 'plin' }) },
   { id: 'dungi', group: 'fill', pick: true, apply: (g) => ({ ...g, fill: 'dungi' }) },
-  { id: 'mic', group: 'size', pick: true, apply: (g) => ({ ...g, size: 'mic' }) },
-  { id: 'mare', group: 'size', pick: true, apply: (g) => ({ ...g, size: 'mare' }) },
+  // mărimea nu e o schimbare de ales: desenul analogiei și variantele au scări diferite; rămâne doar în verificarea unicității
+  { id: 'mic', group: 'size', pick: false, apply: (g) => ({ ...g, size: 'mic' }) },
+  { id: 'mare', group: 'size', pick: false, apply: (g) => ({ ...g, size: 'mare' }) },
   { id: 'dreapta', group: 'turn', pick: true, apply: (g) => ({ ...g, rot: normRot(g.rot + 90) }) },
   { id: 'stanga', group: 'turn', pick: true, apply: (g) => ({ ...g, rot: normRot(g.rot - 90) }) },
   { id: 'rasturnat', group: 'turn', pick: true, apply: (g) => ({ ...g, rot: normRot(g.rot + 180) }) },
@@ -222,11 +227,11 @@ export const SHAPE_KINDS = {
         const offset = int(rand, 0, unit.length - 1);
         const shown = unit.length === 2 ? int(rand, 5, 6) : 6;
         const full = Array.from({ length: shown + 1 }, (_, i) => at(offset + i));
-        const small = rand() < 0.4;
+        const hollow = rand() < 0.4;
         const q = sequence('sir-simplu', rand, {
           full,
-          // distractori: ultima figură repetată, figura de după, figura bună dar mică, celelalte figuri
-          distractors: [full[shown - 1], at(offset + shown + 1), small && { ...full[shown], size: 'mic' }, ...[0, 1, 2, 3].map(item)],
+          // distractori: ultima figură repetată, figura de după, uneori figura bună dar goală, celelalte figuri (niciodată doar mai mică)
+          distractors: [full[shown - 1], at(offset + shown + 1), hollow && { ...full[shown], fill: 'gol' }, ...[0, 1, 2, 3].map(item)],
         });
         if (q) return q;
       }
@@ -240,13 +245,14 @@ export const SHAPE_KINDS = {
     concepts: [MODELE],
     generate(rand) {
       for (;;) {
-        const second = pickOne(rand, ['fill', 'fill', 'size', 'rot']); // a doua însușire: umplerea, mărimea sau orientarea
+        // a doua însușire: umplerea sau orientarea; nu mărimea, pentru că șirul și variantele sunt desenate la scări diferite
+        const second = pickOne(rand, ['fill', 'fill', 'rot']);
         const shapeUnit = pickOne(rand, UNITS);
         const L = shapeUnit.length;
-        const attrUnit = pickOne(rand, UNITS.filter((u) => u.length === L && (second !== 'size' || Math.max(...u) < 2)));
+        const attrUnit = pickOne(rand, UNITS.filter((u) => u.length === L));
         const shift = int(rand, 0, L - 1);
         const pool = second === 'rot' ? shuffle(rand, TURNING) : shuffle(rand, EASY).map((shape) => ({ shape }));
-        const values = second === 'fill' ? shuffle(rand, FILLS) : second === 'size' ? shuffle(rand, ['mare', 'mic']) : shuffle(rand, [0, 90, 180, 270]);
+        const values = second === 'fill' ? shuffle(rand, FILLS) : shuffle(rand, [0, 90, 180, 270]);
         const colors = paint(rand, 4);
         const make = (s, a) => ({ ...pool[s], color: colors[s], [second]: values[a] });
         const at = (i) => make(shapeUnit[i % L], attrUnit[(i + shift) % L]);
@@ -292,8 +298,8 @@ export const SHAPE_KINDS = {
           full,
           slot,
           prompt: 'Ce lipsește?',
-          // distractori: vecinii casetei, figura bună cu altă umplere sau mică, celelalte figuri
-          distractors: [full[slot - 1], full[slot + 1], withFill && item(u, u === 1 ? 'plin' : other), { ...full[slot], size: 'mic' }, ...[0, 1, 2, 3].map((x) => item(x))],
+          // distractori: vecinii casetei, figura bună cu altă umplere, celelalte figuri (niciodată doar mai mică)
+          distractors: [full[slot - 1], full[slot + 1], item(u, full[slot].fill === 'plin' ? other : 'plin'), ...[0, 1, 2, 3].map((x) => item(x))],
         });
         if (q) return q;
       }
@@ -975,9 +981,12 @@ function robotQuestion(kind, rand, n, min, max) {
     if (cells.length < 4 || key(cells[0]) !== key([r, c])) continue;
     const fruits = shuffle(rand, FRUITS).slice(0, 4);
     const items = cells.slice(0, 4).map(([a, b], i) => ({ r: a, c: b, emoji: fruits[i] })).sort((x, y) => x.r - y.r || x.c - y.c);
+    const figure = { v: 'robot-grid', n, robot: { r: start[0], c: start[1] }, program: program.join(''), items };
     const q = figureQuestion(kind, rand, {
-      prompt: 'La ce fruct ajunge robotul?',
-      figure: { v: 'robot-grid', n, robot: { r: start[0], c: start[1] }, program: program.join(''), items },
+      prompt: 'Câte o căsuță pe săgeată. Unde se oprește?',
+      figure,
+      // după răspuns: drumul pas cu pas și căsuța de sosire încercuită
+      solved: { ...figure, path: program.map((_, i) => walk(program.slice(0, i + 1))), mark: { r, c } },
       key: `${key(start)}|${program.join('')}|${cells.slice(0, 4).map(key).join(' ')}`,
       answer: { emoji: fruits[0] },
       distractors: fruits.slice(1).map((emoji) => ({ emoji })),

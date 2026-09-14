@@ -80,8 +80,8 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   întoarce `figureQuestion(kind, rand, { prompt, figure, solved, key, answer, distractors })`: desene din bancă (`glyph`, `glyph-cells`,
   `cell-grid`, `robot-grid`, `net`, `solid`, `farm-grid`), emoji sau texte; distractorii vin din greșeli tipice, iar id-ul unei variante e
   cheia ei canonică. Regula tipului stă în `tests/fulger-forme.rules.js` și găsește singură răspunsul, fără codul generatorului.
-  `fulger.test.js` mai cere: cerința de cel mult 40 de caractere, 4 variante diferite și fără culori, nume diferite pentru cititorul de
-  ecran, desene valide, răspunsul pe toate pozițiile la fel de des și aceeași întrebare după JSON. Capturile din
+  `fulger.test.js` mai cere: cerința de cel mult 45 de caractere, 4 variante diferite și fără culori, și fără mărime, nume diferite pentru
+  cititorul de ecran, desene valide, răspunsul pe toate pozițiile la fel de des și aceeași întrebare după JSON. Capturile din
   `python3 tools/e2e.py --only fulger --shots` se privesc pe fiecare tip.
 - **Temă nouă în Jocuri fulger:** tipurile ei în `KINDS`, apoi tema în `topics` din `data/fulger.js`: id permanent (fără segmentele
   `usor`, `intermediar`, `avansat`, `total`, `all`), `title`, `short`, `text`, `icon`, `grade`, `concepts` și cele 3 niveluri cu `warmup`,
@@ -160,6 +160,11 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   permisă, fără itemi care cer „pătratul e dreptunghi”, fără emoji cu forma neclară (📦 arată ca un cub). La variantele numerice în
   ordine crescătoare, răspunsul trebuie să poată sta pe toate cele 4 locuri (la numărat, răspunsurile sunt 4–6). `#/atelier/fulger`
   arată câte 12 întrebări din fiecare tip, cu răspunsul încadrat; `python3 tools/e2e.py --only fulger` rulează doar jocurile.
+- Figuri pe telefon: mărimea nu deosebește variantele, pentru că desenul întrebării și variantele au scări diferite (o figură „mare” din
+  șir iese mai mică decât o variantă „mică”); `bareId` și testul ignoră mărimea, iar șirurile și analogiile au doar figuri mari. Pașii
+  robotului stau sub rețea ca plăcuțe numerotate, cât o căsuță, iar desenul rezolvat (`path`, `mark`) arată drumul pas cu pas. Variantele
+  cu piese și rețele (`fg-answers--detailed`) trec pe două coloane pe telefoanele înalte. În SVG, clasa `v-label` își ia culoarea din CSS,
+  care bate atributul `fill`: `txt()` scrie celelalte culori ca stil, iar `tests/visuals.test.js` refuză textul alb dat prin atribut.
 - Contul familiei (`js/cloud/`, paginile `profil`, `clasament`, `admin`, `confidentialitate`; detalii în `docs/cloud.md`): `core/storage.js`
   are un scop (`setScope`): fără cont, cheile de până acum; pentru un profil, `cifruta:p:<uid>:<pid>:…`. Orice scriere nouă în storage
   se anunță cu `emit`, ca `cloud/sync.js` să o urce prin `onWrite`. Regulile Firestore sunt singura barieră: un câmp nou în încercări,

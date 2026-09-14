@@ -45,9 +45,12 @@ export const list = (v) =>
   (Array.isArray(v) ? v : has(v) ? String(v).split(',') : []).map((x) => String(x).trim()).filter((x) => x !== '');
 export const bool = (v, fallback = false) => (has(v) ? v === true || v === 'true' || v === 1 || v === '1' : fallback);
 
-/** Text cu culoare explicită (pentru etichete, nu pentru numerele principale). */
+/**
+ * Text pentru etichete (nu pentru numerele principale). Clasa (`v-label`) își ia culoarea din CSS, care bate atributul `fill`,
+ * așa că o altă culoare decât cerneala se scrie ca stil pe element (altfel textul alb ar ieși închis).
+ */
 export const txt = (x, y, s, { size = 12, fill = C.ink, weight = 700, anchor = 'middle', cls = 'v-label' } = {}) =>
-  `<text x="${x}" y="${y}" class="${cls}" font-size="${size}" font-weight="${weight}" fill="${fill}" text-anchor="${anchor}" dominant-baseline="central">${escapeHTML(s)}</text>`;
+  `<text x="${x}" y="${y}" class="${cls}" font-size="${size}" font-weight="${weight}" ${fill === C.ink ? `fill="${fill}"` : `style="fill: ${fill}"`} text-anchor="${anchor}" dominant-baseline="central">${escapeHTML(s)}</text>`;
 
 /** Imagine emoji din site/assets/emoji (cale relativă la pagină). */
 export const emojiImage = (name, x, y, size) => {

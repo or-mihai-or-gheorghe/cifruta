@@ -69,7 +69,7 @@ registerVisual('bar-chart', {
       const isHidden = hidden.has(r.id) || hidden.has(r.label);
       if (isHidden) {
         out += `<rect class="v-bar-chart__bar" data-id="${escapeHTML(r.id)}" x="${cx - bw / 2}" y="${y(max) + 4}" width="${bw}" height="${plotH - 4}" rx="4" fill="${C.grayLight}" stroke="${C.gray}" stroke-width="2" stroke-dasharray="6 5"/>`;
-        out += txt(cx, y0 - plotH / 2, '?', { size: 26, fill: C.gray });
+        out += txt(cx, y0 - plotH / 2, '?', { size: 26 });
       } else {
         const h = Math.max(0, y0 - y(Math.min(r.value, max)));
         out += `<rect class="v-bar-chart__bar" data-id="${escapeHTML(r.id)}" x="${cx - bw / 2}" y="${y0 - h}" width="${bw}" height="${h}" rx="4" fill="${COLORS[i % COLORS.length]}" ${st(2)}/>`;

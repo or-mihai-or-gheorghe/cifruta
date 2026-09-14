@@ -24,6 +24,8 @@ test('fiecare vizual randează corect toate demo-urile', () => {
       assert.ok(!/<script/i.test(svg), `${where}: <script>`);
       assert.ok(!svg.replace('xmlns="http://www.w3.org/2000/svg"', '').includes('http'), `${where}: adresă externă`);
       assert.ok(!/NaN|undefined|\[object/.test(svg), `${where}: valoare lipsă în SVG`);
+      // textele cu clasa v-label / v-num primesc culoarea din CSS (--v-ink), deci o culoare deschisă dată în SVG nu s-ar vedea
+      assert.ok(!/<text[^>]*class="v-(label|num)"[^>]*fill="var\(--v-white/.test(svg), `${where}: text alb care iese închis din cauza CSS-ului`);
       assert.ok(!/[şţŞŢ]/.test(svg) && svg === svg.normalize('NFC'), `${where}: diacritice greșite`);
       // grupurile animate din CSS (v-nume__parte) nu au voie să poarte atributul transform (Chromium le-ar strica)
       assert.ok(!/<g class="v-[\w-]+__[\w-]+[^"]*"[^>]*\stransform="/.test(svg), `${where}: un grup animat poartă atributul transform`);

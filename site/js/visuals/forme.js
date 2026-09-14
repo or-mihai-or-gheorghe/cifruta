@@ -20,9 +20,9 @@ const COUNT_SPOTS = {
   3: [[26, 26], [50, 50], [74, 74]],
   4: [[30, 30], [70, 30], [30, 70], [70, 70]],
   5: [[27, 27], [73, 27], [50, 50], [27, 73], [73, 73]],
-  6: [[30, 22], [70, 22], [30, 50], [70, 50], [30, 78], [70, 78]],
+  6: [[28, 20], [72, 20], [28, 50], [72, 50], [28, 80], [72, 80]],
 };
-const COUNT_SCALE = { 1: 0.5, 2: 0.38, 3: 0.34, 4: 0.38, 5: 0.3, 6: 0.26 };
+const COUNT_SCALE = { 1: 0.6, 2: 0.46, 3: 0.36, 4: 0.44, 5: 0.34, 6: 0.3 }; // cât de mari pot fi figurile fără să se atingă
 
 /** Erorile unei figuri (formă, variantă, umplere, culoare, mărime, rotire, axă). */
 export function glyphErrors(g, where = '') {
@@ -50,7 +50,7 @@ export function glyphBody(raw, id) {
   let paint = fill === 'gol' ? C.white : color;
   if (fill === 'dungi') {
     // dungile păstrează aceeași lățime în cutie și la figurile micșorate
-    const [tile, band] = [r2(11 / k), r2(6 / k)];
+    const [tile, band] = [r2(16 / k), r2(9 / k)]; // dungi late, care se văd și în figurile mici de pe telefon
     defs = `<defs><pattern id="${id}-d" width="${tile}" height="${tile}" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="${tile}" height="${tile}" fill="${C.white}"/><rect width="${band}" height="${tile}" fill="${color}"/></pattern></defs>`;
     paint = `url(#${id}-d)`;
   }
@@ -122,7 +122,7 @@ registerVisual('glyph-cells', {
         } else if (c.text !== undefined) {
           out += txt(x + 50, y + 52, String(c.text), { size: 40 });
         } else {
-          out += `<g transform="translate(${x + 8} ${y + 8}) scale(0.84)">${glyphBody(c, `${uid}-c${i}`)}</g>`;
+          out += `<g transform="translate(${x + 5} ${y + 5}) scale(0.9)">${glyphBody(c, `${uid}-c${i}`)}</g>`;
         }
         if (i === mark) out += `<rect x="${x + 4}" y="${y + 4}" width="92" height="92" rx="16" fill="none" stroke="${C.greenDark}" stroke-width="6"/>`;
         return out;
@@ -316,9 +316,11 @@ registerVisual('net', {
 
 // ——— rețeaua robotului: litere și cifre, obiecte, robotul și drumul lui, o figură închisă cu semne ———
 
-const RG = 24;
-// pașii robotului: d = dreapta, s = stânga, j = jos, u = sus (în sus)
-const MOVES = { d: [0, 1, '→', 'dreapta'], s: [0, -1, '←', 'stânga'], j: [1, 0, '↓', 'jos'], u: [-1, 0, '↑', 'sus'] };
+const RG = 24; // o căsuță
+const TILE = 26; // o plăcuță cu un pas al robotului, cât o căsuță, ca să se vadă bine
+const TILE_GAP = 6;
+// pașii robotului: d = dreapta, s = stânga, j = jos, u = sus; rotirea săgeții desenate (care arată în sus) și numele pasului
+const MOVES = { d: [90, 'dreapta'], s: [270, 'stânga'], j: [180, 'jos'], u: [0, 'sus'] };
 const LETTERS = 'ABCDEF';
 const spot = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? [Number(v.r), Number(v.c)] : null);
 const robotN = (p) => Math.round(num(p.n, 4));
@@ -333,8 +335,9 @@ registerVisual('robot-grid', {
   defaults: { n: 4 },
   viewBox: (p) => {
     const pad = bool(p.labels) ? 18 : 0;
-    const width = Math.max(robotN(p) * RG, programOf(p).length * 22) + 8 + pad;
-    return `0 0 ${width} ${robotN(p) * RG + 8 + pad + (programOf(p).length ? 30 : 0)}`;
+    const steps = programOf(p).length;
+    const width = Math.max(robotN(p) * RG, steps * (TILE + TILE_GAP) - TILE_GAP) + 8 + pad;
+    return `0 0 ${width} ${robotN(p) * RG + 8 + pad + (steps ? TILE + 22 : 0)}`;
   },
   label: (p) => {
     const n = robotN(p);
@@ -343,14 +346,18 @@ registerVisual('robot-grid', {
     for (const m of listOf(p.marks)) parts.push(`${glyphName(norm(m))} în ${cellWord(p, m.r, m.c)}`);
     for (const it of listOf(p.items)) parts.push(`${EMOJI[it.emoji]?.label ?? it.emoji} în ${cellWord(p, it.r, it.c)}`);
     if (spot(p.robot)) parts.push(`robotul în ${cellWord(p, ...spot(p.robot))}`);
+    if (programOf(p).length) parts.push(`pașii robotului, pe rând, câte o căsuță: ${programOf(p).map((m) => MOVES[m]?.[1] ?? m).join(', ')}`);
+    if (cellList(p.path).length) parts.push(`drumul, pas cu pas: ${cellList(p.path).map(([r, c]) => cellWord(p, r, c)).join(', ')}`);
     if (spot(p.mark)) parts.push(`căsuța încercuită: ${cellWord(p, ...spot(p.mark))}`);
-    if (programOf(p).length) parts.push(`drumul: ${programOf(p).map((m) => MOVES[m]?.[3] ?? m).join(', ')}`);
     return parts.join('; ');
   },
   render: (p, { uid }) => {
     const n = robotN(p);
     const pad = bool(p.labels) ? 18 : 0;
-    const [ox, oy] = [4 + pad, 4 + pad];
+    // rețeaua și șirul pașilor stau centrate, oricare dintre ele e mai lat
+    const stripWidth = programOf(p).length * (TILE + TILE_GAP) - TILE_GAP;
+    const width = Math.max(n * RG, stripWidth);
+    const [ox, oy] = [4 + pad + (width - n * RG) / 2, 4 + pad];
     const at = (r, c) => [ox + c * RG, oy + r * RG];
     const region = cellList(p.region);
     let out = `<rect x="${ox}" y="${oy}" width="${n * RG}" height="${n * RG}" fill="${C.white}"/>`;
@@ -372,12 +379,26 @@ registerVisual('robot-grid', {
       const [x, y] = at(Number(m.r), Number(m.c));
       out += `<g transform="translate(${x + 4} ${y + 4}) scale(0.16)">${glyphBody({ ...m, size: 'mare' }, `${uid}-m${i}`)}</g>`;
     });
+    // drumul (în desenul rezolvat): o linie din puncte prin mijlocul căsuțelor, pe sub obiecte
+    const path = cellList(p.path);
+    const center = ([r, c]) => [ox + c * RG + RG / 2, oy + r * RG + RG / 2];
+    if (path.length && spot(p.robot)) {
+      const points = [spot(p.robot), ...path].map(center).map(([x, y]) => `${x},${y}`).join(' ');
+      out += `<polyline points="${points}" fill="none" stroke="${C.blueDark}" stroke-width="3.5" stroke-dasharray="0.5 6" stroke-linecap="round" stroke-linejoin="round"/>`;
+    }
     for (const it of listOf(p.items)) out += emojiImage(it.emoji, at(Number(it.r), Number(it.c))[0] + 3, at(Number(it.r), Number(it.c))[1] + 3, RG - 6);
     if (spot(p.robot)) out += emojiImage('robot', at(...spot(p.robot))[0] + 2, at(...spot(p.robot))[1] + 2, RG - 4);
+    // numărul fiecărui pas, în colțul căsuței în care ajunge robotul (cifre închise pe cerc alb: .v-label își impune culoarea din CSS)
+    path.forEach(([r, c], i) => {
+      out += `<circle cx="${at(r, c)[0] + 6}" cy="${at(r, c)[1] + 6}" r="5.5" fill="${C.white}" stroke="${C.blueDark}" stroke-width="1.5"/>${txt(at(r, c)[0] + 6, at(r, c)[1] + 6.5, String(i + 1), { size: 7.5 })}`;
+    });
     if (spot(p.mark)) out += `<rect x="${at(...spot(p.mark))[0] + 1.5}" y="${at(...spot(p.mark))[1] + 1.5}" width="${RG - 3}" height="${RG - 3}" rx="5" fill="none" stroke="${C.greenDark}" stroke-width="3"/>`;
+    // pașii, sub rețea, de la stânga la dreapta: plăcuțe numerotate, cât o căsuță, cu săgeți pline
     programOf(p).forEach((m, i) => {
-      const [x, y] = [4 + pad + i * 22, oy + n * RG + 6];
-      out += `<rect x="${x}" y="${y}" width="20" height="20" rx="5" fill="${C.cream}" ${st(1.5)}/>${txt(x + 10, y + 10.5, MOVES[m]?.[2] ?? '?', { size: 14 })}`;
+      const [x, y] = [4 + pad + (width - stripWidth) / 2 + i * (TILE + TILE_GAP), oy + n * RG + 18];
+      out += `<circle cx="${x + TILE / 2}" cy="${y - 8}" r="7" fill="${C.white}" ${st(1.5)}/>${txt(x + TILE / 2, y - 7.5, String(i + 1), { size: 9 })}`;
+      out += `<rect x="${x}" y="${y}" width="${TILE}" height="${TILE}" rx="6" fill="${C.blueDark}"/>`;
+      out += `<polygon points="0,-9 8,-1 3,-1 3,9 -3,9 -3,-1 -8,-1" fill="${C.white}" transform="translate(${x + TILE / 2} ${y + TILE / 2}) rotate(${MOVES[m]?.[0] ?? 0})"/>`;
     });
     return out;
   },
@@ -396,12 +417,15 @@ registerVisual('robot-grid', {
     }
     for (const [name, v] of [['robot', p.robot], ['mark', p.mark]]) if (v !== undefined && !(spot(v) && inside(...spot(v)))) e.push(`${name} în afara rețelei`);
     if (!cellList(p.region).every(([r, c]) => inside(r, c))) e.push('region: căsuțe din rețea');
+    if (!cellList(p.path).every(([r, c]) => inside(r, c))) e.push('path: căsuțe din rețea');
     if (!programOf(p).every((m) => MOVES[m])) e.push(`program: doar d, s, j, u (${p.program})`);
+    if (programOf(p).length > 8) e.push(`program: cel mult 8 pași (${p.program})`);
     return e;
   },
   demos: [
     { n: 4, labels: true, items: [{ r: 1, c: 2, emoji: 'mar' }, { r: 3, c: 0, emoji: 'para' }], mark: { r: 1, c: 2 } },
     { n: 4, robot: { r: 0, c: 0 }, program: 'djj', items: [{ r: 2, c: 1, emoji: 'cirese' }] },
+    { n: 4, robot: { r: 0, c: 0 }, program: 'djj', items: [{ r: 2, c: 1, emoji: 'cirese' }], path: [[0, 1], [1, 1], [2, 1]], mark: { r: 2, c: 1 } },
     { n: 5, region: [[1, 1], [1, 2], [2, 1], [2, 2], [2, 3], [3, 2]], marks: [{ r: 2, c: 2, shape: 'cerc', color: 'rosu' }, { r: 1, c: 3, shape: 'triunghi', color: 'albastru' }] },
   ],
 });

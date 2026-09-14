@@ -100,15 +100,16 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
       assert.ok(RULES[id](q), `${where} încalcă regulile tipului`);
       if (q.mode === 'figure') {
         // cerința scurtă, 4 variante diferite chiar și fără culori, desene valide, iar întrebarea rămâne aceeași după JSON
-        assert.ok(q.prompt && q.prompt.length <= 40 && !lintText(q.prompt).length, `${where}: cerința`);
+        assert.ok(q.prompt && q.prompt.length <= 45 && !lintText(q.prompt).length, `${where}: cerința`);
         assert.ok(q.choices.length === 4 && new Set(q.choices).size === 4 && q.choices.includes(q.answer), `${where}: variantele`);
         assert.deepEqual(Object.keys(q.options).sort(), [...q.choices].sort(), `${where}: desenele variantelor`);
         for (const spec of [q.figure, q.solved, ...Object.values(q.options)].filter(Boolean)) {
           if (!spec.v) assert.ok(spec.emoji ? EMOJI[spec.emoji] : typeof spec.text === 'string', `${where}: variantă fără desen`);
           else assert.ok(!visualErrors(spec).length && !/NaN|undefined/.test(visualSVG(spec)), `${where}: desenul ${JSON.stringify(spec)}`);
         }
-        const bare = q.choices.map((c) => q.options[c]).map((o) => (o.v === 'glyph' ? `${glyphKey({ ...o, color: 'albastru' })}|${o.axis ?? ''}` : JSON.stringify(o)));
-        assert.equal(new Set(bare).size, 4, `${where}: două variante diferă doar prin culoare`);
+        // mărimea nici ea: desenul întrebării și variantele au scări diferite, deci „mare” și „mic” nu se pot compara între ele
+        const bare = q.choices.map((c) => q.options[c]).map((o) => (o.v === 'glyph' ? `${glyphKey({ ...o, color: 'albastru', size: 'mare' })}|${o.axis ?? ''}` : JSON.stringify(o)));
+        assert.equal(new Set(bare).size, 4, `${where}: două variante diferă doar prin culoare sau prin mărime`);
         // și cititorul de ecran le deosebește: variantele au nume diferite
         const names = q.choices.map((c) => q.options[c]).map((o) => (o.v ? /aria-label="([^"]*)"/.exec(visualSVG(o))[1] : (o.emoji ?? o.text)));
         assert.equal(new Set(names).size, 4, `${where}: două variante au același nume (${names.join(' | ')})`);

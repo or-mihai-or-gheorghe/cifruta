@@ -349,6 +349,10 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 .fg-opt__label { margin-top: 0.25rem; font-family: var(--font-body); font-weight: 400; font-size: 0.78rem; color: var(--c-ink-soft); }
 /* variantele cu figuri stau pe un singur rând și pe telefon: desenele sunt aproape pătrate, iar rândul economisit încape pe ecranele mici */
 .fg-answers--figure { grid-template-columns: repeat(var(--n, 4), 1fr); }
+/* piesele și rețelele au căsuțe mici: pe telefoanele înalte, două coloane le dau loc să se vadă */
+@media (max-width: 40rem) and (min-height: 44rem) {
+  .fg-answers--detailed { grid-template-columns: repeat(2, 1fr); }
+}
 .fg-opt__art { --opt-h: clamp(2.8rem, 10vh, 5rem); display: block; width: min(100%, calc(var(--opt-h) * var(--ar, 1))); }
 .fg-opt__art .c-emoji,
 .fg-fig .c-emoji,
@@ -644,7 +648,7 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
   .fg-q--sort { font-size: 1.25rem; }
   .fg-opt { min-height: 3.3rem; font-size: 1.6rem; }
   .fg-prompt { font-size: 1.05rem; }
-  .fg-fig { --fig-h: clamp(5rem, 42vh, 9rem); }
+  .fg-fig { --fig-h: clamp(5rem, 38vh, 8.5rem); }
   .fg-opt__art { --opt-h: clamp(2.2rem, 13vh, 3.4rem); }
   .fg-overlay { place-items: safe center; overflow-y: auto; padding: var(--sp-2); }
   .fg-panel { gap: var(--sp-2); padding: var(--sp-4); }

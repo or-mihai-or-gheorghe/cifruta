@@ -9,6 +9,11 @@ const cellsOf = (q) => q.figure?.cells ?? [];
 const optionList = (q) => q.choices.map((id) => q.options[id]);
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
+/** La șiruri toate figurile sunt „mari”, și în desen, și în variante: mărimea nu se poate compara între desene cu scări diferite. */
+function allBig(q) {
+  return [...cellsOf(q), ...optionList(q)].every((g) => g.slot || g.sep || (g.size ?? 'mare') === 'mare');
+}
+
 /** Răspunsul are cheia așteptată, e singura variantă cu ea, iar desenul rezolvat îl pune în locul casetei `slot`. */
 function answers(q, expected, slot) {
   if (!expected || optionList(q).filter((o) => key(o) === expected).length !== 1 || key(q.options[q.answer]) !== expected) return false;
@@ -80,17 +85,18 @@ const CHANGES = [
 export const SHAPE_RULES = {
   'sir-simplu': (q) => {
     const s = nextInPattern(q);
-    return Boolean(s) && s.shown.length >= 5 && s.shown.every((c) => (c.fill ?? 'plin') === 'plin' && (c.size ?? 'mare') === 'mare' && canonical(c).rot === 0) && answers(q, s.expected, s.slot);
+    return Boolean(s) && s.shown.length >= 5 && s.shown.every((c) => (c.fill ?? 'plin') === 'plin' && canonical(c).rot === 0) && allBig(q) && answers(q, s.expected, s.slot);
   },
   'sir-doua': (q) => {
     const s = nextInPattern(q);
     const varies = (f) => new Set(s.shown.map(f)).size > 1;
-    return Boolean(s) && varies((c) => c.shape) && [(c) => c.fill ?? 'plin', (c) => c.size ?? 'mare', (c) => canonical(c).rot].some(varies) && answers(q, s.expected, s.slot);
+    // a doua însușire e umplerea sau orientarea, nu mărimea
+    return Boolean(s) && varies((c) => c.shape) && [(c) => c.fill ?? 'plin', (c) => canonical(c).rot].some(varies) && allBig(q) && answers(q, s.expected, s.slot);
   },
   'sir-lipsa': (q) => {
     const cells = cellsOf(q);
     const slot = cells.findIndex((c) => c.slot);
-    if (slot < 1 || slot > cells.length - 2 || cells.filter((c) => c.slot).length !== 1) return false;
+    if (slot < 1 || slot > cells.length - 2 || cells.filter((c) => c.slot).length !== 1 || !allBig(q)) return false;
     const keys = cells.map((c) => (c.slot ? null : key(c)));
     // toate perioadele potrivite cu figurile arătate; fiecare dă o figură pentru casetă, iar toate trebuie să dea aceeași
     const found = new Set();
@@ -149,7 +155,8 @@ export const SHAPE_RULES = {
     const [A, B, C] = [cells[0], cells[2], cells[3]];
     // toate schimbările care duc A în B trebuie să ducă C în aceeași figură, diferită de C
     const results = new Set(CHANGES.filter((t) => key(t(A)) === key(B)).map((t) => key(t(C))));
-    return results.size === 1 && A.shape !== C.shape && !results.has(key(C)) && answers(q, [...results][0], 5);
+    // fără schimbări de mărime: desenul și variantele au scări diferite
+    return results.size === 1 && A.shape !== C.shape && !results.has(key(C)) && allBig(q) && answers(q, [...results][0], 5);
   },
   matrice: (q) => {
     const cells = cellsOf(q);
@@ -354,14 +361,19 @@ function walkRule(n, minSteps, maxSteps) {
     const steps = String(f?.program ?? '').split('');
     if (f?.v !== 'robot-grid' || f.n !== n || !f.robot || steps.length < minSteps || steps.length > maxSteps || f.items?.length !== 4) return false;
     let [r, c] = [f.robot.r, f.robot.c];
+    const visited = [];
     for (const step of steps) {
       const [dr, dc] = { d: [0, 1], s: [0, -1], j: [1, 0], u: [-1, 0] }[step] ?? [NaN, NaN];
       [r, c] = [r + dr, c + dc];
       if (!(r >= 0 && r < n && c >= 0 && c < n)) return false;
+      visited.push([r, c]);
     }
     const end = f.items.find((it) => it.r === r && it.c === c);
     const good = q.choices.filter((ch) => q.options[ch].emoji === end?.emoji);
-    return new Set(f.items.map((it) => `${it.r},${it.c}`)).size === 4 && new Set(f.items.map((it) => it.emoji)).size === 4 && Boolean(end) && good.length === 1 && good[0] === q.answer;
+    // desenul rezolvat e același desen, cu drumul pas cu pas și căsuța de sosire încercuită
+    const s = q.solved;
+    const solved = s?.v === 'robot-grid' && same({ ...s, path: undefined, mark: undefined }, f) && same(s.path, visited) && s.mark?.r === r && s.mark?.c === c;
+    return solved && new Set(f.items.map((it) => `${it.r},${it.c}`)).size === 4 && new Set(f.items.map((it) => it.emoji)).size === 4 && Boolean(end) && good.length === 1 && good[0] === q.answer;
   };
 }
 

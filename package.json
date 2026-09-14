@@ -1,6 +1,6 @@
 {
   "name": "cifruta",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "private": true,
   "description": "Cifruța — exerciții interactive pentru clasa a II-a (Matematică și explorarea mediului)",
   "type": "module",

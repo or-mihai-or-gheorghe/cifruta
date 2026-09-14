@@ -1,7 +1,7 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-13 · **Versiune:** 0.11.0 (Jocuri fulger: patru teme noi cu figuri, fără calcule)
+- **Data:** 2026-09-14 · **Versiune:** 0.11.1 (Jocuri fulger cu figuri, mai clare pe telefon: fără variante care diferă doar prin mărime, pașii robotului mari și numerotați)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -102,6 +102,11 @@
   întrebare `figure` în arenă, pe cardurile nivelurilor și în „Greșelile tale”; regulile independente din `tests/fulger-forme.rules.js`;
   `#/atelier/fulger` (288 de întrebări, cu răspunsul încadrat). npm test 83/83, reguli 13/13, E2E 1358/1358, E2E cont 62/62; publicat: întâi regulile
   (ruleset `dc52ff06`), apoi site-ul prin GitHub Actions (rularea 34787882913); E2E pe site-ul live 1358/1358, tag `v0.11.0`
+- [x] M26 (v0.11.1): rafinare după încercarea pe telefon: variantele cu figuri nu mai diferă doar prin mărime (șirurile și analogiile au
+  doar figuri mari, iar `bareId` și testul ignoră mărimea); pașii robotului mari, numerotați și centrați sub rețea, cu cerința „Câte o
+  căsuță pe săgeată. Unde se oprește?” și drumul arătat pas cu pas după răspuns; dungi mai late, figuri numărate mai mari, piese și rețele
+  pe două coloane pe telefoanele înalte; `txt()` scrie culorile ca stil (numerele de pe harta liniilor erau invizibile). npm test 83/83,
+  E2E 1358/1358
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -207,6 +212,9 @@
 | 2026-09-13 | Fiecare tip cu figuri are în teste o regulă care găsește singură răspunsul: perioade, însușiri „3 + 1”, schimbări, reguli pe rânduri și coloane, piese, axe găsite prin încercare, formule de numărare, plierea hârtiei, robotul pas cu pas | itemii cu două răspunsuri bune se prind înainte de publicare |
 | 2026-09-13 | Pragurile de stele ale temelor noi vin din simularea copiilor, cu aceleași rapoarte ca la calcule; `fastMs` sunt valori de pornire | nu există încă runde reale |
 | 2026-09-13 | Din „Corpuri și obiecte” au ieșit obiectele cu forma neclară în emoji (cutia arată ca un cub; bateria, petarda) | o captură a arătat un item cu două răspunsuri posibile |
+| 2026-09-14 | La figuri, mărimea nu mai deosebește variantele: șirurile și analogiile au doar figuri mari, iar în locul variantelor „mai mici” vin figuri goale sau alte forme; testul cere variante diferite și fără mărime | pe telefon, desenul întrebării și variantele au scări diferite, iar două variante care diferă doar prin mărime lăsau răspunsul neclar (observat de utilizator) |
+| 2026-09-14 | Pașii robotului: plăcuțe numerotate, cât o căsuță, cu săgeți pline, centrate sub rețea; cerința „Câte o căsuță pe săgeată. Unde se oprește?”; după răspuns, drumul pas cu pas și căsuța de sosire | săgețile erau prea mici, iar regula „câte o căsuță, pe rând” nu era intuitivă (observat de utilizator) |
+| 2026-09-14 | `txt()` scrie culorile, altele decât cerneala, ca stil pe element; indicatorul rutier și „?”-ul din grafic rămân închise la culoare | CSS-ul clasei `v-label` bătea atributul `fill`: numerele albe de pe harta liniilor erau invizibile, iar antetele tabelului de poziție ieșeau închise |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -405,5 +413,16 @@
   cutia din emoji care arată ca un cub; testul de nume a prins variante care sunau la fel pentru cititorul de ecran (rotiri, linii).
   npm test 83/83, reguli 13/13, E2E 1358/1358, E2E cont 62/62. Publicat: întâi regulile Firestore, apoi site-ul prin GitHub Actions;
   E2E pe site-ul live 1358/1358; v0.11.0 publicat, tag `v0.11.0`.
+  **De făcut data viitoare:** copilul joacă temele noi → `fastMs` și pragurile de stele; intrarea cu Google pe site; cererea la GitHub
+  Support pentru commit-urile vechi.
+- **2026-09-14 (rafinare pe telefon)** — Utilizatorul a încercat temele cu figuri pe telefon: la „Șiruri și intruși” desenul și variantele
+  au scări diferite, iar două variante care diferă doar prin mărime lăsau răspunsul neclar; la robot, săgețile erau prea mici și regula
+  „câte o căsuță, pe rând” nu se înțelegea. Remediat fără să micșorăm variantele: mărimea nu mai deosebește variantele (șiruri și analogii
+  doar cu figuri mari, distractori goi sau alte forme; `bareId`, testul generic și regulile o cer); pașii robotului ca plăcuțe mari,
+  numerotate, centrate, cerință nouă și drumul pas cu pas după răspuns (regula îl verifică). Tot acum: dungi mai late, figuri numărate
+  mai mari, piese și rețele pe două coloane pe telefoanele înalte. Depanare: capturile au arătat cifrele albe ieșite negre pe cercuri
+  negre, iar căutarea a găsit aceeași cauză în desenele mai vechi (CSS-ul `v-label` bate atributul `fill`): numerele de pe harta
+  liniilor erau invizibile; `txt()` scrie acum culoarea ca stil, iar testul desenelor refuză textul alb dat prin atribut. Pe telefonul
+  ținut orizontal, figura robotului depășea ecranul cu 4 px (limita de 9rem, nu cea în vh) → 8,5rem. npm test 83/83, E2E 1358/1358.
   **De făcut data viitoare:** copilul joacă temele noi → `fastMs` și pragurile de stele; intrarea cu Google pe site; cererea la GitHub
   Support pentru commit-urile vechi.

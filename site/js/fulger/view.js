@@ -339,7 +339,9 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
       press(btn, () => choose(i));
       return btn;
     });
-    answers.className = `fg-answers fg-answers--${q.mode}`;
+    // variantele cu piese sau rețele (multe căsuțe mici) stau pe două coloane pe telefoanele înalte, ca să iasă mai mari
+    const detailed = q.mode === 'figure' && q.choices.some((id) => q.options[id].v === 'cell-grid');
+    answers.className = `fg-answers fg-answers--${q.mode}${detailed ? ' fg-answers--detailed' : ''}`;
     answers.style.setProperty('--n', String(buttons.length));
     answers.setAttribute('aria-busy', 'true');
     answers.replaceChildren(...buttons);

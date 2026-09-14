@@ -101,7 +101,7 @@ registerVisual('signpost', {
   render: (p) => `
     <rect x="56" y="54" width="8" height="36" fill="${C.brown}" ${st(1.5)}/>
     <path d="M4 6 H102 L116 30 L102 54 H4 Z" fill="${C.green}" ${st(2)}/>
-    ${txt(53, 18, p.label ?? '', { size: 12, fill: C.white })}
-    ${has(p.n) ? txt(53, 39, `${p.n} ${p.unit}`, { size: 20, fill: C.white, weight: 800 }) : ''}`,
+    ${txt(53, 18, p.label ?? '', { size: 12 })}
+    ${has(p.n) ? txt(53, 39, `${p.n} ${p.unit}`, { size: 20, weight: 800 }) : ''}`,
   demos: [{ label: 'Brăduț', n: 145 }, { label: 'Lacu Verde', n: 95 }],
 });
