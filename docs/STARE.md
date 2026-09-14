@@ -39,7 +39,7 @@
   - E2E cu 1415 verificări pe 3 ecrane și tastatură, plus telefon ținut orizontal și telefon mic;
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** publicarea v0.13.0 (regulile Firestore nu se schimbă), apoi E2E pe site-ul live.
+- **Următorul pas:** v0.13.0 e publicat (regulile Firestore nu s-au schimbat), cu E2E pe site-ul live 1415/1415.
   - Copilul joacă temele și strânge medalii; din rundele reale se reglează `fastMs` și pragurile de stele.
   - Rămân: verificarea în Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
   - Apoi: secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul) și temele „în curând” din Jocuri fulger.
@@ -141,6 +141,8 @@
   - **Desen:** vizualul `award` (medalia cu emoji-ul temei, două medalii, trei pe o bară, cupa cu numărul temelor) și tokenii de metal.
   - **Interfață:** raftul pe metale, medalia de pe cardul nivelului, numărul medaliilor pe prima pagină și medaliile noi la rezultate.
   - **Verificare:** npm test 100/100, reguli 16/16, E2E 1415/1415, E2E cont 82/82.
+  - **Publicare:** site-ul prin GitHub Actions (rularea 34862449844; regulile Firestore nu se schimbă); E2E pe site-ul live 1415/1415,
+    tag `v0.13.0`.
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -312,6 +314,9 @@
 - Avatarul, mai departe: accesorii câștigate cu medalii sau cumpărate cu alune (împreună cu magazinul Cifruței), mai multe animale și
   accesorii, fundaluri cu model, avatarul copilului pe ecranul de rezultate și în Jocurile fulger.
 - Publicare automată la push: `gh auth refresh -h github.com -s workflow` + mutarea workflow-ului în `.github/workflows/` + sursa Pages „GitHub Actions”.
+- GitHub Actions: acțiunile din `.github/workflows/pages.yml` (`checkout@v4`, `setup-node@v4`, `configure-pages@v5`, `deploy-pages@v4`,
+  `upload-artifact@v4`) țintesc Node.js 20, pe care GitHub îl rulează forțat pe Node.js 24 (avertisment văzut la publicarea v0.13.0);
+  de trecut la versiunile lor pentru Node.js 24.
 
 ## Jurnal de sesiuni
 - **2026-09-11** — Analiză scanări + documentare online (programă, EN II, exemple, aplicații). Plan aprobat.
@@ -524,6 +529,7 @@
     el, iar `run.shot` îl lasă acum în pagină pe durata capturii.
   - **Rezultate:** npm test 100/100, reguli 16/16 (cu id-urile noi în `medals`), E2E 1415/1415, E2E cont 82/82 (medaliile trec prin
     cloud fără schimbări).
+  - **Publicat:** site-ul prin GitHub Actions (rularea 34862449844); E2E pe site-ul live 1415/1415, tag `v0.13.0`.
 
   **De făcut data viitoare:** copilul joacă și strânge medalii → `fastMs` și pragurile de stele; verificarea în Firestore a clasamentelor
   mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
