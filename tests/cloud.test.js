@@ -4,12 +4,13 @@ import { test } from 'node:test';
 
 import config from '../site/data/fulger.js';
 import {
-  AVATARS, bestRound, cleanNickname, combineData, dequeue, enqueue, entryId, freeProfileId, fromCloudAttempt, fulgerBoard, isoWeek,
+  bestRound, cleanNickname, combineData, dequeue, enqueue, entryId, freeProfileId, fromCloudAttempt, fulgerBoard, isoWeek,
   isRetiredBoard, mergeAttempts, mergeFulger, mergeFulgerState, nicknameError, pruneBoards, QUEUE_MAX, rankEntries, roundId, sameData,
-  signInError, testStars, toCloudAttempt, toCloudRound,
+  shownBoards, signInError, testStars, toCloudAttempt, toCloudRound,
 } from '../site/js/cloud/logic.js';
+import { ANIMALS, AVATAR_PATTERN, avatarId, BACKGROUNDS, COLORS, DEFAULT_BACKGROUND, FACES, HATS, NECKS, randomLook, SLOTS } from '../site/js/core/avatar.js';
+import { seededRandom } from '../site/js/core/rng.js';
 import { recordKey } from '../site/js/fulger/records.js';
-import { EMOJI } from '../site/js/visuals/emoji.js';
 
 const T = 'adunari-scaderi-100';
 
@@ -156,13 +157,38 @@ test('cloud: profilurile libere și coada operațiilor în așteptare', () => {
   assert.equal(q.at(-1).id, `x${QUEUE_MAX + 4}`);
 });
 
-test('cloud: avatarele există în bancă, iar regulile folosesc aceleași avatare și profiluri', () => {
+test('cloud: regulile acceptă exact avatarele din core/avatar.js (aceleași id-uri, aceeași ordine a locurilor) și profilurile p1–p6', () => {
   const rules = readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8');
-  for (const avatar of AVATARS) {
-    assert.ok(EMOJI[avatar], `emoji lipsă: ${avatar}`);
-    assert.ok(rules.includes(`'${avatar}'`), `avatar lipsă din reguli: ${avatar}`);
+  const fn = (name) => rules.match(new RegExp(`function ${name}\\(\\) \\{\\s*return '([^']+)';`))?.[1];
+  const inRules = (name) => (fn(name) ?? '()').slice(1, -1).split('|').sort();
+  const stored = (list, none = null) => list.map((x) => x.id).filter((id) => id !== none).sort();
+  const lists = {
+    avatarAnimals: stored(ANIMALS), avatarColors: stored(COLORS), avatarBackgrounds: stored(BACKGROUNDS, DEFAULT_BACKGROUND),
+    avatarHats: stored(HATS), avatarFaces: stored(FACES), avatarNecks: stored(NECKS),
+  };
+  for (const [name, ids] of Object.entries(lists)) assert.deepEqual(inRules(name), ids, `firestore.rules: ${name}() are id-urile din core/avatar.js`);
+  // expresia din validAvatar, cu listele din reguli: la orice text, același răspuns ca AVATAR_PATTERN (prinde și ordinea locurilor)
+  const arg = rules.match(/function validAvatar\(v\) \{[\s\S]*?\.matches\(([\s\S]*?)\);\s*\}/)?.[1];
+  assert.ok(arg, 'firestore.rules: validAvatar(v) folosește v.matches(…)');
+  const rulesPattern = new RegExp(Function(`return ${arg.replace(/(avatar[A-Z]\w*)\(\)/g, (_, name) => JSON.stringify(fn(name)))};`)());
+  const rand = seededRandom(20260914);
+  const looks = Array.from({ length: 500 }, () => avatarId(randomLook({ animal: ANIMALS[Math.floor(rand() * ANIMALS.length)].id }, rand)));
+  const single = SLOTS.flatMap((s) => s.list.map((x) => `vulpe.${s.key}-${x.id}`));
+  const rejected = ['dragon', 'Vulpe', 'vulpe.', 'vulpe..cap-joben', ' vulpe', 'vulpe\n', 'vulpe.cap-coroana.culoare-rosu', 'vulpe.culoare-natural',
+    'vulpe.fundal-albastru', 'vulpe.cap-fara', 'vulpe.cap-coroana.cap-joben', 'vulpe.cap-', 'vulpe.coroana', ''];
+  for (const s of [...ANIMALS.map((a) => a.id), ...looks]) assert.ok(AVATAR_PATTERN.test(s), s);
+  for (const s of rejected) assert.ok(!AVATAR_PATTERN.test(s), JSON.stringify(s));
+  for (const s of [...ANIMALS.map((a) => a.id), ...single, ...looks, ...rejected]) {
+    assert.equal(rulesPattern.test(s), AVATAR_PATTERN.test(s), `firestore.rules ≠ core/avatar.js pentru ${JSON.stringify(s)}`);
   }
   assert.ok(rules.includes("'^p[1-6]$'"));
+});
+
+test('cloud: o schimbare doar de avatar rescrie clasamentele afișate: stelele, „tot timpul” și săptămâna curentă', () => {
+  const b = (scope, period) => fulgerBoard(T, scope, period);
+  const boards = [b('usor', '2026-W38'), b('usor', 'all'), 'teste-stele', b('total', '2026-W37'), 'fulger-usor-all', b('total', '2026-W38'), 'fulger-avansat-2026-W38'];
+  assert.deepEqual(shownBoards(boards, '2026-W38'), [b('usor', '2026-W38'), b('usor', 'all'), 'teste-stele', b('total', '2026-W38')]);
+  assert.deepEqual(shownBoards([], '2026-W38'), []);
 });
 
 test('cloud: regulile acceptă exact temele jucabile, iar id-urile clasamentelor nu se încurcă', () => {

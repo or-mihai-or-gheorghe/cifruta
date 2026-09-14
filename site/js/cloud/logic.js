@@ -91,6 +91,13 @@ export function pruneBoards(boards) {
 }
 
 /**
+ * Clasamentele în care se vede acum intrarea unui profil: stelele de la teste, „tot timpul” și săptămâna curentă. Săptămânile trecute
+ * nu se afișează, iar cele de dinainte de teme nu se mai scriu: o schimbare doar de avatar le lasă cum sunt.
+ */
+export const shownBoards = (boards, weekId = isoWeek()) =>
+  boards.filter((b) => !isRetiredBoard(b) && (b === TESTS_BOARD || b.endsWith('-all') || b.endsWith(`-${weekId}`)));
+
+/**
  * Intrările din clasamentele de dinainte de teme (`[[clasament, date]]`), mutate în clasamentele temei vechi, pe același nivel și
  * aceeași perioadă; dacă acel clasament e deja printre `wanted`, rămâne scorul mai mare.
  */

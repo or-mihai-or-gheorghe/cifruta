@@ -44,8 +44,31 @@ service cloud.firestore {
     function validNickname(v) {
       return v is string && v.matches("^[\\p{L}\\p{N} .'-]{2,20}$");
     }
+    // avatarul desenat: animal[.culoare-…][.fundal-…][.cap-…][.fata-…][.gat-…], în această ordine, fără valorile implicite
+    // (culoarea naturală, fundalul albastru, accesoriul lipsă). Aceleași id-uri ca în site/js/core/avatar.js (tests/cloud.test.js le
+    // compară). Un id publicat nu se mai scoate: validProfile() verifică avatarul la fiecare scriere a profilului, și la contoare.
+    function avatarAnimals() {
+      return '(veverita|iepure|vulpe|urs|arici|pisica|caine|rata|lup|cal|oaie|gaina|vaca|porc|leu|tigru|panda|koala|pinguin|bufnita|broasca|maimuta|elefant|unicorn)';
+    }
+    function avatarColors() {
+      return '(alb|gri|maro|rosu|portocaliu|galben|verde|turcoaz|albastru|mov|roz)';
+    }
+    function avatarBackgrounds() {
+      return '(verde|galben|crem|roz|mov|turcoaz|gri|noapte)';
+    }
+    function avatarHats() {
+      return '(coroana|joben|fundita|casti|sapca|floare|petrecere|caciula)';
+    }
+    function avatarFaces() {
+      return '(ochelari|soare|inimioare|masca)';
+    }
+    function avatarNecks() {
+      return '(papion|fular|medalie|clopotel)';
+    }
     function validAvatar(v) {
-      return v in ['veverita', 'iepure', 'vulpe', 'urs', 'arici', 'pisica', 'caine', 'rata', 'lup', 'cal', 'oaie', 'gaina'];
+      return v is string
+        && v.matches('^' + avatarAnimals() + '([.]culoare-' + avatarColors() + ')?([.]fundal-' + avatarBackgrounds() + ')?([.]cap-'
+                     + avatarHats() + ')?([.]fata-' + avatarFaces() + ')?([.]gat-' + avatarNecks() + ')?$');
     }
     function validProfile() {
       return onlyKeys(['nickname', 'avatar', 'showOnBoards', 'createdAt', 'attempts', 'rounds', 'boards'])

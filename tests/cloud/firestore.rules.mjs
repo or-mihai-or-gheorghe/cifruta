@@ -269,3 +269,62 @@ test('reguli: stelele se actualizează într-o tranzacție care doar citește pr
   await assertSucceeds(update(5));
   await assertFails(update(6)); // la mai puțin de 5 s de schimbarea precedentă: sync.js reîncearcă mai târziu
 });
+
+test('reguli: avatarul desenat, în ordinea canonică și fără valorile implicite; avatarele vechi rămân valabile', async () => {
+  await family('ana');
+  const db = as('ana');
+  const p = { ...profile(), createdAt: serverTimestamp() };
+  await assertSucceeds(setDoc(doc(db, 'users/ana/profiles/p2'), { ...p, avatar: 'vulpe.culoare-albastru.fundal-noapte.cap-coroana.fata-ochelari.gat-papion' }));
+  await assertSucceeds(updateDoc(doc(db, 'users/ana/profiles/p2'), { attempts: increment(1) })); // avatarul se verifică la fiecare scriere
+  await assertSucceeds(updateDoc(doc(db, 'users/ana/profiles/p1'), { avatar: 'unicorn.cap-petrecere' }));
+  await assertSucceeds(updateDoc(doc(db, 'users/ana/profiles/p1'), { avatar: 'gaina' }));
+  const wrong = ['dragon', 'Vulpe', 'vulpe.', 'vulpe.cap-coroana.culoare-rosu', 'vulpe.culoare-natural', 'vulpe.fundal-albastru', 'vulpe.cap-fara',
+    'vulpe.cap-coroana.cap-joben', 42, null];
+  for (const avatar of wrong) await assertFails(setDoc(doc(db, 'users/ana/profiles/p3'), { ...p, avatar }));
+});
+
+test('reguli: avatarul nou ajunge în intrări în același lot cu profilul; singură, o intrare cu alt avatar decât profilul e refuzată', async () => {
+  await family('ana');
+  const paths = [`${board('usor')}/ana_p1`, `${board('total', '2026-W38')}/ana_p1`, 'leaderboards/teste-stele/entries/ana_p1'];
+  await seed(async (db) => {
+    await setDoc(doc(db, paths[0]), entry('ana', { updatedAt: old }));
+    await setDoc(doc(db, paths[1]), total('ana', { updatedAt: old }));
+    await setDoc(doc(db, paths[2]), stars('ana', { updatedAt: old }));
+  });
+  const ana = as('ana');
+  const avatar = 'veverita.culoare-mov.cap-joben';
+  await assertFails(updateDoc(doc(ana, paths[0]), { avatar, updatedAt: serverTimestamp() }));
+  const batch = writeBatch(ana);
+  batch.update(doc(ana, 'users/ana/profiles/p1'), { avatar });
+  for (const path of paths) batch.update(doc(ana, path), { avatar, updatedAt: serverTimestamp() });
+  await assertSucceeds(batch.commit());
+});
+
+test('reguli: o schimbare de avatar rescrie într-o tranzacție toate intrările afișate (fiecare temă: niveluri și total, pe ambele perioade; stelele)', async () => {
+  const { runTransaction } = await import('firebase/firestore');
+  const { default: fulger } = await import('../../site/data/fulger.js');
+  const topics = fulger.topics.filter((t) => !t.soon).map((t) => t.id);
+  const shown = [...topics.flatMap((t) => ['usor', 'intermediar', 'avansat', 'total'].flatMap((s) => ['all', '2026-W38'].map((p) => `fulger-${t}-${s}-${p}`))), 'teste-stele'];
+  await family('ana');
+  await seed(async (db) => {
+    await updateDoc(doc(db, 'users/ana/profiles/p1'), { boards: shown });
+    for (const b of shown) {
+      const data = b === 'teste-stele' ? stars('ana') : b.includes('-total-') ? total('ana') : entry('ana');
+      await setDoc(doc(db, `leaderboards/${b}/entries/ana_p1`), { ...data, updatedAt: old });
+    }
+  });
+  const ana = as('ana');
+  const avatar = 'veverita.culoare-albastru.fundal-noapte.cap-coroana.fata-soare.gat-medalie';
+  const profileRef = doc(ana, 'users/ana/profiles/p1');
+  const refs = shown.map((b) => doc(ana, `leaderboards/${b}/entries/ana_p1`));
+  await assertSucceeds(
+    runTransaction(ana, async (tx) => {
+      await tx.get(profileRef);
+      const snaps = await Promise.all(refs.map((r) => tx.get(r)));
+      tx.update(profileRef, { avatar });
+      snaps.forEach((s, i) => s.exists() && tx.update(refs[i], { nickname: 'Ana', avatar, updatedAt: serverTimestamp() }));
+    }),
+  );
+  const written = await Promise.all(refs.map((r) => getDoc(r)));
+  if (shown.length < 41 || written.some((s) => s.data()?.avatar !== avatar)) throw new Error(`avatarul nu a ajuns în toate cele ${shown.length} intrări`);
+});
