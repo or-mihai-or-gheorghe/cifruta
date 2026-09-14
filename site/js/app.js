@@ -4,6 +4,7 @@ import './visuals/all.js';
 import { clear, h } from './core/dom.js';
 import { currentRoute, onRouteChange } from './core/router.js';
 import { setSoundEnabled, soundEnabled } from './core/sound.js';
+import { avatarSVG } from './visuals/avatar.js';
 import { emojiHTML } from './visuals/emoji.js';
 import { art } from './components/ui.js';
 import { accountState, activeProfile, bootAccount, onAccountChange } from './cloud/account.js';
@@ -49,14 +50,17 @@ function paintAccount() {
   const profile = activeProfile();
   boardsLink.hidden = !cloudConfigured() || !s.user;
   accountLink.hidden = !cloudConfigured();
-  const [icon, text, title] = !s.user
-    ? ['familie', 'Intră', 'Intră în contul familiei']
-    : profile
-      ? [profile.avatar, profile.nickname, `Joacă: ${profile.nickname}. Contul familiei`]
-      : ['familie', 'Contul', 'Contul familiei'];
-  accountLink.replaceChildren(h('span', { class: 'c-account__icon', 'aria-hidden': 'true', html: emojiHTML(icon) }), h('span', { class: 'c-account__text' }, text));
+  const playing = s.user ? profile : null;
+  const [text, title] = !s.user
+    ? ['Intră', 'Intră în contul familiei']
+    : playing
+      ? [playing.nickname, `Joacă: ${playing.nickname}. Contul familiei`]
+      : ['Contul', 'Contul familiei'];
+  const icon = playing ? avatarSVG(playing.avatar) : emojiHTML('familie');
+  accountLink.replaceChildren(h('span', { class: 'c-account__icon', 'aria-hidden': 'true', html: icon }), h('span', { class: 'c-account__text' }, text));
   accountLink.title = title;
   accountLink.classList.toggle('is-signed', Boolean(s.user));
+  accountLink.classList.toggle('has-avatar', Boolean(playing));
 }
 paintAccount();
 

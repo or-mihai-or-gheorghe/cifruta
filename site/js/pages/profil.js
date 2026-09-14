@@ -5,14 +5,18 @@ import {
   accountState, addProfile, anonymousCounts, connect, deleteAccount, giveConsent, moveAnonymousInto, onAccountChange, playAs, removeProfile,
   signIn, signOut, updateProfile,
 } from '../cloud/account.js';
+import { forgetBoards } from '../cloud/boards.js';
 import { cloudConfigured } from '../cloud/config.js';
-import { AVATARS, nicknameError } from '../cloud/logic.js';
+import { nicknameError } from '../cloud/logic.js';
 import { onSyncChange, syncStatus } from '../cloud/sync.js';
+import { avatarStudio } from '../components/avatar-studio.js';
 import { confirmModal } from '../components/modal.js';
 import { art, backLink, callout, chip } from '../components/ui.js';
+import { avatarId, defaultLook } from '../core/avatar.js';
 import { escapeHTML, h, uid } from '../core/dom.js';
 import { cantitate } from '../core/ro.js';
-import { EMOJI, emojiHTML } from '../visuals/emoji.js';
+import { avatarSVG } from '../visuals/avatar.js';
+import { emojiHTML } from '../visuals/emoji.js';
 
 const GOOGLE_G =
   '<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
@@ -34,6 +38,7 @@ export default function profil(container) {
   const root = h('div', { class: 'l-container l-container--narrow l-stack l-stack--lg', 'data-testid': 'account-page' });
   container.append(root);
   let editing = null; // id-ul profilului editat sau 'new'
+  const drafts = new Map(); // ciornele formularelor, după id (sau 'new'): se șterg la salvare, la renunțare și la ștergere
   let lastKey = null;
   let syncLine = null;
 
@@ -148,7 +153,7 @@ export default function profil(container) {
     return h(
       'article',
       { class: `c-card acc-profile${active ? ' is-active' : ''}`, 'data-testid': `profile-${p.id}` },
-      h('div', { class: 'acc-profile__avatar', 'aria-hidden': 'true', html: emojiHTML(p.avatar) }),
+      h('div', { class: 'acc-profile__avatar', 'aria-hidden': 'true', html: avatarSVG(p.avatar) }),
       h('h2', { class: 'acc-profile__name' }, p.nickname),
       h('p', { class: 'u-small u-muted' }, [cantitate(p.attempts ?? 0, 'încercare', 'încercări'), cantitate(p.rounds ?? 0, 'rundă', 'runde'), p.showOnBoards ? null : 'în afara clasamentului'].filter(Boolean).join(' · ')),
       h(
@@ -209,30 +214,28 @@ export default function profil(container) {
   function profileForm(s, profile) {
     const first = !s.profiles.length;
     const id = uid('nick');
-    const used = new Set(s.profiles.map((p) => p.avatar));
-    let avatar = profile?.avatar ?? AVATARS.find((a) => !used.has(a)) ?? AVATARS[0];
-    const nickname = h('input', { type: 'text', id, class: 'acc-input', maxlength: '20', autocomplete: 'off', spellcheck: 'false', 'data-testid': 'profile-nickname' });
-    nickname.value = profile?.nickname ?? '';
-    const buttons = AVATARS.map((name) =>
-      h('button', {
-        type: 'button',
-        class: 'acc-avatar',
-        role: 'radio',
-        'aria-checked': String(name === avatar),
-        'aria-label': EMOJI[name].label,
-        title: EMOJI[name].label,
-        'data-testid': `avatar-${name}`,
-        html: emojiHTML(name),
-        onClick: () => {
-          avatar = name;
-          for (const b of buttons) b.setAttribute('aria-checked', String(b.dataset.testid === `avatar-${name}`));
-        },
-      }),
-    );
-    const boards = h('input', { type: 'checkbox', checked: profile ? profile.showOnBoards : true, 'data-testid': 'profile-boards' });
+    // ciorna (porecla, bifa, avatarul, fila deschisă) rezistă când pagina se redesenează din cauza unei schimbări în cont
+    const draftKey = profile?.id ?? 'new';
+    if (!drafts.has(draftKey)) {
+      drafts.set(draftKey, {
+        nickname: profile?.nickname ?? '',
+        boards: profile ? profile.showOnBoards : true,
+        avatar: profile?.avatar ?? avatarId(defaultLook(s.profiles.map((p) => p.avatar))),
+        tab: 'animal',
+      });
+    }
+    const draft = drafts.get(draftKey);
+    const close = () => {
+      drafts.delete(draftKey);
+      editing = null;
+    };
+    const nickname = h('input', { type: 'text', id, class: 'acc-input', maxlength: '20', autocomplete: 'off', spellcheck: 'false', 'data-testid': 'profile-nickname', onInput: () => { draft.nickname = nickname.value; } });
+    nickname.value = draft.nickname;
+    const studio = avatarStudio({ value: draft.avatar, tab: draft.tab, onChange: (value) => { draft.avatar = value; }, onTab: (tab) => { draft.tab = tab; } });
+    const boards = h('input', { type: 'checkbox', checked: draft.boards, 'data-testid': 'profile-boards', onChange: () => { draft.boards = boards.checked; } });
     const error = h('p', { class: 'acc-error', role: 'alert', 'data-testid': 'profile-error' });
     const save = h('button', { type: 'submit', class: 'c-btn c-btn--primary', 'data-testid': 'profile-save' }, profile ? 'Salvează' : 'Adaugă profilul');
-    const cancel = first ? null : h('button', { type: 'button', class: 'c-btn', onClick: () => { editing = null; render(true); } }, 'Renunță');
+    const cancel = first ? null : h('button', { type: 'button', class: 'c-btn', onClick: () => { close(); render(true); } }, 'Renunță');
     const remove = profile
       ? h(
           'button',
@@ -247,7 +250,8 @@ export default function profil(container) {
               btn.disabled = true;
               try {
                 await removeProfile(profile.id);
-                editing = null;
+                close();
+                forgetBoards();
                 render(true);
               } catch {
                 error.textContent = 'Nu am putut șterge profilul. Verifică internetul și încearcă din nou.';
@@ -276,13 +280,14 @@ export default function profil(container) {
           error.textContent = '';
           try {
             if (profile) {
-              await updateProfile(profile.id, { nickname: nickname.value, avatar, showOnBoards: boards.checked });
-              editing = null;
+              await updateProfile(profile.id, { nickname: nickname.value, avatar: studio.get(), showOnBoards: boards.checked });
+              close();
+              forgetBoards(); // clasamentul ține intrările în memorie 60 s: fără asta ar arăta porecla și avatarul de dinainte
               render(true);
               return;
             }
-            const created = await addProfile({ nickname: nickname.value, avatar, showOnBoards: boards.checked });
-            editing = null;
+            const created = await addProfile({ nickname: nickname.value, avatar: studio.get(), showOnBoards: boards.checked });
+            close();
             const anon = anonymousCounts();
             if (accountState().profiles.length === 1 && (anon.attempts || anon.rounds)) {
               const parts = [anon.attempts ? `${cantitate(anon.attempts, 'încercare', 'încercări')} la teste` : null, anon.rounds ? `${cantitate(anon.rounds, 'rundă', 'runde')} de la Jocuri fulger` : null].filter(Boolean).join(' și ');
@@ -300,7 +305,7 @@ export default function profil(container) {
       h('h2', {}, profile ? `Editează profilul ${profile.nickname}` : first ? 'Primul profil' : 'Profil nou'),
       first ? h('p', { class: 'u-muted' }, 'Un profil pentru fiecare copil. Poți adăuga până la 6.') : null,
       h('label', { class: 'acc-field', for: id }, h('span', { class: 'acc-field__label' }, 'Porecla'), nickname, h('span', { class: 'u-small u-muted' }, 'Porecla apare în clasament: alege una fără numele complet al copilului.')),
-      h('fieldset', { class: 'acc-field' }, h('legend', { class: 'acc-field__label' }, 'Avatarul'), h('div', { class: 'acc-avatars', role: 'radiogroup', 'aria-label': 'Avatarul' }, buttons)),
+      h('fieldset', { class: 'acc-field' }, h('legend', { class: 'acc-field__label' }, 'Avatarul'), studio.el),
       h('label', { class: 'acc-check' }, boards, h('span', {}, 'Apare în clasament (doar porecla, avatarul și scorul)')),
       error,
       h('div', { class: 'l-cluster' }, save, cancel, remove),

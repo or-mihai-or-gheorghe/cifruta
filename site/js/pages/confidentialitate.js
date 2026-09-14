@@ -19,7 +19,7 @@ const SECTIONS = [
       'Intră în cont doar un părinte sau un tutore, cu contul lui Google. Copiii nu au conturi.',
       'La primul profil, părintele confirmă că este părintele sau tutorele copilului și că este de acord cu această pagină. În România, pentru copiii sub 16 ani e nevoie de acordul părintelui.',
       'Din contul Google păstrăm e-mailul și numele. Mai păstrăm data creării contului, a ultimei vizite și a acordului.',
-      'Pentru fiecare copil, părintele alege o poreclă și un avatar (un animal). Nu cerem numele real, vârsta, școala sau fotografii.',
+      'Pentru fiecare copil se aleg o poreclă și un avatar desenat (un animal, cu o culoare, un fundal și accesorii alese dintr-o listă). Nu cerem numele real, vârsta, școala sau fotografii.',
       'Pentru fiecare profil păstrăm rezultatele: încercările la teste (cu răspunsurile date), rundele de la Jocuri fulger, recordurile și medaliile.',
     ],
   },

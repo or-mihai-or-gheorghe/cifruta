@@ -2,23 +2,33 @@
 
 /* ——— Antet ——— */
 .c-account { gap: 0.4rem; max-width: 12rem; }
+.c-account__icon { display: block; flex: none; }
 .c-account__icon .c-emoji { width: 1.5rem; height: 1.5rem; margin: 0; vertical-align: middle; }
 .c-account__text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .c-account.is-signed { --btn-edge: var(--c-line); background: var(--c-surface); }
+/* profilul care joacă: avatarul desenat, mare, la stânga poreclei (desenul ia lățimea containerului) */
+.c-account.has-avatar { max-width: 13rem; padding: 0.125rem 0.9rem 0.125rem 0.125rem; }
+.c-account.has-avatar .c-account__icon { width: 2.5rem; }
 .c-nav-board .c-emoji { width: 1.25rem; height: 1.25rem; margin: 0; }
-@media (max-width: 30rem) {
-  /* pe telefon, cu contul disponibil, sigla duce la teste; locul rămâne pentru clasament și cont */
-  .l-header:has(.c-account:not([hidden])) .c-nav-home { display: none; }
+/* Antetul cu contul se strânge în trepte, ca să nu depășească ecranul nici cu o poreclă de 20 de caractere: sub 47,5rem pleacă
+   subtitlul siglei și textul clasamentului, sub 42rem și „Teste” (sigla duce acolo) și porecla (rămâne avatarul). */
+@media (max-width: 47.5rem) {
   .l-header:has(.c-account.is-signed) .c-logo__sub { display: none; }
-  .c-sound { width: 2.5rem; }
   .c-nav-board { width: 2.5rem; padding: 0; }
+  /* ascuns doar vizual: linkul își păstrează numele pentru cititoarele de ecran */
   .c-nav-board__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+@media (max-width: 42rem) {
+  .l-header:has(.c-account:not([hidden])) .c-nav-home { display: none; }
+  .c-account { width: 2.5rem; padding: 0; }
+  /* avatarul e chiar butonul: discul lui umple cercul */
+  .c-account.has-avatar { width: 2.75rem; height: 2.75rem; min-height: 0; padding: 0; border: 0; background: transparent; box-shadow: none; }
+  .c-account.has-avatar .c-account__icon { width: 2.75rem; }
+  .c-account__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
 @media (max-width: 30rem) {
   .l-header__inner nav { --cluster-gap: 0.25rem; }
-  .c-account { width: 2.5rem; padding: 0; }
-  /* ascuns doar vizual: linkul își păstrează numele pentru cititoarele de ecran */
-  .c-account__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .c-sound { width: 2.5rem; }
 }
 
 /* ——— Mesaj trecător ——— */
@@ -56,17 +66,8 @@
 .acc-profiles .acc-form { grid-column: 1 / -1; }
 .acc-profile { align-items: center; text-align: center; }
 .acc-profile.is-active { border-color: var(--c-ok); box-shadow: 0 0 0 3px var(--c-ok-bg), var(--sh-1); }
-.acc-profile__avatar {
-  display: grid;
-  place-items: center;
-  width: 4.5rem;
-  height: 4.5rem;
-  border: 2px solid var(--c-line);
-  border-radius: 50%;
-  background: var(--c-surface-2);
-}
-.acc-profile__avatar .c-emoji { width: 3rem; height: 3rem; margin: 0; }
-.acc-profile.is-active .acc-profile__avatar { border-color: var(--c-ok); background: var(--c-ok-bg); }
+/* avatarul desenat are discul lui: containerul îi dă doar mărimea */
+.acc-profile__avatar { display: block; width: 7rem; }
 .acc-profile__name { font-size: var(--fs-2); overflow-wrap: anywhere; }
 .acc-profile__actions { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); margin-top: auto; }
 
@@ -101,22 +102,6 @@
   font-size: var(--fs-2);
 }
 .acc-input:focus-visible { border-color: var(--c-focus); }
-.acc-avatars { display: grid; grid-template-columns: repeat(auto-fill, minmax(3.5rem, 1fr)); gap: var(--sp-2); max-width: 26rem; }
-.acc-avatar {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 1;
-  max-width: 100%;
-  padding: 0.35rem;
-  border: 3px solid var(--c-line);
-  border-radius: var(--r-2);
-  background: var(--c-surface);
-  transition: transform var(--dur-2) var(--ease-spring), border-color var(--dur-2), background-color var(--dur-2);
-  -webkit-tap-highlight-color: transparent;
-}
-.acc-avatar .c-emoji { width: 100%; height: 100%; margin: 0; }
-.acc-avatar:hover { transform: scale(1.06); }
-.acc-avatar[aria-checked='true'] { border-color: var(--c-brand); background: var(--c-brand-soft); transform: scale(1.06); }
 .acc-check { display: flex; align-items: flex-start; gap: var(--sp-2); cursor: pointer; }
 .acc-check input { flex: none; width: 1.4rem; height: 1.4rem; margin: 0.15rem 0 0; accent-color: var(--c-brand); }
 .acc-error { color: var(--c-bad-ink); font-weight: 700; }
@@ -149,7 +134,7 @@
 .lb-list--own { margin-top: var(--sp-3); padding-top: var(--sp-3); border-top: 3px dotted var(--c-line-strong); }
 .lb-row {
   display: grid;
-  grid-template-columns: 2.6rem 2.6rem minmax(0, 1fr) auto;
+  grid-template-columns: 2.6rem 3.5rem minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--sp-3);
   padding: 0.5rem var(--sp-4) 0.5rem 0.5rem;
@@ -161,16 +146,19 @@
 .lb-row.is-active { box-shadow: 0 0 0 3px var(--c-brand-soft), var(--sh-1); }
 .lb-place { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 50%; background: var(--c-surface-2); font-family: var(--font-title); font-size: var(--fs-1); font-weight: 700; }
 .lb-place--medal { background: transparent; }
-.lb-place .c-emoji, .lb-avatar .c-emoji { width: 2.2rem; height: 2.2rem; margin: 0; }
-.lb-avatar { display: grid; place-items: center; }
+.lb-place .c-emoji { width: 2.2rem; height: 2.2rem; margin: 0; }
+/* avatarul desenat ia lățimea containerului */
+.lb-avatar { display: block; width: 3.5rem; }
 .lb-name { display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem 0.5rem; min-width: 0; }
 .lb-score { display: grid; justify-items: end; font-family: var(--font-title); font-size: var(--fs-1); font-weight: 700; white-space: nowrap; }
 .lb-score small { font-family: var(--font-body); font-weight: 400; }
 .c-board-link__icon .c-emoji { width: 1.3rem; height: 1.3rem; margin: 0; }
 .adm-nick { max-width: 12rem; min-height: 2.5rem; font-size: var(--fs-1); }
+.adm-avatar { display: block; flex: none; width: 2.5rem; }
 @media (max-width: 30rem) {
-  .lb-row { grid-template-columns: 2.1rem 2.1rem minmax(0, 1fr) auto; gap: var(--sp-2); padding-right: var(--sp-3); }
-  .lb-place, .lb-place .c-emoji, .lb-avatar .c-emoji { width: 2rem; height: 2rem; }
+  .lb-row { grid-template-columns: 2.1rem 2.75rem minmax(0, 1fr) auto; gap: var(--sp-2); padding-right: var(--sp-3); }
+  .lb-place, .lb-place .c-emoji { width: 2rem; height: 2rem; }
+  .lb-avatar { width: 2.75rem; }
 }
 
 /* ——— Avatarul: matricea de revizuire din atelier (#/atelier/avatare) ——— */

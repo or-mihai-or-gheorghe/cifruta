@@ -9,7 +9,7 @@ import { confirmModal } from '../components/modal.js';
 import { backLink, callout, chip } from '../components/ui.js';
 import { h } from '../core/dom.js';
 import { cantitate, formatDateTime } from '../core/ro.js';
-import { emojiHTML } from '../visuals/emoji.js';
+import { avatarSVG } from '../visuals/avatar.js';
 
 export default function admin(container) {
   document.title = 'Administrare — Cifruța';
@@ -45,7 +45,7 @@ export default function admin(container) {
       h(
         'span',
         { class: 'l-cluster' },
-        h('span', { 'aria-hidden': 'true', html: emojiHTML(p.avatar) }),
+        h('span', { class: 'adm-avatar', 'aria-hidden': 'true', html: avatarSVG(p.avatar) }),
         h('strong', {}, p.nickname),
         h('span', { class: 'u-small u-muted' }, [cantitate(p.attempts ?? 0, 'încercare', 'încercări'), cantitate(p.rounds ?? 0, 'rundă', 'runde'), cantitate((p.boards ?? []).length, 'clasament', 'clasamente'), p.showOnBoards ? null : 'ascuns din clasament'].filter(Boolean).join(' · ')),
       ),

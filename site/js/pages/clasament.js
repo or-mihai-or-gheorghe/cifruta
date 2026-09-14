@@ -11,6 +11,7 @@ import { cantitate } from '../core/ro.js';
 import { redirect } from '../core/router.js';
 import { playableTopics, topicConfig } from '../fulger/engine.js';
 import { LEGACY_TOPIC, LEVEL_IDS } from '../fulger/records.js';
+import { avatarSVG } from '../visuals/avatar.js';
 import { emojiHTML } from '../visuals/emoji.js';
 
 const PODIUM = ['aur', 'argint', 'bronz'];
@@ -77,7 +78,7 @@ export default function clasament(container, [game = 'fulger', first, second, th
       e.place <= 3
         ? h('span', { class: 'lb-place lb-place--medal', 'aria-hidden': 'true', html: emojiHTML(PODIUM[e.place - 1]) })
         : h('span', { class: 'lb-place', 'aria-hidden': 'true' }, String(e.place)),
-      h('span', { class: 'lb-avatar', 'aria-hidden': 'true', html: emojiHTML(e.avatar) }),
+      h('span', { class: 'lb-avatar', 'aria-hidden': 'true', html: avatarSVG(e.avatar) }),
       h('span', { class: 'lb-name' }, h('strong', { class: 'u-break' }, e.nickname), active ? chip('tu', 'c-chip--ok') : mine ? chip('familia ta') : null),
       h('span', { class: 'lb-score' }, view.game === 'teste' ? cantitate(e.score, 'stea', 'stele') : cantitate(e.score, 'alună', 'alune'), h('small', { class: 'u-muted' }, extra)),
     );

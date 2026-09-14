@@ -152,24 +152,35 @@ def flushed(page) -> bool:
     return page.evaluate("window.__cloud.flush()") == 0
 
 
-def first_profile(page, nickname: str, avatar: str, move: bool | None):
+def dress(page, look: list):
+    """În atelierul avatarului, câte o variantă pe filă: [("culoare", "albastru"), ("cap", "coroana"), …]."""
+    for tab, option in look:
+        page.get_by_test_id(f"avatar-tab-{tab}").click()
+        page.get_by_test_id(f"avatar-{tab}-{option}").click()
+
+
+def first_profile(page, nickname: str, avatar: str, move: bool | None, look: list | None = None, run: Run | None = None, shot: str | None = None):
     page.get_by_test_id("consent-check").check()
     page.get_by_test_id("consent-ok").click()
     page.get_by_test_id("profile-nickname").fill(nickname)
     page.get_by_test_id(f"avatar-{avatar}").click()
+    dress(page, look or [])
+    if run and shot:
+        run.layout_ok(page, f"{shot}: atelierul avatarului")
+        run.shot(page, shot)
     page.get_by_test_id("profile-save").click()
     if move is not None:
         page.get_by_test_id("modal-confirm" if move else "modal-cancel").click()
     expect(page.get_by_test_id("profile-p1")).to_contain_text("Joacă acum")
 
 
-def parent(run: Run, browser, label: str, email: str, name: str, nickname: str, avatar: str, device=LAPTOP):
+def parent(run: Run, browser, label: str, email: str, name: str, nickname: str, avatar: str, device=LAPTOP, look: list | None = None, shot: str | None = None):
     ctx = browser.new_context(**device)
     page = ctx.new_page()
     run.watch(page, label)
     run.goto(page, "profil")
     sign_in(page, email, name)
-    first_profile(page, nickname, avatar, move=None)
+    first_profile(page, nickname, avatar, move=None, look=look, run=run, shot=shot)
     return ctx, page, page.evaluate("window.__cloud.state().user.uid")
 
 
@@ -268,6 +279,30 @@ def account_flow(run: Run, browser):
     run.goto(page2, "profil")
     rename(page2, "Ana Maria")
     run.check((doc(f"{board('usor')}/{uid}_p1") or {}).get("nickname") == "Ana Maria" and (doc(f"{board('total')}/{uid}_p1") or {}).get("nickname") == "Ana Maria", "clasament: porecla nouă, și la total")
+
+    print("\n[cont] avatarul desenat: atelierul din profil, textul salvat, desenul în card, antet și clasamente")
+    week = this_week(page2)
+    page2.get_by_test_id("edit-p1").click()
+    dress(page2, [("culoare", "albastru"), ("fundal", "verde"), ("cap", "coroana"), ("fata", "ochelari"), ("gat", "papion")])
+    name = page2.get_by_test_id("avatar-name").inner_text()
+    run.check("coroană" in name and "papion" in name, f"avatar: numele din atelier ({name})")
+    run.layout_ok(page2, "laptop: atelierul avatarului din profil")
+    run.shot(page2, "cloud-avatar-studio-laptop")
+    page2.get_by_test_id("profile-save").click()
+    expect(page2.get_by_test_id("profile-p1")).to_contain_text("Ana Maria")
+    wanted = "vulpe.culoare-albastru.fundal-verde.cap-coroana.fata-ochelari.gat-papion"
+    saved = (doc(base) or {}).get("avatar")
+    run.check(saved == wanted, f"cloud: avatarul salvat în profil ({saved})")
+    carried = [(doc(f"{board(scope, period)}/{uid}_p1") or {}).get("avatar") for scope in ("usor", "total") for period in ("all", week)]
+    run.check(carried == [wanted] * 4, f"clasament: avatarul nou în intrările afișate ({carried})")
+    card = page2.locator("[data-testid=profile-p1] svg.v-avatar").get_attribute("aria-label") or ""
+    header = page2.locator("[data-testid=nav-account] svg.v-avatar").get_attribute("aria-label") or ""
+    run.check("coroană" in card and "coroană" in header, f"avatar: desenul nou în card și în antet ({card} / {header})")
+    for width in (1024, 768, 600):
+        page2.set_viewport_size({"width": width, "height": 800})
+        page2.wait_for_timeout(150)
+        run.layout_ok(page2, f"{width} px: antetul cu avatarul")
+    page2.set_viewport_size({"width": 1280, "height": 800})
     page2.get_by_test_id("edit-p1").click()
     page2.get_by_test_id("profile-boards").uncheck()
     page2.get_by_test_id("profile-save").click()
@@ -289,14 +324,31 @@ def account_flow(run: Run, browser):
     run.check(not left, f"browser: fără copii ale profilului după ieșire ({left})")
     expect(page.get_by_test_id("nav-account")).to_contain_text("Intră")
 
-    print("\n[cont] al doilea părinte, pe telefon")
-    phone, page3, _ = parent(run, browser, "telefon", "bob@example.com", "Tata lui Bob", "Bob", "urs", PHONE)
+    print("\n[cont] al doilea părinte, pe telefon, cu avatarul îmbrăcat de la primul profil")
+    bob_look = [("culoare", "portocaliu"), ("fundal", "noapte"), ("cap", "petrecere"), ("fata", "inimioare"), ("gat", "clopotel")]
+    phone, page3, bob_uid = parent(run, browser, "telefon", "bob@example.com", "Tata lui Bob", "Bob", "urs", PHONE, look=bob_look, shot="cloud-avatar-studio-telefon")
     run.check(flushed(page3), "telefon: profil nou fără rezultate")
+    bob_avatar = (doc(f"users/{bob_uid}/profiles/p1") or {}).get("avatar")
+    run.check(bob_avatar == "urs.culoare-portocaliu.fundal-noapte.cap-petrecere.fata-inimioare.gat-clopotel", f"telefon: profilul nou are avatarul ales ({bob_avatar})")
     run.layout_ok(page3, "telefon: pagina contului")
     run.shot(page3, "cloud-profil-telefon")
     run.goto(page3, "")
+    page3.wait_for_selector("[data-testid=fulger-card]")
+    page3.wait_for_selector("[data-testid=nav-account] svg.v-avatar")
     run.layout_ok(page3, "telefon: antetul cu avatar și clasament")
     run.shot(page3, "cloud-antet-telefon")
+    small = browser.new_context(viewport={"width": 360, "height": 640}, is_mobile=True, has_touch=True)
+    page4 = small.new_page()
+    run.watch(page4, "telefon mic")
+    run.goto(page4, "profil")
+    sign_in(page4, "bob@example.com", "Tata lui Bob")
+    expect(page4.get_by_test_id("profile-p1")).to_contain_text("Joacă acum")
+    run.goto(page4, "")
+    page4.wait_for_selector("[data-testid=fulger-card]")
+    page4.wait_for_selector("[data-testid=nav-account] svg.v-avatar")
+    run.layout_ok(page4, "telefon mic 360 px: antetul cu avatar și clasament")
+    run.shot(page4, "cloud-antet-telefon-mic")
+    small.close()
 
     print("\n[cont] ștergerea profilului și a contului")
     run.goto(page2, "profil")
@@ -383,6 +435,19 @@ def legacy_flow(run: Run, browser):
     names = [(doc(f"{board('usor', w)}/{uid}_p1") or {}).get("nickname") for w in ("all", *old_weeks)]
     run.check(names == ["Vechi Nou"] * 3 and doc(f"leaderboards/fulger-usor-all/entries/{uid}_p1") is None and "fulger-usor-all" not in after,
               f"migrare: redenumirea schimbă porecla și în săptămânile trecute, iar clasamentul vechi iese ({names}, {after})")
+
+    # o schimbare doar de avatar rescrie clasamentele afișate (tot timpul, săptămâna curentă, stelele), nu și săptămânile trecute
+    page.get_by_test_id("edit-p1").click()
+    dress(page, [("cap", "joben"), ("gat", "fular")])
+    page.get_by_test_id("profile-save").click()
+    page.wait_for_function("document.querySelector('[data-testid=profile-p1] svg.v-avatar')?.getAttribute('aria-label')?.includes('joben')", timeout=20000)
+    dressed = "lup.cap-joben.gat-fular"
+    shown = [(doc(f"{board(scope, period)}/{uid}_p1") or {}).get("avatar") for scope, period in (("usor", "all"), ("usor", week), ("total", "all"), ("total", week))]
+    shown.append((doc(f"leaderboards/teste-stele/entries/{uid}_p1") or {}).get("avatar"))
+    past = [(doc(f"{board('usor', w)}/{uid}_p1") or {}).get("avatar") for w in old_weeks]
+    kept = (doc(base) or {}).get("boards", [])
+    run.check(shown == [dressed] * 5 and past == ["lup"] * len(old_weeks) and all(f"fulger-{TOPIC}-usor-{w}" in kept for w in old_weeks),
+              f"avatar: doar clasamentele afișate primesc avatarul nou, săptămânile trecute îl păstrează pe cel vechi ({shown}, {past})")
     ctx.close()
 
 
@@ -412,6 +477,8 @@ def boards_admin_flow(run: Run, browser):
     expect(rows).to_have_count(2)
     run.check("Bob" in rows.nth(0).inner_text() and "Ana" in rows.nth(1).inner_text(), "clasament: pe nivel, ordinea după scor")
     expect(ana.get_by_test_id(f"lb-row-{uid_a}_p1")).to_contain_text("tu")
+    run.check(ana.locator(f"[data-testid=lb-row-{uid_a}_p1] svg.v-avatar").count() == 1 and ana.locator("[data-testid=lb-list] svg.v-avatar").count() == 2,
+              "clasament: fiecare rând are avatarul desenat")
     run.check("@example.com" not in ana.content(), "clasament: fără e-mailuri în pagină")
     run.goto(ana, f"clasament/fulger/{TOPIC}/total/week")
     totals = ana.get_by_test_id("lb-list").locator("li")
@@ -439,6 +506,7 @@ def boards_admin_flow(run: Run, browser):
     expect(ana.get_by_test_id(f"admin-status-{uid_b}")).to_contain_text("schimbată")
     run.check((doc(f"users/{uid_b}/profiles/p1") or {}).get("nickname") == "Bobo" and (doc(f"{board('usor')}/{uid_b}_p1") or {}).get("nickname") == "Bobo"
               and (doc(f"{board('total')}/{uid_b}_p1") or {}).get("nickname") == "Bobo", "admin: porecla nouă în profil și în clasamente")
+    run.check(ana.locator(f"[data-testid=admin-profile-{uid_b}-p1] svg.v-avatar").count() == 1, "admin: profilul are avatarul desenat")
     run.shot(ana, "cloud-admin")
     ana.get_by_test_id(f"admin-block-{uid_b}").click()
     ana.get_by_test_id("modal-confirm").click()

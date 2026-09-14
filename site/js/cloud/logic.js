@@ -1,9 +1,8 @@
 // Cifruța în cloud: logica pură (fără Firebase și fără DOM), testată în Node (tests/cloud.test.js).
-// Aceleași limite apar și în firestore.rules: poreclă, avatare, profiluri, id-urile clasamentelor.
+// Aceleași limite apar și în firestore.rules: poreclă, profiluri, id-urile clasamentelor (avatarul are modelul lui: core/avatar.js).
 
 import { LEGACY_TOPIC, LEVEL_IDS, recordKey } from '../fulger/records.js';
 
-export const AVATARS = ['veverita', 'iepure', 'vulpe', 'urs', 'arici', 'pisica', 'caine', 'rata', 'lup', 'cal', 'oaie', 'gaina'];
 export const PROFILE_IDS = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6'];
 export const LEVELS = LEVEL_IDS;
 export const TESTS_BOARD = 'teste-stele';

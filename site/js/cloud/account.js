@@ -3,11 +3,12 @@
 // Paginile citesc sincron starea (accountState) și se abonează la schimbări (onAccountChange).
 
 import fulgerConfig from '../../data/fulger.js';
+import { avatarId, parseAvatar } from '../core/avatar.js';
 import { currentRoute, refresh } from '../core/router.js';
 import { clearAccountCopies, clearScopeData, moveDrafts, readScopeData, setScope, writeScopeData } from '../core/storage.js';
 import { cloudConfigured, USE_EMULATOR } from './config.js';
 import { loadFirebase } from './firebase.js';
-import { cleanNickname, combineData, freeProfileId, isRetiredBoard, signInError } from './logic.js';
+import { cleanNickname, combineData, freeProfileId, isRetiredBoard, shownBoards, signInError } from './logic.js';
 import { readSession, sessionProfile, writeSession } from './session.js';
 import { deleteProfileCloud, flush, requestBoards, startSync, stopSync, uploadAll } from './sync.js';
 
@@ -255,7 +256,7 @@ export async function addProfile({ nickname, avatar, showOnBoards = true }) {
   const { db, f } = fb;
   const id = freeProfileId(state.profiles);
   if (!id) throw new Error('Ai deja 6 profiluri.');
-  const data = { nickname: cleanNickname(nickname), avatar, showOnBoards, attempts: 0, rounds: 0, boards: [] };
+  const data = { nickname: cleanNickname(nickname), avatar: avatarId(parseAvatar(avatar)), showOnBoards, attempts: 0, rounds: 0, boards: [] };
   try {
     await f.setDoc(f.doc(db, 'users', state.user.uid, 'profiles', id), { ...data, createdAt: f.serverTimestamp() });
   } catch (err) {
@@ -269,14 +270,15 @@ export async function addProfile({ nickname, avatar, showOnBoards = true }) {
 }
 
 /**
- * Porecla, avatarul și prezența în clasament, într-o tranzacție cu intrările din clasamente: la redenumire intrările iau porecla
- * nouă, iar la ieșirea din clasament se șterg.
+ * Porecla, avatarul și prezența în clasament, într-o tranzacție cu intrările din clasamente: o poreclă nouă ajunge în toate
+ * clasamentele profilului, un avatar nou doar în cele afișate (săptămânile trecute păstrează avatarul de atunci), iar la ieșirea
+ * din clasament intrările se șterg.
  */
 export async function updateProfile(pid, { nickname, avatar, showOnBoards }) {
   const { db, f } = fb;
   const uid = state.user.uid;
   const ref = f.doc(db, 'users', uid, 'profiles', pid);
-  const next = { nickname: cleanNickname(nickname), avatar, showOnBoards };
+  const next = { nickname: cleanNickname(nickname), avatar: avatarId(parseAvatar(avatar)), showOnBoards };
   const result = await f.runTransaction(db, async (tx) => {
     const snap = await tx.get(ref);
     if (!snap.exists()) throw new Error('Profilul nu mai există.');
@@ -287,11 +289,15 @@ export async function updateProfile(pid, { nickname, avatar, showOnBoards }) {
     const retired = boards.filter(isRetiredBoard);
     const live = boards.filter((b) => !isRetiredBoard(b));
     const leaving = current.showOnBoards && !showOnBoards;
-    const renamed = next.nickname !== current.nickname || next.avatar !== current.avatar;
-    const entries = renamed && !leaving ? await Promise.all(live.map((b) => tx.get(entryRef(b)))) : [];
+    const touched = leaving ? [] : next.nickname !== current.nickname ? live : next.avatar !== current.avatar ? shownBoards(live) : [];
+    const entries = await Promise.all(touched.map((b) => tx.get(entryRef(b))));
     const changes = { ...next };
     if (leaving) changes.boards = [];
-    else if (renamed) changes.boards = [...live.filter((_, i) => entries[i].exists()), ...retired].sort();
+    else if (touched.length) {
+      // doar clasamentele citite pot ieși din listă, când intrarea lor nu mai există
+      const gone = new Set(touched.filter((_, i) => !entries[i].exists()));
+      changes.boards = [...live.filter((b) => !gone.has(b)), ...retired].sort();
+    }
     tx.update(ref, changes);
     if (leaving) for (const b of boards) tx.delete(entryRef(b));
     for (const e of entries) if (e.exists()) tx.update(e.ref, { nickname: next.nickname, avatar: next.avatar, updatedAt: f.serverTimestamp() });
