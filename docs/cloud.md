@@ -51,7 +51,7 @@ O altă filă a aceluiași browser află de ieșirea voluntară din evenimentul 
 | `admins/{uid}` | fiecare își citește doar documentul propriu; se creează din consolă | `{}` |
 | `blocked/{uid}` | proprietarul își vede blocarea; doar adminul o pune și o scoate | `at`; stă separat de cont, ca ștergerea și recrearea lui `users/{uid}` să n-o anuleze |
 | `users/{uid}` | proprietarul și adminul | `email` (din token), `name`, `createdAt`, `lastSeenAt`, `consentAt` |
-| `users/{uid}/profiles/{p1…p6}` | proprietarul, adminul (adminul schimbă doar `nickname`) | `nickname`, `avatar`, `showOnBoards`, `createdAt`, `attempts`, `rounds`, `boards` |
+| `users/{uid}/profiles/{p1…p6}` | proprietarul, adminul (adminul schimbă doar `nickname`) | `nickname`, `avatar` (avatarul desenat, ca text canonic `animal[.culoare-…][.fundal-…][.cap-…][.fata-…][.gat-…]`, fără valorile implicite; vezi `core/avatar.js`), `showOnBoards`, `createdAt`, `attempts`, `rounds`, `boards` |
 | `…/attempts/{id}` | proprietarul, adminul | încercarea, cu timpul de rezolvare (`activeMs`, `msByExercise`, `startedAt`, `submittedAt`); `answers` ca text JSON (Firestore nu acceptă liste în liste) |
 | `…/fulger/{nivel-ms}` | proprietarul, adminul | runda: `topic`, `level`, `at`, `total`, `correct`, `wrong`, `bestStreak`, `fast`, `stars`, `byKind` (fără `topic`, runda e din prima temă) |
 | `…/state/fulger` | proprietarul, adminul | chei „temă:nivel”: `best` (recordul, cu `correct` și `bestStreak`) și `week` (cea mai bună rundă a săptămânii); `medals`, comune temelor |
@@ -74,7 +74,11 @@ O altă filă a aceluiași browser află de ieșirea voluntară din evenimentul 
 - încercarea cu contorul;
 - runda cu starea și contorul;
 - intrările cu lista `boards` și ștergerea săptămânilor vechi;
-- redenumirea profilului cu intrările lui.
+- redenumirea profilului cu intrările lui:
+  - o poreclă nouă ajunge în toate clasamentele din `boards`;
+  - un avatar nou ajunge doar în clasamentele afișate (`shownBoards`: stelele, „tot timpul” și săptămâna curentă), deci o salvare
+    costă cel mult 42 de citiri și 42 de scrieri;
+  - săptămânile trecute păstrează avatarul de atunci.
 
 `boards` din profil face posibile ștergerile fără căutări: ieșirea din clasament, ștergerea profilului, blocarea.
 
@@ -84,8 +88,12 @@ O altă filă a aceluiași browser află de ieșirea voluntară din evenimentul 
   admin) citește, dar nu mai scrie; blocarea rămâne și dacă proprietarul își șterge și își recreează documentul `users/{uid}`.
 - Contul se creează doar pentru sine, cu e-mailul din token și `createdAt == request.time`. Proprietarul schimbă doar `name`,
   `lastSeenAt` și `consentAt`.
-- Profilurile au id-uri `^p[1-6]$`, cer acordul în cont, o poreclă de 2–20 caractere (litere, cifre, spațiu, `.'-`) și un avatar
-  din listă. Aceleași valori sunt și în `logic.js`, iar `tests/cloud.test.js` verifică potrivirea.
+- Profilurile au id-uri `^p[1-6]$`, cer acordul în cont și o poreclă de 2–20 caractere (litere, cifre, spațiu, `.'-`).
+- Avatarul trece prin `validAvatar()`:
+  - animalul, apoi locurile în ordine, fără valorile implicite;
+  - id-urile vin din `avatarAnimals()`, `avatarColors()`, `avatarBackgrounds()`, `avatarHats()`, `avatarFaces()`, `avatarNecks()`;
+  - aceleași liste stau în `core/avatar.js`, iar `tests/cloud.test.js` le compară și încearcă expresia pe un corpus de texte;
+  - un id publicat nu se mai scoate: `validProfile()` verifică avatarul la fiecare scriere a profilului, și la contoare.
 - O intrare în clasament e a contului (`entryId == uid + '_' + pid`), are porecla și avatarul profilului (`getAfter`), vine de la un
   profil cu `showOnBoards` și are `updatedAt == request.time`.
   - La Jocurile fulger, scorul e 1–3000, doar crește și se schimbă cel mult o dată la 90 s.
@@ -124,6 +132,8 @@ poate verifica pe server, așa că există moderarea din `#/admin` (redenumire, 
 - `npm run e2e:cloud`: emulatoarele Auth (:9099) și Firestore, plus `tools/e2e_cloud.py`. Scriptul acoperă:
   - contul, acordul, profilul și mutarea rezultatelor;
   - al doilea dispozitiv, scrierile, ștergerea istoricului, redenumirea și ieșirea din clasament;
+  - avatarul îmbrăcat în atelierul din profil: textul salvat, desenul din card, antet și clasamente, antetul la 1024, 768, 600,
+    390 și 360 px; o schimbare doar de avatar lasă săptămânile trecute neatinse;
   - ieșirea din cont, telefonul, ștergerea profilului și a contului;
   - clasamentul văzut de doi părinți, refuzul pentru anonimi;
   - adminul care redenumește, blochează și deblochează.
@@ -146,4 +156,5 @@ poate verifica pe server, așa că există moderarea din `#/admin` (redenumire, 
 **Consum estimat** (planul gratuit: 50 000 de citiri și 20 000 de scrieri pe zi):
 - o rundă: ~3 citiri și ~5 scrieri;
 - o vizită în clasament: ~22 de citiri;
+- o salvare de avatar: cel mult 42 de citiri și 42 de scrieri (profilul și intrările din clasamentele afișate);
 - activarea unui profil: încercările, cel mult 30 de runde și starea.

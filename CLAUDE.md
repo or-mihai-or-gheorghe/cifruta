@@ -29,10 +29,12 @@ site/                      ← publicat
   js/core/                 expr (calcule fără eval) · rules · markup · spec (validare) · scoring · registry
                            storage (localStorage simplu) · loader · router · dom (h, pop, countUp) · ro (diacritice, cantitate) · lint · dnd · sound
                            forme (figuri: contur, cheie canonică, nume, axe) · grile (piese din căsuțe, desfășurările cubului)
-  js/components/, js/pages/  interfața (player, rezultate/revizuire, atelier)
+                           avatar (avatarul desenat: liste, text canonic, nume, alegerea la întâmplare)
+  js/components/, js/pages/  interfața (player, rezultate/revizuire, atelier; avatar-studio = atelierul avatarului, în profil și în atelier)
   js/types/<tip>/logic.js  logică pură (Node o poate importa): validate · count · answered · empty · solution · evaluate
   js/types/<tip>/view.js   DOM: mount(el, part, ctx) → { get, set, mode, showResult, destroy }
-  js/visuals/              banca vizuală: registerVisual(nume, {render, label, demos}); all.js le importă pe toate
+  js/visuals/              banca vizuală: registerVisual(nume, {render, label, demos}); all.js le importă pe toate;
+                           avatar (desenul și accesoriile) · avatar-animals (cele 24 de animale) · avatar-parts (blănuri, ochi, umeri)
   js/fulger/               Jocuri fulger (jocuri pe viteză, pe teme, #/fulger): kinds (calcule) și kinds-forme (figuri), generate
                            cu sămânță, cu concepte · rand · art (desenul și numele unei variante) · engine (temele, runda și
                            punctajul, pur) · records (chei „temă:nivel”, datele vechi) · view (arena) · effects (particule, bannere);
@@ -89,6 +91,16 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   `firestore.rules` (un test le compară). Verificare: `npm test`, `npm run test:rules`, `npm run e2e`, `npm run e2e:cloud`; la publicare
   **`npm run deploy:rules` înaintea lui `npm run deploy`**. Id-ul unei teme publicate nu se mai schimbă: e în cheile recordurilor
   („temă:nivel”) și în id-urile clasamentelor.
+- **Animal sau accesoriu nou pentru avatar:**
+  1. Id permanent (`[a-z]+`, fără `fara` și `natural`), eticheta și genul în listele din `js/core/avatar.js`. La un animal, `natural`
+     e culoarea lui din listă sau null; cu null, desenul are paleta proprie (`fur`).
+  2. Desenul: un animal în `js/visuals/avatar-animals.js` (ancorele `a`, părțile `back`/`head`/`face`, reglajele `place`), un accesoriu
+     în `HAT_ART` / `FACE_ART` / `NECK_ART` din `js/visuals/avatar.js`.
+  3. Id-ul în funcția lui din `firestore.rules` (`avatarAnimals()` …; testul le compară) și în `PUBLISHED` din `tests/avatar.test.js`.
+  4. Se privesc matricele din `#/atelier/avatare`, apoi `npm test`, `npm run test:rules`, `npm run e2e`, `npm run e2e:cloud`.
+  5. La publicare, **`npm run deploy:rules` înaintea lui `npm run deploy`**.
+
+  Un id publicat nu se mai scoate și nu se redenumește.
 
 ## Capcane știute
 - `node --test` fără argumente ar prinde fișiere `test-*.js` — rulăm explicit `tests/**/*.test.js`.
@@ -178,3 +190,18 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   săptămânii au chei „temă:nivel” (`js/fulger/records.js`), datele de dinainte de teme se normalizează la fiecare citire
   (`normalizeFulger`), iar clasamentele sunt `fulger-<temă>-<nivel|total>-<perioadă>`; cele vechi (`fulger-<nivel>-…`) se mută cu
   scorul lor în tema veche, apoi se șterg. Clasamentele săptămânilor trecute nu se șterg: rezultatele sunt persistente.
+- Avatarul desenat (`core/avatar.js`, `visuals/avatar*.js`, `components/avatar-studio.js`):
+  - **Textul:** profilul și intrările din clasamente păstrează un singur text canonic, `animal[.culoare-…][.fundal-…][.cap-…][.fata-…][.gat-…]`,
+    fără valorile implicite. Un avatar vechi (`vulpe`) înseamnă aspectul implicit, iar același aspect dă mereu același text.
+  - **Siguranța:** textul se citește doar cu `parseAvatar` (tolerant) și se desenează doar cu `avatarSVG`; nu intră ca atare în HTML sau SVG.
+  - **Id-urile** nu se scot, pentru că `validProfile()` verifică avatarul la fiecare scriere a profilului, și la contoare.
+  - **Desenul** n-are id-uri și nici `clipPath` și se dimensionează prin container, ca orice `.v-svg`.
+  - **Salvarea:** o schimbare doar de avatar rescrie numai clasamentele afișate (`shownBoards`); o poreclă nouă le rescrie pe toate.
+  - **Antetul** cu contul se strânge în trepte, ca să încapă și o poreclă de 20 de caractere:
+    - sub 47,5rem pleacă subtitlul siglei și textul clasamentului;
+    - sub 42rem pleacă „Teste” și porecla, iar avatarul rămâne buton;
+    - sub 30rem se strâng spațiile.
+
+    E2E-ul contului verifică antetul la 1024, 768, 600, 390 și 360 px.
+  - **Atelierul:** miniatura unei variante e aspectul de acum cu doar acea alegere schimbată, iar culoarea naturală a animalului apare
+    doar ca „Naturală”.

@@ -130,6 +130,7 @@ HTML nu este permis (se afișează ca text).
 - **Geometrie:** `shape {name: triunghi|patrat|dreptunghi|cerc}` · `solid {name: cub|cuboid|cilindru|sfera|con}` · `rocket-shapes` · `triangle-fan {cuts}` · `square-grid {n}`.
 - **Natură și corp:** `organ {name: inima|plamanii|creierul|stomacul|rinichii}` · `plant` · `vegetable {name: morcov|ridiche|sfecla|salata|spanac|varza|rosie|ardei|castravete}` · `energy {name: soare|vant|apa|carbune|petrol|gaze}` · `sky-body {name: soare|pamant|luna}` · `farm-grid {cells, labels}`.
 - **Mascotă și decor:** `mascot {mood: vesela|ganditoare|sarbatoreste|incurajeaza}` · `level-icon {level}` · `scene {theme: mare|piata|spatiu|ferma|magazin|oras|scoala|stadion}` (o temă nouă cere și tokenii `[data-theme]` din `00-tokens.css`).
+- **Avatare:** `avatar {avatar: vulpe.culoare-albastru.cap-coroana}` (avatarul unui profil, textul canonic din `core/avatar.js`; animalele, culorile, fundalurile și accesoriile se văd la `#/atelier/avatare`).
 
 Toate apar cu exemple la `#/atelier/vizualuri`. **Desen nou:** `registerVisual('nume', { group, defaults, label, render, viewBox, demos })`
 într-un modul din `site/js/visuals/`; culori doar din variabile `--v-*` (vezi `css/00-tokens.css`), contur

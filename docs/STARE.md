@@ -1,15 +1,15 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-14 · **Versiune:** 0.11.1 (Jocuri fulger cu figuri, mai clare pe telefon: fără variante care diferă doar prin mărime, pașii robotului mari și numerotați)
+- **Data:** 2026-09-14 · **Versiune:** 0.12.0 (avatare desenate și personalizabile: 24 de animale, culori, fundaluri și accesorii, afișate mai mari peste tot)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
   rezultate (scor, calificativ, stele, confetti, autoevaluare, zona pentru părinți cu lista încercărilor și concepte pe subpunct,
   revizuire cu explicații, rezolvare, „Mai încerc o dată” repetabil), 13 tipuri de exerciții (cu traseu pe harta liniilor și
-  grafic cu bare construit; `mark` cu reguli de set pentru sarcini deschise), banca vizuală (56 de desene: și grafice, pictograme,
+  grafic cu bare construit; `mark` cu reguli de set pentru sarcini deschise), banca vizuală (57 de desene: și grafice, pictograme,
   bețișoare, felii, tabele, podium, hartă de linii, indicator, raft, bon, listă, tabel de poziție, cuburi, medalie, figuri cu umplere
-  și rotire, piese din căsuțe, desfășurări, rețeaua robotului; 8 peisaje animate), sunete discrete cu buton de oprire, atelier pentru
+  și rotire, piese din căsuțe, desfășurări, rețeaua robotului, avatarul desenat; 8 peisaje animate), sunete discrete cu buton de oprire, atelier pentru
   autori (și cu întrebările generate ale jocurilor), **Jocurile fulger** (`#/fulger`: teme desfășurate pe pagina jocului, fiecare cu trei
   niveluri: „Adunări și scăderi până la 100” și patru teme cu figuri, fără calcule, „Șiruri și intruși”, „Puzzle cu forme”, „Figuri și
   corpuri”, „Poziții și trasee”; numerele până la 1000, înmulțirea, împărțirea și ecuațiile simple apar „în curând”; runde de 2 minute,
@@ -18,19 +18,29 @@
   de recapitulare a clasei I** (T1–T4 v2)
   și **6 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc), toate
   exercițiile cu desen sau emoji, fără răspunsuri „la vedere”, cu probleme în mai mulți pași și sarcini deschise la avansat.
-  **Contul familiei** (v0.9.0, `docs/cloud.md`): părintele intră cu Google și face profiluri de copii (poreclă + avatar, cu acordul
-  părintelui); rezultatele profilului care joacă se sincronizează cu Cloud Firestore (coadă cu reîncercări, tranzacții, mutarea
-  rezultatelor fără cont); clasament doar pentru cei din cont (Jocuri fulger pe temă: pe nivel și totalul temei, săptămâna aceasta
-  și tot timpul; stelele de la teste); administrare (blocare, redenumire, ștergeri); pagina de confidențialitate. Fără configurarea Firebase, site-ul arată
-  ca în v0.8.1, plus legătura „Confidențialitate” din subsol.
-  Calitate: 83 de teste Node (plus validarea conținutului, a tabelului de acoperire, a contrastului, calibrarea stelelor din Jocurile
-  fulger pe fiecare temă și nivel și regulile independente ale celor 24 de tipuri cu figuri), 13 teste ale regulilor Firestore pe emulator,
-  E2E 1358 de verificări pe 3 ecrane + tastatură (plus telefon ținut orizontal și telefon mic) și E2E pentru cont pe emulatoare, cu 62 de
-  verificări (două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute, date vechi din cloud).
-- **Următorul pas:** v0.11.0 e publicat (E2E pe site-ul live 1358/1358); copilul joacă temele cu
-  figuri → `fastMs` și pragurile de stele din runde reale. Rămân: intrarea cu Google pe site (la activare, clasamentele vechi trec pe temă
-  și stelele de la teste revin; verificăm în Firestore), cererea la GitHub Support pentru commit-urile vechi.
-  Apoi secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul) și temele „în curând” din Jocuri fulger.
+  **Contul familiei** (v0.9.0, `docs/cloud.md`): părintele intră cu Google și face profiluri de copii (poreclă și avatar desenat, cu
+  acordul părintelui).
+  - Din v0.12.0, fiecare copil își îmbracă personajul în atelierul avatarului: 24 de animale, 11 culori plus cea naturală, 9 fundaluri,
+    8 accesorii pe cap, 4 pe față, 4 la gât, toate libere. Avatarul apare mare în profil, în antet, în clasament și în administrare.
+  - Rezultatele profilului care joacă se sincronizează cu Cloud Firestore (coadă cu reîncercări, tranzacții, mutarea rezultatelor fără
+    cont).
+  - Clasament doar pentru cei din cont: Jocuri fulger pe temă (pe nivel și totalul temei, săptămâna aceasta și tot timpul) și stelele
+    de la teste.
+  - Administrare (blocare, redenumire, ștergeri) și pagina de confidențialitate.
+  - Fără configurarea Firebase, site-ul arată ca în v0.8.1, plus legătura „Confidențialitate” din subsol.
+
+  **Calitate:**
+  - 96 de teste Node, plus validarea conținutului, a tabelului de acoperire și a contrastului, calibrarea stelelor din Jocurile fulger
+    pe fiecare temă și nivel, regulile independente ale celor 24 de tipuri cu figuri și avatarele (textul canonic, id-urile publicate,
+    fiecare combinație desenată);
+  - 16 teste ale regulilor Firestore pe emulator, inclusiv 41 de intrări într-o tranzacție;
+  - E2E cu 1397 de verificări pe 3 ecrane și tastatură, plus telefon ținut orizontal și telefon mic;
+  - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
+    date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
+- **Următorul pas:** v0.12.0 e publicat (întâi regulile, apoi site-ul).
+  - Copilul își face avatarul și joacă temele cu figuri; din rundele reale se reglează `fastMs` și pragurile de stele.
+  - Rămân: verificarea în Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
+  - Apoi: secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul) și temele „în curând” din Jocuri fulger.
 
 ## Etape
 - [x] M0 Schelet: git, `_surse/`, `.gitignore`, `package.json`, `CLAUDE.md`, docs (curriculum, cercetare)
@@ -107,6 +117,18 @@
   căsuță pe săgeată. Unde se oprește?” și drumul arătat pas cu pas după răspuns; dungi mai late, figuri numărate mai mari, piese și rețele
   pe două coloane pe telefoanele înalte; `txt()` scrie culorile ca stil (numerele de pe harta liniilor erau invizibile). npm test 83/83,
   E2E 1358/1358; publicat prin GitHub Actions (rularea 34815547669), E2E pe site-ul live 1358/1358, tag `v0.11.1`
+- [x] M27 (v0.12.0): avatare desenate și personalizabile.
+  - **Conținut:** 24 de animale (cele 12 de dinainte, plus vacă, porc, leu, tigru, panda, koala, pinguin, bufniță, broască, maimuță,
+    elefant, unicorn), 11 culori plus cea naturală, 9 fundaluri, 8 accesorii pe cap, 4 pe față, 4 la gât, toate libere.
+  - **Date și reguli:** textul canonic stă în câmpul `avatar`, deci avatarele vechi rămân valabile, fără migrare; regulile îl verifică
+    prin `validAvatar()`.
+  - **Interfață:**
+    - atelierul avatarului, în profil și în `#/atelier/avatare`, unde stau și matricele de revizuire;
+    - avatarul mare în profil, antet, clasament și administrare;
+    - antetul se strânge în trepte.
+  - **Salvare:** o schimbare doar de avatar rescrie numai clasamentele afișate.
+  - **Verificare:** npm test 96/96, reguli 16/16, E2E 1397/1397, E2E cont 82/82.
+  - **Publicare:** întâi regulile (ruleset `5bf8842e`), apoi site-ul prin GitHub Actions (rularea 34847423241).
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -215,6 +237,11 @@
 | 2026-09-14 | La figuri, mărimea nu mai deosebește variantele: șirurile și analogiile au doar figuri mari, iar în locul variantelor „mai mici” vin figuri goale sau alte forme; testul cere variante diferite și fără mărime | pe telefon, desenul întrebării și variantele au scări diferite, iar două variante care diferă doar prin mărime lăsau răspunsul neclar (observat de utilizator) |
 | 2026-09-14 | Pașii robotului: plăcuțe numerotate, cât o căsuță, cu săgeți pline, centrate sub rețea; cerința „Câte o căsuță pe săgeată. Unde se oprește?”; după răspuns, drumul pas cu pas și căsuța de sosire | săgețile erau prea mici, iar regula „câte o căsuță, pe rând” nu era intuitivă (observat de utilizator) |
 | 2026-09-14 | `txt()` scrie culorile, altele decât cerneala, ca stil pe element; indicatorul rutier și „?”-ul din grafic rămân închise la culoare | CSS-ul clasei `v-label` bătea atributul `fill`: numerele albe de pe harta liniilor erau invizibile, iar antetele tabelului de poziție ieșeau închise |
+| 2026-09-14 | Avatarele sunt personaje desenate (SVG, în stilul mascotei): 24 de animale, 11 culori plus cea naturală, 9 fundaluri, 8 accesorii pe cap, 4 pe față, 4 la gât, toate libere de la început | cererea utilizatorului (mai multe pictograme, culori, accesorii, avatare mai mari); emoji-urile nu se pot recolora și nu primesc accesorii |
+| 2026-09-14 | Aspectul stă în același câmp `avatar`, ca text canonic `animal[.culoare-…][.fundal-…][.cap-…][.fata-…][.gat-…]`, fără valorile implicite, cu id-uri citibile care nu se mai scot | fără câmpuri noi în profil și în clasamente; avatarele vechi rămân valabile fără migrare; regulile verifică avatarul la fiecare scriere a profilului |
+| 2026-09-14 | O schimbare doar de avatar rescrie clasamentele afișate (stelele, „tot timpul”, săptămâna curentă), nu și săptămânile trecute | copilul își schimbă des avatarul, săptămânile trecute nu se afișează, iar o salvare rămâne la cel mult 42 de scrieri |
+| 2026-09-14 | În atelierul avatarului, miniatura unei variante arată aspectul de acum cu doar acea alegere schimbată; „La întâmplare” păstrează animalul; săgețile mută între file și între variante | copilul vede ce alege înainte să aleagă |
+| 2026-09-14 | Desenul avatarului n-are id-uri și nici `clipPath`: umerii se opresc pe marginea discului | același avatar apare de mai multe ori pe aceeași pagină (clasament, antet, card) |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -236,6 +263,12 @@
   Numărul clasamentelor fiecărui profil se vede în `#/admin`.
 - GitHub mai arată după SHA 13 commit-uri vechi cu cheia veche (ștearsă, deci nefolositoare), până la curățarea cerută prin GitHub
   Support. O clonă făcută înainte de rescriere (13 septembrie) are istoria veche: `git fetch origin` și `git reset --hard origin/main`.
+- O filă deschisă înainte de v0.12.0 (sau servită din cache) arată, în locul desenului, textul unui avatar îmbrăcat, până la
+  reîncărcare; o salvare din ea trimite textul neschimbat, pe care regulile îl acceptă.
+- Săptămânile trecute păstrează avatarul de atunci (încă nu se afișează). La scor egal, ordinea din clasament se poate schimba după o
+  salvare de avatar, pentru că se schimbă `updatedAt`.
+- O salvare de avatar rescrie într-o tranzacție până la 41 de intrări, fiecare verificată cu `getAfter` pe profil: pe emulator trece,
+  dar documentația Firestore nu spune limpede dacă citirile repetate ale aceluiași document intră o singură dată în limita de accesări.
 
 ## Backlog
 - Scanările actuale acoperă manualul până la înmulțire; utilizatorul adaugă scanări noi după finalizarea etapei curente.
@@ -257,6 +290,8 @@
   (evidențieri pas cu pas în desen); ceas și termometru cu tragere directă; validator care leagă desenele cu date de răspunsuri.
 - Contul familiei, mai departe: App Check (reCAPTCHA) împotriva scorurilor trimise din afara site-ului; pagina cu istoricul clasamentelor pe
   săptămâni (intrările rămân din v0.10.2); schimbarea profilului care joacă cu un PIN al părintelui; Firebase Hosting cu login prin redirect, dacă popup-ul e blocat des.
+- Avatarul, mai departe: accesorii câștigate cu medalii sau cumpărate cu alune (împreună cu magazinul Cifruței), mai multe animale și
+  accesorii, fundaluri cu model, avatarul copilului pe ecranul de rezultate și în Jocurile fulger.
 - Publicare automată la push: `gh auth refresh -h github.com -s workflow` + mutarea workflow-ului în `.github/workflows/` + sursa Pages „GitHub Actions”.
 
 ## Jurnal de sesiuni
@@ -432,3 +467,25 @@
   pagina `#/admin` se deschide după reîncărcare, din butonul „Administrare” de pe `#/profil`.
   **De făcut data viitoare:** copilul joacă temele noi → `fastMs` și pragurile de stele; verificarea în Firestore a clasamentelor mutate
   pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
+- **2026-09-14 (avatare desenate, v0.12.0)**
+  - **Cererea utilizatorului:** mai multe pictograme de avatar, personalizare (culori, accesorii), avatare mai mari.
+  - **Deciziile lui:** personaje desenate (nu emoji cu decor); se aleg culoarea, fundalul și accesoriile pe cap, pe față și la gât; toate
+    libere.
+  - **Planul**, aprobat după explorarea codului și o revizuire a designului, s-a construit în 6 etape, cu commit la fiecare:
+    1. Modelul (`core/avatar.js`): textul canonic stă în câmpul `avatar`, fără valorile implicite, deci fără migrare. Regulile:
+       `validAvatar()` cu listele ca funcții, pe care testul le compară cu modelul; pe emulator trec 41 de intrări într-o tranzacție.
+    2. Desenul: disc, umeri, ancore pentru accesorii, fără id-uri și fără clipPath.
+    3. Cele 24 de animale, privite pe foi mari cu fiecare culoare și fiecare accesoriu. Foile au prins căștile care acopereau ochii
+       broaștei și țepii ariciului, prea rari.
+    4. Atelierul avatarului: o componentă comună pentru profil și `#/atelier/avatare`, cu miniaturi în care se schimbă doar alegerea,
+       săgeți și „La întâmplare”.
+    5. Integrarea: profilul (cu o ciornă care rezistă redesenării), antetul, clasamentul, administrarea. O schimbare doar de avatar
+       rescrie numai clasamentele afișate.
+    6. Documentația și publicarea.
+  - **Depanare:** E2E-ul contului a prins antetul care depășea ecranul la 600 px (depășea și înainte, cu emoji). Măsurat pe mai multe
+    lățimi și cu porecle de 20 de caractere, antetul se strânge acum în trepte: 47,5rem, 42rem, 30rem.
+  - **Rezultate:** npm test 96/96, reguli 16/16, E2E 1397/1397, E2E cont 82/82.
+  - **Publicat:** regulile Firestore (ruleset `5bf8842e`), apoi site-ul prin GitHub Actions (rularea 34847423241).
+
+  **De făcut data viitoare:** copilul își face avatarul și joacă temele cu figuri → `fastMs` și pragurile de stele; verificarea în
+  Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
