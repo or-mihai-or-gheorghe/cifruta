@@ -106,7 +106,7 @@
   doar figuri mari, iar `bareId` și testul ignoră mărimea); pașii robotului mari, numerotați și centrați sub rețea, cu cerința „Câte o
   căsuță pe săgeată. Unde se oprește?” și drumul arătat pas cu pas după răspuns; dungi mai late, figuri numărate mai mari, piese și rețele
   pe două coloane pe telefoanele înalte; `txt()` scrie culorile ca stil (numerele de pe harta liniilor erau invizibile). npm test 83/83,
-  E2E 1358/1358
+  E2E 1358/1358; publicat prin GitHub Actions (rularea 34815547669), E2E pe site-ul live 1358/1358, tag `v0.11.1`
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -424,5 +424,6 @@
   negre, iar căutarea a găsit aceeași cauză în desenele mai vechi (CSS-ul `v-label` bate atributul `fill`): numerele de pe harta
   liniilor erau invizibile; `txt()` scrie acum culoarea ca stil, iar testul desenelor refuză textul alb dat prin atribut. Pe telefonul
   ținut orizontal, figura robotului depășea ecranul cu 4 px (limita de 9rem, nu cea în vh) → 8,5rem. npm test 83/83, E2E 1358/1358.
+  Publicat prin GitHub Actions; E2E pe site-ul live 1358/1358; tag `v0.11.1`.
   **De făcut data viitoare:** copilul joacă temele noi → `fastMs` și pragurile de stele; intrarea cu Google pe site; cererea la GitHub
   Support pentru commit-urile vechi.
