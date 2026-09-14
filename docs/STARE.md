@@ -128,7 +128,8 @@
     - antetul se strânge în trepte.
   - **Salvare:** o schimbare doar de avatar rescrie numai clasamentele afișate.
   - **Verificare:** npm test 96/96, reguli 16/16, E2E 1397/1397, E2E cont 82/82.
-  - **Publicare:** întâi regulile (ruleset `5bf8842e`), apoi site-ul prin GitHub Actions (rularea 34847423241).
+  - **Publicare:** întâi regulile (ruleset `5bf8842e`), apoi site-ul prin GitHub Actions (rularea 34847423241); E2E pe site-ul live
+    1397/1397, tag `v0.12.0`.
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -485,7 +486,8 @@
   - **Depanare:** E2E-ul contului a prins antetul care depășea ecranul la 600 px (depășea și înainte, cu emoji). Măsurat pe mai multe
     lățimi și cu porecle de 20 de caractere, antetul se strânge acum în trepte: 47,5rem, 42rem, 30rem.
   - **Rezultate:** npm test 96/96, reguli 16/16, E2E 1397/1397, E2E cont 82/82.
-  - **Publicat:** regulile Firestore (ruleset `5bf8842e`), apoi site-ul prin GitHub Actions (rularea 34847423241).
+  - **Publicat:** regulile Firestore (ruleset `5bf8842e`), apoi site-ul prin GitHub Actions (rularea 34847423241); E2E pe site-ul live
+    1397/1397, tag `v0.12.0`.
 
   **De făcut data viitoare:** copilul își face avatarul și joacă temele cu figuri → `fastMs` și pragurile de stele; verificarea în
   Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
