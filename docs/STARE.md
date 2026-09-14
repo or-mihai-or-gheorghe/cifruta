@@ -1,20 +1,22 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-14 · **Versiune:** 0.12.0 (avatare desenate și personalizabile: 24 de animale, culori, fundaluri și accesorii, afișate mai mari peste tot)
+- **Data:** 2026-09-14 · **Versiune:** 0.13.0 (medaliile Jocurilor fulger pe niveluri: bronz la Ușor, argint la Intermediar, aur la Avansat, plus medalii în plus pentru aceeași medalie la mai multe teme)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
   rezultate (scor, calificativ, stele, confetti, autoevaluare, zona pentru părinți cu lista încercărilor și concepte pe subpunct,
   revizuire cu explicații, rezolvare, „Mai încerc o dată” repetabil), 13 tipuri de exerciții (cu traseu pe harta liniilor și
-  grafic cu bare construit; `mark` cu reguli de set pentru sarcini deschise), banca vizuală (57 de desene: și grafice, pictograme,
+  grafic cu bare construit; `mark` cu reguli de set pentru sarcini deschise), banca vizuală (58 de desene: și grafice, pictograme,
   bețișoare, felii, tabele, podium, hartă de linii, indicator, raft, bon, listă, tabel de poziție, cuburi, medalie, figuri cu umplere
-  și rotire, piese din căsuțe, desfășurări, rețeaua robotului, avatarul desenat; 8 peisaje animate), sunete discrete cu buton de oprire, atelier pentru
+  și rotire, piese din căsuțe, desfășurări, rețeaua robotului, avatarul desenat, medaliile și cupele jocurilor; 8 peisaje animate), sunete discrete cu buton de oprire, atelier pentru
   autori (și cu întrebările generate ale jocurilor), **Jocurile fulger** (`#/fulger`: teme desfășurate pe pagina jocului, fiecare cu trei
   niveluri: „Adunări și scăderi până la 100” și patru teme cu figuri, fără calcule, „Șiruri și intruși”, „Puzzle cu forme”, „Figuri și
   corpuri”, „Poziții și trasee”; numerele până la 1000, înmulțirea, împărțirea și ecuațiile simple apar „în curând”; runde de 2 minute,
   40 de tipuri de întrebări generate (16 cu calcule, 24 cu figuri), fiecare cu conceptele ei („Ce exersăm”), alune cu bonus de viteză și
-  de serie, Turbo, pistă spre stele și record, 6 medalii, „Greșelile tale” și ținta următoarei stele la rezultate). Conținut: **4 teste
+  de serie, Turbo, pistă spre stele și record, medalii pe niveluri, „Greșelile tale” și ținta următoarei stele la rezultate: 3 stele la
+  un nivel al unei teme aduc medalia de bronz, argint sau aur, iar aceeași medalie la 2, 3 și 5 teme aduce „dublul”, colecția și cupa;
+  acum 24 de medalii, pe raftul de pe pagina jocului, pe cardurile nivelurilor și pe prima pagină). Conținut: **4 teste
   de recapitulare a clasei I** (T1–T4 v2)
   și **6 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc), toate
   exercițiile cu desen sau emoji, fără răspunsuri „la vedere”, cu probleme în mai mulți pași și sarcini deschise la avansat.
@@ -30,15 +32,15 @@
   - Fără configurarea Firebase, site-ul arată ca în v0.8.1, plus legătura „Confidențialitate” din subsol.
 
   **Calitate:**
-  - 96 de teste Node, plus validarea conținutului, a tabelului de acoperire și a contrastului, calibrarea stelelor din Jocurile fulger
-    pe fiecare temă și nivel, regulile independente ale celor 24 de tipuri cu figuri și avatarele (textul canonic, id-urile publicate,
-    fiecare combinație desenată);
+  - 100 de teste Node, plus validarea conținutului, a tabelului de acoperire și a contrastului, calibrarea stelelor din Jocurile fulger
+    pe fiecare temă și nivel, regulile independente ale celor 24 de tipuri cu figuri, avatarele (textul canonic, id-urile publicate,
+    fiecare combinație desenată) și medaliile (catalogul, pragurile, medaliile unei runde, datele vechi);
   - 16 teste ale regulilor Firestore pe emulator, inclusiv 41 de intrări într-o tranzacție;
-  - E2E cu 1397 de verificări pe 3 ecrane și tastatură, plus telefon ținut orizontal și telefon mic;
+  - E2E cu 1415 verificări pe 3 ecrane și tastatură, plus telefon ținut orizontal și telefon mic;
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.12.0 e publicat (întâi regulile, apoi site-ul).
-  - Copilul își face avatarul și joacă temele cu figuri; din rundele reale se reglează `fastMs` și pragurile de stele.
+- **Următorul pas:** publicarea v0.13.0 (regulile Firestore nu se schimbă), apoi E2E pe site-ul live.
+  - Copilul joacă temele și strânge medalii; din rundele reale se reglează `fastMs` și pragurile de stele.
   - Rămân: verificarea în Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
   - Apoi: secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul) și temele „în curând” din Jocuri fulger.
 
@@ -130,6 +132,15 @@
   - **Verificare:** npm test 96/96, reguli 16/16, E2E 1397/1397, E2E cont 82/82.
   - **Publicare:** întâi regulile (ruleset `5bf8842e`), apoi site-ul prin GitHub Actions (rularea 34847423241); E2E pe site-ul live
     1397/1397, tag `v0.12.0`.
+- [x] M28 (v0.13.0): medaliile Jocurilor fulger pe niveluri.
+  - **Regula:** 3 stele la un nivel al unei teme aduc medalia nivelului (bronz la Ușor, argint la Intermediar, aur la Avansat); aceeași
+    medalie la 2, 3 și 5 teme aduce medaliile în plus (de exemplu „Bronz dublu”, „Colecția de bronz”, „Cupa de bronz”). Azi sunt 24;
+    cele 6 medalii comune nu se mai arată, iar datele lor rămân.
+  - **Model:** `js/fulger/medals.js`, pur: catalogul, medaliile câștigate (deduse din recorduri și unite cu cele salvate) și medaliile
+    unei runde (se anunță cele noi, se salvează toate). Stocarea, îmbinarea din cloud și regulile Firestore nu se schimbă.
+  - **Desen:** vizualul `award` (medalia cu emoji-ul temei, două medalii, trei pe o bară, cupa cu numărul temelor) și tokenii de metal.
+  - **Interfață:** raftul pe metale, medalia de pe cardul nivelului, numărul medaliilor pe prima pagină și medaliile noi la rezultate.
+  - **Verificare:** npm test 100/100, reguli 16/16, E2E 1415/1415, E2E cont 82/82.
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -243,6 +254,9 @@
 | 2026-09-14 | O schimbare doar de avatar rescrie clasamentele afișate (stelele, „tot timpul”, săptămâna curentă), nu și săptămânile trecute | copilul își schimbă des avatarul, săptămânile trecute nu se afișează, iar o salvare rămâne la cel mult 42 de scrieri |
 | 2026-09-14 | În atelierul avatarului, miniatura unei variante arată aspectul de acum cu doar acea alegere schimbată; „La întâmplare” păstrează animalul; săgețile mută între file și între variante | copilul vede ce alege înainte să aleagă |
 | 2026-09-14 | Desenul avatarului n-are id-uri și nici `clipPath`: umerii se opresc pe marginea discului | același avatar apare de mai multe ori pe aceeași pagină (clasament, antet, card) |
+| 2026-09-14 | Medaliile Jocurilor fulger sunt pe niveluri: 3 stele la un nivel al unei teme aduc medalia nivelului (bronz la Ușor, argint la Intermediar, aur la Avansat), iar aceeași medalie la 2, 3 și 5 teme aduce medaliile în plus („Bronz dublu”, „Colecția de bronz”, „Cupa de bronz”); doar în Jocurile fulger; cele 6 medalii comune nu se mai arată, iar datele lor rămân și se ignoră | cererea utilizatorului („bronz ușor, argint intermediar, aur avansat”, medalii extra pentru aceeași medalie la teme diferite) și răspunsurile lui la cele 4 întrebări; înlocuiește decizia din 2026-09-13 „Medaliile rămân comune” |
+| 2026-09-14 | Medaliile temelor se deduc din recorduri și se unesc cu cele salvate; la finalul rundei se anunță doar cele noi, dar se salvează toate cele câștigate, ca să urce în cloud cu runda; la încărcarea paginii nu se scrie nimic | stelele nu se salvează; recordurile de dinainte aduc medaliile imediat, fără migrare și fără reguli Firestore noi (`medals` rămâne o hartă) |
+| 2026-09-14 | Id-urile medaliilor sunt permanente (`<metal>:<temă>`, `<metal>-<treaptă>`), iar legătura metal–nivel e fixă; o temă jucabilă nouă aduce singură cele 3 medalii ale ei, iar catalogul crește cu ea | id-urile stau în `cifruta:fulger` și în `state/fulger` |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -270,6 +284,10 @@
   salvare de avatar, pentru că se schimbă `updatedAt`.
 - O salvare de avatar rescrie într-o tranzacție până la 41 de intrări, fiecare verificată cu `getAfter` pe profil: pe emulator trece,
   dar documentația Firestore nu spune limpede dacă citirile repetate ale aceluiași document intră o singură dată în limita de accesări.
+- Medaliile pentru recordurile de dinainte de v0.13.0 apar pe raft fără sărbătorire (nu sunt „noi”) și se salvează la prima rundă
+  terminată, din orice temă. Un prag de stele ridicat mai târziu ascunde o medalie doar dacă era dedusă și încă nesalvată.
+- Cele 6 medalii vechi rămân în `cifruta:fulger` și în `state/fulger`, ignorate; ștergerea rundelor din „Pentru părinți” șterge și
+  medaliile. Raftul are 24 de medalii, deci pe telefon pagina jocului se lungește (grila are 3 coloane).
 
 ## Backlog
 - Scanările actuale acoperă manualul până la înmulțire; utilizatorul adaugă scanări noi după finalizarea etapei curente.
@@ -491,3 +509,21 @@
 
   **De făcut data viitoare:** copilul își face avatarul și joacă temele cu figuri → `fastMs` și pragurile de stele; verificarea în
   Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
+- **2026-09-14 (medalii pe niveluri, v0.13.0)**
+  - **Cererea utilizatorului:** o schemă de medalii mai detaliată, pe niveluri de dificultate (bronz la Ușor, argint la Intermediar, aur
+    la Avansat), cu medalii în plus când aceeași medalie se strânge la teme diferite.
+  - **Deciziile lui:** medalia vine cu 3 stele la nivel; medaliile în plus la 2, 3 și 5 teme; doar în Jocurile fulger; cele 6 medalii
+    vechi se înlocuiesc.
+  - **Planul**, aprobat, s-a construit în 4 etape, cu commit la fiecare:
+    1. Desenul `award` și tokenii de metal, cu perechile de contrast pentru text.
+    2. Modelul (`js/fulger/medals.js`) și legarea lui de raft și de rezultate; `medalsFor` a ieșit din motor.
+    3. Interfața: panourile pe metale, medalia de pe cardul nivelului, numărul de pe prima pagină, medaliile noi la rezultate, telefonul.
+    4. Documentația, versiunea și publicarea.
+  - **Depanare:** pe laptop, capturile au arătat medaliile unui metal pe rânduri inegale (4 + 1 și 2 + 1); pe ecran lat, grupurile stau
+    acum pe un singur rând, cu o coloană pentru fiecare medalie. Captura unui element mai înalt decât ecranul ieșea cu antetul lipit peste
+    el, iar `run.shot` îl lasă acum în pagină pe durata capturii.
+  - **Rezultate:** npm test 100/100, reguli 16/16 (cu id-urile noi în `medals`), E2E 1415/1415, E2E cont 82/82 (medaliile trec prin
+    cloud fără schimbări).
+
+  **De făcut data viitoare:** copilul joacă și strânge medalii → `fastMs` și pragurile de stele; verificarea în Firestore a clasamentelor
+  mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.

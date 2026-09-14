@@ -37,7 +37,8 @@ site/                      ← publicat
                            avatar (desenul și accesoriile) · avatar-animals (cele 24 de animale) · avatar-parts (blănuri, ochi, umeri)
   js/fulger/               Jocuri fulger (jocuri pe viteză, pe teme, #/fulger): kinds (calcule) și kinds-forme (figuri), generate
                            cu sămânță, cu concepte · rand · art (desenul și numele unei variante) · engine (temele, runda și
-                           punctajul, pur) · records (chei „temă:nivel”, datele vechi) · view (arena) · effects (particule, bannere);
+                           punctajul, pur) · records (chei „temă:nivel”, datele vechi) · medals (medaliile: catalogul, cele câștigate, cele
+                           ale unei runde; pur) · view (arena) · effects (particule, bannere);
                            pagina e pages/fulger.js
   data/catalog.js          secțiuni → grupuri → teste · concepts.js (ID-uri de concepte) · scoring.js · demo.js · fulger.js (jocul)
   data/tests/<grup>/tN-nume.js   testele (NU le numi test-*.js)
@@ -90,7 +91,9 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   `mix`, `stars` (o temă `soon: true` n-are niveluri și apare doar ca „în curând”). Id-ul intră și în `fulgerTopics()` din
   `firestore.rules` (un test le compară). Verificare: `npm test`, `npm run test:rules`, `npm run e2e`, `npm run e2e:cloud`; la publicare
   **`npm run deploy:rules` înaintea lui `npm run deploy`**. Id-ul unei teme publicate nu se mai schimbă: e în cheile recordurilor
-  („temă:nivel”) și în id-urile clasamentelor.
+  („temă:nivel”) și în id-urile clasamentelor. O temă jucabilă nouă aduce singură cele 3 medalii ale ei (bronz, argint, aur, cu
+  id-urile `<metal>:<temă>`); pragurile medaliilor în plus (`medals.extras[].count`) rămân cel mult numărul temelor jucabile (testul
+  din `tests/fulger-medals.test.js` verifică).
 - **Animal sau accesoriu nou pentru avatar:**
   1. Id permanent (`[a-z]+`, fără `fara` și `natural`), eticheta și genul în listele din `js/core/avatar.js`. La un animal, `natural`
      e culoarea lui din listă sau null; cu null, desenul are paleta proprie (`fur`).
@@ -177,6 +180,21 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   robotului stau sub rețea ca plăcuțe numerotate, cât o căsuță, iar desenul rezolvat (`path`, `mark`) arată drumul pas cu pas. Variantele
   cu piese și rețele (`fg-answers--detailed`) trec pe două coloane pe telefoanele înalte. În SVG, clasa `v-label` își ia culoarea din CSS,
   care bate atributul `fill`: `txt()` scrie celelalte culori ca stil, iar `tests/visuals.test.js` refuză textul alb dat prin atribut.
+- Medaliile Jocurilor fulger (`js/fulger/medals.js`, configurarea `medals` din `data/fulger.js`, desenul `award`):
+  - **Regula:** 3 stele la un nivel al unei teme aduc medalia metalului nivelului (bronz la Ușor, argint la Intermediar, aur la Avansat);
+    aceeași medalie la 2, 3 și 5 teme aduce medaliile în plus (dublu, colecția, cupa).
+  - **Deducerea:** stelele nu se salvează, deci medaliile temelor se deduc din recorduri (`medalsWon`) și se unesc cu cele salvate. Un
+    prag de stele ridicat ascunde doar o medalie dedusă și încă nesalvată.
+  - **Salvarea:** la finalul rundei, `medalsAfterRound` anunță doar medaliile noi, dar le salvează pe toate cele câștigate, ca să urce în
+    cloud cu runda. La încărcarea paginii nu se scrie nimic.
+  - **Id-urile** sunt permanente (`<metal>:<temă>`, `<metal>-<treaptă>`), iar legătura metal–nivel e fixă. Medaliile de dinainte de
+    v0.13.0 rămân în date, dar nu se mai arată.
+  - **Interfața:** raftul (`fg-medals`: un panou pe metal, cu medaliile temelor și cele în plus) stă după legătura spre clasament; cardul
+    nivelului arată medalia lui (`fg-level-medal-<nivel>`), cardul de pe prima pagină numărul lor (`fulger-medals`), iar rezultatele doar
+    medaliile noi (`fg-new-medals`). Câștigul nu se vede doar prin culoare (marginea plină și bifa), iar culorile vin din `[data-metal]`
+    (`--metal`, `--metal-dark`, `--metal-bg`, `--metal-ink`).
+  - **E2E:** testid-urile medaliilor conțin `:`, deci se caută doar cu `get_by_test_id`, iar `is-won` se verifică în lista claselor.
+    `run.shot(page, nume, selector)` capturează doar un element (raftul, de pe o pagină lungă).
 - Contul familiei (`js/cloud/`, paginile `profil`, `clasament`, `admin`, `confidentialitate`; detalii în `docs/cloud.md`): `core/storage.js`
   are un scop (`setScope`): fără cont, cheile de până acum; pentru un profil, `cifruta:p:<uid>:<pid>:…`. Orice scriere nouă în storage
   se anunță cu `emit`, ca `cloud/sync.js` să o urce prin `onWrite`. Regulile Firestore sunt singura barieră: un câmp nou în încercări,
