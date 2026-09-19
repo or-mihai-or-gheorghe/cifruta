@@ -15,6 +15,7 @@
 import { calc, relation } from '../core/expr.js';
 import { trecere } from '../core/rules.js';
 import { CHART_KINDS } from './kinds-grafice.js';
+import { MAP_KINDS } from './kinds-grafuri.js';
 import { SHAPE_KINDS } from './kinds-forme.js';
 import { distinct, int, pickOne, shuffle, withChoices } from './rand.js';
 
@@ -322,6 +323,7 @@ export const KINDS = {
   },
   ...SHAPE_KINDS,
   ...CHART_KINDS,
+  ...MAP_KINDS,
 };
 
 /** Tipurile cu desen: toate cele cu figuri și comparările sau ordonările făcute pe un grafic (`drawn`). */

@@ -20,6 +20,7 @@ import { EMOJI } from '../site/js/visuals/emoji.js';
 import { visualErrors, visualSVG } from '../site/js/visuals/index.js';
 import { SHAPE_RULES } from './fulger-forme.rules.js';
 import { CHART_RULES } from './fulger-grafice.rules.js';
+import { MAP_RULES } from './fulger-grafuri.rules.js';
 
 const SEEDS = 500;
 const terms = (text) => text.split(/ [+−] /).map(Number);
@@ -60,6 +61,7 @@ const RULES = {
   'sort-4-dir': ({ numbers }) => numbers.length === 4 && numbers.every((x) => inRange(x, 0, 100)),
   ...SHAPE_RULES, // tipurile cu figuri: regulile sunt în tests/fulger-forme.rules.js
   ...CHART_RULES, // tipurile cu grafice: tests/fulger-grafice.rules.js
+  ...MAP_RULES, // hărțile, rețelele și arborii: tests/fulger-grafuri.rules.js
 };
 
 /** Plăcile unei ordonări: numerele (la calcule) sau id-urile plăcuțelor desenate (la grafice). */

@@ -29,6 +29,7 @@ const hops = (ids) => ids.slice(1).map((id, i) => [ids[i], id]);
 // ——— Harta liniilor ———
 // stops: [{ id, emoji, x, y }] · lines: [{ id, n, stops }] · minutes: [{ a, b, n, at? }] · path: [id] (drumul marcat)
 // routes: [{ id: 'A' | 'B', path }] (două drumuri de comparat) · mark: [id] (stații evidențiate) · h: înălțimea (implicit 220)
+// plain: drumuri, nu linii de transport (gri, fără numere la capete), pentru hărțile unde contează doar minutele
 function metroErrors(p) {
   const stops = arr(p.stops);
   const ids = byIdOf(stops);
@@ -60,7 +61,9 @@ function metroErrors(p) {
 export function metroLabel(p) {
   const ids = byIdOf(p.stops);
   const name = (id) => nameOf(ids.get(id));
-  const parts = [`hartă: ${arr(p.lines).map((l) => `linia ${l.n}: ${arr(l.stops).map(name).join(', ')}`).join('; ')}`];
+  const parts = p.plain
+    ? [`hartă cu drumuri: ${arr(p.lines).map((l) => arr(l.stops).map(name).join(', ')).join('; ')}`]
+    : [`hartă: ${arr(p.lines).map((l) => `linia ${l.n}: ${arr(l.stops).map(name).join(', ')}`).join('; ')}`];
   if (arr(p.minutes).length) parts.push(`minute: ${p.minutes.map((m) => `${name(m.a)}–${name(m.b)} ${m.n}`).join(', ')}`);
   if (arr(p.path).length) parts.push(`drumul marcat: ${p.path.map(name).join(', ')}`);
   for (const r of arr(p.routes)) parts.push(`drumul ${r.id}: ${arr(r.path).map(name).join(', ')}`);
@@ -88,26 +91,28 @@ registerVisual('metro', {
       out += `<polyline points="${poly(r.path)}" fill="none" stroke="${r.id === 'B' ? C.purpleLight : C.yellow}" stroke-width="20" stroke-linejoin="round" stroke-linecap="round"${r.id === 'B' ? ' stroke-dasharray="2 26"' : ''} opacity=".9"/>`;
     }
     for (const l of arr(p.lines)) {
-      out += `<polyline points="${poly(l.stops)}" fill="none" stroke="${lineColor(l.n)}" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"${dashAttr(l.n)}/>`;
+      out += p.plain
+        ? `<polyline points="${poly(l.stops)}" fill="none" stroke="${C.coalLight}" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>`
+        : `<polyline points="${poly(l.stops)}" fill="none" stroke="${lineColor(l.n)}" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"${dashAttr(l.n)}/>`;
     }
     for (const m of arr(p.minutes)) {
       const [a, b] = [pt(m.a), pt(m.b)];
       const t = clamp(Number(m.at ?? 0.5), 0.2, 0.8);
-      out += pill(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, m.n, SIZE.label);
+      out += pill(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, m.n, SIZE.num);
     }
     for (const s of stops) {
       if ((onLines.get(s.id) ?? 0) > 1) out += `<circle cx="${s.x}" cy="${s.y}" r="22" fill="${C.white}" ${st(2.5)}/>`;
       out += `<circle cx="${s.x}" cy="${s.y}" r="17" fill="${C.white}" ${st(2.5)}/>` + emojiImage(s.emoji, s.x - 13, s.y - 13, 26);
       if (arr(p.mark).includes(s.id)) out += `<circle cx="${s.x}" cy="${s.y}" r="26" fill="none" ${st(3.5)}/>`;
     }
-    // numărul liniei la ambele capete, în direcția liniei
-    for (const l of arr(p.lines)) {
+    // numărul liniei la ambele capete, în direcția liniei (drumurile simple n-au numere)
+    for (const l of p.plain ? [] : arr(p.lines)) {
       const ss = arr(l.stops).map(pt);
       for (const [end, prev] of [[ss[0], ss[1]], [ss.at(-1), ss.at(-2)]]) {
         const [ux, uy] = unit(end.x - prev.x, end.y - prev.y);
         const bx = r1(clamp(end.x + ux * 32, 15, 305));
         const by = r1(clamp(end.y + uy * 32, 15, h - 15));
-        out += `<circle cx="${bx}" cy="${by}" r="14" fill="${C.white}" stroke="${lineColor(l.n)}" stroke-width="4"/>` + txt(bx, by, l.n, { size: SIZE.label });
+        out += `<circle cx="${bx}" cy="${by}" r="14" fill="${C.white}" stroke="${lineColor(l.n)}" stroke-width="4"/>` + txt(bx, by, l.n, { size: SIZE.num });
       }
     }
     for (const r of arr(p.routes)) {
@@ -115,10 +120,9 @@ registerVisual('metro', {
       const i = Math.max(0, Math.floor((path.length - 2) / 2));
       const [a, b] = [pt(path[i]), pt(path[i + 1])];
       const [ux, uy] = unit(b.x - a.x, b.y - a.y);
-      const [mx, my] = [r1((a.x + b.x) / 2 - uy * 24), r1((a.y + b.y) / 2 + ux * 24)];
-      out += `<circle cx="${mx}" cy="${my}" r="14" fill="${C.ink}"/>` + txt(mx, my, r.id, { size: SIZE.label, fill: C.white });
+      const [mx, my] = [r1((a.x + b.x) / 2 - uy * 30), r1((a.y + b.y) / 2 + ux * 30)];
+      out += `<circle cx="${mx}" cy="${my}" r="15" fill="${C.ink}"/>` + txt(mx, my, r.id, { size: SIZE.num, fill: C.white });
     }
-    if (arr(p.minutes).length) out += emojiImage('ceas', 8, 7, SIZE.small) + txt(38, 19, 'minute', { size: SIZE.label, anchor: 'start' });
     return out;
   },
   demos: [
@@ -295,7 +299,8 @@ registerVisual('bracket', {
 // ——— Arborele: sume, alegeri, clasificare (da / nu), crengile veveriței ———
 // nodes: [{ id, parent?, edge? (eticheta ramurii de la părinte), value? | emoji? | text? | slot? }] · grow: 'down' | 'up'
 // style: 'plain' | 'branch' (crengi maro, cu veverița la trunchi) · mark: [id] (drumul evidențiat: nodurile și ramurile spre ele)
-const LEVEL = 70; // loc între două căsuțe pentru eticheta ramurii (da / nu, alunele)
+// loc între două niveluri pentru eticheta ramurii (da / nu, alunele); crengile veveriței n-au căsuțe, deci le ajunge mai puțin
+const levelOf = (p) => (p.style === 'branch' ? 60 : 70);
 export function treeLayout(nodes) {
   const list = arr(nodes);
   const kids = new Map(list.map((n) => [n.id, []]));
@@ -324,7 +329,7 @@ export function treeLayout(nodes) {
   return { root, kids, depth, x, leaves, levels: Math.max(0, ...depth.values()) + 1 };
 }
 
-const treeHeight = (p) => 60 + LEVEL * (treeLayout(p.nodes).levels - 1);
+const treeHeight = (p) => 60 + levelOf(p) * (treeLayout(p.nodes).levels - 1);
 
 registerVisual('tree', {
   group: GROUP,
@@ -351,7 +356,7 @@ registerVisual('tree', {
   label: (p) => {
     const list = arr(p.nodes);
     const ids = byIdOf(list);
-    const say = (n) => (n.slot ? 'semnul întrebării' : has(n.value) ? String(n.value) : has(n.text) ? n.text : n.emoji ? nameOf({ emoji: n.emoji }) : 'ramificație');
+    const say = (n) => (n.slot ? 'semnul întrebării' : n.blank ? 'căsuță goală' : has(n.value) ? String(n.value) : has(n.text) ? n.text : n.emoji ? nameOf({ emoji: n.emoji }) : 'ramificație');
     const kind = p.style === 'branch' ? 'crengi' : 'arbore';
     return `${kind}: ${list.filter((n) => has(n.parent)).map((n) => `${say(ids.get(n.parent))} → ${has(n.edge) ? `(${n.edge}) ` : ''}${say(n)}`).join('; ')}`;
   },
@@ -359,9 +364,10 @@ registerVisual('tree', {
     const list = arr(p.nodes);
     const ids = byIdOf(list);
     const { depth, x, levels } = treeLayout(list);
-    const h = 60 + LEVEL * (levels - 1);
+    const level = levelOf(p);
+    const h = 60 + level * (levels - 1);
     const branch = p.style === 'branch';
-    const y = (id) => (p.grow === 'up' ? h - 30 - depth.get(id) * LEVEL : 30 + depth.get(id) * LEVEL);
+    const y = (id) => (p.grow === 'up' ? h - 30 - depth.get(id) * level : 30 + depth.get(id) * level);
     const marked = new Set(arr(p.mark));
     let out = '';
     // ramurile: întâi banda drumului marcat, apoi ramura, apoi eticheta ei
@@ -375,13 +381,15 @@ registerVisual('tree', {
     }
     for (const n of list) {
       if (!has(n.parent) || !has(n.edge)) continue;
-      out += pill((x.get(n.parent) + x.get(n.id)) / 2, (y(n.parent) + y(n.id)) / 2, n.edge, SIZE.label);
+      out += pill((x.get(n.parent) + x.get(n.id)) / 2, (y(n.parent) + y(n.id)) / 2, n.edge, typeof n.edge === 'number' ? SIZE.num : SIZE.label);
     }
     for (const n of list) {
       const [cx, cy] = [r1(x.get(n.id)), y(n.id)];
       const ring = marked.has(n.id);
       if (n.slot) {
         out += `<rect x="${cx - 24}" y="${cy - 18}" width="48" height="36" rx="8" fill="${C.white}" stroke="${C.ink}" stroke-width="2.5" stroke-dasharray="6 4"/>` + txt(cx, cy, '?', { size: SIZE.big });
+      } else if (n.blank) {
+        out += `<rect x="${cx - 24}" y="${cy - 18}" width="48" height="36" rx="8" fill="${C.grayLight}" stroke="${C.grayDark}" stroke-width="2" stroke-dasharray="4 4"/>`;
       } else if (has(n.value)) {
         const w = Math.max(48, r1(18 + textWidth(n.value, SIZE.num)));
         out += `<rect x="${r1(cx - w / 2)}" y="${cy - 18}" width="${w}" height="36" rx="8" fill="${C.white}" ${st(ring ? 3.5 : 2.5)}/>` + txt(cx, cy, n.value, { size: SIZE.num });
@@ -395,7 +403,8 @@ registerVisual('tree', {
       }
     }
     // legenda alunelor stă jos, în colțul liber de lângă trunchi (sus sunt capetele crengilor)
-    if (branch) out += emojiImage('castana', 8, h - 30, SIZE.small) + txt(38, h - 18, 'alune', { size: SIZE.label, anchor: 'start' });
+    // (text de numere: crengile cu 4 niveluri ies mai mici pe ecran, iar legenda trebuie să se citească la fel)
+    if (branch) out += emojiImage('castana', 8, h - 30, SIZE.small) + txt(38, h - 18, 'alune', { size: SIZE.num, anchor: 'start' });
     return out;
   },
   demos: [

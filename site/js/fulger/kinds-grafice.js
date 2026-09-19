@@ -1,4 +1,4 @@
-// Jocuri fulger: tipurile tema „Grafice și tabele”. Fiecare întrebare are un desen de date (visuals/grafice.js), un răspuns calculat
+// Jocuri fulger: tipurile temei „Grafice și tabele”. Fiecare întrebare are un desen de date (visuals/grafice.js), un răspuns calculat
 // din date și un `ask` declarativ (ce se întreabă, despre ce), din care regulile din tests/fulger-grafice.rules.js găsesc singure
 // răspunsul. Numerele merg până la 20 la tipurile ușoare și până la 100 la celelalte; valorile stau pe liniile grilei (cu jumătăți doar
 // la `bare-scara`), iar maximul și minimul sunt unice când se întreabă de ele. Comparările și ordonările au desenul deasupra

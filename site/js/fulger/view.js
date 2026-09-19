@@ -344,7 +344,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     }
     // bara fulgerului apare doar când răspunsul ar continua o serie (atunci contează viteza)
     boltBar = round.streak >= 1 ? h('span', { class: 'fg-bolt__bar' }) : null;
-    bolt = boltBar ? h('div', { class: 'fg-bolt', 'aria-hidden': 'true', 'data-testid': 'fg-bolt' }, h('span', { html: emojiHTML('fulger') }), h('span', { class: 'fg-bolt__rail' }, boltBar)) : null;
+    bolt = boltBar ? h('div', { class: 'fg-bolt', 'aria-hidden': 'true', 'data-testid': 'fg-bolt' }, h('span', { class: 'fg-bolt__icon', html: emojiHTML('fulger') }), h('span', { class: 'fg-bolt__rail' }, boltBar)) : null;
     card.className = 'fg-card';
     card.replaceChildren(...[body, bolt].filter(Boolean));
     if (!reduced) pop(card, 'is-enter');

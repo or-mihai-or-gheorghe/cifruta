@@ -7,7 +7,7 @@ const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const sum = (list) => list.reduce((s, x) => s + x, 0);
 const escape = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 /** Cuvântul apare întreg în text (fără să fie bucată din alt cuvânt). */
-const says = (text, word) => new RegExp(`(^|[^\\p{L}])${escape(word)}([^\\p{L}]|$)`, 'u').test(text);
+export const says = (text, word) => new RegExp(`(^|[^\\p{L}])${escape(word)}([^\\p{L}]|$)`, 'u').test(text);
 const REL = (a, b) => (a < b ? '<' : a > b ? '>' : '=');
 
 // numele articulate ale preferatelor (cerința spune „câinele”, desenul are „câine”)
@@ -28,7 +28,7 @@ function mentionsOnly(text, cats, asked) {
 }
 
 /** Variantele numerice: patru numere diferite, crescătoare; răspunsul e `expected` și apare o singură dată. */
-function numberAnswer(q, expected) {
+export function numberAnswer(q, expected) {
   const nums = optionList(q).map((o) => Number(o.text));
   return (
     Number.isInteger(expected) &&
@@ -39,13 +39,13 @@ function numberAnswer(q, expected) {
 }
 
 /** Exact o variantă îndeplinește condiția, iar ea e răspunsul. */
-function pickAnswer(q, test) {
+export function pickAnswer(q, test) {
   const good = q.choices.filter((id) => test(q.options[id]));
   return good.length === 1 && good[0] === q.answer;
 }
 
 /** Desenul rezolvat e desenul întrebării cu marcaje (și, la bara ascunsă, fără ascundere). */
-function solvedOk(q, drop = []) {
+export function solvedOk(q, drop = []) {
   if (!q.solved || q.solved.v !== q.figure.v || !q.solved.mark) return false;
   const keys = new Set([...Object.keys(q.figure), ...Object.keys(q.solved)]);
   return [...keys].every((k) => k === 'mark' || drop.includes(k) || same(q.figure[k], q.solved[k]));

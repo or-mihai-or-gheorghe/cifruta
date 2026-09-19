@@ -345,6 +345,10 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
    la comparările și ordonările desenate, cardul n-are rând de cerință, iar operanzii stau în rândul de răspuns (.fg-strip) */
 .fg-fig--chart { --fig-h: clamp(5.5rem, 26vh, 15rem); }
 .fg-q--drawn .fg-fig { --fig-h: clamp(5.5rem, 24vh, 15rem); }
+/* pe ecranele înalte (laptop, tabletă, telefonul ținut vertical) e loc pentru mai mult: arborii cu 4 niveluri rămân lizibili */
+@media (min-height: 44rem) {
+  .fg-fig--chart { --fig-h: clamp(5.5rem, 30vh, 15rem); }
+}
 .fg-prompt--long { font-size: clamp(1rem, 0.9rem + 0.6vw, 1.35rem); text-wrap: balance; }
 .fg-prompt__emoji,
 .fg-strip .c-emoji,
@@ -386,6 +390,8 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 
 .fg-bolt { display: flex; align-items: center; gap: 0.4rem; width: min(15rem, 80%); transition: opacity var(--dur-2); }
 .fg-bolt .c-emoji { width: 1.3rem; height: 1.3rem; margin: 0; }
+/* fără rândul de text din jurul emoji-ului: pastila are înălțimea desenului, altfel coboară peste cerință */
+.fg-bolt__icon { display: flex; }
 .fg-bolt__rail { flex: 1; height: 0.45rem; overflow: hidden; border-radius: var(--r-pill); background: var(--c-surface-2); }
 .fg-bolt__bar { display: block; height: 100%; background: var(--c-accent); transform-origin: left; }
 .fg-bolt.is-rapid .fg-bolt__bar { background: var(--c-level); }
@@ -743,6 +749,8 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
   .fg-track__runner { width: 1.7rem; height: 1.7rem; margin: -1.1rem 0 0 -0.85rem; }
   .fg-stage { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: 'card answers' 'cool cool'; align-items: center; gap: 0.4rem var(--sp-3); }
   .fg-card { grid-area: card; min-height: 0; padding: var(--sp-3); }
+  .fg-card > .fg-bolt { padding-block: 0; }
+  .fg-card > .fg-bolt .c-emoji { width: 1.1rem; height: 1.1rem; }
   .fg-answers { grid-area: answers; gap: var(--sp-2); }
   .fg-cooldown { grid-area: cool; min-height: 1.6rem; }
   .fg-q { font-size: clamp(1.8rem, 1.2rem + 3vh, 2.4rem); }

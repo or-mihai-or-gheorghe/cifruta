@@ -91,6 +91,7 @@ export default {
   'mat.geo.desfasurari': { domain: 'mat', title: 'Desfășurări: cub, cuboid, cilindru, con', grade: 2, competencies: ['2.2'], source: ['programa'] },
   'mat.geo.pozitii': { domain: 'mat', title: 'Poziții: stânga, dreapta, sus, jos, între', grade: 1, competencies: ['2.1'], source: ['programa', 'en2'] },
   'mat.geo.interior-exterior': { domain: 'mat', title: 'Interior, exterior, frontieră', grade: 1, competencies: ['2.1'], source: ['programa'] },
+  'mat.geo.harta-linii': { domain: 'mat', title: 'Hărți de linii: stații, schimbări, drumuri', grade: 2, competencies: ['2.1', '5.1'], source: ['imbogatire'] },
   'mat.geo.trasee': { domain: 'mat', title: 'Trasee pe rețea cu săgeți', grade: 1, competencies: ['2.1'], source: ['imbogatire'] },
   'mat.geo.simetrie': { domain: 'mat', title: 'Axa de simetrie', grade: 2, competencies: ['2.2'], source: ['programa'] },
   'mat.geo.coordonate': { domain: 'mat', title: 'Rând și coloană (coordonate)', grade: 2, competencies: ['2.1'], source: ['programa'] },
@@ -127,6 +128,8 @@ export default {
   'mat.log.venn': { domain: 'mat', title: 'Diagrama Venn', grade: 2, competencies: ['5.1'], source: ['programa'] },
   'mat.log.diagrama-cerc': { domain: 'mat', title: 'Cercul cu felii egale (o felie = un număr)', grade: 2, competencies: ['5.1'], source: ['imbogatire'] },
   'mat.log.grafic-linie': { domain: 'mat', title: 'Grafice în timp, pe zile și pe date', grade: 2, competencies: ['5.1'], source: ['imbogatire'] },
+  'mat.log.arbori': { domain: 'mat', title: 'Arbori: ramuri, alegeri, sume, clasificări', grade: 2, competencies: ['5.1', '4.1'], source: ['imbogatire'] },
+  'mat.log.retele': { domain: 'mat', title: 'Rețele și turnee: puncte legate prin linii', grade: 2, competencies: ['4.1'], source: ['imbogatire'] },
   'mat.log.analogii': { domain: 'mat', title: 'Analogii cu figuri și tabele cu reguli', grade: 2, competencies: ['3.1'], source: ['imbogatire'] },
 
   // ——— 7. Explorarea mediului ———

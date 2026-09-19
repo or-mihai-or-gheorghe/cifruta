@@ -541,7 +541,12 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
 
 FULGER_TOPIC = "adunari-scaderi-100"  # tema în care au intrat rezultatele de dinainte de teme
 FULGER_READY = "window.__dbg && window.__dbg.fulger.state().enabled"
-FULGER_FIT = "(() => { const a = document.querySelector('[data-testid=fg-answers]').getBoundingClientRect(); return { bottom: Math.round(a.bottom), vh: innerHeight, scroll: document.documentElement.scrollHeight - innerHeight, x: document.documentElement.scrollWidth - innerWidth }; })()"
+# `bolt`: cât loc rămâne între pastila fulgerului (pe marginea de sus a cardului, doar în serie) și ce e sub ea în card
+FULGER_FIT = """(() => { const a = document.querySelector('[data-testid=fg-answers]').getBoundingClientRect();
+  const bolt = document.querySelector('.fg-card > [data-testid=fg-bolt]');
+  const first = bolt && Math.min(...[...bolt.parentElement.children].filter((c) => c !== bolt).map((c) => c.getBoundingClientRect().top));
+  return { bottom: Math.round(a.bottom), vh: innerHeight, scroll: document.documentElement.scrollHeight - innerHeight, x: document.documentElement.scrollWidth - innerWidth,
+           bolt: bolt ? Math.round(first - bolt.getBoundingClientRect().bottom) : null }; })()"""
 
 
 def fulger_flow(run: Run, page: Page, vp: str):
@@ -587,6 +592,9 @@ def fulger_flow(run: Run, page: Page, vp: str):
     run.check("is-won" in theirs.get_attribute("class").split() and "is-won" not in mine.get_attribute("class").split() and texts == ["Ai medalia de bronz!", "Cu 3 stele câștigi medalia de bronz."],
               f"[{vp}] fulger: cardul nivelului arată medalia lui, câștigată sau de câștigat ({texts})")
     run.layout_ok(page, f"[{vp}] fulger medalii")
+    if vp == "laptop":  # cu 7 teme, grupurile stau unul sub altul, ca medaliile să rămână mari
+        widths = page.get_by_test_id("fg-medals").locator(".fg-medal").evaluate_all("els => els.map((e) => Math.round(e.getBoundingClientRect().width))")
+        run.check(len(widths) == medals and min(widths) >= 110, f"[{vp}] fulger: pe raft, fiecare dintre cele {len(widths)} medalii are cel puțin 110 px (cea mai mică: {min(widths)} px)")
     run.shot(page, f"{vp}-fulger-medalii", "[data-testid=fg-medals]")
 
     run.goto(page, f"fulger/{FULGER_TOPIC}/usor", debug=True)
@@ -795,8 +803,8 @@ def fulger_drawn_flow(run: Run, page: Page, vp: str):
             figure = page.get_by_test_id("fg-figure")
             # desenul are mărimea lui: toată lățimea cardului sau o înălțime mare (nu lățimea implicită a unui SVG, 300 px)
             drawn = not s["figure"] or (figure.count() == 1 and page.evaluate("(() => { const f = document.querySelector('[data-testid=fg-figure]'); const r = f.getBoundingClientRect(); return r.width >= 0.9 * f.parentElement.getBoundingClientRect().width || r.height >= 88; })()"))
-            run.check(s["kind"] == kind and arts == s["buttons"] and drawn and fit["bottom"] <= fit["vh"] and fit["scroll"] <= 1 and fit["x"] <= 1 and (text is None or text >= 14),
-                      f"[{vp}] {tid}: {kind} — desenul și variantele încap pe ecran, cu seria pornită; textul desenului are {text} px ({fit})")
+            run.check(s["kind"] == kind and arts == s["buttons"] and drawn and fit["bottom"] <= fit["vh"] and fit["scroll"] <= 1 and fit["x"] <= 1 and (text is None or text >= 14) and fit["bolt"] is not None and fit["bolt"] >= 2,
+                      f"[{vp}] {tid}: {kind} — desenul și variantele încap pe ecran, cu seria pornită, iar pastila fulgerului nu acoperă cerința; textul desenului are {text} px ({fit})")
             run.shot(page, f"{vp}-fulger-{kind}")
             if i % 2 == 0:
                 answer_drawn(page, s, True)
@@ -837,6 +845,7 @@ def fulger_screens(run: Run, browser, base: str):
         ("figuri-corpuri", ("desfasurare", "numara-figuri", "corpuri")),
         ("pozitii-trasee", ("robot-lung", "coordonate", "interior")),
         ("grafice-tabele", ("timp-doua-serii", "grafic-compara", "grafic-ordine", "venn", "tabel", "cerc-felii")),
+        ("harti-arbori", ("drum-compara", "linie-ordine", "arbore-clasificare", "turneu", "drum-scurt", "veverita-drum", "veverita-bogat", "arbore-alegeri")),
     ]
     for name, opts, min_text in screens:
         context = browser.new_context(locale="ro-RO", **opts)
@@ -856,8 +865,8 @@ def fulger_screens(run: Run, browser, base: str):
                 page.wait_for_timeout(250)
                 fit = page.evaluate(FULGER_FIT)
                 text = page.evaluate(FULGER_TEXT)
-                run.check(fit["bottom"] <= fit["vh"] and fit["scroll"] <= 1 and fit["x"] <= 1 and (text is None or text >= min_text),
-                          f"[{name}] fulger: la {kind} variantele încap fără derulare, cu seria pornită; textul desenului are {text} px ({fit})")
+                run.check(fit["bottom"] <= fit["vh"] and fit["scroll"] <= 1 and fit["x"] <= 1 and (text is None or text >= min_text) and fit["bolt"] is not None and fit["bolt"] >= 2,
+                          f"[{name}] fulger: la {kind} variantele încap fără derulare, cu seria pornită, iar pastila fulgerului nu acoperă cerința; textul desenului are {text} px ({fit})")
                 run.shot(page, f"fulger-{name.replace(' ', '-')}-{kind}")
         context.close()
 
@@ -1016,6 +1025,20 @@ def keyboard_flow(run: Run, browser, base: str):
     page.wait_for_timeout(100)
     streak = page.evaluate("window.__dbg.fulger.state().streak")
     run.check(s["mode"] == "figure" and streak == 1, f"[tastatură] fulger: la o întrebare cu figuri, tasta {s['answerIndex'] + 1} alege varianta (serie {streak})")
+
+    # o comparare pe un grafic, tot doar de la tastatură: tasta semnului
+    page.goto(f"{base}?debug=1#/fulger/grafice-tabele/usor")
+    page.wait_for_selector("[data-testid=fg-start]")
+    page.keyboard.press("Enter")
+    page.wait_for_function(FULGER_READY)
+    page.evaluate("window.__dbg.fulger.force('grafic-compara')")
+    page.wait_for_function(FULGER_READY)
+    s = page.evaluate("window.__dbg.fulger.state()")
+    sign = "<=>"[s["answerIndex"]]
+    page.keyboard.press(sign)
+    page.wait_for_timeout(100)
+    streak = page.evaluate("window.__dbg.fulger.state().streak")
+    run.check(s["mode"] == "compare" and s["drawn"] and streak == 1, f"[tastatură] fulger: la o comparare pe un grafic, tasta {sign} răspunde (serie {streak})")
     context.close()
 
 
