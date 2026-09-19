@@ -12,12 +12,14 @@ import {
   createRound, levelConfig, milestone, nextStar, pauseAfter, playableTopics, practiceFor, precisionBonus, scoreAnswer, starsFor,
   topicConfig, topicStars, topicTotal,
 } from '../site/js/fulger/engine.js';
+import { artName, promptLength, promptSpoken } from '../site/js/fulger/art.js';
 import { KINDS } from '../site/js/fulger/kinds.js';
 import { LEGACY_TOPIC, LEVEL_IDS, normalizeFulger, recordKey, splitKey } from '../site/js/fulger/records.js';
 import '../site/js/visuals/all.js';
 import { EMOJI } from '../site/js/visuals/emoji.js';
 import { visualErrors, visualSVG } from '../site/js/visuals/index.js';
 import { SHAPE_RULES } from './fulger-forme.rules.js';
+import { CHART_RULES } from './fulger-grafice.rules.js';
 
 const SEEDS = 500;
 const terms = (text) => text.split(/ [+−] /).map(Number);
@@ -57,7 +59,11 @@ const RULES = {
     [left, right].some((x) => /[+−]/.test(x)) && Math.abs(calc(left) - calc(right)) <= 3 && [left, right].every((x) => inRange(calc(x), 10, 100)),
   'sort-4-dir': ({ numbers }) => numbers.length === 4 && numbers.every((x) => inRange(x, 0, 100)),
   ...SHAPE_RULES, // tipurile cu figuri: regulile sunt în tests/fulger-forme.rules.js
+  ...CHART_RULES, // tipurile cu grafice: tests/fulger-grafice.rules.js
 };
+
+/** Plăcile unei ordonări: numerele (la calcule) sau id-urile plăcuțelor desenate (la grafice). */
+const tilesOf = (q) => q.tiles ?? q.numbers;
 
 /** Trecerea peste ordin a unui calcul din text: pe coloane la doi termeni, prin suma unităților la trei. */
 function carries(text) {
@@ -77,7 +83,7 @@ function wrongAnswer(q, rand) {
 function guessAnswer(q, rand) {
   if (q.choices) return q.choices[Math.floor(rand() * q.choices.length)];
   if (q.mode === 'compare') return ['<', '=', '>'][Math.floor(rand() * 3)];
-  const order = [...q.numbers];
+  const order = [...tilesOf(q)];
   for (let i = order.length - 1; i > 0; i--) {
     const j = Math.floor(rand() * (i + 1));
     [order[i], order[j]] = [order[j], order[i]];
@@ -98,9 +104,18 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
       const where = `${id} (sămânța ${seed}): ${JSON.stringify(q)}`;
       assert.ok(q.kind === id && q.mode === kind.mode && q.key, where);
       assert.ok(RULES[id](q), `${where} încalcă regulile tipului`);
+      const validSpec = (spec) =>
+        spec.v ? !visualErrors(spec).length && !/NaN|undefined/.test(visualSVG(spec)) : spec.emoji ? Boolean(EMOJI[spec.emoji]) : typeof spec.text === 'string';
+      if (kind.mode === 'compare' || kind.mode === 'sort') assert.equal(Boolean(q.figure), Boolean(kind.drawn), `${where}: desenul comparărilor și ordonărilor`);
+      if (q.mode === 'figure' || q.figure) {
+        // cerința scurtă (emoji-urile {{e:}} contează cât două litere), desene valide, iar întrebarea rămâne aceeași după JSON
+        const max = kind.promptMax ?? 45;
+        assert.ok(q.prompt && promptLength(q.prompt) <= max && !lintText(promptSpoken(q.prompt)).length && !/\{\{(?!e:[a-z0-9]+\}\})/.test(q.prompt), `${where}: cerința`);
+        for (const spec of [q.figure, q.solved].filter(Boolean)) assert.ok(validSpec(spec), `${where}: desenul ${JSON.stringify(spec)}`);
+        assert.deepEqual(JSON.parse(JSON.stringify(q)), q, `${where}: întrebarea se schimbă după JSON`);
+      }
       if (q.mode === 'figure') {
-        // cerința scurtă, 4 variante diferite chiar și fără culori, desene valide, iar întrebarea rămâne aceeași după JSON
-        assert.ok(q.prompt && q.prompt.length <= 45 && !lintText(q.prompt).length, `${where}: cerința`);
+        // 4 variante diferite chiar și fără culori
         assert.ok(q.choices.length === 4 && new Set(q.choices).size === 4 && q.choices.includes(q.answer), `${where}: variantele`);
         assert.deepEqual(Object.keys(q.options).sort(), [...q.choices].sort(), `${where}: desenele variantelor`);
         for (const spec of [q.figure, q.solved, ...Object.values(q.options)].filter(Boolean)) {
@@ -111,9 +126,8 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
         const bare = q.choices.map((c) => q.options[c]).map((o) => (o.v === 'glyph' ? `${glyphKey({ ...o, color: 'albastru', size: 'mare' })}|${o.axis ?? ''}` : JSON.stringify(o)));
         assert.equal(new Set(bare).size, 4, `${where}: două variante diferă doar prin culoare sau prin mărime`);
         // și cititorul de ecran le deosebește: variantele au nume diferite
-        const names = q.choices.map((c) => q.options[c]).map((o) => (o.v ? /aria-label="([^"]*)"/.exec(visualSVG(o))[1] : (o.emoji ?? o.text)));
+        const names = q.choices.map((c) => q.options[c]).map((o) => (o.v ? /aria-label="([^"]*)"/.exec(visualSVG(o))[1] : artName(o)));
         assert.equal(new Set(names).size, 4, `${where}: două variante au același nume (${names.join(' | ')})`);
-        assert.deepEqual(JSON.parse(JSON.stringify(q)), q, `${where}: întrebarea se schimbă după JSON`);
         positions[q.choices.indexOf(q.answer)]++;
       } else if (q.mode === 'choice') {
         assert.equal(q.answer, calc(q.text), where);
@@ -123,8 +137,23 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
         positions[q.choices.indexOf(q.answer)]++;
         carry[carries(q.text) ? 'cu' : 'fara']++;
       } else if (q.mode === 'compare') {
-        assert.equal(q.answer, relation(calc(q.left), calc(q.right)), where);
+        if (q.figure) {
+          // pe desen: laturile sunt liste de desene cu nume diferite; relația o verifică regula tipului
+          const side = (list) => list.map(artName).join(' + ');
+          assert.ok([q.left, q.right].every((l) => Array.isArray(l) && l.length >= 1 && l.length <= 2 && l.every(validSpec)), `${where}: laturile`);
+          assert.notEqual(side(q.left), side(q.right), `${where}: laturile au același nume`);
+          assert.ok(['<', '=', '>'].includes(q.answer), where);
+        } else assert.equal(q.answer, relation(calc(q.left), calc(q.right)), where);
         relations[q.answer]++;
+      } else if (q.tiles) {
+        // plăcuțe desenate: 3–4 id-uri diferite, fiecare cu desenul și numele ei; răspunsul e o ordine a lor, dar nu cea afișată
+        assert.ok(q.tiles.length >= 3 && q.tiles.length <= 4 && new Set(q.tiles).size === q.tiles.length, `${where}: plăcuțele`);
+        assert.deepEqual(Object.keys(q.options).sort(), [...q.tiles].sort(), `${where}: desenele plăcuțelor`);
+        assert.ok(q.tiles.every((t) => validSpec(q.options[t])), `${where}: desenele plăcuțelor`);
+        assert.deepEqual([...q.answer].sort(), [...q.tiles].sort(), `${where}: răspunsul e o ordine a plăcuțelor`);
+        assert.notDeepEqual(q.tiles, q.answer, `${where}: plăcuțele stau deja în ordine`);
+        assert.equal(new Set(q.tiles.map((t) => artName(q.options[t]))).size, q.tiles.length, `${where}: plăcuțe cu același nume`);
+        dirs.add(q.dir);
       } else {
         assert.equal(new Set(q.numbers).size, q.numbers.length, where);
         assert.deepEqual(q.answer, [...q.numbers].sort((a, b) => (q.dir === 'asc' ? a - b : b - a)), where);
@@ -163,6 +192,7 @@ test('fulger: pauzele după greșeli; ghicitul prea rapid primește pauza lungă
   assert.deepEqual(pauseAfter({ kind: 'add-100-cu', correct: false, ms: 2500 }), { pauseMs: 7000, guarded: true }); // sub 2,8 s
   assert.deepEqual(pauseAfter({ kind: 'cmp-20', correct: false, ms: 900 }), { pauseMs: 3000, guarded: true }); // sub 1 s
   assert.deepEqual(pauseAfter({ kind: 'sort-4-dir', correct: false, ms: 300 }), { pauseMs: 1000, guarded: false });
+  assert.deepEqual(pauseAfter({ kind: 'timp-total', correct: false, ms: 1000 }), { pauseMs: 9000, guarded: true }); // plafonul de 9 s
 });
 
 test('fulger: pragurile de serie și Turbo', () => {
@@ -307,7 +337,7 @@ const honest = (accuracy, [lo, hi]) => (q, rand) => ({
   ms: KINDS[q.kind].fastMs * (lo + rand() * (hi - lo)),
   given: rand() < accuracy ? q.answer : wrongAnswer(q, rand),
 });
-const guesser = (ms) => (q, rand) => ({ ms: q.mode === 'sort' ? (ms * q.numbers.length) / 2 : ms, given: guessAnswer(q, rand) });
+const guesser = (ms) => (q, rand) => ({ ms: q.mode === 'sort' ? (ms * tilesOf(q).length) / 2 : ms, given: guessAnswer(q, rand) });
 
 /** O rundă întreagă cu motorul real; timpul curge ca în interfață: întârzierea de la apariție, gândirea, pauza. */
 function playRound(topic, level, seed, decide) {
@@ -333,6 +363,7 @@ test('fulger: pragurile de stele se potrivesc cu copiii simulați (mediana a 200
         ghicitLent: median(guesser(900)),
       };
       const where = `${topic.id}/${id}: ${JSON.stringify(m)}, praguri ${one}/${two}/${three}`;
+      if (process.env.FULGER_CALIBRARE) console.log(where); // FULGER_CALIBRARE=1 node --test tests/fulger.test.js: medianele, pentru praguri
       assert.ok(m.rapid >= three && m.bun >= two && m.incet >= one, where);
       assert.ok(m.ghicitRepede < one && m.ghicitLent < one, where);
     }

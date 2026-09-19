@@ -6,12 +6,15 @@
 //   compare → left: '35 + 8', right: '42', answer: '<' | '=' | '>'
 //   sort    → numbers: plăcile în ordinea afișată, dir: 'asc' | 'desc', answer: ordinea corectă
 //   figure  → prompt, figure?, solved?, choices: id-urile desenelor, options: { id: desen }, answer: id (tipurile din kinds-forme.js)
+// Comparările și ordonările pot avea și un desen (`drawn: true`, tipurile din kinds-grafice.js): atunci left / right sunt liste de
+// desene, iar ordonarea are plăcuțele în `tiles` (id-uri), desenele lor în `options` și ordinea corectă în `answer`.
 // Fiecare tip poartă conceptele din data/concepts.js pe care le exersează (`concepts`); „fără / cu trecere” se verifică în teste.
 // Un tip nou: o intrare aici (cu figuri: în kinds-forme.js), o linie în `mix`-ul unui nivel al unei teme din data/fulger.js și regulile
 // lui în tests/fulger.test.js (cu figuri: în tests/fulger-forme.rules.js).
 
 import { calc, relation } from '../core/expr.js';
 import { trecere } from '../core/rules.js';
+import { CHART_KINDS } from './kinds-grafice.js';
 import { SHAPE_KINDS } from './kinds-forme.js';
 import { distinct, int, pickOne, shuffle, withChoices } from './rand.js';
 
@@ -318,4 +321,8 @@ export const KINDS = {
     },
   },
   ...SHAPE_KINDS,
+  ...CHART_KINDS,
 };
+
+/** Tipurile cu desen: toate cele cu figuri și comparările sau ordonările făcute pe un grafic (`drawn`). */
+export const isDrawn = (id) => KINDS[id]?.mode === 'figure' || Boolean(KINDS[id]?.drawn);

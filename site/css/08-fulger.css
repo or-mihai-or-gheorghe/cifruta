@@ -140,9 +140,9 @@
 .fg-metal__label { font-size: var(--fs-0); color: var(--metal-ink); }
 .fg-medals { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 7rem), 1fr)); gap: var(--sp-2); margin: 0; padding: 0; list-style: none; }
 @media (min-width: 60rem) {
-  .fg-metal__groups { display: flex; }
-  .fg-metal__group { flex: var(--n, 1) 1 0; }
-  .fg-metal__group .fg-medals { grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr)); }
+  .fg-metal__groups.is-row { display: flex; }
+  .fg-metal__groups.is-row .fg-metal__group { flex: var(--n, 1) 1 0; }
+  .fg-metal__groups.is-row .fg-medals { grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr)); }
 }
 .fg-medal {
   position: relative;
@@ -341,10 +341,41 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 .fg-prompt { margin: 0; font-size: clamp(1.15rem, 0.95rem + 1vw, 1.6rem); text-align: center; }
 .fg-fig { --fig-h: clamp(5.5rem, 26vh, 13rem); width: min(100%, calc(var(--fig-h) * var(--ar, 1))); }
 .fg-fig.is-shown { animation: anim-pop var(--dur-3) var(--ease-spring); }
+/* grafice și grafuri: aceeași înălțime ca figurile pe telefoanele mici (încap cu o cerință pe două rânduri), mai mari pe cele înalte;
+   la comparările și ordonările desenate, cardul n-are rând de cerință, iar operanzii stau în rândul de răspuns (.fg-strip) */
+.fg-fig--chart { --fig-h: clamp(5.5rem, 26vh, 15rem); }
+.fg-q--drawn .fg-fig { --fig-h: clamp(5.5rem, 24vh, 15rem); }
+.fg-prompt--long { font-size: clamp(1rem, 0.9rem + 0.6vw, 1.35rem); text-wrap: balance; }
+.fg-prompt__emoji,
+.fg-strip .c-emoji,
+.fg-slot .c-emoji,
+.fg-mistake__prompt .c-emoji { display: inline-block; width: 1.25em; height: 1.25em; margin: 0; vertical-align: -0.25em; }
+.fg-strip {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem 0.6rem;
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: clamp(1.25rem, 1rem + 2vw, 2rem);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.fg-strip__caption { font-size: var(--fs-1); color: var(--c-ink-soft); }
+.fg-strip__row,
+.fg-strip__side { display: inline-flex; align-items: center; gap: 0.35rem; }
+.fg-strip--sort { flex-direction: column; gap: 0.25rem; }
+.fg-strip .fg-slot { min-width: 1.9em; height: 1.45em; }
 .fg-mistake__fig { display: inline-block; width: min(100%, calc(4.2rem * var(--ar, 1))); } /* desenul întrebării în „Greșelile tale” */
+.fg-mistake__fig--chart { width: min(100%, calc(8rem * var(--ar, 1))); } /* graficele și hărțile se citesc doar mari */
 /* atelier: întrebările cu figuri generate, cu varianta corectă încadrată */
 .fg-review { display: grid; align-content: start; gap: var(--sp-2); margin: 0; }
 .fg-review__fig { display: block; width: min(100%, calc(7rem * var(--ar, 1))); margin-inline: auto; }
+.fg-review__fig--chart { width: 100%; }
+.fg-review__row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.35rem; padding: 0.25rem; border: 2px solid var(--c-ok-ink); border-radius: var(--r-2); background: var(--c-ok-bg); font-family: var(--font-title); font-weight: 700; font-size: var(--fs-2); }
+.fg-review__row .fg-review__art { width: min(100%, calc(1.8rem * var(--ar, 1))); }
 .fg-review__opts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.35rem; }
 .fg-review__opt { display: grid; place-items: center; min-height: 3rem; padding: 0.25rem; border: 2px solid var(--c-line); border-radius: var(--r-2); }
 .fg-review__opt.is-answer { border-color: var(--c-ok-ink); background: var(--c-ok-bg); }
@@ -359,6 +390,19 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 .fg-bolt__bar { display: block; height: 100%; background: var(--c-accent); transform-origin: left; }
 .fg-bolt.is-rapid .fg-bolt__bar { background: var(--c-level); }
 .fg-bolt.is-gone { opacity: 0; }
+/* în card, bara stă pe marginea de sus, ca o pastilă, fără înălțime proprie: altfel, în serie, împinge variantele sub ecran */
+.fg-card > .fg-bolt {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 1;
+  width: min(12rem, 60%);
+  padding: 0.12rem 0.55rem;
+  border: 2px solid var(--c-line);
+  border-radius: var(--r-pill);
+  background: var(--c-surface);
+  transform: translate(-50%, -55%);
+}
 
 /* variantele și plăcile */
 .fg-answers { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-3); }
@@ -706,6 +750,9 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
   .fg-opt { min-height: 3.3rem; font-size: 1.6rem; }
   .fg-prompt { font-size: 1.05rem; }
   .fg-fig { --fig-h: clamp(5rem, 38vh, 8.5rem); }
+  .fg-fig--chart { --fig-h: clamp(5rem, 38vh, 8.5rem); }
+  .fg-q--drawn .fg-fig { --fig-h: clamp(5rem, 44vh, 10.5rem); }
+  .fg-strip { font-size: 1.2rem; }
   .fg-opt__art { --opt-h: clamp(2.2rem, 13vh, 3.4rem); }
   .fg-overlay { place-items: safe center; overflow-y: auto; padding: var(--sp-2); }
   .fg-panel { gap: var(--sp-2); padding: var(--sp-4); }

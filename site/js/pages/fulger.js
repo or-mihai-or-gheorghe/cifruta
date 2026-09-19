@@ -13,9 +13,9 @@ import { cantitate, formatDateTime, formatNumber } from '../core/ro.js';
 import { redirect, refresh } from '../core/router.js';
 import { play } from '../core/sound.js';
 import { clearFulger, getFulger, saveFulgerRound } from '../core/storage.js';
-import { artHTML, artName, aspect } from '../fulger/art.js';
+import { artHTML, artName, aspect, isChart, promptHTML, promptSpoken } from '../fulger/art.js';
 import { levelConfig, nextStar, playableTopics, practiceFor, starsFor, topicConfig, topicStars, topicTotal } from '../fulger/engine.js';
-import { KINDS } from '../fulger/kinds.js';
+import { isDrawn, KINDS } from '../fulger/kinds.js';
 import { medalCatalog, medalsAfterRound, medalsWon, metalCount, metalOf } from '../fulger/medals.js';
 import { LEGACY_TOPIC, LEVEL_IDS, recordKey } from '../fulger/records.js';
 import { mountArena } from '../fulger/view.js';
@@ -141,13 +141,13 @@ function gamePage(container, focus = null) {
 /** O întrebare-exemplu ca plăcuță: 7 + 5, 14 ◻ 17, 12 · 9 · 15 sau o miniatură a desenului (fără desen: cele 4 variante). */
 function sample(kind, seed) {
   const q = KINDS[kind].generate(seededRandom(seed));
-  if (q.mode === 'figure') {
+  if (q.mode === 'figure' || q.figure) {
     const arts = q.figure ? [q.figure] : q.choices.map((c) => q.options[c]);
     return h(
       'li',
       { class: `fg-sample fg-sample--art${q.figure ? '' : ' fg-sample--options'}` },
       arts.map((art) => h('span', { class: 'fg-sample__art', 'aria-hidden': 'true', style: { '--ar': String(aspect(art)) }, html: artHTML(art) })),
-      h('span', { class: 'u-visually-hidden' }, q.prompt),
+      h('span', { class: 'u-visually-hidden' }, promptSpoken(q.prompt)),
     );
   }
   const content = q.mode === 'choice' ? q.text : q.mode === 'compare' ? [q.left, h('span', { class: 'fg-box', 'aria-label': 'căsuță' }), q.right] : q.numbers.join(' · ');
@@ -156,8 +156,10 @@ function sample(kind, seed) {
 
 function levelCard(topic, lvl, data, medals) {
   const best = data.best[recordKey(topic.id, lvl.id)]?.alune ?? null;
-  const byMode = ['choice', 'compare', 'sort'].map((mode) => lvl.mix.find((m) => KINDS[m.kind].mode === mode)?.kind).filter(Boolean);
-  const examples = byMode.length ? byMode : lvl.mix.map((m) => m.kind).slice(0, 2); // la temele cu figuri: primele două tipuri din amestec
+  // la calcule, câte un exemplu din fiecare mod; la temele desenate (figuri, grafice, hărți), primele două tipuri din amestec
+  const drawnTopic = topic.levels.every((l) => l.mix.every((m) => isDrawn(m.kind)));
+  const byMode = drawnTopic ? [] : ['choice', 'compare', 'sort'].map((mode) => lvl.mix.find((m) => KINDS[m.kind].mode === mode)?.kind).filter(Boolean);
+  const examples = byMode.length ? byMode : lvl.mix.map((m) => m.kind).slice(0, 2);
   return h(
     'article',
     { class: 'c-card fg-level', 'data-level': lvl.id, 'data-testid': `fg-card-${lvl.id}` },
@@ -238,7 +240,8 @@ function medalShelf(data, { catalog, won }, topics) {
           levelPill(metal.level),
           chip(`${mine.filter((m) => won.has(m.id)).length} din ${mine.length}`, 'fg-metal__count'),
         ),
-        h('div', { class: 'fg-metal__groups' }, group('topic', 'Medaliile temelor'), group('extra', 'Medalii în plus')),
+        // până la 5 teme, pe ecran lat, medaliile temelor și cele în plus încap pe un rând; cu mai multe, grupurile stau unul sub altul
+        h('div', { class: `fg-metal__groups${topics.length <= 5 ? ' is-row' : ''}` }, group('topic', 'Medaliile temelor'), group('extra', 'Medalii în plus')),
       );
     }),
   );
@@ -335,13 +338,38 @@ function suggestion(topic, lvl, summary) {
   return h('a', { class: `c-btn c-btn--lg${summary.stars === 3 ? ' c-btn--accent' : ''}`, href: `#/fulger/${topic.id}/${target.id}`, 'data-testid': 'fg-suggest' }, `Încearcă nivelul ${levelLabel(target.id)}`);
 }
 
-/** Miniatura unui desen din „Greșelile tale” (o variantă-text rămâne text). */
+/** Miniatura unui desen din „Greșelile tale” (o variantă-text rămâne text, scrisă întreg: „miercuri”, „10 iunie”). */
 const mistakeArt = (spec, cls = 'fg-mistake__art') =>
-  spec.v || spec.emoji ? h('span', { class: cls, 'aria-hidden': 'true', style: { '--ar': String(aspect(spec)) }, html: artHTML(spec) }) : h('span', {}, spec.text);
+  spec.v || spec.emoji ? h('span', { class: cls, 'aria-hidden': 'true', style: { '--ar': String(aspect(spec)) }, html: artHTML(spec) }) : h('span', {}, spec.alt ?? spec.text);
+/** Desenul întrebării la „Greșelile tale”: graficele și hărțile ies mai mari, ca să se poată citi. */
+const mistakeFigure = (spec) => mistakeArt(spec, `fg-mistake__fig${isChart(spec) ? ' fg-mistake__fig--chart' : ''}`);
+const SEPARATORS = { asc: ' < ', desc: ' > ', path: ' → ' };
 
 /** O greșeală: operația sau desenul, cu răspunsul corect evidențiat, și ce a ales copilul. */
 function mistake({ question: q, given }) {
   const ok = (text) => h('strong', { class: 'fg-mistake__ok' }, text);
+  const prompt = h('span', { class: 'fg-mistake__prompt', html: promptHTML(q.prompt) });
+  if (q.figure && q.mode !== 'figure') {
+    // comparare sau ordonare pe un desen: desenul rezolvat, comparația sau ordinea corectă, ce a ales copilul
+    const shown = mistakeFigure(q.solved ?? q.figure);
+    if (q.mode === 'compare') {
+      const side = (list) => list.flatMap((spec, i) => (i ? [' + ', mistakeArt(spec)] : [mistakeArt(spec)]));
+      return h(
+        'li',
+        { class: 'fg-mistake fg-mistake--figure' },
+        h('span', { class: 'fg-mistake__line' }, prompt, shown, ok([...side(q.left), ` ${q.answer} `, ...side(q.right)])),
+        h('span', { class: 'fg-mistake__note' }, `ai ales ${given}`),
+      );
+    }
+    const name = (id) => artName(q.options[id]);
+    const order = q.answer.flatMap((id, i) => (i ? [SEPARATORS[q.dir], mistakeArt(q.options[id])] : [mistakeArt(q.options[id])]));
+    return h(
+      'li',
+      { class: 'fg-mistake fg-mistake--figure' },
+      h('span', { class: 'fg-mistake__line' }, prompt, shown, ok(order)),
+      h('span', { class: 'fg-mistake__note' }, `ai atins ${name(given.at(-1))} în loc de ${name(q.answer[given.length - 1])}`),
+    );
+  }
   if (q.mode === 'figure') {
     const right = q.options[q.answer];
     const chosen = q.options[given];
@@ -351,8 +379,8 @@ function mistake({ question: q, given }) {
       h(
         'span',
         { class: 'fg-mistake__line' },
-        h('span', { class: 'fg-mistake__prompt' }, q.prompt),
-        q.solved || q.figure ? mistakeArt(q.solved ?? q.figure, 'fg-mistake__fig') : null,
+        prompt,
+        q.solved || q.figure ? mistakeFigure(q.solved ?? q.figure) : null,
         ok([mistakeArt(right), h('span', { class: 'u-visually-hidden' }, ` Răspunsul corect: ${artName(right)}.`)]),
       ),
       chosen ? h('span', { class: 'fg-mistake__note' }, 'ai ales ', mistakeArt(chosen), h('span', { class: 'u-visually-hidden' }, artName(chosen))) : null,

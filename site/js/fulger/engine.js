@@ -49,7 +49,8 @@ export function pauseAfter({ kind, correct, ms }) {
   if (correct) return { pauseMs: config.feedbackMs, guarded: false };
   const { fastMs, mode } = KINDS[kind];
   const guarded = mode !== 'sort' && ms < Math.max(config.guard.minMs, config.guard.below * fastMs);
-  return { pauseMs: guarded ? Math.max(config.guard.pauseMinMs, fastMs) : config.cooldownMs, guarded };
+  const long = Math.min(config.guard.pauseMaxMs, Math.max(config.guard.pauseMinMs, fastMs));
+  return { pauseMs: guarded ? long : config.cooldownMs, guarded };
 }
 
 /** Pragul de serie sărbătorit (începutul fiecărei trepte, apoi din 5 în 5): { label, mult, turbo } sau null. */

@@ -10,8 +10,8 @@ export default {
   feedbackMs: 450, // după un răspuns corect, până la întrebarea următoare
   cooldownMs: 1000, // după o greșeală
   // o greșeală mai rapidă decât cititul (sub 40% din timpul „fulger”, minimum 0,8 s; nu la sortări)
-  // primește o pauză cât timpul „fulger” (minimum 3 s)
-  guard: { below: 0.4, minMs: 800, pauseMinMs: 3000 },
+  // primește o pauză cât timpul „fulger” (între 3 și 9 s: la graficele citite încet, timpul „fulger” trece de 9 s)
+  guard: { below: 0.4, minMs: 800, pauseMinMs: 3000, pauseMaxMs: 9000 },
   // viteza contează doar în serie: până la timpul „fulger” ×2, până la dublul lui ×1,5
   speed: [
     { id: 'fulger', upTo: 1, mult: 2, label: 'Fulger!' },
@@ -273,6 +273,68 @@ export default {
             { kind: 'pozitii', weight: 1 },
           ],
           stars: [27, 75, 200],
+        },
+      ],
+    },
+    {
+      id: 'grafice-tabele',
+      title: 'Grafice și tabele',
+      short: 'Grafice',
+      text: 'Pictograme, bare, tabele cu bețișoare, cercuri cu felii, grafice în timp și două cercuri: citești, compari, ordonezi, aduni și scazi.',
+      icon: 'grafic',
+      grade: 2,
+      concepts: [
+        'mat.log.pictograma', 'mat.log.grafic-bare', 'mat.log.tabel', 'mat.log.diagrama-cerc', 'mat.log.grafic-linie', 'mat.log.venn',
+        'mat.nr100.comparare', 'mat.nr100.ordonare', 'mat.nr100.adunare-repetata', 'mat.pb.mai-mult-mai-putin', 'mat.pb.o-operatie',
+        'mat.op.necunoscut',
+      ],
+      levels: [
+        {
+          id: 'usor',
+          warmup: ['pictograma', 'bare-citire'],
+          mix: [
+            { kind: 'pictograma', weight: 3 },
+            { kind: 'bare-citire', weight: 3 },
+            { kind: 'grafic-compara', weight: 2 },
+            { kind: 'tabel', weight: 1.5 },
+            { kind: 'grafic-ordine', weight: 1 },
+          ],
+          stars: [20, 48, 120],
+        },
+        {
+          id: 'intermediar',
+          warmup: ['bare-citire', 'grafic-compara'],
+          mix: [
+            { kind: 'pictograma-legenda', weight: 2 },
+            { kind: 'bare-scara', weight: 2 },
+            { kind: 'bare-diferenta', weight: 2 },
+            { kind: 'cerc-felii', weight: 2 },
+            { kind: 'timp-grafic', weight: 2 },
+            { kind: 'bare-suma', weight: 1.5 },
+            { kind: 'grafic-ordine', weight: 1.5 },
+            { kind: 'tabel', weight: 1 },
+            { kind: 'grafic-compara', weight: 1 },
+            { kind: 'bare-citire', weight: 0.5 },
+            { kind: 'pictograma', weight: 0.5 },
+          ],
+          stars: [22, 57, 155],
+        },
+        {
+          id: 'avansat',
+          warmup: ['bare-diferenta', 'timp-grafic'],
+          mix: [
+            { kind: 'timp-doua-serii', weight: 2.5 },
+            { kind: 'timp-total', weight: 2 },
+            { kind: 'bare-duble', weight: 2 },
+            { kind: 'venn', weight: 2 },
+            { kind: 'bare-lipsa', weight: 1.5 },
+            { kind: 'bare-suma', weight: 1 },
+            { kind: 'grafic-compara', weight: 0.5 },
+            { kind: 'cerc-felii', weight: 0.5 },
+            { kind: 'bare-diferenta', weight: 0.5 },
+            { kind: 'timp-grafic', weight: 0.5 },
+          ],
+          stars: [23, 62, 185],
         },
       ],
     },

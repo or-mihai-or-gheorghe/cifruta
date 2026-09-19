@@ -743,19 +743,36 @@ def fulger_flow(run: Run, page: Page, vp: str):
         page.evaluate("localStorage.removeItem('cifruta:fulger')")
 
 
-# temele ale căror tipuri au doar figuri, cu tipurile lor
-SHAPE_TOPICS = """Promise.all([import('./data/fulger.js'), import('./js/fulger/kinds.js')]).then(([{ default: c }, { KINDS }]) => c.topics
-  .filter((t) => !t.soon && t.levels.every((l) => l.mix.every((m) => KINDS[m.kind].mode === 'figure')))
+# temele ale căror tipuri au toate un desen (figuri, grafice, hărți), cu tipurile lor
+DRAWN_TOPICS = """Promise.all([import('./data/fulger.js'), import('./js/fulger/kinds.js')]).then(([{ default: c }, { isDrawn }]) => c.topics
+  .filter((t) => !t.soon && t.levels.every((l) => l.mix.every((m) => isDrawn(m.kind))))
   .map((t) => ({ id: t.id, kinds: [...new Set(t.levels.flatMap((l) => l.mix.map((m) => m.kind)))] })))"""
+# cel mai mic text dintr-un grafic sau o hartă, în pixeli pe ecran (null la desenele care nu sunt grafice)
+FULGER_TEXT = """(() => { const svg = document.querySelector('[data-testid=fg-figure] svg');
+  if (!svg || !/v-(chart-|metro|network|bracket|tree|venn)/.test(svg.getAttribute('class'))) return null;
+  const scale = svg.getScreenCTM().a; let min = Infinity;
+  for (const t of svg.querySelectorAll('text')) min = Math.min(min, parseFloat(t.getAttribute('font-size')) * scale);
+  return Math.round(min * 10) / 10; })()"""
+FULGER_ARTS = "[...document.querySelectorAll('[data-testid=fg-answers] .fg-opt')].filter((b) => b.querySelector('.fg-opt__art svg, .fg-opt__art img') || [...b.children].some((c) => !c.classList.contains('fg-opt__key') && c.textContent.trim())).length"
 
 
-def fulger_shapes_flow(run: Run, page: Page, vp: str):
-    """Jocuri fulger cu figuri, pe fiecare temă cu figuri: exemplele desenate de pe carduri, fiecare tip (desenul și cele 4 variante
-    încap pe ecran), răspunsul corect cu desenul rezolvat, cel greșit cu varianta bună arătată și „Greșelile tale” cu desene."""
+def answer_drawn(page: Page, s: dict, correct: bool):
+    """Răspunde la întrebarea curentă: corect (plăcuțele în ordine sau varianta bună) ori greșit (o variantă sau o plăcuță greșită)."""
+    if correct and s["mode"] == "sort":
+        for i in s["order"]:
+            page.get_by_test_id(f"fg-opt-{i}").click()
+    else:
+        page.get_by_test_id(f"fg-opt-{s['answerIndex' if correct else 'wrongIndex']}").click()
+
+
+def fulger_drawn_flow(run: Run, page: Page, vp: str):
+    """Jocuri fulger cu desene (figuri, grafice, hărți), pe fiecare temă: exemplele desenate de pe carduri, fiecare tip cu seria pornită
+    (desenul și variantele încap pe ecran, textul graficelor se citește), răspunsul corect cu desenul rezolvat, cel greșit cu răspunsul
+    arătat și „Greșelile tale” cu desene."""
     run.goto(page, "")
     page.evaluate("localStorage.removeItem('cifruta:fulger')")
     state = lambda: page.evaluate("window.__dbg.fulger.state()")
-    for topic in page.evaluate(SHAPE_TOPICS):
+    for topic in page.evaluate(DRAWN_TOPICS):
         tid, kinds = topic["id"], topic["kinds"]
         run.goto(page, f"fulger/{tid}")
         samples = page.get_by_test_id(f"fg-topic-{tid}").locator("li.fg-sample--art")
@@ -767,27 +784,31 @@ def fulger_shapes_flow(run: Run, page: Page, vp: str):
         page.get_by_test_id("fg-start").click()
         for i, kind in enumerate(kinds):
             page.wait_for_function(FULGER_READY)
+            page.evaluate("window.__dbg.fulger.setStreak(3)")  # în serie apare bara fulgerului: totul trebuie să încapă și atunci
             page.evaluate(f"window.__dbg.fulger.force('{kind}')")
             page.wait_for_function(FULGER_READY)
+            page.wait_for_timeout(250)  # după intrarea cardului
             s = state()
             fit = page.evaluate(FULGER_FIT)
-            # fiecare variantă are un desen sau un text (la „Câte axe…” variantele sunt numere)
-            arts = page.evaluate("[...document.querySelectorAll('[data-testid=fg-answers] .fg-opt')].filter((b) => b.querySelector('.fg-opt__art svg, .fg-opt__art img') || [...b.children].some((c) => !c.classList.contains('fg-opt__key') && c.textContent.trim())).length")
+            arts = page.evaluate(FULGER_ARTS)  # fiecare buton are un desen, un emoji sau un text
+            text = page.evaluate(FULGER_TEXT)
             figure = page.get_by_test_id("fg-figure")
             # desenul are mărimea lui: toată lățimea cardului sau o înălțime mare (nu lățimea implicită a unui SVG, 300 px)
             drawn = not s["figure"] or (figure.count() == 1 and page.evaluate("(() => { const f = document.querySelector('[data-testid=fg-figure]'); const r = f.getBoundingClientRect(); return r.width >= 0.9 * f.parentElement.getBoundingClientRect().width || r.height >= 88; })()"))
-            run.check(s["kind"] == kind and arts == 4 and drawn and fit["bottom"] <= fit["vh"] and fit["scroll"] <= 1 and fit["x"] <= 1,
-                      f"[{vp}] {tid}: {kind} — desenul și cele 4 variante încap pe ecran ({fit})")
+            run.check(s["kind"] == kind and arts == s["buttons"] and drawn and fit["bottom"] <= fit["vh"] and fit["scroll"] <= 1 and fit["x"] <= 1 and (text is None or text >= 14),
+                      f"[{vp}] {tid}: {kind} — desenul și variantele încap pe ecran, cu seria pornită; textul desenului are {text} px ({fit})")
             run.shot(page, f"{vp}-fulger-{kind}")
             if i % 2 == 0:
-                page.get_by_test_id(f"fg-opt-{s['answerIndex']}").click()
+                answer_drawn(page, s, True)
                 shown = page.locator("[data-testid=fg-figure].is-shown").count() == 1
                 run.check(page.locator(".fg-opt.is-correct").count() == 1 and shown == s["solved"], f"[{vp}] {tid}: {kind} — răspunsul corect, cu desenul rezolvat")
                 if s["solved"]:
                     run.shot(page, f"{vp}-fulger-{kind}-rezolvat")
             else:
-                page.get_by_test_id(f"fg-opt-{s['wrongIndex']}").click()
-                run.check(page.locator(".fg-opt.is-wrong").count() == 1 and page.locator(".fg-opt.is-answer").count() == 1, f"[{vp}] {tid}: {kind} — la greșeală se vede varianta bună")
+                answer_drawn(page, s, False)
+                # la variante se încadrează cea bună, la ordonări se completează casetele în ordinea bună
+                shown = page.locator(".fg-slot.is-shown").count() == len(s["order"]) if s["mode"] == "sort" else page.locator(".fg-opt.is-answer").count() == 1
+                run.check(page.locator(".fg-opt.is-wrong").count() == 1 and shown, f"[{vp}] {tid}: {kind} — la greșeală se vede răspunsul bun")
                 page.evaluate("window.__dbg.fulger.elapse(9500)")  # peste pauza „Hopa”
         page.evaluate("window.__dbg.fulger.elapse(window.__dbg.fulger.state().remainingMs + 50)")
         page.wait_for_selector("[data-testid=fg-results]")
@@ -795,7 +816,7 @@ def fulger_shapes_flow(run: Run, page: Page, vp: str):
         page.wait_for_timeout(300)
         mistakes = page.locator("[data-testid=fg-mistakes] .fg-mistake--figure").count()
         # fiecare greșeală arată răspunsul bun: un desen, un emoji sau un text (la numărat, variantele sunt numere)
-        shown = page.evaluate("[...document.querySelectorAll('[data-testid=fg-mistakes] .fg-mistake--figure .fg-mistake__ok')].filter((ok) => ok.querySelector('svg, img') || [...ok.children].some((c) => !c.classList.contains('u-visually-hidden') && c.textContent.trim())).length")
+        shown = page.evaluate("[...document.querySelectorAll('[data-testid=fg-mistakes] .fg-mistake--figure .fg-mistake__ok')].filter((ok) => ok.querySelector('svg, img') || [...ok.childNodes].some((c) => !(c.classList?.contains('u-visually-hidden')) && c.textContent.trim())).length")
         run.check(mistakes == min(5, len(kinds) // 2) and shown == mistakes, f"[{vp}] {tid}: „Greșelile tale” arată răspunsul bun la fiecare greșeală ({mistakes} greșeli, {shown} cu răspunsul arătat)")
         run.layout_ok(page, f"[{vp}] {tid} rezultate")
         run.shot(page, f"{vp}-fulger-{tid}-rezultate")
@@ -803,10 +824,11 @@ def fulger_shapes_flow(run: Run, page: Page, vp: str):
 
 
 def fulger_screens(run: Run, browser, base: str):
-    """Jocuri fulger pe ecrane joase sau înguste (telefon ținut orizontal, telefon mic): totul încape fără derulare, și la figuri."""
+    """Jocuri fulger pe ecrane joase sau înguste (telefon ținut orizontal, telefon mic), cu seria pornită: totul încape fără derulare,
+    la figuri și la grafice, iar textul graficelor rămâne lizibil."""
     screens = [
-        ("telefon culcat", {"viewport": {"width": 844, "height": 390}, "has_touch": True, "is_mobile": True}),
-        ("telefon mic", {"viewport": {"width": 360, "height": 640}, "has_touch": True, "is_mobile": True}),
+        ("telefon culcat", {"viewport": {"width": 844, "height": 390}, "has_touch": True, "is_mobile": True}, 11),
+        ("telefon mic", {"viewport": {"width": 360, "height": 640}, "has_touch": True, "is_mobile": True}, 12),
     ]
     rounds = [
         (FULGER_TOPIC, ("add-100-cu", "sort-4-dir", "cmp-expr")),
@@ -814,8 +836,9 @@ def fulger_screens(run: Run, browser, base: str):
         ("puzzle-forme", ("simetrie-jumatate", "piesa-rotita", "axe-cate")),
         ("figuri-corpuri", ("desfasurare", "numara-figuri", "corpuri")),
         ("pozitii-trasee", ("robot-lung", "coordonate", "interior")),
+        ("grafice-tabele", ("timp-doua-serii", "grafic-compara", "grafic-ordine", "venn", "tabel", "cerc-felii")),
     ]
-    for name, opts in screens:
+    for name, opts, min_text in screens:
         context = browser.new_context(locale="ro-RO", **opts)
         page = context.new_page()
         run.watch(page, name)
@@ -827,10 +850,14 @@ def fulger_screens(run: Run, browser, base: str):
             page.get_by_test_id("fg-start").click()
             for kind in kinds:
                 page.wait_for_function(FULGER_READY)
+                page.evaluate("window.__dbg.fulger.setStreak(3)")
                 page.evaluate(f"window.__dbg.fulger.force('{kind}')")
                 page.wait_for_function(FULGER_READY)
+                page.wait_for_timeout(250)
                 fit = page.evaluate(FULGER_FIT)
-                run.check(fit["bottom"] <= fit["vh"] and fit["scroll"] <= 1 and fit["x"] <= 1, f"[{name}] fulger: la {kind} variantele încap fără derulare ({fit})")
+                text = page.evaluate(FULGER_TEXT)
+                run.check(fit["bottom"] <= fit["vh"] and fit["scroll"] <= 1 and fit["x"] <= 1 and (text is None or text >= min_text),
+                          f"[{name}] fulger: la {kind} variantele încap fără derulare, cu seria pornită; textul desenului are {text} px ({fit})")
                 run.shot(page, f"fulger-{name.replace(' ', '-')}-{kind}")
         context.close()
 
@@ -1018,7 +1045,7 @@ def main() -> int:
                 avatar_studio_flow(run, page, vp)
             if not args.only or fulger_only:
                 fulger_flow(run, page, vp)
-                fulger_shapes_flow(run, page, vp)
+                fulger_drawn_flow(run, page, vp)
             if tests:
                 pages_flow(run, page, tests[0], vp)
             for test in tests:

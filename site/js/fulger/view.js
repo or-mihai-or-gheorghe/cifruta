@@ -9,7 +9,7 @@ import { cantitate, formatNumber } from '../core/ro.js';
 import { play, unlockSound } from '../core/sound.js';
 import { emojiHTML } from '../visuals/emoji.js';
 import { visualSVG } from '../visuals/index.js';
-import { artHTML, artName, aspect } from './art.js';
+import { artHTML, artName, aspect, isChart, promptHTML, promptLength, promptSpoken } from './art.js';
 import { badge, banner, burst, flyTo, stamp } from './effects.js';
 import { createRound, levelConfig, nextStar, streakTier, TURBO_FROM } from './engine.js';
 import { KINDS } from './kinds.js';
@@ -25,12 +25,18 @@ const STAR_WORDS = ['Prima', 'A doua', 'A treia'];
 
 const spoken = (text) => String(text).replace(/−/g, 'minus');
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
+/** Plăcile unei ordonări: numerele (la calcule) sau id-urile plăcuțelor desenate (la grafice). */
+const tilesOf = (q) => q.tiles ?? q.numbers;
+/** O latură a comparării: textul unui calcul sau desenele de pe un grafic, unite cu „+”. */
+const sideText = (side, plus = ' + ') => (Array.isArray(side) ? side.map(artName).join(plus) : side);
+const SEPARATORS = { asc: '<', desc: '>', path: '→' };
 
 /** Răspunsul corect, scris pentru copil. */
 function answerText(q) {
   if (q.mode === 'figure') return artName(q.options[q.answer]);
   if (q.mode === 'choice') return String(q.answer);
-  if (q.mode === 'compare') return `${q.left} ${q.answer} ${q.right}`;
+  if (q.mode === 'compare') return `${sideText(q.left)} ${q.answer} ${sideText(q.right)}`;
+  if (q.tiles) return q.answer.map((id) => artName(q.options[id])).join(q.dir === 'path' ? ', ' : ` ${SEPARATORS[q.dir]} `);
   return q.answer.join(q.dir === 'asc' ? ' < ' : ' > ');
 }
 
@@ -52,6 +58,13 @@ function optionArt(spec) {
   if (!spec.v && !spec.emoji) return h('span', {}, spec.text);
   return h('span', { class: 'fg-opt__art', 'aria-hidden': 'true', style: { '--ar': String(aspect(spec)) }, html: artHTML(spec) });
 }
+
+/** Un emoji sau un text mic, pentru rândul de răspuns și pentru casetele ordonării. */
+const tinyArt = (spec) => (spec.emoji ? h('span', { class: 'fg-strip__art', html: artHTML(spec) }) : h('span', {}, spec.text));
+
+/** O latură a comparării desenate: emoji-uri sau texte, unite cu „+”. */
+const sideArt = (list) =>
+  h('span', { class: 'fg-strip__side' }, list.flatMap((spec, i) => (i ? [h('span', { class: 'fg-sign' }, '+'), tinyArt(spec)] : [tinyArt(spec)])));
 
 export function mountArena(host, { topic, topicTitle = '', level, best = null, seed, onEnd }) {
   const lvl = levelConfig(topic, level);
@@ -292,11 +305,27 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
   function renderQuestion(q) {
     slot = null;
     slots = [];
-    figure = null;
+    figure = q.figure
+      ? h('div', { class: `fg-fig${isChart(q.figure) ? ' fg-fig--chart' : ''}`, 'data-testid': 'fg-figure', 'aria-hidden': 'true', style: { '--ar': String(aspect(q.figure)) }, html: artHTML(q.figure) })
+      : null;
     let body;
+    let strip = null;
     if (q.mode === 'figure') {
-      figure = q.figure ? h('div', { class: 'fg-fig', 'data-testid': 'fg-figure', 'aria-hidden': 'true', style: { '--ar': String(aspect(q.figure)) }, html: artHTML(q.figure) }) : null;
-      body = h('div', { class: 'fg-q fg-q--figure', 'data-testid': 'fg-question' }, h('p', { class: 'fg-prompt' }, q.prompt), figure);
+      const prompt = h('p', { class: `fg-prompt${promptLength(q.prompt) > 45 ? ' fg-prompt--long' : ''}`, html: promptHTML(q.prompt) });
+      body = h('div', { class: 'fg-q fg-q--figure', 'data-testid': 'fg-question' }, prompt, figure);
+    } else if (q.figure) {
+      // comparare sau ordonare pe un desen: cardul are doar desenul, iar legenda și operanzii stau în rândul de deasupra butoanelor
+      // (așa cardul rămâne cât la întrebările cu variante, iar pe telefonul culcat rândul stă în coloana variantelor)
+      body = h('div', { class: 'fg-q fg-q--figure fg-q--drawn', 'data-testid': 'fg-question' }, figure);
+      const caption = h('span', { class: 'fg-strip__caption', html: promptHTML(q.prompt) });
+      if (q.mode === 'compare') {
+        slot = h('span', { class: 'fg-q__slot fg-q__slot--sign' });
+        strip = h('div', { class: 'fg-strip', 'data-testid': 'fg-strip' }, caption, h('span', { class: 'fg-strip__row' }, sideArt(q.left), slot, sideArt(q.right)));
+      } else {
+        slots = q.answer.map(() => h('span', { class: 'fg-slot' }));
+        const sign = SEPARATORS[q.dir];
+        strip = h('div', { class: 'fg-strip fg-strip--sort', 'data-testid': 'fg-strip' }, caption, h('span', { class: 'fg-slots' }, slots.flatMap((s, i) => (i ? [h('span', { class: 'fg-sign' }, sign), s] : [s]))));
+      }
     } else if (q.mode === 'choice') {
       slot = h('span', { class: 'fg-q__slot' }, '?');
       body = h('div', { class: 'fg-q', 'data-testid': 'fg-question' }, h('span', {}, q.text), h('span', { 'aria-hidden': 'true' }, '='), slot);
@@ -320,14 +349,17 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     card.replaceChildren(...[body, bolt].filter(Boolean));
     if (!reduced) pop(card, 'is-enter');
 
+    const drawnOption = (spec) => ({ art: spec, name: artName(spec), label: spec.note });
     const options =
       q.mode === 'figure'
-        ? q.choices.map((id) => ({ art: q.options[id], name: artName(q.options[id]) }))
+        ? q.choices.map((id) => drawnOption(q.options[id]))
         : q.mode === 'choice'
           ? q.choices.map((v) => ({ text: String(v), name: String(v) }))
           : q.mode === 'compare'
             ? SIGNS.map((s) => ({ text: s, name: SIGN_NAMES[s], label: SIGN_LABELS[s] }))
-            : q.numbers.map((n) => ({ text: String(n), name: `placa ${n}` }));
+            : q.tiles
+              ? q.tiles.map((id) => drawnOption(q.options[id]))
+              : q.numbers.map((n) => ({ text: String(n), name: `placa ${n}` }));
     buttons = options.map((o, i) => {
       const btn = h(
         'button',
@@ -341,14 +373,19 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     });
     // variantele cu piese sau rețele (multe căsuțe mici) stau pe două coloane pe telefoanele înalte, ca să iasă mai mari
     const detailed = q.mode === 'figure' && q.choices.some((id) => q.options[id].v === 'cell-grid');
-    answers.className = `fg-answers fg-answers--${q.mode}${detailed ? ' fg-answers--detailed' : ''}`;
+    answers.className = `fg-answers fg-answers--${q.mode}${detailed ? ' fg-answers--detailed' : ''}${strip ? ' fg-answers--strip' : ''}`;
     answers.style.setProperty('--n', String(buttons.length));
     answers.setAttribute('aria-busy', 'true');
-    answers.replaceChildren(...buttons);
+    answers.replaceChildren(...[strip, ...buttons].filter(Boolean));
+    const said = promptSpoken(q.prompt);
     live.textContent =
       q.mode === 'figure'
-        ? `${q.prompt}${q.figure ? ` ${artName(q.figure)}.` : ''} Variante: ${options.map((o) => o.name).join('; ')}.`
-        : q.mode === 'choice'
+        ? `${said}${q.figure ? ` ${artName(q.figure)}.` : ''} Variante: ${options.map((o) => o.name).join('; ')}.`
+        : q.figure && q.mode === 'compare'
+          ? `${said} ${artName(q.figure)}. Compară ${sideText(q.left, ' plus ')} cu ${sideText(q.right, ' plus ')}.`
+          : q.figure
+            ? `${said} ${artName(q.figure)}. Plăcuțe: ${options.map((o) => o.name).join(', ')}.`
+            : q.mode === 'choice'
           ? `${spoken(q.text)} fac?`
           : q.mode === 'compare'
             ? `Compară ${spoken(q.left)} cu ${spoken(q.right)}.`
@@ -363,7 +400,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
       finish(q.mode === 'compare' ? SIGNS[i] : q.choices[i], btn);
       return;
     }
-    const value = q.numbers[i];
+    const value = tilesOf(q)[i];
     if (taps.includes(value)) return;
     taps.push(value);
     if (value !== q.answer[taps.length - 1]) {
@@ -371,7 +408,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
       return;
     }
     const target = slots[taps.length - 1];
-    target.textContent = String(value);
+    fillSlot(target, q, value);
     target.classList.add('is-filled');
     btn.classList.add('is-used');
     if (taps.length === q.answer.length) finish([...taps], btn);
@@ -389,6 +426,12 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     after(res.pauseMs, () => nextQuestion());
   }
 
+  /** O casetă a ordonării: numărul sau desenul plăcuței. */
+  function fillSlot(el, q, value) {
+    if (q.tiles) el.replaceChildren(tinyArt(q.options[value]));
+    else el.textContent = String(value);
+  }
+
   function reveal(q) {
     if (figure && q.solved) {
       figure.innerHTML = artHTML(q.solved);
@@ -400,7 +443,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     }
     q.mode === 'sort' &&
       q.answer.forEach((v, i) => {
-        slots[i].textContent = String(v);
+        fillSlot(slots[i], q, v);
         slots[i].classList.remove('is-filled');
         slots[i].classList.add('is-shown');
       });
@@ -607,10 +650,12 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
         kind: q?.kind ?? null,
         mode: q?.mode ?? null,
         answerIndex: !q ? null : q.choices ? q.choices.indexOf(q.answer) : q.mode === 'compare' ? SIGNS.indexOf(q.answer) : null,
-        wrongIndex: !q ? null : q.choices ? q.choices.findIndex((c) => c !== q.answer) : q.mode === 'compare' ? SIGNS.findIndex((s) => s !== q.answer) : q.numbers.findIndex((n) => n !== q.answer[0]),
-        order: q?.mode === 'sort' ? q.answer.map((v) => q.numbers.indexOf(v)) : null,
+        wrongIndex: !q ? null : q.choices ? q.choices.findIndex((c) => c !== q.answer) : q.mode === 'compare' ? SIGNS.findIndex((s) => s !== q.answer) : tilesOf(q).findIndex((n) => n !== q.answer[0]),
+        order: q?.mode === 'sort' ? q.answer.map((v) => tilesOf(q).indexOf(v)) : null,
         figure: Boolean(q?.figure),
         solved: Boolean(q?.solved),
+        drawn: Boolean(q?.figure) && q?.mode !== 'figure',
+        buttons: buttons.length,
       };
     },
     start: () => countdown(),

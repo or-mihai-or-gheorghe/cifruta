@@ -9,9 +9,9 @@ import { normalizeTest } from '../core/spec.js';
 import { mountExercise } from '../components/exercise.js';
 import { callout, chip, levelPill, mascot, stars } from '../components/ui.js';
 import { seededRandom } from '../core/rng.js';
-import { artHTML, aspect } from '../fulger/art.js';
+import { artHTML, aspect, isChart, promptHTML } from '../fulger/art.js';
 import { playableTopics } from '../fulger/engine.js';
-import { KINDS } from '../fulger/kinds.js';
+import { isDrawn, KINDS } from '../fulger/kinds.js';
 import { listVisuals, visualSVG } from '../visuals/index.js';
 import { ANIMALS, avatarId, BACKGROUNDS, COLORS, colorWord, SLOTS } from '../core/avatar.js';
 import { avatarStudio } from '../components/avatar-studio.js';
@@ -117,12 +117,22 @@ async function types(wrap, ctls) {
 function fulgerReview() {
   const art = (spec, cls) =>
     spec.v || spec.emoji ? h('span', { class: cls, 'aria-hidden': 'true', style: { '--ar': String(aspect(spec)) }, html: artHTML(spec) }) : h('span', { class: `${cls} fg-review__text` }, spec.text);
+  const SEPARATORS = { asc: '<', desc: '>', path: '→' };
+  /** Sub desen: variantele (cu cea corectă încadrată), comparația corectă sau ordinea corectă a plăcuțelor. */
+  function answerRow(q) {
+    if (q.mode === 'figure') return h('div', { class: 'fg-review__opts' }, q.choices.map((c) => h('span', { class: `fg-review__opt${c === q.answer ? ' is-answer' : ''}` }, art(q.options[c], 'fg-review__art'))));
+    const items =
+      q.mode === 'compare'
+        ? [...q.left.flatMap((s, i) => (i ? ['+', s] : [s])), q.answer, ...q.right.flatMap((s, i) => (i ? ['+', s] : [s]))]
+        : q.answer.flatMap((id, i) => (i ? [SEPARATORS[q.dir], q.options[id]] : [q.options[id]]));
+    return h('div', { class: 'fg-review__row is-answer' }, items.map((x) => (typeof x === 'string' ? h('span', {}, x) : art(x, 'fg-review__art'))));
+  }
   return h(
     'div',
     { class: 'l-stack l-stack--lg' },
-    h('p', { class: 'u-muted' }, 'Câte 12 întrebări din fiecare tip cu figuri (semințele 1–12), cu varianta corectă încadrată în verde.'),
+    h('p', { class: 'u-muted' }, 'Câte 12 întrebări din fiecare tip desenat (semințele 1–12), cu răspunsul corect încadrat în verde.'),
     playableTopics().map((topic) => {
-      const kinds = [...new Set(topic.levels.flatMap((l) => l.mix.map((m) => m.kind)))].filter((kind) => KINDS[kind].mode === 'figure');
+      const kinds = [...new Set(topic.levels.flatMap((l) => l.mix.map((m) => m.kind)))].filter(isDrawn);
       if (!kinds.length) return null;
       return h(
         'section',
@@ -141,9 +151,9 @@ function fulgerReview() {
                 return h(
                   'figure',
                   { class: 'c-card fg-review' },
-                  h('figcaption', { class: 'u-small' }, h('strong', {}, `${i + 1}. `), q.prompt),
-                  q.figure ? art(q.figure, 'fg-review__fig') : null,
-                  h('div', { class: 'fg-review__opts' }, q.choices.map((c) => h('span', { class: `fg-review__opt${c === q.answer ? ' is-answer' : ''}` }, art(q.options[c], 'fg-review__art')))),
+                  h('figcaption', { class: 'u-small' }, h('strong', {}, `${i + 1}. `), h('span', { html: promptHTML(q.prompt) })),
+                  q.figure ? art(q.solved ?? q.figure, `fg-review__fig${isChart(q.figure) ? ' fg-review__fig--chart' : ''}`) : null,
+                  answerRow(q),
                 );
               }),
             ),
