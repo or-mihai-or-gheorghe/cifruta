@@ -89,7 +89,7 @@ service cloud.firestore {
 
     // ——— Calcul fulger: temele jucabile (aceleași id-uri ca în site/data/fulger.js; testul tests/cloud.test.js le compară) ———
     function fulgerTopics() {
-      return '(adunari-scaderi-100|siruri-intrusi|puzzle-forme|figuri-corpuri|pozitii-trasee|grafice-tabele|harti-arbori)';
+      return '(adunari-scaderi-100|numere-1000|siruri-intrusi|puzzle-forme|figuri-corpuri|pozitii-trasee|grafice-tabele|harti-arbori)';
     }
     function fulgerPeriod() {
       return '(all|[0-9]{4}-W[0-9]{2})';

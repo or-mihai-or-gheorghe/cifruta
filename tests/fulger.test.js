@@ -18,6 +18,7 @@ import { LEGACY_TOPIC, LEVEL_IDS, normalizeFulger, recordKey, splitKey } from '.
 import '../site/js/visuals/all.js';
 import { EMOJI } from '../site/js/visuals/emoji.js';
 import { visualErrors, visualSVG } from '../site/js/visuals/index.js';
+import { RULES_1000 } from './fulger-1000.rules.js';
 import { SHAPE_RULES } from './fulger-forme.rules.js';
 import { CHART_RULES } from './fulger-grafice.rules.js';
 import { MAP_RULES } from './fulger-grafuri.rules.js';
@@ -59,6 +60,7 @@ const RULES = {
   'cmp-expr': ({ left, right }) =>
     [left, right].some((x) => /[+−]/.test(x)) && Math.abs(calc(left) - calc(right)) <= 3 && [left, right].every((x) => inRange(calc(x), 10, 100)),
   'sort-4-dir': ({ numbers }) => numbers.length === 4 && numbers.every((x) => inRange(x, 0, 100)),
+  ...RULES_1000, // numerele până la 1000: tests/fulger-1000.rules.js
   ...SHAPE_RULES, // tipurile cu figuri: regulile sunt în tests/fulger-forme.rules.js
   ...CHART_RULES, // tipurile cu grafice: tests/fulger-grafice.rules.js
   ...MAP_RULES, // hărțile, rețelele și arborii: tests/fulger-grafuri.rules.js

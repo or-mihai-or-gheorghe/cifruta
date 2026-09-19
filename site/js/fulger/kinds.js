@@ -14,6 +14,7 @@
 
 import { trecere } from '../core/rules.js';
 import { choice, compare, sorting } from './intrebari.js';
+import { KINDS_1000 } from './kinds-1000.js';
 import { CHART_KINDS } from './kinds-grafice.js';
 import { MAP_KINDS } from './kinds-grafuri.js';
 import { SHAPE_KINDS } from './kinds-forme.js';
@@ -304,6 +305,7 @@ export const KINDS = {
       return sorting('sort-4-dir', rand, trickyFour(rand), dir);
     },
   },
+  ...KINDS_1000,
   ...SHAPE_KINDS,
   ...CHART_KINDS,
   ...MAP_KINDS,
