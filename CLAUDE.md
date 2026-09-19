@@ -30,15 +30,18 @@ site/                      ← publicat
                            storage (localStorage simplu) · loader · router · dom (h, pop, countUp) · ro (diacritice, cantitate) · lint · dnd · sound
                            forme (figuri: contur, cheie canonică, nume, axe) · grile (piese din căsuțe, desfășurările cubului)
                            avatar (avatarul desenat: liste, text canonic, nume, alegerea la întâmplare)
+                           grafuri (vecini și prieteni comuni, arbori: copii, frunze, drumul și suma de pe ramuri; turneul)
   js/components/, js/pages/  interfața (player, rezultate/revizuire, atelier; avatar-studio = atelierul avatarului, în profil și în atelier)
   js/types/<tip>/logic.js  logică pură (Node o poate importa): validate · count · answered · empty · solution · evaluate
   js/types/<tip>/view.js   DOM: mount(el, part, ctx) → { get, set, mode, showResult, destroy }
   js/visuals/              banca vizuală: registerVisual(nume, {render, label, demos}); all.js le importă pe toate;
                            avatar (desenul și accesoriile) · avatar-animals (cele 24 de animale) · avatar-parts (blănuri, ochi, umeri)
-  js/fulger/               Jocuri fulger (jocuri pe viteză, pe teme, #/fulger): kinds (calcule) și kinds-forme (figuri), generate
-                           cu sămânță, cu concepte · rand · art (desenul și numele unei variante) · engine (temele, runda și
-                           punctajul, pur) · records (chei „temă:nivel”, datele vechi) · medals (medaliile: catalogul, cele câștigate, cele
-                           ale unei runde; pur) · view (arena) · effects (particule, bannere);
+                           grafice (bare, linii, pictograme, tabel, cerc, Venn) · grafuri (hartă, rețea, turneu, arbore): desenele jocurilor
+  js/fulger/               Jocuri fulger (jocuri pe viteză, pe teme, #/fulger): kinds (calcule), kinds-forme (figuri), kinds-grafice și
+                           kinds-grafuri (grafice, hărți, arbori), generate cu sămânță, cu concepte · intrebari (forma întrebărilor
+                           desenate) · contexte (unități, nume, zile, date) · rand · art (desenul și numele unei variante, cerința cu
+                           emoji) · engine (temele, runda și punctajul, pur) · records (chei „temă:nivel”, datele vechi) · medals
+                           (medaliile: catalogul, cele câștigate, cele ale unei runde; pur) · view (arena) · effects (particule, bannere);
                            pagina e pages/fulger.js
   data/catalog.js          secțiuni → grupuri → teste · concepts.js (ID-uri de concepte) · scoring.js · demo.js · fulger.js (jocul)
   data/tests/<grup>/tN-nume.js   testele (NU le numi test-*.js)
@@ -60,7 +63,8 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
 - `npm run serve` — site local la http://localhost:8080 (`?debug=1` expune `window.__dbg`).
 - `npm run e2e` — Playwright (Chromium headless): fluxuri pe fiecare test, gesturi pe fiecare tip, tastatură, capturi în `test-results/`
   (`python3 tools/e2e.py --only recap-c1-t2 --shots`, `--viewports laptop`, `--base-url https://…` pentru site-ul publicat).
-- `python3 tools/fetch_assets.py` / `tools/fetch_fonts.py` — descarcă emoji Noto noi (după ce le adaugi în `emoji.js`) și fonturile.
+- `python3 tools/fetch_assets.py` / `tools/fetch_fonts.py` — descarcă emoji Noto noi (după ce le adaugi în `emoji.js`; din folderul
+  `2D/svg` al depozitului Noto) și fonturile.
 - `npm run deploy` — rulează `npm test` și împinge `main`; fluxul `.github/workflows/pages.yml` rulează testele și publică `site/` pe
   GitHub Pages → https://or-mihai-or-gheorghe.github.io/cifruta/, cu cheia web Firebase din secretul `FIREBASE_API_KEY` (~2 min, `gh run watch`;
   verifică apoi cu `python3 tools/e2e.py --base-url https://or-mihai-or-gheorghe.github.io/cifruta/`).
@@ -86,6 +90,21 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   `fulger.test.js` mai cere: cerința de cel mult 45 de caractere, 4 variante diferite și fără culori, și fără mărime, nume diferite pentru
   cititorul de ecran, desene valide, răspunsul pe toate pozițiile la fel de des și aceeași întrebare după JSON. Capturile din
   `python3 tools/e2e.py --only fulger --shots` se privesc pe fiecare tip.
+- **Tip cu grafice sau grafuri în Jocuri fulger:**
+  - **Unde:** o intrare în `CHART_KINDS` (`js/fulger/kinds-grafice.js`) sau în `MAP_KINDS` (`js/fulger/kinds-grafuri.js`). Datele se aleg
+    la întâmplare, iar desenul vine din bancă: `chart-bars`, `chart-line`, `chart-picto`, `chart-table`, `chart-pie`, `venn`, `metro`,
+    `network`, `bracket`, `tree`.
+  - **Întrebarea** se face cu `numberQuestion`, `pickQuestion`, `drawnCompare` sau `drawnSort` din `js/fulger/intrebari.js` și poartă `ask`
+    (ce se întreabă, ca date JSON). Din `ask`, regula tipului verifică numele din cerință și calculează singură răspunsul, cu codul ei:
+    `tests/fulger-grafice.rules.js` sau `tests/fulger-grafuri.rules.js`.
+  - **Comparările și ordonările pe desen** au `drawn: true`:
+    - cardul arată doar desenul;
+    - legenda (cel mult 24 de caractere) și operanzii stau în rândul de răspuns (`fg-strip`);
+    - la ordonare, `tiles` sunt id-uri, cu desenele lor în `options`.
+  - **Cerința:** cel mult `promptMax` caractere (45 implicit, 60 la grafice; un `{{e:nume}}` numără 2); singurul markup permis e `{{e:}}`.
+  - **Unitățile, numele, zilele și datele** vin din `js/fulger/contexte.js` (genul dă „Câte / Câți”, cantitățile se scriu cu `cantitate`).
+  - **Un desen nou de acest fel** intră și în `isChart` (`js/fulger/art.js`), în `FULGER_TEXT` (`tools/e2e.py`) și în grupurile testului de
+    mărime din `tests/visuals.test.js`.
 - **Temă nouă în Jocuri fulger:** tipurile ei în `KINDS`, apoi tema în `topics` din `data/fulger.js`: id permanent (fără segmentele
   `usor`, `intermediar`, `avansat`, `total`, `all`), `title`, `short`, `text`, `icon`, `grade`, `concepts` și cele 3 niveluri cu `warmup`,
   `mix`, `stars` (o temă `soon: true` n-are niveluri și apare doar ca „în curând”). Id-ul intră și în `fulgerTopics()` din
@@ -180,6 +199,20 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   robotului stau sub rețea ca plăcuțe numerotate, cât o căsuță, iar desenul rezolvat (`path`, `mark`) arată drumul pas cu pas. Variantele
   cu piese și rețele (`fg-answers--detailed`) trec pe două coloane pe telefoanele înalte. În SVG, clasa `v-label` își ia culoarea din CSS,
   care bate atributul `fill`: `txt()` scrie celelalte culori ca stil, iar `tests/visuals.test.js` refuză textul alb dat prin atribut.
+- Jocuri fulger cu grafice și grafuri (temele „Grafice și tabele” și „Hărți și arbori”):
+  - **Lizibil pe telefon:** desenele au viewBox de 320 de unități, cu text de cel puțin 18 unități (numerele 20, emoji-urile 24).
+    `tests/visuals.test.js` citește mărimile din SVG, iar E2E le măsoară pe ecran (`FULGER_TEXT`: ≥ 14 px; 12 px pe 360×640, 11 px pe
+    844×390).
+  - **Culoarea nu e singurul indiciu:** a doua serie e punctată și are ■, liniile hărții au numere, al doilea cerc din Venn e punctat.
+    Culorile seriilor sunt `--v-series-1..4`.
+  - **Bara fulgerului** e o pastilă pe marginea de sus a cardului (absolută, fără înălțime proprie). E2E verifică încăperea cu seria
+    pornită (`setStreak(3)`) și că pastila nu acoperă cerința (`bolt` din `FULGER_FIT`).
+  - **Pauza „Hopa”** e plafonată la `guard.pauseMaxMs` (9 s), pentru tipurile lente.
+  - **Un singur răspuns bun:** maximul și minimul întrebate sunt stricte, iar valorile stau pe liniile grilei. Cel mai scurt drum, linia,
+    stația de schimb, prietenul comun și drumul cel mai bogat sunt unice. Regulile verifică toate acestea.
+  - **Numele desenului** (pentru cititorul de ecran) citește datele, nu rezultatul: fără „cel mai mare”, total sau câștigător.
+  - **E2E:** `DRAWN_TOPICS` (temele cu toate tipurile desenate) și `fulger_drawn_flow` joacă fiecare tip, cu un răspuns corect și unul
+    greșit; `fulger_screens` le încearcă pe 844×390 și pe 360×640.
 - Medaliile Jocurilor fulger (`js/fulger/medals.js`, configurarea `medals` din `data/fulger.js`, desenul `award`):
   - **Regula:** 3 stele la un nivel al unei teme aduc medalia metalului nivelului (bronz la Ușor, argint la Intermediar, aur la Avansat);
     aceeași medalie la 2, 3 și 5 teme aduce medaliile în plus (dublu, colecția, cupa).

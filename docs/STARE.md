@@ -1,22 +1,25 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-14 · **Versiune:** 0.13.0 (medaliile Jocurilor fulger pe niveluri: bronz la Ușor, argint la Intermediar, aur la Avansat, plus medalii în plus pentru aceeași medalie la mai multe teme)
+- **Data:** 2026-09-19 · **Versiune:** 0.14.0 (Jocuri fulger cu grafice și grafuri: temele „Grafice și tabele” și „Hărți și arbori”, 32 de tipuri noi de întrebări)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
   rezultate (scor, calificativ, stele, confetti, autoevaluare, zona pentru părinți cu lista încercărilor și concepte pe subpunct,
   revizuire cu explicații, rezolvare, „Mai încerc o dată” repetabil), 13 tipuri de exerciții (cu traseu pe harta liniilor și
-  grafic cu bare construit; `mark` cu reguli de set pentru sarcini deschise), banca vizuală (58 de desene: și grafice, pictograme,
+  grafic cu bare construit; `mark` cu reguli de set pentru sarcini deschise), banca vizuală (70 de desene: și grafice, pictograme,
   bețișoare, felii, tabele, podium, hartă de linii, indicator, raft, bon, listă, tabel de poziție, cuburi, medalie, figuri cu umplere
-  și rotire, piese din căsuțe, desfășurări, rețeaua robotului, avatarul desenat, medaliile și cupele jocurilor; 8 peisaje animate), sunete discrete cu buton de oprire, atelier pentru
+  și rotire, piese din căsuțe, desfășurări, rețeaua robotului, avatarul desenat, medaliile și cupele jocurilor, graficele și grafurile
+  jocurilor: bare, grafice în timp, pictograme, tabele, cercul cu felii, Venn, harta liniilor, rețeaua, turneul, arborele; 8 peisaje animate), sunete discrete cu buton de oprire, atelier pentru
   autori (și cu întrebările generate ale jocurilor), **Jocurile fulger** (`#/fulger`: teme desfășurate pe pagina jocului, fiecare cu trei
   niveluri: „Adunări și scăderi până la 100” și patru teme cu figuri, fără calcule, „Șiruri și intruși”, „Puzzle cu forme”, „Figuri și
-  corpuri”, „Poziții și trasee”; numerele până la 1000, înmulțirea, împărțirea și ecuațiile simple apar „în curând”; runde de 2 minute,
-  40 de tipuri de întrebări generate (16 cu calcule, 24 cu figuri), fiecare cu conceptele ei („Ce exersăm”), alune cu bonus de viteză și
+  corpuri”, „Poziții și trasee”, și două teme cu grafice și grafuri, „Grafice și tabele” și „Hărți și arbori”; numerele până la 1000,
+  înmulțirea, împărțirea și ecuațiile simple apar „în curând”; runde de 2 minute,
+  72 de tipuri de întrebări generate (16 cu calcule, 24 cu figuri, 32 cu grafice, hărți și arbori), fiecare cu conceptele ei („Ce
+  exersăm”), alune cu bonus de viteză și
   de serie, Turbo, pistă spre stele și record, medalii pe niveluri, „Greșelile tale” și ținta următoarei stele la rezultate: 3 stele la
   un nivel al unei teme aduc medalia de bronz, argint sau aur, iar aceeași medalie la 2, 3 și 5 teme aduce „dublul”, colecția și cupa;
-  acum 24 de medalii, pe raftul de pe pagina jocului, pe cardurile nivelurilor și pe prima pagină). Conținut: **4 teste
+  acum 30 de medalii, pe raftul de pe pagina jocului, pe cardurile nivelurilor și pe prima pagină). Conținut: **4 teste
   de recapitulare a clasei I** (T1–T4 v2)
   și **6 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc), toate
   exercițiile cu desen sau emoji, fără răspunsuri „la vedere”, cu probleme în mai mulți pași și sarcini deschise la avansat.
@@ -32,15 +35,17 @@
   - Fără configurarea Firebase, site-ul arată ca în v0.8.1, plus legătura „Confidențialitate” din subsol.
 
   **Calitate:**
-  - 100 de teste Node, plus validarea conținutului, a tabelului de acoperire și a contrastului, calibrarea stelelor din Jocurile fulger
-    pe fiecare temă și nivel, regulile independente ale celor 24 de tipuri cu figuri, avatarele (textul canonic, id-urile publicate,
-    fiecare combinație desenată) și medaliile (catalogul, pragurile, medaliile unei runde, datele vechi);
-  - 16 teste ale regulilor Firestore pe emulator, inclusiv 41 de intrări într-o tranzacție;
-  - E2E cu 1415 verificări pe 3 ecrane și tastatură, plus telefon ținut orizontal și telefon mic;
+  - 102 teste Node, plus validarea conținutului, a tabelului de acoperire și a contrastului, calibrarea stelelor din Jocurile fulger
+    pe fiecare temă și nivel, regulile independente ale celor 24 de tipuri cu figuri și ale celor 32 cu grafice și grafuri (numele din
+    cerință și răspunsul, calculate din datele desenului), mărimea textului din desenele jocurilor, avatarele (textul canonic, id-urile
+    publicate, fiecare combinație desenată) și medaliile (catalogul, pragurile, medaliile unei runde, datele vechi);
+  - 16 teste ale regulilor Firestore pe emulator, inclusiv 57 de intrări într-o tranzacție;
+  - E2E cu 1665 de verificări pe 3 ecrane și tastatură, plus telefon ținut orizontal și telefon mic (cu seria pornită, textul graficelor
+    măsurat pe ecran);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.13.0 e publicat (regulile Firestore nu s-au schimbat), cu E2E pe site-ul live 1415/1415.
-  - Copilul joacă temele și strânge medalii; din rundele reale se reglează `fastMs` și pragurile de stele.
+- **Următorul pas:** v0.14.0 se publică: întâi regulile Firestore (`fulgerTopics()` cu temele noi), apoi site-ul.
+  - Copilul joacă temele noi și strânge medalii; din rundele reale se reglează `fastMs` și pragurile de stele.
   - Rămân: verificarea în Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
   - Apoi: secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul) și temele „în curând” din Jocuri fulger.
 
@@ -143,6 +148,20 @@
   - **Verificare:** npm test 100/100, reguli 16/16, E2E 1415/1415, E2E cont 82/82.
   - **Publicare:** site-ul prin GitHub Actions (rularea 34862449844; regulile Firestore nu se schimbă); E2E pe site-ul live 1415/1415,
     tag `v0.13.0`.
+- [x] M29 (v0.14.0): Jocuri fulger cu grafice și grafuri.
+  - **Conținut:** două teme noi, câte 16 tipuri, și 6 medalii noi (30 în total):
+    - „Grafice și tabele”: pictograme, bare cu una sau două serii, tabele cu bețișoare, cercul cu felii numărate, grafice în timp pe
+      zile și pe date, Venn;
+    - „Hărți și arbori”: hărți de linii (stații, schimbări, minute), rețele de prieteni, turnee, arbori de sume, de alegeri și de
+      clasificare, crengile veveriței.
+  - **Întrebări:** comparare, ordonare, adunare și scădere, totaluri, diferențe la o dată, drumuri; cu unitatea din enunț și cu date
+    din calendar. Fiecare poartă `ask`, din care regulile din teste află singure răspunsul.
+  - **Arena:** comparările și ordonările au desenul deasupra, iar operanzii stau în rândul de răspuns. Bara fulgerului e o pastilă pe
+    marginea cardului, iar pauza „Hopa” e plafonată la 9 s.
+  - **Desene:** `chart-bars`, `chart-line`, `chart-picto`, `chart-table`, `chart-pie`, `venn`, `metro`, `line-badge`, `network`,
+    `bracket`, `tree`, pe 320 de unități, cu text mare; 34 de emoji noi.
+  - **Verificare:** npm test 102/102, reguli 16/16, E2E 1665/1665, E2E cont 82/82.
+  - **Publicare:** întâi regulile (`fulgerTopics()` cu temele noi), apoi site-ul prin GitHub Actions.
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -259,6 +278,16 @@
 | 2026-09-14 | Medaliile Jocurilor fulger sunt pe niveluri: 3 stele la un nivel al unei teme aduc medalia nivelului (bronz la Ușor, argint la Intermediar, aur la Avansat), iar aceeași medalie la 2, 3 și 5 teme aduce medaliile în plus („Bronz dublu”, „Colecția de bronz”, „Cupa de bronz”); doar în Jocurile fulger; cele 6 medalii comune nu se mai arată, iar datele lor rămân și se ignoră | cererea utilizatorului („bronz ușor, argint intermediar, aur avansat”, medalii extra pentru aceeași medalie la teme diferite) și răspunsurile lui la cele 4 întrebări; înlocuiește decizia din 2026-09-13 „Medaliile rămân comune” |
 | 2026-09-14 | Medaliile temelor se deduc din recorduri și se unesc cu cele salvate; la finalul rundei se anunță doar cele noi, dar se salvează toate cele câștigate, ca să urce în cloud cu runda; la încărcarea paginii nu se scrie nimic | stelele nu se salvează; recordurile de dinainte aduc medaliile imediat, fără migrare și fără reguli Firestore noi (`medals` rămâne o hartă) |
 | 2026-09-14 | Id-urile medaliilor sunt permanente (`<metal>:<temă>`, `<metal>-<treaptă>`), iar legătura metal–nivel e fixă; o temă jucabilă nouă aduce singură cele 3 medalii ale ei, iar catalogul crește cu ea | id-urile stau în `cifruta:fulger` și în `state/fulger` |
+| 2026-09-19 | Două teme noi în Jocuri fulger, „Grafice și tabele” și „Hărți și arbori”, câte 16 tipuri, cu același cadru: arena, punctajul, timpul, stelele, medaliile și clasamentele | cererea utilizatorului (grafice cu bare, cu felii și în timp, cu una sau mai multe serii; hărți ca ale transportului public și arbori) și răspunsurile lui la cele 4 întrebări |
+| 2026-09-19 | Comparările și ordonările pe desen merg ca la calcule (butoanele <, =, > și plăcuțe atinse în ordine), cu desenul deasupra; cardul lor n-are rând de cerință: o legendă scurtă și operanzii stau în rândul de răspuns | decizia utilizatorului; pe telefonul mic nu încăpeau și desenul, și cerința, și operanzii |
+| 2026-09-19 | Cercul cu felii se citește doar prin felii numărate (1, 2, 5 sau 10 pe felie), fără fracții; păstrate și rețeaua de prieteni, turneul, veverița pe crengi și cele două cercuri (Venn) | deciziile utilizatorului; programa clasei a II-a |
+| 2026-09-19 | Întrebările folosesc unitatea din enunț și date din calendar („Câte cărți au citit Ana și Dan pe 10 iunie?”, „Cu cât a citit Ana mai mult decât Dan pe 10 iunie?”); unitățile, numele și datele vin din `js/fulger/contexte.js`, cu acordul prin `cantitate` | cererea utilizatorului |
+| 2026-09-19 | Fiecare întrebare desenată poartă `ask` (ce se întreabă, ca date JSON); regulile din teste verifică numele din cerință, calculează răspunsul din datele desenului, cu codul lor, și cer un singur răspuns bun (maxim strict, un singur drum cel mai scurt, o singură stație de schimb…) | itemii cu două răspunsuri bune se prind înainte de publicare, ca la figuri |
+| 2026-09-19 | Desenele jocurilor au 320 de unități lățime și text de cel puțin 18 unități (numerele 20); E2E măsoară textul pe ecran: 14 px pe laptop, tabletă și telefon, 12 px pe 360×640, 11 px pe 844×390 | desenele de date din teste (`bar-chart`, `pie`, `route-map`) au text de 7–11 px pe telefon; ele rămân neschimbate, pentru că sunt în teste publicate |
+| 2026-09-19 | Bara fulgerului e o pastilă pe marginea de sus a cardului, fără înălțime proprie; E2E verifică încăperea cu seria pornită și că pastila nu acoperă cerința | măsurat: în serie, figurile cele mai înalte ieșeau din ecran pe 360×640 și 844×390, iar E2E forța întrebările fără serie; o captură a arătat apoi pastila peste cerință pe telefonul ținut orizontal |
+| 2026-09-19 | Pauza „Hopa” e plafonată la 9 s (`guard.pauseMaxMs`) | tipurile noi, care cer citirea unui desen, au `fastMs` de până la 11 s |
+| 2026-09-19 | Culoarea nu e niciodată singurul indiciu: seriile au culori validate pentru daltonism (`--v-series-1..4`), a doua serie e punctată și are ■, liniile hărții au numere și modele, al doilea cerc din Venn e punctat | accesibilitate; paleta verificată cu validatorul de palete |
+| 2026-09-19 | Crengile veveriței au cel mult 5 fructe (la 3 niveluri se desparte o singură creangă), iar numerele de pe crengi au mărimea numerelor | cu 8 fructe, pastilele crengilor surori se atingeau, iar textul ieșea la 10–11 px pe telefonul mic și pe cel ținut orizontal |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -284,12 +313,15 @@
   reîncărcare; o salvare din ea trimite textul neschimbat, pe care regulile îl acceptă.
 - Săptămânile trecute păstrează avatarul de atunci (încă nu se afișează). La scor egal, ordinea din clasament se poate schimba după o
   salvare de avatar, pentru că se schimbă `updatedAt`.
-- O salvare de avatar rescrie într-o tranzacție până la 41 de intrări, fiecare verificată cu `getAfter` pe profil: pe emulator trece,
+- O salvare de avatar rescrie într-o tranzacție până la 57 de intrări (7 teme), fiecare verificată cu `getAfter` pe profil: pe emulator trece,
   dar documentația Firestore nu spune limpede dacă citirile repetate ale aceluiași document intră o singură dată în limita de accesări.
 - Medaliile pentru recordurile de dinainte de v0.13.0 apar pe raft fără sărbătorire (nu sunt „noi”) și se salvează la prima rundă
   terminată, din orice temă. Un prag de stele ridicat mai târziu ascunde o medalie doar dacă era dedusă și încă nesalvată.
 - Cele 6 medalii vechi rămân în `cifruta:fulger` și în `state/fulger`, ignorate; ștergerea rundelor din „Pentru părinți” șterge și
-  medaliile. Raftul are 24 de medalii, deci pe telefon pagina jocului se lungește (grila are 3 coloane).
+  medaliile. Raftul are 30 de medalii, deci pe telefon pagina jocului se lungește (grila are 3 coloane).
+- Pragurile de stele și `fastMs` ale temelor cu grafice și grafuri vin din simulare, cu aceleași rapoarte ca la celelalte teme; citirea
+  unui desen poate dura mai mult la un copil real.
+- Pe telefonul ținut orizontal, textul graficelor și al hărților are 11–15 px (pragul din E2E e 11 px): se citește, dar e mic.
 
 ## Backlog
 - Scanările actuale acoperă manualul până la înmulțire; utilizatorul adaugă scanări noi după finalizarea etapei curente.
@@ -304,6 +336,8 @@
   pe mai multe teme (`fulger-total-<perioadă>`, rezervat), răspuns tastat, antrenament
   fără cronometru, magazinul Cifruței (accesorii pentru mascotă cumpărate cu alune), provocarea zilei, vibrații pe tabletă, nivel
   adaptiv; pragurile de stele și timpii „fulger” se ajustează după runde reale.
+- Jocuri fulger cu grafice și grafuri, mai departe: timp la schimbarea liniei pe hartă, bare orizontale, tabele cu două intrări mai
+  mari, drumuri pe hărți desenate de copil; `fastMs` și pragurile de stele ajustate după rundele reale.
 - Jocuri fulger cu figuri, mai departe: tangram cu triunghiuri, perechi de piese care formează o figură, vederi de sus ale corpurilor,
   emoji-urile unei teme încărcate înainte de start, `fastMs` și pragurile de stele ajustate după rundele reale.
 - Amânate la cerere: citire cu voce (TTS), tastatură numerică proprie pe ecran.
@@ -532,4 +566,35 @@
   - **Publicat:** site-ul prin GitHub Actions (rularea 34862449844); E2E pe site-ul live 1415/1415, tag `v0.13.0`.
 
   **De făcut data viitoare:** copilul joacă și strânge medalii → `fastMs` și pragurile de stele; verificarea în Firestore a clasamentelor
+  mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
+- **2026-09-19 (grafice și grafuri, v0.14.0)**
+  - **Cererea utilizatorului:**
+    - jocuri fulger cu grafice (bare, felii, grafice în timp, cu una sau mai multe serii) și cu grafuri (hărți ca ale transportului
+      public, arbori);
+    - întrebări de comparare, ordonare, adunare și scădere, agregare, între elemente, grupuri și drumuri;
+    - apoi și întrebări cu unitatea din enunț și cu date („Cu cât e mai mare x decât y pe 10 iunie?”).
+  - **Deciziile lui:**
+    - două teme;
+    - comparările și ordonările ca la calcule, cu desenul deasupra;
+    - cercul doar cu felii numărate;
+    - toate cele patru idei în plus: rețeaua de prieteni, turneul, veverița pe crengi, Venn;
+    - încă o trecere de verificare a planului, înainte de aprobare.
+  - **Planul**, aprobat, s-a construit în 5 etape, cu commit la fiecare:
+    1. Desenele și emoji-urile.
+    2. Arena cu desen și tema „Grafice și tabele”.
+    3. Tema „Hărți și arbori”.
+    4. Integrarea: prima pagină, testele regulilor, E2E.
+    5. Documentația și publicarea.
+  - **Depanare:**
+    - **Bara fulgerului:** am măsurat cu Playwright că, în serie, împingea figurile înalte sub ecran; a devenit o pastilă pe marginea
+      cardului, iar E2E verifică încăperea cu seria pornită. Capturile au arătat apoi pastila peste cerință pe telefonul ținut
+      orizontal (emoji-ul avea în jur un rând de text); E2E verifică acum și locul dintre pastilă și cerință.
+    - **Textul prea mic:**
+      - Harta avea text de 10–11 px pe ecranele mici: numerele au trecut la 20 de unități, iar harta e mai joasă.
+      - Arborele veveriței cu 8 fructe avea pastilele lipite și text de 11 px pe telefonul mic; acum are cel mult 5 fructe.
+    - **Un distractor slab:** la cel mai scurt drum, suma tuturor minutelor dădea variantele „3, 4, 5, 20”; a ieșit din listă.
+    - **Emoji-urile Noto** se descarcă acum din folderul nou, `2D/svg`.
+  - **Rezultate:** npm test 102/102, reguli 16/16, E2E 1665/1665, E2E cont 82/82.
+
+  **De făcut data viitoare:** copilul joacă temele noi → `fastMs` și pragurile de stele; verificarea în Firestore a clasamentelor
   mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.

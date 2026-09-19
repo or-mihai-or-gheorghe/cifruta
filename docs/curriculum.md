@@ -133,6 +133,7 @@ Ce altă documentare am folosit (exemple de exerciții, aplicații, UX): `docs/c
 | Figuri rotite și figuri în oglindă (Jocuri fulger) | II | ➕ | `mat.geo.rotire` |
 | Desfășurarea cubului, a cuboidului, a cilindrului și a conului | II | 📜 | `mat.geo.desfasurari` |
 | Coordonate (rând, coloană) | II | 📜 | `mat.geo.coordonate` |
+| Hărți de linii: stații, schimbarea liniei, drumul cel mai scurt în minute (Jocuri fulger) | II | ➕ | `mat.geo.harta-linii` |
 
 ### 5. Măsurări, timp și bani
 
@@ -169,6 +170,10 @@ Notă: bancnota de **20 de lei** circulă din 2021, dar programa din 2013 nu o l
 | „Ce s-ar întâmpla dacă…?” | I | 📜 | — |
 | Grafice cu bare (conținut), diagrama Venn | II | 📜 | `mat.log.grafic-bare`, `mat.log.venn` |
 | Analogii cu figuri (A → B, C → ?) și tabele 3 × 3 cu reguli (Jocuri fulger) | II | ➕ | `mat.log.analogii` |
+| Cercul cu felii egale, fiecare felie valorează un număr, fără fracții (Jocuri fulger) | II | ➕ | `mat.log.diagrama-cerc` |
+| Grafice în timp, cu una sau două serii, pe zilele săptămânii sau pe date (Jocuri fulger) | II | ➕ | `mat.log.grafic-linie` |
+| Arbori: ramuri, alegeri, sume, clasificări cu da / nu (Jocuri fulger) | II | ➕ | `mat.log.arbori` |
+| Rețele și turnee: puncte legate prin linii, prieteni comuni, cine a câștigat (Jocuri fulger) | II | ➕ | `mat.log.retele` |
 
 ### 7. Explorarea mediului
 

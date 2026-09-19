@@ -132,6 +132,36 @@ HTML nu este permis (se afișează ca text).
 - **Mascotă și decor:** `mascot {mood: vesela|ganditoare|sarbatoreste|incurajeaza}` · `level-icon {level}` · `scene {theme: mare|piata|spatiu|ferma|magazin|oras|scoala|stadion}` (o temă nouă cere și tokenii `[data-theme]` din `00-tokens.css`).
 - **Medalii:** `award {metal: bronz|argint|aur, form?: medalie|dublu|colectie|cupa, icon?, n?}` (medalia unei teme din Jocurile fulger, cu emoji-ul temei în mijloc, sau formele medaliilor în plus; `n` = numărul de pe cupă).
 - **Avatare:** `avatar {avatar: vulpe.culoare-albastru.cap-coroana}` (avatarul unui profil, textul canonic din `core/avatar.js`; animalele, culorile, fundalurile și accesoriile se văd la `#/atelier/avatare`).
+- **Grafice și grafuri (făcute pentru Jocurile fulger):**
+  - **Forma:** 320 de unități lățime, text de cel puțin 18 unități (numerele 20), ca să se citească pe telefon.
+  - **Parametrii** sunt liste de obiecte, deci vin doar din date, nu din `{{v:}}`.
+  - **`mark`** scoate în evidență ce ține de răspuns în desenul rezolvat.
+  - **Numele pentru cititorul de ecran** citește datele, nu rezultatul.
+
+  Desenele:
+  - **Grafice:**
+    - `chart-bars {cats: [{id, emoji | text, name}], series: [{id, name?, values}], step, unit: [sg, pl], month?, hide?, mark?: [{cat, s}]}`:
+      bare pe categorii sau pe zilele unei luni (`month`, cu datele în `cats`), cu una sau două serii; `hide` ascunde o bară sub „?”.
+    - `chart-line {days: [luni, …] | dates: [8, 9, …] + month, series, step, unit, mark?: [{s, x}]}`: grafic în timp, cu una sau două
+      serii (a doua punctată, cu ■).
+    - `chart-picto {rows: [{id, name}], values, symbol, each: 1 | 2 | 5 | 10, unit, mark?}`: pictogramă cu legendă („🍎 = 5 mere”).
+    - `chart-table {cols, rows: [{id, emoji?, name, cells: [n | {tally: n}]}], mark?: [{r, c}]}`: tabel cu numere sau cu bețișoare.
+    - `chart-pie {groups: [{id, emoji, name, n}], each, unit, mark?}`: cerc cu felii numărate („o felie = 2 copii”), fără fracții.
+    - `venn {a: {emoji, name}, b, counts: {a, ab, b}, mark?: a | ab | b | A | B | all}`: două cercuri; `A` = tot cercul A.
+  - **Hărți și rețele:**
+    - `metro {stops: [{id, emoji, x, y}], lines: [{id, n, stops}], minutes?: [{a, b, n}], path?, routes?: [{id: A | B, path}], plain?, mark?, h?}`:
+      - harta liniilor: fiecare linie are numărul și modelul ei, iar stațiile de schimb au inel dublu;
+      - `plain` = drumuri gri, fără linii;
+      - `routes` = drumurile A (plin) și B (punctat).
+    - `line-badge {n}`: insigna liniei, ca variantă de răspuns.
+    - `network {nodes: [{id, emoji, x, y}], edges: [[a, b], …], mark?}`: rețeaua de prieteni.
+    - `bracket {players (4 sau 8), rounds: [[câștigătorii turului], …], mark?}`: turneu eliminatoriu (câștigătorul urcă pe linia plină).
+  - **Arbori:**
+    - `tree {nodes: [{id, parent?, edge?, value? | emoji? | text? | slot? | blank?}], grow: down | up, style: plain | branch, mark?}`:
+      - arborele sumelor (`slot` = „?”, `blank` = căsuță goală);
+      - arborele alegerilor;
+      - clasificarea cu da / nu pe ramuri;
+      - crengile veveriței (`branch`, cu alunele în `edge`).
 
 Toate apar cu exemple la `#/atelier/vizualuri`. **Desen nou:** `registerVisual('nume', { group, defaults, label, render, viewBox, demos })`
 într-un modul din `site/js/visuals/`; culori doar din variabile `--v-*` (vezi `css/00-tokens.css`), contur
