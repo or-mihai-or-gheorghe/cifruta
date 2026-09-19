@@ -44,7 +44,7 @@
     măsurat pe ecran);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.14.0 se publică: întâi regulile Firestore (`fulgerTopics()` cu temele noi), apoi site-ul.
+- **Următorul pas:** v0.14.0 e publicat (întâi regulile Firestore, ruleset `673d0bb7`, apoi site-ul), cu E2E pe site-ul live 1665/1665.
   - Copilul joacă temele noi și strânge medalii; din rundele reale se reglează `fastMs` și pragurile de stele.
   - Rămân: verificarea în Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
   - Apoi: secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul) și temele „în curând” din Jocuri fulger.
@@ -161,7 +161,8 @@
   - **Desene:** `chart-bars`, `chart-line`, `chart-picto`, `chart-table`, `chart-pie`, `venn`, `metro`, `line-badge`, `network`,
     `bracket`, `tree`, pe 320 de unități, cu text mare; 34 de emoji noi.
   - **Verificare:** npm test 102/102, reguli 16/16, E2E 1665/1665, E2E cont 82/82.
-  - **Publicare:** întâi regulile (`fulgerTopics()` cu temele noi), apoi site-ul prin GitHub Actions.
+  - **Publicare:** întâi regulile (`fulgerTopics()` cu temele noi, ruleset `673d0bb7`), apoi site-ul prin GitHub Actions (rularea
+    35429835230); E2E pe site-ul live 1665/1665, tag `v0.14.0`.
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -595,6 +596,8 @@
     - **Un distractor slab:** la cel mai scurt drum, suma tuturor minutelor dădea variantele „3, 4, 5, 20”; a ieșit din listă.
     - **Emoji-urile Noto** se descarcă acum din folderul nou, `2D/svg`.
   - **Rezultate:** npm test 102/102, reguli 16/16, E2E 1665/1665, E2E cont 82/82.
+  - **Publicat:** regulile Firestore (ruleset `673d0bb7`), apoi site-ul prin GitHub Actions (rularea 35429835230); E2E pe site-ul live
+    1665/1665, tag `v0.14.0`.
 
   **De făcut data viitoare:** copilul joacă temele noi → `fastMs` și pragurile de stele; verificarea în Firestore a clasamentelor
   mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
