@@ -147,7 +147,8 @@ function sample(kind, seed) {
       'li',
       { class: `fg-sample fg-sample--art${q.figure ? '' : ' fg-sample--options'}` },
       arts.map((art) => h('span', { class: 'fg-sample__art', 'aria-hidden': 'true', style: { '--ar': String(aspect(art)) }, html: artHTML(art) })),
-      h('span', { class: 'u-visually-hidden' }, promptSpoken(q.prompt)),
+      // la comparările și ordonările desenate, cerința e doar legenda rândului de răspuns („Minute:”): se citește numele tipului
+      h('span', { class: 'u-visually-hidden' }, q.mode === 'figure' ? promptSpoken(q.prompt) : KINDS[kind].label),
     );
   }
   const content = q.mode === 'choice' ? q.text : q.mode === 'compare' ? [q.left, h('span', { class: 'fg-box', 'aria-label': 'căsuță' }), q.right] : q.numbers.join(' · ');
@@ -354,10 +355,17 @@ function mistake({ question: q, given }) {
     const shown = mistakeFigure(q.solved ?? q.figure);
     if (q.mode === 'compare') {
       const side = (list) => list.flatMap((spec, i) => (i ? [' + ', mistakeArt(spec)] : [mistakeArt(spec)]));
+      const spoken = (list) => list.map(artName).join(' plus ');
       return h(
         'li',
         { class: 'fg-mistake fg-mistake--figure' },
-        h('span', { class: 'fg-mistake__line' }, prompt, shown, ok([...side(q.left), ` ${q.answer} `, ...side(q.right)])),
+        h(
+          'span',
+          { class: 'fg-mistake__line' },
+          prompt,
+          shown,
+          ok([...side(q.left), ` ${q.answer} `, ...side(q.right), h('span', { class: 'u-visually-hidden' }, ` Răspunsul corect: ${spoken(q.left)} ${q.answer} ${spoken(q.right)}.`)]),
+        ),
         h('span', { class: 'fg-mistake__note' }, `ai ales ${given}`),
       );
     }
@@ -366,7 +374,7 @@ function mistake({ question: q, given }) {
     return h(
       'li',
       { class: 'fg-mistake fg-mistake--figure' },
-      h('span', { class: 'fg-mistake__line' }, prompt, shown, ok(order)),
+      h('span', { class: 'fg-mistake__line' }, prompt, shown, ok([...order, h('span', { class: 'u-visually-hidden' }, ` Răspunsul corect: ${q.answer.map(name).join(', ')}.`)])),
       h('span', { class: 'fg-mistake__note' }, `ai atins ${name(given.at(-1))} în loc de ${name(q.answer[given.length - 1])}`),
     );
   }

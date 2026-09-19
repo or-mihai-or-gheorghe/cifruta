@@ -74,15 +74,18 @@ export const ANIMALS = [
 ];
 const animal = (id) => ANIMALS.find((a) => a.id === id);
 const animalOption = (id) => ({ emoji: id, alt: animal(id).name });
-// așezările nodurilor și legăturile posibile (fără linii care trec prin alt nod)
+// așezările nodurilor și legăturile posibile (fără linii care trec prin alt nod); `hub` e locul care poate avea cele mai multe
+// legături (5, față de cel mult 3 în rest)
 const NETWORKS = [
   {
     at: [[60, 50], [160, 50], [260, 50], [60, 160], [160, 160], [260, 160]],
     edges: [[0, 1], [1, 2], [3, 4], [4, 5], [0, 3], [1, 4], [2, 5], [0, 4], [2, 4]],
+    hub: 4,
   },
   {
     at: [[160, 105], [160, 30], [247, 84], [213, 184], [107, 184], [73, 84]],
     edges: [[1, 2], [2, 3], [3, 4], [4, 5], [5, 1], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5]],
+    hub: 0,
   },
 ];
 
@@ -94,7 +97,7 @@ function buildNetwork(rand) {
     const count = int(rand, 6, Math.min(8, layout.edges.length));
     const edges = shuffle(rand, layout.edges).slice(0, count).map(([a, b]) => [ids[a], ids[b]]);
     if (!connected(ids, edges)) continue;
-    return { ids, edges, nodes: ids.map((id, i) => ({ id, emoji: id, name: animal(id).name, x: layout.at[i][0], y: layout.at[i][1] })) };
+    return { ids, edges, hub: ids[layout.hub], nodes: ids.map((id, i) => ({ id, emoji: id, name: animal(id).name, x: layout.at[i][0], y: layout.at[i][1] })) };
   }
 }
 
@@ -197,11 +200,14 @@ export const MAP_KINDS = {
     promptMax: 60,
     concepts: [RETELE],
     generate(rand) {
+      // felul întrebării se alege o dată: o rețea refăcută la „cei mai mulți prieteni” nu trece la cealaltă întrebare (la „câți
+      // prieteni”, răspunsurile de 1 sau 2 nu pot sta ultimele, deci jumătate din întrebări sunt cu variante-animale)
+      const count = rand() < 0.5;
       for (;;) {
         const net = buildNetwork(rand);
         const figure = { v: 'network', nodes: net.nodes, edges: net.edges };
         const key = `${net.ids.join(',')}:${net.edges.map((x) => x.join('-')).join(',')}`;
-        if (rand() < 0.6) {
+        if (count) {
           const x = pickOne(rand, net.ids);
           const d = degree(net.edges, x);
           return numberQuestion('prieteni', rand, {
@@ -211,6 +217,7 @@ export const MAP_KINDS = {
             key: `d:${key}:${x}`,
             answer: d,
             typical: [d + 1, d - 1, net.edges.length],
+            // 0 rămâne printre variante (deși rețeaua e legată): fără el, un răspuns de 1 sau 2 ar sta aproape mereu primul
             min: 0,
             max: 7,
             ask: { op: 'degree', node: x },
@@ -220,6 +227,8 @@ export const MAP_KINDS = {
         const top = Math.max(...degrees);
         if (degrees.filter((d) => d === top).length !== 1) continue;
         const best = net.ids[degrees.indexOf(top)];
+        // locul din mijloc câștigă aproape mereu: de cele mai multe ori, cel cu cei mai mulți prieteni stă în altă parte
+        if (best === net.hub && rand() < 0.97) continue;
         const second = [...net.ids].filter((id) => id !== best).sort((p, q) => degree(net.edges, q) - degree(net.edges, p));
         const q = pickQuestion('prieteni', rand, {
           prompt: 'Cine are cei mai mulți prieteni?',
@@ -256,6 +265,7 @@ export const MAP_KINDS = {
         key: `${tree.nodes.map((n) => `${n.id}${n.edge ?? n.emoji}`).join(',')}:${tip}`,
         answer,
         typical: [answer - edges.at(-1), answer - edges[0], edges.length, answer + 1, answer - 1],
+        min: 1,
         ask: { op: 'pathSum', to: tip },
       });
     },
@@ -273,7 +283,7 @@ export const MAP_KINDS = {
         const drinks = shuffle(rand, DRINKS).slice(0, int(rand, 2, 3));
         const counts = drinks.map(() => int(rand, 1, 4));
         const total = sum(counts);
-        if (total < 3 || total > 8) continue;
+        if (total < 3 || total > 6) continue;
         const nodes = [{ id: 'r', emoji: 'veverita' }];
         drinks.forEach((d, i) => {
           nodes.push({ id: d.id, parent: 'r', emoji: d.id === 'apa' ? 'apa' : d.id });
@@ -394,7 +404,7 @@ export const MAP_KINDS = {
         const path = stops.slice(from, to + 1);
         const parts = pair(path).map(([a, b]) => minuteOf(minutes, a, b));
         const answer = sum(parts);
-        const figure = metro(map, { minutes, path });
+        const figure = metro(map, { minutes, path, mark: path });
         return numberQuestion('drum-minute', rand, {
           prompt: 'Câte minute durează drumul marcat?',
           figure,
@@ -402,6 +412,7 @@ export const MAP_KINDS = {
           key: `${map.stops.map((s) => s.id).join(',')}:${minutes.map((m) => m.n).join('')}:${path.join('-')}`,
           answer,
           typical: [answer - parts.at(-1), answer - parts[0], path.length, answer + 1, answer - 1],
+          min: 1,
           ask: { op: 'minutes' },
         });
       }
@@ -461,10 +472,11 @@ export const MAP_KINDS = {
         const finalists = eight ? rounds[1] : rounds[0];
         const runnerUp = finalists.find((p) => p !== champion);
         const key = `${players.join(',')}:${rounds.flat().join(',')}`;
-        const variant = eight ? pickOne(rand, ['winner', 'final', 'wins', 'wins']) : pickOne(rand, ['winner', 'final']);
+        // la 4 jucători, „cu cine a jucat în finală” n-ar avea trei variante greșite
+        const variant = pickOne(rand, eight ? ['winner', 'final', 'wins', 'wins'] : ['winner', 'wins']);
         if (variant === 'wins') {
-          // răspunsul întâi (0–3, variantele fixe), apoi un jucător cu atâtea victorii
-          const wins = int(rand, 0, 3);
+          // răspunsul întâi (variantele fixe 0–3; la 4 jucători, cel mult 2 victorii), apoi un jucător cu atâtea victorii
+          const wins = int(rand, 0, eight ? 3 : 2);
           const p = pickOne(rand, players.filter((x) => bracketWins(rounds, x) === wins));
           return numberQuestion('turneu', rand, {
             prompt: `Câte meciuri a câștigat ${animal(p).the}?`,
@@ -529,6 +541,7 @@ export const MAP_KINDS = {
           key: `${tree.map((n) => n.value).join(',')}:${target}`,
           answer,
           typical: [answer + 10, answer - 10, sibling ? tree.find((n) => n.id === parentOf).value + sibling.value : answer + 5, sibling?.value ?? answer - 5],
+          min: 1,
           ask: { op: 'sumTree' },
         });
       }
@@ -549,7 +562,8 @@ export const MAP_KINDS = {
         const [q1, q2, q3] = shuffle(rand, Object.keys(QUESTIONS)).slice(0, 3);
         const [yes1, yes2] = [letter < 2, letter % 2 === 0];
         const asks = [q1, letter < 2 ? q2 : q3];
-        const fits = Object.entries(FACTS).filter(([, f]) => f[q1] === yes1 && f[asks[1]] === yes2 && f[q2] !== undefined && f[q3] !== undefined);
+        // faptele contează doar pe drumul animalului: întrebarea din cealaltă ramură nu-l privește
+        const fits = Object.entries(FACTS).filter(([, f]) => f[q1] === yes1 && f[asks[1]] === yes2);
         if (!fits.length) continue;
         const [who] = pickOne(rand, fits);
         const nodes = [
@@ -605,6 +619,7 @@ export const MAP_KINDS = {
           key: `${map.stops.map((s) => s.id).join(',')}:${minutes.map((m) => m.n).join(',')}`,
           answer: best,
           typical: [...totals.filter((x) => x !== best), best + 1, best - 1],
+          min: 1,
           ask: { op: 'shortest', from, to },
         });
       }
@@ -671,6 +686,7 @@ export const MAP_KINDS = {
           key: `${tree.map((n) => n.value).join(',')}:${leaf.id}`,
           answer,
           typical: [parent.value, tree[0].value - sib.value, tree[0].value - uncle.value - sib.value + 10, answer + 10, answer - 10].filter((x) => x !== answer),
+          min: 1,
           ask: { op: 'sumTree' },
         });
       }
@@ -686,17 +702,20 @@ export const MAP_KINDS = {
     concepts: [ARBORI, O_OP],
     generate(rand) {
       for (;;) {
-        const tree = squirrelTree(rand, 2);
+        const tree = squirrelTree(rand, 3);
         const tips = leaves(tree.nodes);
         const sums = tips.map((t) => pathSum(tree.nodes, t));
         const top = Math.max(...sums);
         if (sums.filter((s) => s === top).length !== 1) continue;
         const best = tips[sums.indexOf(top)];
-        // drumul lacom: la fiecare ramificație, creanga cu mai multe alune
+        // scurtăturile: drumul lacom (la fiecare ramificație, creanga cu mai multe alune) și fructul cu cea mai mare creangă a lui duc
+        // la răspuns doar într-o întrebare din patru; fructele de sus (drumurile cu trei crengi strâng mai mult) câștigă mai rar
         const kids = childrenOf(tree.nodes);
         let greedy = 'r';
         while (kids.get(greedy).length) greedy = kids.get(greedy).reduce((p, c) => (tree.byId[c].edge > tree.byId[p].edge ? c : p));
-        if (greedy === best && rand() < 0.6) continue; // de cele mai multe ori, drumul lacom nu e cel mai bogat
+        const bigTip = tips.reduce((p, c) => (tree.byId[c].edge > tree.byId[p].edge ? c : p));
+        if ((greedy === best || bigTip === best) && rand() < 0.8) continue;
+        if (pathTo(tree.nodes, best).length === 4 && rand() < 0.5) continue;
         const fruitOf = (id) => ({ emoji: tree.byId[id].emoji, alt: FRUIT_NAMES[tree.byId[id].emoji] });
         const q = pickQuestion('veverita-bogat', rand, {
           prompt: 'Pe ce drum strânge cele mai multe alune?',

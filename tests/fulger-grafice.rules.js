@@ -6,9 +6,13 @@ const optionList = (q) => q.choices.map((id) => q.options[id]);
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const sum = (list) => list.reduce((s, x) => s + x, 0);
 const escape = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-/** Cuvântul apare întreg în text (fără să fie bucată din alt cuvânt). */
-export const says = (text, word) => new RegExp(`(^|[^\\p{L}])${escape(word)}([^\\p{L}]|$)`, 'u').test(text);
+/** Cuvântul apare întreg în text (fără să fie bucată din alt cuvânt sau din alt număr: „5 mai” nu e în „15 mai”). */
+export const says = (text, word) => new RegExp(`(^|[^\\p{L}\\p{N}])${escape(word)}([^\\p{L}\\p{N}]|$)`, 'u').test(text);
 const REL = (a, b) => (a < b ? '<' : a > b ? '>' : '=');
+/** Cerința întreabă de maxim („cele mai multe”, „cei mai mulți”) sau de minim, nu de celălalt. */
+const MOST = /mai (multe|mulți)/u;
+const LEAST = /mai (puține|puțini)/u;
+const asks = (text, op) => (op === 'max' ? MOST.test(text) && !LEAST.test(text) : LEAST.test(text) && !MOST.test(text));
 
 // numele articulate ale preferatelor (cerința spune „câinele”, desenul are „câine”)
 const THE = {
@@ -82,13 +86,15 @@ export const CHART_RULES = {
   pictograma: (q) => {
     const f = q.figure;
     if (f?.v !== 'chart-picto' || f.each !== 1 || !f.values.every((v) => v >= 1 && v <= 8) || !solvedOk(q)) return false;
+    // pe rânduri cu nume, toate simbolurile sunt același fruct, iar cerința îl numește
+    if (f.symbol && !says(q.prompt, f.unit[1])) return false;
     const { op, row } = q.ask;
     if (op === 'value') {
       const r = f.rows.find((x) => x.id === row);
       return says(q.prompt, r.name) && f.rows.every((x) => x.id === row || !says(q.prompt, x.name)) && numberAnswer(q, pictoValue(f, row));
     }
     const i = extreme(f.values, op);
-    if (i < 0 || !says(q.prompt, op === 'max' ? 'multe' : 'puține')) return false;
+    if (i < 0 || !asks(q.prompt, op)) return false;
     const r = f.rows[i];
     return pickAnswer(q, (o) => (r.emoji ? o.emoji === r.emoji : o.text === r.name));
   },
@@ -100,7 +106,7 @@ export const CHART_RULES = {
     const { op, cat } = q.ask;
     if (op === 'value') return mentionsOnly(q.prompt, f.cats, [cat]) && numberAnswer(q, barValue(f, cat));
     const i = extreme(values, op);
-    return i >= 0 && says(q.prompt, op === 'max' ? 'multe' : 'puține') && pickAnswer(q, (o) => o.emoji === f.cats[i].emoji);
+    return i >= 0 && asks(q.prompt, op) && pickAnswer(q, (o) => o.emoji === f.cats[i].emoji);
   },
 
   'grafic-compara': (q) => {
@@ -113,7 +119,8 @@ export const CHART_RULES = {
     const shows = (spec, r) =>
       r.cat !== undefined ? spec.emoji === f.cats.find((c) => c.id === r.cat).emoji : r.s !== undefined && f.series.length > 1 ? spec.text === seriesOf(f, r.s).name : spec.text === DAY[r.x][0];
     const sides = q.left.length === a.length && q.right.length === b.length && q.left.every((s, i) => shows(s, a[i])) && q.right.every((s, i) => shows(s, b[i]));
-    const dated = f.v === 'chart-line' && f.dates ? says(q.prompt, `${a[0].x} ${f.month}`) : true;
+    // pe date: cerința spune data, iar ambele laturi se citesc la ea
+    const dated = f.v === 'chart-line' && f.dates ? says(q.prompt, `${a[0].x} ${f.month}`) && [...a, ...b].every((r) => r.x === a[0].x) : true;
     const values = f.series.flatMap((s) => s.values);
     return sides && dated && onGrid(f, values) && q.answer === REL(lv, rv);
   },
@@ -194,7 +201,7 @@ export const CHART_RULES = {
     }
     if (op === 'total') return says(q.prompt, 'total') && numberAnswer(q, sum(slices) * f.each);
     const i = extreme(slices, 'max');
-    return i >= 0 && says(q.prompt, 'mulți') && pickAnswer(q, (o) => o.emoji === f.groups[i].emoji);
+    return i >= 0 && asks(q.prompt, 'max') && pickAnswer(q, (o) => o.emoji === f.groups[i].emoji);
   },
 
   'timp-grafic': (q) => {
@@ -206,7 +213,7 @@ export const CHART_RULES = {
     if (op === 'value') return says(q.prompt, DAY[q.ask.x][1]) && others([q.ask.x]) && numberAnswer(q, lineValue(f, q.ask.x));
     if (op === 'max' || op === 'min') {
       const i = extreme(values, op);
-      return i >= 0 && others([]) && pickAnswer(q, isX(f, f.days[i]));
+      return i >= 0 && asks(q.prompt, op) && others([]) && pickAnswer(q, isX(f, f.days[i]));
     }
     if (op === 'diff') {
       const [a, b] = [q.ask.a[0].x, q.ask.b[0].x];
@@ -261,6 +268,8 @@ export const CHART_RULES = {
       return lineValue(f, x, 'a') > lineValue(f, x, 'b') && q.prompt.indexOf(A.name) < q.prompt.indexOf(B.name) && numberAnswer(q, diffs[f.dates.indexOf(x)]);
     }
     if (datesSaid.length) return false;
+    // „… a citit Ana … mai mult decât Dan”: întâi seria care are mai mult
+    if (op !== 'dayEqual' && q.prompt.indexOf(A.name) > q.prompt.indexOf(B.name)) return false;
     if (op === 'dayMore') {
       const hits = f.dates.filter((_, i) => diffs[i] === q.ask.k);
       return hits.length === 1 && says(q.prompt, String(q.ask.k)) && pickAnswer(q, isX(f, hits[0]));
@@ -287,7 +296,7 @@ export const CHART_RULES = {
     }
     const totals = f.dates.map((d) => lineValue(f, d, 'a') + lineValue(f, d, 'b'));
     const i = extreme(totals, 'max');
-    return f.series.length === 2 && i >= 0 && says(q.prompt, 'împreună') && pickAnswer(q, isX(f, f.dates[i]));
+    return f.series.length === 2 && i >= 0 && says(q.prompt, 'împreună') && asks(q.prompt, 'max') && pickAnswer(q, isX(f, f.dates[i]));
   },
 
   venn: (q) => {

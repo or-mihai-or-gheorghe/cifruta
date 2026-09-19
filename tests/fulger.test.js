@@ -175,6 +175,16 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
   }
 });
 
+test('fulger: regulile graficelor și ale grafurilor pe încă 2500 de semințe (ramurile rare ale datelor)', () => {
+  // ramurile rare scapă din 500 de semințe: „cu 5 mai mult”, într-o lună de mai, se citea ca data „5 mai” (1 întrebare din 1000)
+  for (const id of Object.keys({ ...CHART_RULES, ...MAP_RULES })) {
+    for (let seed = SEEDS + 1; seed <= 3000; seed++) {
+      const q = KINDS[id].generate(seededRandom(seed));
+      assert.ok(RULES[id](q), `${id} (sămânța ${seed}) încalcă regulile tipului: ${JSON.stringify(q)}`);
+    }
+  }
+});
+
 test('fulger: alunele cresc cu viteza (doar în serie) și cu seria', () => {
   const alune = (kind, ms, streak) => scoreAnswer({ kind, ms, streak }).alune;
   assert.equal(alune('add-1c', 500, 1), 1); // primul răspuns din serie: fără bonus de viteză

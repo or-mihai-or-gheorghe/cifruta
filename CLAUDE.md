@@ -95,8 +95,9 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
     la întâmplare, iar desenul vine din bancă: `chart-bars`, `chart-line`, `chart-picto`, `chart-table`, `chart-pie`, `venn`, `metro`,
     `network`, `bracket`, `tree`.
   - **Întrebarea** se face cu `numberQuestion`, `pickQuestion`, `drawnCompare` sau `drawnSort` din `js/fulger/intrebari.js` și poartă `ask`
-    (ce se întreabă, ca date JSON). Din `ask`, regula tipului verifică numele din cerință și calculează singură răspunsul, cu codul ei:
-    `tests/fulger-grafice.rules.js` sau `tests/fulger-grafuri.rules.js`.
+    (ce se întreabă, ca date JSON). Din `ask`, regula tipului verifică numele din cerință (și sensul: „cele mai multe” sau „cele mai
+    puține”, cine e primul) și calculează singură răspunsul, cu codul ei: `tests/fulger-grafice.rules.js` sau `tests/fulger-grafuri.rules.js`.
+    Regulile acestor tipuri rulează pe 3000 de semințe, ca să prindă ramurile rare (o dată din 1000, „cu 5 mai mult” se citea „5 mai”).
   - **Comparările și ordonările pe desen** au `drawn: true`:
     - cardul arată doar desenul;
     - legenda (cel mult 24 de caractere) și operanzii stau în rândul de răspuns (`fg-strip`);
@@ -209,7 +210,16 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
     pornită (`setStreak(3)`) și că pastila nu acoperă cerința (`bolt` din `FULGER_FIT`).
   - **Pauza „Hopa”** e plafonată la `guard.pauseMaxMs` (9 s), pentru tipurile lente.
   - **Un singur răspuns bun:** maximul și minimul întrebate sunt stricte, iar valorile stau pe liniile grilei. Cel mai scurt drum, linia,
-    stația de schimb, prietenul comun și drumul cel mai bogat sunt unice. Regulile verifică toate acestea.
+    stația de schimb, prietenul comun și drumul cel mai bogat sunt unice. Regulile verifică toate acestea. O variantă din afara desenului
+    are 0, deci apare doar la „cele mai multe”.
+  - **Variantele:**
+    - zilele și datele stau în ordinea lor (`order` în `pickQuestion`);
+    - pe grafice cu pasul 5 sau 10, distractorii sunt multipli ai pasului (altfel ±1–3 lasă un singur număr posibil);
+    - la răspunsuri mici (1–2), 0 rămâne printre variante, altfel răspunsul ar sta mereu primul (testul pozițiilor pică).
+  - **Bucla `for (;;)`:** felul întrebării se alege înaintea ei. O întrebare refăcută nu trebuie să treacă la alt fel, altfel se strică
+    amestecul și echilibrul pozițiilor.
+  - **Scurtăturile** (drumul lacom, cea mai mare creangă, nodul din mijlocul rețelei) se refac de cele mai multe ori, ca răspunsul să
+    ceară calculul; frecvența lor se măsoară prin simulare.
   - **Numele desenului** (pentru cititorul de ecran) citește datele, nu rezultatul: fără „cel mai mare”, total sau câștigător.
   - **E2E:** `DRAWN_TOPICS` (temele cu toate tipurile desenate) și `fulger_drawn_flow` joacă fiecare tip, cu un răspuns corect și unul
     greșit; `fulger_screens` le încearcă pe 844×390 și pe 360×640.

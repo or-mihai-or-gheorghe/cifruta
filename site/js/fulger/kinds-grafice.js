@@ -1,7 +1,8 @@
 // Jocuri fulger: tipurile temei „Grafice și tabele”. Fiecare întrebare are un desen de date (visuals/grafice.js), un răspuns calculat
 // din date și un `ask` declarativ (ce se întreabă, despre ce), din care regulile din tests/fulger-grafice.rules.js găsesc singure
-// răspunsul. Numerele merg până la 20 la tipurile ușoare și până la 100 la celelalte; valorile stau pe liniile grilei (cu jumătăți doar
-// la `bare-scara`), iar maximul și minimul sunt unice când se întreabă de ele. Comparările și ordonările au desenul deasupra
+// răspunsul. Numerele de citit sau de adunat merg până la 20 la tipurile ușoare și până la 100 la celelalte (comparările și ordonările
+// compară doar înălțimi); valorile stau pe liniile grilei (cu jumătăți doar la `bare-scara`), iar maximul și minimul sunt unice când
+// se întreabă de ele. Comparările și ordonările au desenul deasupra
 // (`drawn: true`): la ele cerința e o legendă scurtă, iar operanzii stau în rândul de răspuns.
 
 import { cantitate } from '../core/ro.js';
@@ -85,6 +86,11 @@ const lineFigure = ({ days, dates, month, series, step, unit }) => ({
   unit,
 });
 
+// variantele-zi și variantele-dată stau în ordinea din calendar, nu amestecate
+const DAY_ORDER = Object.values(DAYS).map(([short]) => short);
+const byDay = (o) => DAY_ORDER.indexOf(o.text);
+const byDate = (o) => Number(o.text);
+
 const consecutive = (rand, n) => {
   const start = int(rand, 1, 28 - n);
   return Array.from({ length: n }, (_, i) => start + i);
@@ -102,7 +108,8 @@ export const CHART_KINDS = {
     generate(rand) {
       for (;;) {
         const values = distinct(rand, 3, 1, 8);
-        const variant = pickOne(rand, ['value', 'value', 'most', 'least']);
+        // doar „cele mai multe”: o variantă din afara desenului are 0, deci la „cele mai puține” ar fi și ea un răspuns bun
+        const variant = pickOne(rand, ['value', 'value', 'most']);
         const byNames = rand() < 0.5;
         if (byNames) {
           const fruit = pickOne(rand, COUNT_SETS[0].items);
@@ -123,18 +130,17 @@ export const CHART_KINDS = {
               ask: { op: 'value', row: rows[i].id },
             });
           }
-          const pick = variant === 'most' ? Math.max(...values) : Math.min(...values);
-          const i = values.indexOf(pick);
+          const i = values.indexOf(Math.max(...values));
           const others = rows.filter((_, j) => j !== i).map((r) => ({ text: r.name }));
           const extra = shuffle(rand, NAMES.flat().filter((n) => !names.includes(n)))[0];
           return pickQuestion('pictograma', rand, {
-            prompt: `Cine a cules cele ${variant === 'most' ? 'mai multe' : 'mai puține'} ${fruit.name}?`,
+            prompt: `Cine a cules cele mai multe ${fruit.name}?`,
             figure,
             solved: marked(figure, [rows[i].id]),
-            key: `n${variant}:${names.join(',')}:${values.join(',')}`,
+            key: `nmost:${fruit.id}:${names.join(',')}:${values.join(',')}`,
             answer: { text: rows[i].name },
             distractors: [...others, { text: extra }],
-            ask: { op: variant === 'most' ? 'max' : 'min' },
+            ask: { op: 'max' },
           });
         }
         const set = pickOne(rand, COUNT_SETS);
@@ -154,17 +160,16 @@ export const CHART_KINDS = {
             ask: { op: 'value', row: items[i].id },
           });
         }
-        const pick = variant === 'most' ? Math.max(...values) : Math.min(...values);
-        const i = values.indexOf(pick);
+        const i = values.indexOf(Math.max(...values));
         const outside = shuffle(rand, set.items.filter((x) => !items.includes(x)))[0];
         const q = pickQuestion('pictograma', rand, {
-          prompt: variant === 'most' ? set.most : set.least,
+          prompt: set.most,
           figure,
           solved: marked(figure, [items[i].id]),
-          key: `c${variant}:${items.map((x) => x.id).join(',')}:${values.join(',')}`,
+          key: `cmost:${items.map((x) => x.id).join(',')}:${values.join(',')}`,
           answer: catOption(items[i]),
           distractors: [...items.filter((_, j) => j !== i).map(catOption), catOption(outside)],
-          ask: { op: variant === 'most' ? 'max' : 'min' },
+          ask: { op: 'max' },
         });
         if (q) return q;
       }
@@ -442,7 +447,7 @@ export const CHART_KINDS = {
             prompt: `Câte ${fruit.name} a cules ${names[i]}?`,
             figure,
             solved: marked(figure, [rows[i].id]),
-            key: `v:${each}:${names.join(',')}:${counts.join(',')}:${i}`,
+            key: `v:${fruit.id}:${each}:${names.join(',')}:${counts.join(',')}:${i}`,
             answer: values[i],
             typical: [counts[i], values[i] - each, values[i] + each, ...values.filter((_, j) => j !== i)],
             ask: { op: 'value', row: rows[i].id },
@@ -454,7 +459,7 @@ export const CHART_KINDS = {
           prompt: `Câte ${fruit.name} au cules ${names[i]} și ${names[j]}?`,
           figure,
           solved: marked(figure, [rows[i].id, rows[j].id]),
-          key: `s:${each}:${names.join(',')}:${counts.join(',')}:${i}${j}`,
+          key: `s:${fruit.id}:${each}:${names.join(',')}:${counts.join(',')}:${i}${j}`,
           answer: values[i] + values[j],
           typical: [counts[i] + counts[j], values[i] + values[j] - each, values[i] + values[j] + each, Math.abs(values[i] - values[j])],
           ask: { op: 'sum', rows: [rows[i].id, rows[j].id] },
@@ -678,6 +683,7 @@ export const CHART_KINDS = {
             key: `${most ? 'max' : 'min'}:${base}`,
             answer: dayOption(WEEK[i]),
             distractors: shuffle(rand, WEEK.filter((_, j) => j !== i)).map(dayOption),
+            order: byDay,
             ask: { op: most ? 'max' : 'min' },
           });
           if (q) return q;
@@ -792,11 +798,12 @@ export const CHART_KINDS = {
         const n = int(rand, 3, 4);
         const ctx = categories(rand, n);
         const step = pickOne(rand, [1, 2, 5]);
-        const values = onLines(rand, n, step, 7);
+        const values = onLines(rand, n, step, 6);
         const total = sum(values);
         if (total > 100) continue;
         const i = int(rand, 0, n - 1);
-        const open = barsFigure({ cats: ctx.items.map(catOf), values, step, unit: ctx.unit });
+        // grila are mereu 7 linii: cu scara făcută după valori, bara ascunsă cea mai înaltă ar fi ajuns chiar la ultima linie
+        const open = { ...barsFigure({ cats: ctx.items.map(catOf), values, step, unit: ctx.unit }), max: 7 * step };
         const figure = { ...open, hide: ctx.items[i].id };
         const shown = total - values[i];
         return numberQuestion('bare-lipsa', rand, {
@@ -855,7 +862,7 @@ export const CHART_KINDS = {
             solved: marked(figure, [{ s: 'a', x: dates[i] }, { s: 'b', x: dates[i] }]),
             key: `d:${base}:${i}`,
             answer: sa[i] - sb[i],
-            typical: [sa[i] + sb[i], sa[i], sb[i], sa[i] - sb[i] + step],
+            typical: [sa[i] + sb[i], sa[i], sb[i], sa[i] - sb[i] + step, sa[i] - sb[i] - step, sa[i] - sb[i] - 2 * step],
             ask: { op: 'diff', a: [{ s: 'a', x: dates[i] }], b: [{ s: 'b', x: dates[i] }] },
           });
         }
@@ -872,6 +879,7 @@ export const CHART_KINDS = {
             key: `m:${base}:${k}`,
             answer: dateOpts(i),
             distractors: [reverse >= 0 ? dateOpts(reverse) : null, ...shuffle(rand, dates.map((_, j) => j).filter((j) => j !== i && j !== reverse)).map(dateOpts)],
+            order: byDate,
             ask: { op: 'dayMore', a: 'a', b: 'b', k },
           });
           if (q) return q;
@@ -902,6 +910,7 @@ export const CHART_KINDS = {
           key: `e:${base}`,
           answer: dateOpts(i),
           distractors: shuffle(rand, dates.map((_, j) => j).filter((j) => j !== i)).map(dateOpts),
+          order: byDate,
           ask: { op: 'dayEqual' },
         });
         if (q) return q;
@@ -936,7 +945,7 @@ export const CHART_KINDS = {
             solved: marked(figure, dates.slice(0, n).map((x) => ({ s: 'a', x }))),
             key: `f:${ctx.id}:${name}:${dates[0]}${month}:${values.join(',')}:${n}`,
             answer,
-            typical: [sum(values.slice(0, n - 1)), sum(values.slice(0, n + 1)), values[n - 1], sum(values)],
+            typical: [sum(values.slice(0, n - 1)), sum(values.slice(0, n + 1)), values[n - 1], sum(values), answer + step, answer - step],
             ask: { op: 'firstN', s: 'a', n },
           });
         }
@@ -967,7 +976,7 @@ export const CHART_KINDS = {
         const sb = dayValues(rand, 5, step, 6);
         const totals = sa.map((v, i) => v + sb[i]);
         const top = Math.max(...totals);
-        if (totals.filter((t) => t === top).length !== 1) continue;
+        if (top > 100 || totals.filter((t) => t === top).length !== 1) continue;
         const i = totals.indexOf(top);
         const figure = lineFigure({ dates, month, series: [{ id: 'a', name: na, values: sa }, { id: 'b', name: nb, values: sb }], step, unit: ctx.unit });
         // greșelile tipice: ziua în care unul singur a avut cel mai mult
@@ -980,6 +989,7 @@ export const CHART_KINDS = {
           key: `m:${ctx.id}:${na}:${dates[0]}${month}:${sa.join(',')}|${sb.join(',')}`,
           answer: dateOption(dates[i], month),
           distractors: [ia, ib, ...shuffle(rand, [0, 1, 2, 3, 4])].filter((j) => j !== i).map((j) => dateOption(dates[j], month)),
+          order: byDate,
           ask: { op: 'dayMaxTotal' },
         });
         if (q) return q;

@@ -137,6 +137,7 @@ registerVisual('chart-bars', {
       const cx = X0 + slot * (i + 0.5);
       const gw = Math.min(slot * 0.74, two ? 66 : 46);
       const bw = two ? (gw - 3) / 2 : gw;
+      const pills = [];
       series.forEach((s, k) => {
         const v = s.values[i];
         const x = r1(two ? cx - gw / 2 + k * (bw + 3) : cx - bw / 2);
@@ -150,8 +151,20 @@ registerVisual('chart-bars', {
         if (v > 0) {
           out += `<rect class="v-chart-bars__bar" data-value="${v}" x="${x}" y="${y(v)}" width="${r1(bw)}" height="${r1(y0 - y(v))}" rx="3" fill="${k ? `url(#${uid}-s)` : SERIES[0]}" ${st(marked ? 3.5 : 2)}${faded ? ' opacity=".35"' : ''}/>`;
         }
-        if (marked) out += pill(x + bw / 2, Math.max(Y1 - 16, y(v) - 18), v);
+        if (marked) pills.push({ x: x + bw / 2, v });
       });
+      // valorile barelor marcate stau deasupra celei mai înalte (în ea, dacă ar ajunge la rândul de sus, cu unitatea): la două serii
+      // una lângă alta, iar la valori egale una singură
+      if (pills.length) {
+        const top = Math.min(...pills.map((m) => y(m.v))) - 18;
+        const py = top < Y1 - 8 ? top + 36 : top;
+        const shown = pills.length === 2 && pills[0].v === pills[1].v ? [{ x: cx, v: pills[0].v }] : pills;
+        if (shown.length === 2) {
+          const d = Math.max(16 + (textWidth(shown[0].v, SIZE.num) + textWidth(shown[1].v, SIZE.num)) / 2, shown[1].x - shown[0].x) / 2;
+          [shown[0].x, shown[1].x] = [cx - d, cx + d];
+        }
+        for (const m of shown) out += pill(r1(m.x), r1(py), m.v);
+      }
       out += c.emoji ? emojiImage(c.emoji, r1(cx - 14), y0 + 5, SIZE.emoji) : txt(r1(cx), y0 + 16, c.text ?? c.name, { size: SIZE.label });
     });
     if (p.month) out += txt((X0 + X1) / 2, y0 + 40, p.month, { size: SIZE.label });
@@ -203,14 +216,23 @@ registerVisual('chart-line', {
           : `<circle cx="${px}" cy="${py}" r="7.5" fill="${SERIES[k]}" stroke="${C.white}" stroke-width="2"/>`;
       }
     }
-    for (const m of arr(p.mark)) {
-      const k = Math.max(0, series.findIndex((s) => s.id === (m.s ?? series[0]?.id)));
-      const i = xs.findIndex((x) => String(x.id) === String(m.x));
-      if (i < 0 || !series[k]) continue;
-      const v = series[k].values[i];
-      const [px, py] = [cx(i), y(v)];
+    const marks = arr(p.mark)
+      .map((m) => ({ k: Math.max(0, series.findIndex((s) => s.id === (m.s ?? series[0]?.id))), i: xs.findIndex((x) => String(x.id) === String(m.x)) }))
+      .filter((m) => m.i >= 0 && series[m.k])
+      .map((m) => ({ ...m, v: series[m.k].values[m.i] }));
+    for (const m of marks) {
+      const [px, py] = [cx(m.i), y(m.v)];
       out += `<circle cx="${px}" cy="${py}" r="12" fill="none" ${st(3)}/>`;
-      out += pill(px, py - 28 < Y1 - 8 ? py + 28 : py - 28, v);
+      // două serii marcate în aceeași zi: valoarea mai mare deasupra punctului ei, cea mai mică dedesubt (la valori egale, o singură
+      // pastilă); lângă rândul de sus sau lângă zilele de pe axă, pastila trece alături de punct, spre interiorul graficului
+      const twin = marks.find((o) => o !== m && o.i === m.i);
+      if (twin && twin.v === m.v && twin.k < m.k) continue;
+      const up = py - 28 >= Y1 - 8;
+      const down = py + 41 <= y0 + 4;
+      const side = r1(px + (m.i === xs.length - 1 ? -1 : 1) * (22 + textWidth(m.v, SIZE.num) / 2));
+      if (twin && twin.v < m.v) out += up ? pill(px, py - 28, m.v) : pill(side, py, m.v);
+      else if (twin && twin.v > m.v) out += down ? pill(px, py + 28, m.v) : pill(side, py, m.v);
+      else out += pill(px, up ? py - 28 : py + 28, m.v);
     }
     xs.forEach((x, i) => (out += txt(cx(i), y0 + 16, x.short, { size: SIZE.label })));
     if (!Array.isArray(p.days)) out += txt((X0 + X1) / 2, y0 + 40, p.month, { size: SIZE.label });
@@ -247,7 +269,12 @@ registerVisual('chart-picto', {
     if (!Array.isArray(p.unit)) errors.push('unit este [singular, plural]');
     return errors;
   },
-  label: (p) => `pictogramă, un simbol = ${cantitate(Number(p.each), ...arr(p.unit))}: ${arr(p.rows).map((r, i) => `${nameOf(r)} ${arr(p.values)[i]}`).join(', ')}`,
+  label: (p) => {
+    const each = Number(p.each);
+    // câte simboluri are fiecare rând (cu un simbol = 5, valoarea ar fi chiar răspunsul întrebării)
+    const count = (v) => (each === 1 ? v : cantitate(v / each, 'simbol', 'simboluri'));
+    return `pictogramă, un simbol = ${cantitate(each, ...arr(p.unit))}: ${arr(p.rows).map((r, i) => `${nameOf(r)} ${count(arr(p.values)[i])}`).join(', ')}`;
+  },
   render: (p) => {
     const rows = arr(p.rows);
     const marks = new Set(arr(p.mark));
@@ -275,7 +302,7 @@ registerVisual('chart-picto', {
 
 // ——— Tabel: prima coloană numește rândul (emoji sau text), celelalte au numere sau bețișoare ({ tally: n }, grupe de 5) ———
 // cols: capul tabelului (fără prima coloană sau cu ea) · rows: [{ id, emoji? | name, cells }] · mark: [{ r, c }]
-const TABLE_TOP = (p) => (arr(p.cols).length ? 40 : 0);
+const TABLE_TOP = (p) => (arr(p.cols).length ? 36 : 0);
 registerVisual('chart-table', {
   group: GROUP,
   viewBox: (p) => `0 0 320 ${TABLE_TOP(p) + 46 * arr(p.rows).length + 6}`,
@@ -287,15 +314,19 @@ registerVisual('chart-table', {
     for (const r of rows) {
       const cells = arr(r.cells);
       if (cells.length !== width) errors.push(`rândul „${r.id}” are ${cells.length} celule, primul ${width}`);
-      for (const c of cells) if (!(isNat(c) || (isNat(c?.tally) && c.tally <= 20))) errors.push(`rândul „${r.id}”: celulele sunt numere sau { tally: 0–20 }`);
+      for (const c of cells) if (!(isNat(c) || (isNat(c?.tally) && c.tally <= 20 && width === 1))) errors.push(`rândul „${r.id}”: celulele sunt numere sau, într-o singură coloană, { tally: 0–20 }`);
     }
     if (arr(p.cols).length && arr(p.cols).length !== width + 1) errors.push('cols numește toate coloanele, începând cu prima');
     return errors;
   },
   label: (p) => {
     const cols = arr(p.cols);
-    const cell = (c) => (isNat(c?.tally) ? cantitate(c.tally, 'bețișor', 'bețișoare') : c);
-    return `tabel${cols.length ? ` (${cols.join(', ')})` : ''}: ${arr(p.rows).map((r) => `${nameOf(r)}: ${arr(r.cells).map(cell).join(', ')}`).join('; ')}`;
+    // cu mai multe coloane (zilele), fiecare număr își spune coloana; cu una, capul tabelului o singură dată
+    const wide = cols.length > 2;
+    const head = (j) => Object.values(DAYS).find(([short]) => short === cols[j + 1])?.[1] ?? cols[j + 1];
+    const cell = (c, j) => `${wide ? `${head(j)} ` : ''}${isNat(c?.tally) ? cantitate(c.tally, 'bețișor', 'bețișoare') : c}`;
+    const title = cols.length && !wide ? ` (${cols.join(', ')})` : '';
+    return `tabel${title}: ${arr(p.rows).map((r) => `${nameOf(r)}: ${arr(r.cells).map(cell).join(', ')}`).join('; ')}`;
   },
   render: (p) => {
     const rows = arr(p.rows);
@@ -400,9 +431,9 @@ registerVisual('chart-pie', {
     out += txt(252, 20, 'o felie =', { size: SIZE.label });
     out += txt(252, 46, cantitate(Number(p.each), ...p.unit), { size: SIZE.num });
     groups.forEach((g, gi) => {
-      const y = 86 + gi * 30;
+      const y = 76 + gi * 32;
+      if (marks.has(g.id)) out += `<rect x="182" y="${y - 15}" width="134" height="30" rx="8" fill="none" ${st(3)}/>`;
       out += emojiImage(g.emoji, 188, y - 14, SIZE.emoji);
-      if (marks.has(g.id)) out += `<circle cx="202" cy="${y}" r="17" fill="none" ${st(3)}/>`;
       out += txt(224, y, nameOf(g), { size: SIZE.label, anchor: 'start' });
     });
     return out;

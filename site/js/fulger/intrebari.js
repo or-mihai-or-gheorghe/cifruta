@@ -24,9 +24,13 @@ export function numberQuestion(kind, rand, { prompt, figure, solved, key, answer
   };
 }
 
-/** Întrebare cu variante desenate (emoji, zile, date, insigne): răspunsul și primii trei distractori diferiți, amestecați. */
-export function pickQuestion(kind, rand, { ask, ...rest }) {
+/**
+ * Întrebare cu variante desenate (emoji, zile, date, insigne): răspunsul și primii trei distractori diferiți, amestecați. Cu `order`
+ * (rangul unei variante), variantele care au o ordine firească (zilele, datele) stau în ordinea lor.
+ */
+export function pickQuestion(kind, rand, { ask, order = null, ...rest }) {
   const q = figureQuestion(kind, rand, rest);
+  if (q && order) q.choices.sort((x, y) => order(q.options[x]) - order(q.options[y]));
   return q && { ...q, ask };
 }
 

@@ -178,7 +178,7 @@ export const MAP_RULES = {
       return named.length === 1 && finalists.includes(p) && says(q.prompt, 'finală') && pickAnswer(q, (o) => o.emoji === finalists.find((x) => x !== p));
     }
     const [p] = named;
-    return named.length === 1 && f.players.length === 8 && numberAnswer(q, f.rounds.filter((r) => r.includes(p)).length);
+    return named.length === 1 && numberAnswer(q, f.rounds.filter((r) => r.includes(p)).length);
   },
 
   'arbore-sume': (q) => sumTreeRule(q, false),
@@ -199,10 +199,12 @@ export const MAP_RULES = {
     const named = namedIn(q.prompt, Object.keys(FACTS));
     if (named.length !== 1) return false;
     const facts = FACTS[named[0]];
-    // coborâm din rădăcină pe ramura „da” sau „nu”; fiecare întrebare din arbore trebuie să aibă răspuns sigur pentru animal
-    if (!f.nodes.filter((n) => kidsOf(f.nodes, n.id).length).every((n) => facts[n.text])) return false;
+    // coborâm din rădăcină pe ramura „da” sau „nu”; fiecare întrebare de pe drum trebuie să aibă răspuns sigur pentru animal
     let node = rootOf(f.nodes);
-    while (kidsOf(f.nodes, node.id).length) node = kidsOf(f.nodes, node.id).find((k) => k.edge === facts[node.text]);
+    while (kidsOf(f.nodes, node.id).length) {
+      if (!facts[node.text]) return false;
+      node = kidsOf(f.nodes, node.id).find((k) => k.edge === facts[node.text]);
+    }
     return pickAnswer(q, (o) => o.text === node.text);
   },
 

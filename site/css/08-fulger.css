@@ -348,6 +348,7 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 /* pe ecranele înalte (laptop, tabletă, telefonul ținut vertical) e loc pentru mai mult: arborii cu 4 niveluri rămân lizibili */
 @media (min-height: 44rem) {
   .fg-fig--chart { --fig-h: clamp(5.5rem, 30vh, 15rem); }
+  .fg-q--drawn .fg-fig { --fig-h: clamp(5.5rem, 28vh, 15rem); }
 }
 .fg-prompt--long { font-size: clamp(1rem, 0.9rem + 0.6vw, 1.35rem); text-wrap: balance; }
 .fg-prompt__emoji,
@@ -380,6 +381,7 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 .fg-review__fig--chart { width: 100%; }
 .fg-review__row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.35rem; padding: 0.25rem; border: 2px solid var(--c-ok-ink); border-radius: var(--r-2); background: var(--c-ok-bg); font-family: var(--font-title); font-weight: 700; font-size: var(--fs-2); }
 .fg-review__row .fg-review__art { width: min(100%, calc(1.8rem * var(--ar, 1))); }
+.fg-review__row .fg-review__text { width: auto; } /* numele și zilele din rând au lățimea lor */
 .fg-review__opts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.35rem; }
 .fg-review__opt { display: grid; place-items: center; min-height: 3rem; padding: 0.25rem; border: 2px solid var(--c-line); border-radius: var(--r-2); }
 .fg-review__opt.is-answer { border-color: var(--c-ok-ink); background: var(--c-ok-bg); }

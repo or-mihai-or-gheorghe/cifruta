@@ -35,9 +35,9 @@
   - Fără configurarea Firebase, site-ul arată ca în v0.8.1, plus legătura „Confidențialitate” din subsol.
 
   **Calitate:**
-  - 102 teste Node, plus validarea conținutului, a tabelului de acoperire și a contrastului, calibrarea stelelor din Jocurile fulger
+  - 103 teste Node, plus validarea conținutului, a tabelului de acoperire și a contrastului, calibrarea stelelor din Jocurile fulger
     pe fiecare temă și nivel, regulile independente ale celor 24 de tipuri cu figuri și ale celor 32 cu grafice și grafuri (numele din
-    cerință și răspunsul, calculate din datele desenului), mărimea textului din desenele jocurilor, avatarele (textul canonic, id-urile
+    cerință, sensul și răspunsul, calculate din datele desenului, pe 3000 de semințe), mărimea textului din desenele jocurilor, avatarele (textul canonic, id-urile
     publicate, fiecare combinație desenată) și medaliile (catalogul, pragurile, medaliile unei runde, datele vechi);
   - 16 teste ale regulilor Firestore pe emulator, inclusiv 57 de intrări într-o tranzacție;
   - E2E cu 1665 de verificări pe 3 ecrane și tastatură, plus telefon ținut orizontal și telefon mic (cu seria pornită, textul graficelor
@@ -45,6 +45,8 @@
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
 - **Următorul pas:** v0.14.0 e publicat (întâi regulile Firestore, ruleset `673d0bb7`, apoi site-ul), cu E2E pe site-ul live 1665/1665.
+  - Remedierile recenziei de cod (v0.14.1, jurnalul din 19 septembrie) sunt în `main`, local, nepublicate. Publicarea: `npm run deploy`
+    (regulile Firestore nu se schimbă), apoi E2E pe site-ul live și tag `v0.14.1`.
   - Copilul joacă temele noi și strânge medalii; din rundele reale se reglează `fastMs` și pragurile de stele.
   - Rămân: verificarea în Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
   - Apoi: secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul) și temele „în curând” din Jocuri fulger.
@@ -289,6 +291,9 @@
 | 2026-09-19 | Pauza „Hopa” e plafonată la 9 s (`guard.pauseMaxMs`) | tipurile noi, care cer citirea unui desen, au `fastMs` de până la 11 s |
 | 2026-09-19 | Culoarea nu e niciodată singurul indiciu: seriile au culori validate pentru daltonism (`--v-series-1..4`), a doua serie e punctată și are ■, liniile hărții au numere și modele, al doilea cerc din Venn e punctat | accesibilitate; paleta verificată cu validatorul de palete |
 | 2026-09-19 | Crengile veveriței au cel mult 5 fructe (la 3 niveluri se desparte o singură creangă), iar numerele de pe crengi au mărimea numerelor | cu 8 fructe, pastilele crengilor surori se atingeau, iar textul ieșea la 10–11 px pe telefonul mic și pe cel ținut orizontal |
+| 2026-09-19 | Recenzia codului se face cu recenzori independenți, pe zone (desenele, generatoarele graficelor, generatoarele hărților și arborilor, arena și paginile); fiecare constatare se verifică în cod înainte de reparare, iar reparațiile rămân mici, fără verificări defensive | cererea utilizatorului („fără over engineering sau ultra defensive programming”); codul scris de mine l-ar fi citit ancorat în propriile alegeri |
+| 2026-09-19 | O scurtătură care dă răspunsul fără calcul (drumul lacom, cea mai mare creangă, nodul din mijlocul rețelei) se refuză de cele mai multe ori la generare, iar frecvența ei se măsoară prin simulare | recenzia: drumul cel mai bogat se ghicea în 62–79% din întrebări, iar cine are cei mai mulți prieteni era 93% nodul din mijloc |
+| 2026-09-19 | Variantele-zi și variantele-dată stau în ordinea din calendar; o variantă din afara desenului apare doar la „cele mai multe”; la răspunsuri mici, 0 rămâne printre variante | ordinea firească se citește mai ușor; un rând care lipsește are 0, deci ar fi și el „cel mai puțin”; fără 0, un răspuns de 1 sau 2 ar sta mereu primul |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -323,6 +328,9 @@
 - Pragurile de stele și `fastMs` ale temelor cu grafice și grafuri vin din simulare, cu aceleași rapoarte ca la celelalte teme; citirea
   unui desen poate dura mai mult la un copil real.
 - Pe telefonul ținut orizontal, textul graficelor și al hărților are 11–15 px (pragul din E2E e 11 px): se citește, dar e mic.
+- Pe hărți, insigna cu numărul liniei atinge stația de la capăt (pe rândurile de sus și de jos nu are loc mai departe); cifrele rămân
+  întregi.
+- Pinguinul are pene („Are pene?” → da), iar mulți copii cred altfel: întrebarea e corectă, dar poate surprinde.
 
 ## Backlog
 - Scanările actuale acoperă manualul până la înmulțire; utilizatorul adaugă scanări noi după finalizarea etapei curente.
@@ -601,3 +609,44 @@
 
   **De făcut data viitoare:** copilul joacă temele noi → `fastMs` și pragurile de stele; verificarea în Firestore a clasamentelor
   mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
+- **2026-09-19 (recenzia codului v0.14.0)**
+  - **Cererea utilizatorului:** o recenzie a codului și remedierea a ce se găsește, fără soluții complicate și fără programare
+    ultra-defensivă.
+  - **Cum:**
+    - Patru recenzori independenți, pe zone: desenele, generatoarele graficelor, generatoarele hărților și arborilor, arena și paginile.
+    - Au generat zeci de mii de întrebări, au randat și au măsurat desenele în Chromium și au făcut teste de mutație pe reguli.
+    - Fiecare constatare am verificat-o în cod înainte de reparare.
+  - **Întrebări:**
+    - „În ce zi a sărit Luca cu 5 mai mult decât Ema?”, într-o lună de mai, se citea ca data „5 mai”; acum e „Când a sărit Luca cu 5
+      sărituri mai mult decât Ema?”.
+    - La pictogramă, „cele mai puține” avea o variantă din afara desenului, cu 0, deci tot „cea mai puțină”; a rămas doar „cele mai
+      multe”.
+    - Bara ascunsă se ghicea din scară când era cea mai înaltă; grila are acum mereu 7 linii.
+    - „În ce zi au făcut împreună cele mai multe…” cerea totaluri de peste 100.
+    - Variante care dădeau răspunsul (7, 8, 9, 10 pe un grafic din 5 în 5): distractorii sunt acum multipli ai pasului.
+    - Zilele și datele stau în ordinea lor.
+    - Drumul cel mai bogat se ghicea din scurtături în 62–79% din întrebări; acum ~25%, pe crengi cu 5 fructe.
+    - „Cine are cei mai mulți prieteni?” avea răspunsul în nodul din mijloc în 93% din întrebări; acum ~30%.
+    - Drumul marcat de la „Câte minute durează…” abia se vedea; stațiile lui sunt acum încercuite chiar în întrebare.
+    - Turneul cu 4 jucători întreba doar „cine a câștigat”; acum întreabă și câte meciuri a câștigat un jucător.
+    - La clasificare, faptele contează doar pe drumul animalului: liliacul nu apărea niciodată, iar pinguinul era un sfert din
+      întrebări.
+    - Meniurile sunt cel mult 6 (cu 7–8, cercurile se suprapuneau).
+  - **Desene:**
+    - pastilele cu valori nu se mai acoperă (două serii în aceeași zi sau în același grup; sub unitate, la bara cea mai înaltă);
+    - legenda cercului are chenar în loc de inel, iar tabelul nu mai are spațiu gol sub cap;
+    - la turneu, cel care pierde nu mai trece peste cel care câștigă;
+    - minutele și numerele de pe crengi stau peste inele, iar rețeaua încape în desen;
+    - numele pentru cititorul de ecran: pictograma citește simbolurile (valoarea era chiar răspunsul), tabelul leagă numerele de zile,
+      arborele se citește pe ramuri, cu drumul marcat.
+  - **Arena și paginile:**
+    - „Greșelile tale” spune răspunsul corect și cititorului de ecran, la comparările și ordonările desenate;
+    - exemplele de pe cardurile nivelurilor spun numele tipului;
+    - în atelier, numele din rândul răspunsului nu mai sunt strânse;
+    - pe ecranele înalte, desenele comparărilor și ordonărilor cresc și ele.
+  - **Teste:**
+    - regulile verifică și sensul („cele mai multe” sau „cele mai puține”), ordinea numelor și data ambelor laturi;
+    - `says` nu mai găsește „5 mai” în „15 mai”;
+    - regulile graficelor și grafurilor rulează pe 3000 de semințe;
+    - E2E-ul „Greșelilor tale” nu mai trece doar datorită săgeților dintre plăcuțe.
+  - **Rezultate:** npm test 103/103, E2E 1665/1665 (nepublicat: v0.14.1 așteaptă acordul pentru publicare).

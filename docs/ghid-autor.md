@@ -145,12 +145,13 @@ HTML nu este permis (se afișează ca text).
     - `chart-line {days: [luni, …] | dates: [8, 9, …] + month, series, step, unit, mark?: [{s, x}]}`: grafic în timp, cu una sau două
       serii (a doua punctată, cu ■).
     - `chart-picto {rows: [{id, name}], values, symbol, each: 1 | 2 | 5 | 10, unit, mark?}`: pictogramă cu legendă („🍎 = 5 mere”).
-    - `chart-table {cols, rows: [{id, emoji?, name, cells: [n | {tally: n}]}], mark?: [{r, c}]}`: tabel cu numere sau cu bețișoare.
+    - `chart-table {cols, rows: [{id, emoji?, name, cells: [n | {tally: n}]}], mark?: [{r, c}]}`: tabel cu numere sau cu bețișoare
+      (bețișoarele, doar într-o singură coloană: mai multe nu încap în căsuță).
     - `chart-pie {groups: [{id, emoji, name, n}], each, unit, mark?}`: cerc cu felii numărate („o felie = 2 copii”), fără fracții.
     - `venn {a: {emoji, name}, b, counts: {a, ab, b}, mark?: a | ab | b | A | B | all}`: două cercuri; `A` = tot cercul A.
   - **Hărți și rețele:**
     - `metro {stops: [{id, emoji, x, y}], lines: [{id, n, stops}], minutes?: [{a, b, n}], path?, routes?: [{id: A | B, path}], plain?, mark?, h?}`:
-      - harta liniilor: fiecare linie are numărul și modelul ei, iar stațiile de schimb au inel dublu;
+      - harta liniilor: fiecare linie are numărul (1–4) și modelul ei, iar stațiile de schimb au inel dublu;
       - `plain` = drumuri gri, fără linii;
       - `routes` = drumurile A (plin) și B (punctat).
     - `line-badge {n}`: insigna liniei, ca variantă de răspuns.
