@@ -1,7 +1,7 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-19 · **Versiune:** 0.14.1 (Jocuri fulger cu grafice și grafuri: temele „Grafice și tabele” și „Hărți și arbori”, 32 de tipuri noi de întrebări, plus remedierile recenziei de cod)
+- **Data:** 2026-09-19 · **Versiune:** 0.15.0 (Jocuri fulger: tema „Numere până la 1000”, a doua după cea de 0–100, cu 18 tipuri noi de întrebări)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -12,14 +12,15 @@
   și rotire, piese din căsuțe, desfășurări, rețeaua robotului, avatarul desenat, medaliile și cupele jocurilor, graficele și grafurile
   jocurilor: bare, grafice în timp, pictograme, tabele, cercul cu felii, Venn, harta liniilor, rețeaua, turneul, arborele; 8 peisaje animate), sunete discrete cu buton de oprire, atelier pentru
   autori (și cu întrebările generate ale jocurilor), **Jocurile fulger** (`#/fulger`: teme desfășurate pe pagina jocului, fiecare cu trei
-  niveluri: „Adunări și scăderi până la 100” și patru teme cu figuri, fără calcule, „Șiruri și intruși”, „Puzzle cu forme”, „Figuri și
-  corpuri”, „Poziții și trasee”, și două teme cu grafice și grafuri, „Grafice și tabele” și „Hărți și arbori”; numerele până la 1000,
-  înmulțirea, împărțirea și ecuațiile simple apar „în curând”; runde de 2 minute,
-  72 de tipuri de întrebări generate (16 cu calcule, 24 cu figuri, 32 cu grafice, hărți și arbori), fiecare cu conceptele ei („Ce
-  exersăm”), alune cu bonus de viteză și
+  niveluri: „Adunări și scăderi până la 100”, „Numere până la 1000” (sute, zeci și unități, comparări, ordonări, șiruri, rotunjire și
+  calcule fără trecere), patru teme cu figuri, fără calcule, „Șiruri și intruși”, „Puzzle cu forme”, „Figuri și corpuri”, „Poziții și
+  trasee”, și două teme cu grafice și grafuri, „Grafice și tabele” și „Hărți și arbori”; înmulțirea, împărțirea și ecuațiile simple
+  apar „în curând”; runde de 2 minute,
+  90 de tipuri de întrebări generate (16 cu calcule până la 100, 18 cu numerele până la 1000, 24 cu figuri, 32 cu grafice, hărți și
+  arbori), fiecare cu conceptele ei („Ce exersăm”), alune cu bonus de viteză și
   de serie, Turbo, pistă spre stele și record, medalii pe niveluri, „Greșelile tale” și ținta următoarei stele la rezultate: 3 stele la
   un nivel al unei teme aduc medalia de bronz, argint sau aur, iar aceeași medalie la 2, 3 și 5 teme aduce „dublul”, colecția și cupa;
-  acum 30 de medalii, pe raftul de pe pagina jocului, pe cardurile nivelurilor și pe prima pagină). Conținut: **4 teste
+  acum 33 de medalii, pe raftul de pe pagina jocului, pe cardurile nivelurilor și pe prima pagină). Conținut: **4 teste
   de recapitulare a clasei I** (T1–T4 v2)
   și **6 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc), toate
   exercițiile cu desen sau emoji, fără răspunsuri „la vedere”, cu probleme în mai mulți pași și sarcini deschise la avansat.
@@ -39,13 +40,12 @@
     pe fiecare temă și nivel, regulile independente ale celor 24 de tipuri cu figuri și ale celor 32 cu grafice și grafuri (numele din
     cerință, sensul și răspunsul, calculate din datele desenului, pe 3000 de semințe), mărimea textului din desenele jocurilor, avatarele (textul canonic, id-urile
     publicate, fiecare combinație desenată) și medaliile (catalogul, pragurile, medaliile unei runde, datele vechi);
-  - 16 teste ale regulilor Firestore pe emulator, inclusiv 57 de intrări într-o tranzacție;
-  - E2E cu 1665 de verificări pe 3 ecrane și tastatură, plus telefon ținut orizontal și telefon mic (cu seria pornită, textul graficelor
-    măsurat pe ecran);
+  - 16 teste ale regulilor Firestore pe emulator, inclusiv 65 de intrări într-o tranzacție;
+  - E2E cu 1799 de verificări pe 3 ecrane și tastatură, plus telefon ținut orizontal și telefon mic (cu seria pornită, textul desenelor
+    măsurat pe ecran, fiecare temă jucată tip cu tip);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.14.1 e publicat (remedierile recenziei de cod; regulile Firestore au rămas cele din v0.14.0, ruleset `673d0bb7`),
-  cu E2E pe site-ul live 1665/1665.
+- **Următorul pas:** v0.15.0 se publică: întâi regulile Firestore (`fulgerTopics()` cu tema `numere-1000`), apoi site-ul.
   - Copilul joacă temele noi și strânge medalii; din rundele reale se reglează `fastMs` și pragurile de stele.
   - Rămân: verificarea în Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
   - Apoi: secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul) și temele „în curând” din Jocuri fulger.
@@ -176,6 +176,16 @@
   - **Verificare:** npm test 103/103 (regulile graficelor și grafurilor pe 3000 de semințe), E2E 1665/1665.
   - **Publicare:** site-ul prin GitHub Actions (rularea 35435426680; regulile Firestore nu se schimbă); E2E pe site-ul live 1665/1665,
     tag `v0.14.1`.
+- [x] M31 (v0.15.0): Jocuri fulger, tema „Numere până la 1000”, a doua după cea de 0–100.
+  - **Conținut:** 18 tipuri noi, în `js/fulger/kinds-1000.js`:
+    - numere: numărătoarea S-Z-U, scrierea cu cifre după cuvinte, forma desfășurată, șiruri din 10 și din 100, rotunjirea la sute;
+    - comparări și ordonări: sute rotunde, numere capcană (cifre inversate, zerouri), comparări cu calcule;
+    - calcule: sute rotunde, ± zeci și sute, adunări și scăderi fără trecere, trei termeni și, la Avansat, o singură trecere simplă.
+  - **Cod:** formele întrebărilor cu calcule (`choice`, `compare`, `sorting`) s-au mutat în `js/fulger/intrebari.js`; o întrebare cu
+    variante poate avea doar cerință, fără desen.
+  - **Verificare:** npm test 103/103 (regulile din `tests/fulger-1000.rules.js`, cu trecerile numărate pe coloane), reguli 16/16,
+    E2E 1799/1799, E2E cont 82/82.
+  - **Publicare:** întâi regulile (`fulgerTopics()` cu tema nouă), apoi site-ul prin GitHub Actions.
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -305,6 +315,9 @@
 | 2026-09-19 | Recenzia codului se face cu recenzori independenți, pe zone (desenele, generatoarele graficelor, generatoarele hărților și arborilor, arena și paginile); fiecare constatare se verifică în cod înainte de reparare, iar reparațiile rămân mici, fără verificări defensive | cererea utilizatorului („fără over engineering sau ultra defensive programming”); codul scris de mine l-ar fi citit ancorat în propriile alegeri |
 | 2026-09-19 | O scurtătură care dă răspunsul fără calcul (drumul lacom, cea mai mare creangă, nodul din mijlocul rețelei) se refuză de cele mai multe ori la generare, iar frecvența ei se măsoară prin simulare | recenzia: drumul cel mai bogat se ghicea în 62–79% din întrebări, iar cine are cei mai mulți prieteni era 93% nodul din mijloc |
 | 2026-09-19 | Variantele-zi și variantele-dată stau în ordinea din calendar; o variantă din afara desenului apare doar la „cele mai multe”; la răspunsuri mici, 0 rămâne printre variante | ordinea firească se citește mai ușor; un rând care lipsește are 0, deci ar fi și el „cel mai puțin”; fără 0, un răspuns de 1 sau 2 ar sta mereu primul |
+| 2026-09-19 | Tema „Numere până la 1000” vine imediat după cea de 0–100 (a doua în listă, deci și pe pagina jocului, pe prima pagină și în clasament) | cererea utilizatorului: pasul următor după 0–100 |
+| 2026-09-19 | În jocul de 0–1000, trecerea peste ordin e doar la Avansat și doar simplă: o trecere la unități (345 + 27) sau un împrumut din zeci (452 − 28), niciodată două și niciodată la sute | cererea utilizatorului („operații care nu necesită schimbări sau schimbări complicate de ordin”) și unitatea 2 din manual („adunarea cu trecere peste ordinul unităților”, „scăderea cu împrumut la ordinul zecilor”); completează decizia din 12 septembrie, care privea secțiunea de teste |
+| 2026-09-19 | O întrebare cu variante poate avea doar cerință, fără desen (șiruri, rotunjire, numere scrise cu litere): cerința se scrie mai mare, iar variantele de patru cifre trec pe două coloane pe ecranele înguste | numerele sunt conținutul întrebării, nu un desen; patru numere de patru cifre nu încap pe un rând la 360 px |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -330,12 +343,12 @@
   reîncărcare; o salvare din ea trimite textul neschimbat, pe care regulile îl acceptă.
 - Săptămânile trecute păstrează avatarul de atunci (încă nu se afișează). La scor egal, ordinea din clasament se poate schimba după o
   salvare de avatar, pentru că se schimbă `updatedAt`.
-- O salvare de avatar rescrie într-o tranzacție până la 57 de intrări (7 teme), fiecare verificată cu `getAfter` pe profil: pe emulator trece,
+- O salvare de avatar rescrie într-o tranzacție până la 65 de intrări (8 teme), fiecare verificată cu `getAfter` pe profil: pe emulator trece,
   dar documentația Firestore nu spune limpede dacă citirile repetate ale aceluiași document intră o singură dată în limita de accesări.
 - Medaliile pentru recordurile de dinainte de v0.13.0 apar pe raft fără sărbătorire (nu sunt „noi”) și se salvează la prima rundă
   terminată, din orice temă. Un prag de stele ridicat mai târziu ascunde o medalie doar dacă era dedusă și încă nesalvată.
 - Cele 6 medalii vechi rămân în `cifruta:fulger` și în `state/fulger`, ignorate; ștergerea rundelor din „Pentru părinți” șterge și
-  medaliile. Raftul are 30 de medalii, deci pe telefon pagina jocului se lungește (grila are 3 coloane).
+  medaliile. Raftul are 33 de medalii, deci pe telefon pagina jocului se lungește (grila are 3 coloane).
 - Pragurile de stele și `fastMs` ale temelor cu grafice și grafuri vin din simulare, cu aceleași rapoarte ca la celelalte teme; citirea
   unui desen poate dura mai mult la un copil real.
 - Pe telefonul ținut orizontal, textul graficelor și al hărților are 11–15 px (pragul din E2E e 11 px): se citește, dar e mic.
@@ -352,7 +365,7 @@
   indicii treptate, pașii unei probleme afișați pe rând, animații legate de operație (gruparea din 5 în 5, simbolul care se desface,
   deplasarea pe axă).
 - Variante generate aleator (cu sămânță), diplomă printabilă.
-- Jocuri fulger, mai departe: temele „în curând” (numere până la 1000, înmulțirea, împărțirea, ecuații □ + 7 = 15) și super-totalul
+- Jocuri fulger, mai departe: temele „în curând” (înmulțirea, împărțirea, ecuații □ + 7 = 15) și super-totalul
   pe mai multe teme (`fulger-total-<perioadă>`, rezervat), răspuns tastat, antrenament
   fără cronometru, magazinul Cifruței (accesorii pentru mascotă cumpărate cu alune), provocarea zilei, vibrații pe tabletă, nivel
   adaptiv; pragurile de stele și timpii „fulger” se ajustează după runde reale.
@@ -663,3 +676,23 @@
   - **Rezultate:** npm test 103/103, E2E 1665/1665.
   - **Publicat:** site-ul prin GitHub Actions (rularea 35435426680; regulile Firestore nu se schimbă); E2E pe site-ul live 1665/1665,
     tag `v0.14.1`.
+- **2026-09-19 (numerele până la 1000, v0.15.0)**
+  - **Cererea utilizatorului:** încă un set de întrebări fulger, imediat după cele de 0–100: numerele 0–1000, cu comparări și cu
+    operații care nu cer treceri peste ordin (sau nu cer treceri complicate).
+  - **Deciziile din plan** (aprobate): trecerea simplă doar la Avansat; pe lângă comparări, ordonări și calcule, intră numărătoarea
+    S-Z-U, scrierea cu cifre, șirurile din 10 și din 100 și rotunjirea la sute.
+  - **Planul**, aprobat, s-a construit în 5 etape, cu commit la fiecare:
+    1. Formele comune ale calculelor, mutate în `intrebari.js`, și verificările trecerii, generalizate.
+    2. Cele 18 tipuri, regulile lor și tema, cu pragurile de stele din simulare.
+    3. Arena (cerința singură mai mare, variantele de patru cifre pe două coloane), ecranele și E2E.
+    4. Regulile din cloud.
+    5. Documentația și publicarea.
+  - **Măsurat înainte de a scrie generatoarele** (lecția recenziei de dinainte): perechile fără trecere (134 281), cele cu trecere
+    simplă (~14 500) și, la rotunjire și la șiruri, pozițiile răspunsului și variantele care n-ar fi rotunde.
+  - **Depanare:**
+    - Verificarea trecerii socotea „fără trecere” un calcul cu trei termeni care trece la zeci („150 + 160 + 170”); acum se uită la
+      fiecare coloană.
+    - La rotunjire lipsea uneori tocmai suta vecină; acum trei din patru întrebări o arată.
+    - Verificarea „Greșelile tale” din E2E respingea comparările, unde răspunsul e chiar semnul.
+    - Literele S, Z, U de pe numărătoare ieșeau sub pragul de lizibilitate pe telefonul ținut orizontal.
+  - **Rezultate:** npm test 103/103, reguli 16/16, E2E 1799/1799, E2E cont 82/82.

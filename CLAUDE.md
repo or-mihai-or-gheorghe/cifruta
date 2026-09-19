@@ -37,9 +37,10 @@ site/                      ← publicat
   js/visuals/              banca vizuală: registerVisual(nume, {render, label, demos}); all.js le importă pe toate;
                            avatar (desenul și accesoriile) · avatar-animals (cele 24 de animale) · avatar-parts (blănuri, ochi, umeri)
                            grafice (bare, linii, pictograme, tabel, cerc, Venn) · grafuri (hartă, rețea, turneu, arbore): desenele jocurilor
-  js/fulger/               Jocuri fulger (jocuri pe viteză, pe teme, #/fulger): kinds (calcule), kinds-forme (figuri), kinds-grafice și
-                           kinds-grafuri (grafice, hărți, arbori), generate cu sămânță, cu concepte · intrebari (forma întrebărilor
-                           desenate) · contexte (unități, nume, zile, date) · rand · art (desenul și numele unei variante, cerința cu
+  js/fulger/               Jocuri fulger (jocuri pe viteză, pe teme, #/fulger): kinds (calcule până la 100), kinds-1000 (numerele până
+                           la 1000), kinds-forme (figuri), kinds-grafice și kinds-grafuri (grafice, hărți, arbori), generate cu
+                           sămânță, cu concepte · intrebari (formele întrebărilor: calcule și desene) · contexte (unități, nume, zile,
+                           date) · rand · art (desenul și numele unei variante, cerința cu
                            emoji) · engine (temele, runda și punctajul, pur) · records (chei „temă:nivel”, datele vechi) · medals
                            (medaliile: catalogul, cele câștigate, cele ale unei runde; pur) · view (arena) · effects (particule, bannere);
                            pagina e pages/fulger.js
@@ -79,10 +80,16 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
 - **Vizual nou:** `registerVisual` într-un modul din `js/visuals/`, culori din variabile `--v-*`, `demos` pentru atelier.
 - **Desen nou într-un exercițiu publicat:** `context.visual` / `part.visual` / `itemVisual` / `item.visual` / `bin.visual` din bancă;
   **nu** cere versiune nouă (răspunsurile și ciornele nu sunt afectate); `npm test` verifică numele desenului.
-- **Tip nou în Jocuri fulger (calcule):** o intrare în `KINDS` (`js/fulger/kinds.js`: `label`, `points`, `fastMs`, `mode`, `concepts` din
-  `data/concepts.js`, `generate(rand)` cu răspunsul calculat și variante din greșeli tipice), o linie în `mix`-ul unui nivel al unei
-  teme din `data/fulger.js` și regulile tipului în `RULES` din `tests/fulger.test.js`; testul de calibrare spune dacă pragurile de stele
-  mai sunt potrivite, iar conceptele temei trebuie să fie exact conceptele tipurilor ei (etichetele „fără / cu trecere” se verifică).
+- **Tip nou în Jocuri fulger (calcule):** o intrare în `KINDS` (`js/fulger/kinds.js` pentru 0–100, `kinds-1000.js` pentru numerele până
+  la 1000: `label`, `points`, `fastMs`, `mode`, `concepts` din `data/concepts.js`, `generate(rand)` cu răspunsul calculat și variante din
+  greșeli tipice), o linie în `mix`-ul unui nivel al unei teme din `data/fulger.js` și regulile tipului în `RULES` din
+  `tests/fulger.test.js` (cele de la 1000: `tests/fulger-1000.rules.js`); testul de calibrare spune dacă pragurile de stele mai sunt
+  potrivite, iar conceptele temei trebuie să fie exact conceptele tipurilor ei (etichetele „fără / cu trecere” se verifică).
+  - Formele întrebărilor (`choice`, `compare`, `sorting`) vin din `js/fulger/intrebari.js`, ca să le poată folosi ambele module.
+  - La numerele de trei cifre, `numberQuestion` și `choice` cer `max` (implicit caută variante până la 100).
+  - O întrebare `figure` **fără desen** (doar cerință și patru variante) e bună pentru șiruri, rotunjire sau numere scrise cu
+    litere: cerința se scrie mai mare, iar variantele de patru cifre trec pe două coloane pe ecranele înguste.
+  - Eticheta „fără / cu trecere” are câte o pereche pentru 0–100 (`mat.op.*`) și pentru 0–1000 (`mat.op1000.*`).
 - **Tip cu figuri în Jocuri fulger:** o intrare în `SHAPE_KINDS` (`js/fulger/kinds-forme.js`, `mode: 'figure'`), al cărei `generate(rand)`
   întoarce `figureQuestion(kind, rand, { prompt, figure, solved, key, answer, distractors })`: desene din bancă (`glyph`, `glyph-cells`,
   `cell-grid`, `robot-grid`, `net`, `solid`, `farm-grid`), emoji sau texte; distractorii vin din greșeli tipice, iar id-ul unei variante e

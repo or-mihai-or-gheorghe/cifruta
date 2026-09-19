@@ -592,7 +592,7 @@ def fulger_flow(run: Run, page: Page, vp: str):
     run.check("is-won" in theirs.get_attribute("class").split() and "is-won" not in mine.get_attribute("class").split() and texts == ["Ai medalia de bronz!", "Cu 3 stele câștigi medalia de bronz."],
               f"[{vp}] fulger: cardul nivelului arată medalia lui, câștigată sau de câștigat ({texts})")
     run.layout_ok(page, f"[{vp}] fulger medalii")
-    if vp == "laptop":  # cu 7 teme, grupurile stau unul sub altul, ca medaliile să rămână mari
+    if vp == "laptop":  # de la 6 teme încoace, grupurile stau unul sub altul, ca medaliile să rămână mari
         widths = page.get_by_test_id("fg-medals").locator(".fg-medal").evaluate_all("els => els.map((e) => Math.round(e.getBoundingClientRect().width))")
         run.check(len(widths) == medals and min(widths) >= 110, f"[{vp}] fulger: pe raft, fiecare dintre cele {len(widths)} medalii are cel puțin 110 px (cea mai mică: {min(widths)} px)")
     run.shot(page, f"{vp}-fulger-medalii", "[data-testid=fg-medals]")

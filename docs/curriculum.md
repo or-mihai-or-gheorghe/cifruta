@@ -76,10 +76,10 @@ Ce altă documentare am folosit (exemple de exerciții, aplicații, UX): `docs/c
 | „Prietenii lui 10 / 100” | I | ➕ | `mat.nr100.prietenii-lui-10` |
 | Numărare din 2/5/10 și adunare repetată — pregătirea înmulțirii (competența 1.5) | I | 📜➕ | `mat.nr100.adunare-repetata` |
 | Regula unei corespondențe (3 → 7) | I | 📜➕ | — |
-| Numere 0–1000: sute, zeci, unități | II | 📘📜 | `mat.nr1000.formare` |
-| Scrierea numerelor cu litere | II | 📘📜 | `mat.nr1000.citire-scriere` |
+| Numere 0–1000: sute, zeci, unități (și numărătoarea S-Z-U din Jocuri fulger) | II | 📘📜 | `mat.nr1000.formare` |
+| Scrierea numerelor cu litere (în Jocuri fulger: „scrie cu cifre”) | II | 📘📜 | `mat.nr1000.citire-scriere` |
 | Compararea, ordonarea, paritatea până la 1000 | II | 📘📜 | `mat.nr1000.comparare`, `mat.nr1000.ordonare`, `mat.nr1000.paritate` |
-| Rotunjirea la sute | II | 📘📜 | `mat.nr1000.rotunjire` |
+| Rotunjirea la sute (și în Jocuri fulger) | II | 📘📜 | `mat.nr1000.rotunjire` |
 | Răsturnatul unui număr (nu e în programă — doar opțional) | II | 📘 | `mat.nr1000.rasturnat` |
 
 ### 2. Adunare și scădere
@@ -100,7 +100,7 @@ Ce altă documentare am folosit (exemple de exerciții, aplicații, UX): `docs/c
 | Familii de operații (7 + 5, 5 + 7, 12 − 5, 12 − 7) | I | ➕ | `mat.op.familii` |
 | Termeni: termen, sumă, total, diferență | I | 📜 | `mat.op.terminologie` |
 | Descăzut, scăzător; reconstituirea calculelor cu cifre lipsă | II | 📘📜 | `mat.op1000.reconstituire` |
-| Adunări și scăderi 0–1000 fără / cu trecere | II | 📘📜 | `mat.op1000.fara-trecere`, `mat.op1000.cu-trecere` |
+| Adunări și scăderi 0–1000 fără / cu trecere (în Jocuri fulger, la Avansat, doar o trecere simplă: la unități sau cu împrumut din zeci) | II | 📘📜 | `mat.op1000.fara-trecere`, `mat.op1000.cu-trecere` |
 | Înmulțirea și împărțirea (adunare / scădere repetată) | II | 📜 | `mat.op.inmultire`, `mat.op.impartire` |
 
 ### 3. Rezolvarea problemelor
