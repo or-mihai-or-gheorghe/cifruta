@@ -45,7 +45,7 @@
     măsurat pe ecran, fiecare temă jucată tip cu tip);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.15.0 se publică: întâi regulile Firestore (`fulgerTopics()` cu tema `numere-1000`), apoi site-ul.
+- **Următorul pas:** v0.15.0 e publicat (întâi regulile Firestore, ruleset `69018eff`, apoi site-ul), cu E2E pe site-ul live 1799/1799.
   - Copilul joacă temele noi și strânge medalii; din rundele reale se reglează `fastMs` și pragurile de stele.
   - Rămân: verificarea în Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
   - Apoi: secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul) și temele „în curând” din Jocuri fulger.
@@ -185,7 +185,8 @@
     variante poate avea doar cerință, fără desen.
   - **Verificare:** npm test 103/103 (regulile din `tests/fulger-1000.rules.js`, cu trecerile numărate pe coloane), reguli 16/16,
     E2E 1799/1799, E2E cont 82/82.
-  - **Publicare:** întâi regulile (`fulgerTopics()` cu tema nouă), apoi site-ul prin GitHub Actions.
+  - **Publicare:** întâi regulile (`fulgerTopics()` cu tema nouă, ruleset `69018eff`), apoi site-ul prin GitHub Actions (rularea
+    35473169543); E2E pe site-ul live 1799/1799, tag `v0.15.0`.
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -696,3 +697,8 @@
     - Verificarea „Greșelile tale” din E2E respingea comparările, unde răspunsul e chiar semnul.
     - Literele S, Z, U de pe numărătoare ieșeau sub pragul de lizibilitate pe telefonul ținut orizontal.
   - **Rezultate:** npm test 103/103, reguli 16/16, E2E 1799/1799, E2E cont 82/82.
+  - **Publicat:** regulile Firestore (ruleset `69018eff`), apoi site-ul prin GitHub Actions (rularea 35473169543); E2E pe site-ul
+    live 1799/1799, tag `v0.15.0`.
+
+  **De făcut data viitoare:** copilul joacă tema nouă → `fastMs` și pragurile de stele; verificarea în Firestore a clasamentelor
+  mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
