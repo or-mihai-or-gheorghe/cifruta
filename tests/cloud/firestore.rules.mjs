@@ -115,6 +115,7 @@ test('reguli: încercările, rundele (cu temă) și starea le scrie doar proprie
   await assertSucceeds(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-7'), { ...round, topic: 'pozitii-trasee' })); // o temă cu figuri
   await assertSucceeds(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-8'), { ...round, topic: 'grafice-tabele' })); // o temă cu grafice
   await assertSucceeds(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-9'), { ...round, topic: 'harti-arbori' })); // o temă cu hărți și arbori
+  await assertSucceeds(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-10'), { ...round, topic: 'numere-1000' })); // numerele până la 1000
   await assertFails(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-4'), { ...round, topic: 7 }));
   await assertFails(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-5'), { ...round, total: 5000 }));
   await assertFails(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-6'), { ...round, level: 'expert' }));
@@ -151,6 +152,7 @@ test('reguli: clasamentul îl văd doar autentificații; o intrare e a contului,
   await assertSucceeds(setDoc(doc(ana, 'leaderboards/fulger-siruri-intrusi-avansat-all/entries/ana_p1'), entry('ana'))); // o temă cu figuri
   await assertSucceeds(setDoc(doc(ana, 'leaderboards/fulger-grafice-tabele-intermediar-all/entries/ana_p1'), entry('ana'))); // o temă cu grafice
   await assertSucceeds(setDoc(doc(ana, 'leaderboards/fulger-harti-arbori-total-2026-W38/entries/ana_p1'), total('ana'))); // o temă cu hărți și arbori
+  await assertSucceeds(setDoc(doc(ana, 'leaderboards/fulger-numere-1000-avansat-all/entries/ana_p1'), entry('ana'))); // numerele până la 1000
   await assertFails(setDoc(doc(ana, `${board('expert')}/ana_p1`), entry('ana')));
   await assertFails(setDoc(doc(ana, 'leaderboards/fulger-usor-all/entries/ana_p1'), entry('ana'))); // clasament de dinainte de teme
   await assertFails(setDoc(doc(ana, 'leaderboards/fulger-inmultirea-usor-all/entries/ana_p1'), entry('ana'))); // temă „în curând”
@@ -332,5 +334,5 @@ test('reguli: o schimbare de avatar rescrie într-o tranzacție toate intrările
     }),
   );
   const written = await Promise.all(refs.map((r) => getDoc(r)));
-  if (shown.length < 41 || written.some((s) => s.data()?.avatar !== avatar)) throw new Error(`avatarul nu a ajuns în toate cele ${shown.length} intrări`);
+  if (shown.length !== topics.length * 8 + 1 || written.some((s) => s.data()?.avatar !== avatar)) throw new Error(`avatarul nu a ajuns în toate cele ${shown.length} intrări`);
 });
