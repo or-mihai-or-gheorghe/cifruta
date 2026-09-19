@@ -12,12 +12,12 @@
 // Un tip nou: o intrare aici (cu figuri: în kinds-forme.js), o linie în `mix`-ul unui nivel al unei teme din data/fulger.js și regulile
 // lui în tests/fulger.test.js (cu figuri: în tests/fulger-forme.rules.js).
 
-import { calc, relation } from '../core/expr.js';
 import { trecere } from '../core/rules.js';
+import { choice, compare, sorting } from './intrebari.js';
 import { CHART_KINDS } from './kinds-grafice.js';
 import { MAP_KINDS } from './kinds-grafuri.js';
 import { SHAPE_KINDS } from './kinds-forme.js';
-import { distinct, int, pickOne, shuffle, withChoices } from './rand.js';
+import { distinct, int, pickOne, shuffle } from './rand.js';
 
 const PLUS = ' + ';
 const MINUS = ' − ';
@@ -37,23 +37,6 @@ function twoDigits(rand) {
 
 /** Numărul cu cifrele inversate (43 → 34), pentru greșeli tipice. */
 const reversed = (n) => (n >= 10 && n <= 99 && n % 10 !== 0 ? (n % 10) * 10 + Math.floor(n / 10) : null);
-
-function choice(kind, rand, text, typical, max) {
-  const answer = calc(text);
-  return { kind, mode: 'choice', key: `${kind}:${text}`, text, answer, choices: withChoices(rand, answer, typical, { max }) };
-}
-
-function compare(kind, left, right) {
-  const [l, r] = [String(left), String(right)];
-  return { kind, mode: 'compare', key: `${kind}:${l}|${r}`, left: l, right: r, answer: relation(calc(l), calc(r)) };
-}
-
-function sorting(kind, rand, values, dir = 'asc') {
-  const answer = [...values].sort((a, b) => (dir === 'asc' ? a - b : b - a));
-  let numbers = shuffle(rand, values);
-  while (numbers.every((n, i) => n === answer[i])) numbers = shuffle(rand, values);
-  return { kind, mode: 'sort', key: `${kind}:${dir}:${numbers.join(',')}`, dir, numbers, answer };
-}
 
 /** Patru numere care se încurcă ușor: aceleași cifre (43, 34, 40, 30), aceleași zeci (52, 55, 57, 59) sau vecine. */
 function trickyFour(rand) {

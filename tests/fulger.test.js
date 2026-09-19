@@ -25,8 +25,8 @@ import { MAP_RULES } from './fulger-grafuri.rules.js';
 const SEEDS = 500;
 const terms = (text) => text.split(/ [+−] /).map(Number);
 const inRange = (x, min, max) => Number(x) >= min && Number(x) <= max;
-const FARA = 'mat.op.fara-trecere';
-const CU = 'mat.op.cu-trecere';
+const FARA = ['mat.op.fara-trecere', 'mat.op1000.fara-trecere'];
+const CU = ['mat.op.cu-trecere', 'mat.op1000.cu-trecere'];
 
 // Regulile fiecărui tip, verificate pe întrebările generate
 const RULES = {
@@ -67,10 +67,11 @@ const RULES = {
 /** Plăcile unei ordonări: numerele (la calcule) sau id-urile plăcuțelor desenate (la grafice). */
 const tilesOf = (q) => q.tiles ?? q.numbers;
 
-/** Trecerea peste ordin a unui calcul din text: pe coloane la doi termeni, prin suma unităților la trei. */
+/** Trecerea peste ordin a unui calcul din text: pe coloane la doi termeni, iar la mai mulți, suma cifrelor fiecărei coloane. */
 function carries(text) {
   const t = terms(text);
-  return t.length === 2 ? trecere(text.includes('−') ? '-' : '+', t[0], t[1]) : t.reduce((s, x) => s + (x % 10), 0) >= 10;
+  if (t.length === 2) return trecere(text.includes('−') ? '-' : '+', t[0], t[1]);
+  return [1, 10, 100].some((p) => t.reduce((s, x) => s + (Math.floor(x / p) % 10), 0) >= 10);
 }
 
 /** Un răspuns greșit la întâmplare. */
@@ -168,7 +169,9 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
     }
     if (kind.mode === 'choice') {
       // „fără trecere” doar dacă nu apare niciodată trecerea, „cu trecere” doar dacă apare mereu, amândouă dacă apar amândouă
-      assert.deepEqual([kind.concepts.includes(FARA), kind.concepts.includes(CU)], [carry.fara > 0, carry.cu > 0], `${id}: etichetele de trecere față de ${JSON.stringify(carry)}`);
+      // (fiecare etichetă are varianta ei până la 100 și până la 1000)
+      const tags = [FARA, CU].map((ids) => kind.concepts.some((c) => ids.includes(c)));
+      assert.deepEqual(tags, [carry.fara > 0, carry.cu > 0], `${id}: etichetele de trecere față de ${JSON.stringify(carry)}`);
     }
     if (kind.mode === 'compare') assert.ok(Object.values(relations).every((n) => n >= SEEDS * 0.1), `${id}: semnele ${JSON.stringify(relations)}`);
     if (id === 'sort-4-dir') assert.deepEqual([...dirs].sort(), ['asc', 'desc']);
