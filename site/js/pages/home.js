@@ -24,7 +24,7 @@ function fulgerCard() {
       'div',
       { class: 'fg-home__body l-stack l-stack--sm' },
       h('h2', { class: 'fg-home__title' }, 'Jocuri fulger'),
-      h('p', { class: 'fg-home__text' }, 'Câte întrebări rezolvi în 2 minute? Calcule, șiruri, puzzle-uri cu forme și drumuri. Strânge alune, fă serii și bate-ți recordul!'),
+      h('p', { class: 'fg-home__text' }, 'Câte întrebări rezolvi în 2 minute? Calcule, șiruri, forme, drumuri, grafice și hărți. Strânge alune, fă serii și bate-ți recordul!'),
     ),
     h(
       'div',
