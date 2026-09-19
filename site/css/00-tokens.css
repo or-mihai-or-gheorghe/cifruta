@@ -120,6 +120,12 @@
   --v-medal-aur: #f5c542;
   --v-medal-aur-dark: #c68d0e;
   --v-medal-aur-light: #ffeaa6;
+  /* seriile graficelor din Jocurile fulger (grafice.js, grafuri.js), în ordinea fixă albastru, portocaliu, verde, indigo; trec
+     validatorul de palete (fond deschis, toate perechile, inclusiv daltonism); textul rămâne în cerneală, nu în culoarea seriei */
+  --v-series-1: #2a78d6;
+  --v-series-2: #eb6834;
+  --v-series-3: #1baf7a;
+  --v-series-4: #4a3aa7;
   --c-bronz-bg: #fbeee4;
   --c-bronz-ink: #8a4b22;
   --c-argint-bg: #eef1f6;

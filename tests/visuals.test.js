@@ -59,3 +59,28 @@ test('desenele cu date își verifică parametrii', () => {
   const mixed = visualSVG({ v: 'pictogram', labels: 'legume,fructe', values: '2,1', emoji: 'morcov,mar' });
   assert.equal(new Set([...mixed.matchAll(/href="([^"]+)"/g)].map((m) => m[1])).size, 2); // fiecare rând cu emoji-ul lui
 });
+
+test('graficele și grafurile pentru jocuri au text și emoji destul de mari pentru telefon', () => {
+  // desenate pe 320 de unități lățime, ca pe telefon să iasă cel puțin 13 px (tests/fulger: FULGER_TEXT măsoară și pe ecran)
+  const groups = new Set(['Grafice pentru jocuri', 'Hărți, rețele și arbori']);
+  const drawn = listVisuals().filter((v) => groups.has(v.group));
+  assert.ok(drawn.length >= 11, `doar ${drawn.length} desene în grupurile noi`);
+  for (const { name, demos } of drawn) {
+    for (const params of demos) {
+      const where = `${name} ${JSON.stringify(params)}`;
+      const svg = visualSVG({ v: name, ...params });
+      if (/viewBox="0 0 320 /.test(svg) === false) continue; // insigna liniei e o variantă de răspuns, nu un desen de întrebare
+      for (const [, size] of svg.matchAll(/<text[^>]*font-size="([\d.]+)"/g)) assert.ok(Number(size) >= 18, `${where}: text de ${size}`);
+      for (const [, w] of svg.matchAll(/<image[^>]*width="([\d.]+)"/g)) assert.ok(Number(w) >= 24, `${where}: emoji de ${w}`);
+    }
+  }
+});
+
+test('barele au înălțimea proporțională cu valoarea lor', () => {
+  const demos = listVisuals().find((v) => v.name === 'chart-bars').demos;
+  for (const params of demos) {
+    const svg = visualSVG({ v: 'chart-bars', ...params });
+    const bars = [...svg.matchAll(/data-value="(\d+)"[^>]*height="([\d.]+)"/g)].map(([, v, h]) => Number(h) / Number(v));
+    assert.ok(bars.length >= 2 && bars.every((r) => Math.abs(r - bars[0]) < 0.2), `${JSON.stringify(params)}: ${bars}`);
+  }
+});

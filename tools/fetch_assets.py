@@ -15,7 +15,7 @@ import urllib.request
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 EMOJI_JS = ROOT / "site" / "js" / "visuals" / "emoji.js"
 EMOJI_DIR = ROOT / "site" / "assets" / "emoji"
-NOTO_URL = "https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u{}.svg"
+NOTO_URL = "https://raw.githubusercontent.com/googlefonts/noto-emoji/main/2D/svg/emoji_u{}.svg"
 
 
 def emoji_codes():
