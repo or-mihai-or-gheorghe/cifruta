@@ -1,7 +1,7 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-19 · **Versiune:** 0.14.0 (Jocuri fulger cu grafice și grafuri: temele „Grafice și tabele” și „Hărți și arbori”, 32 de tipuri noi de întrebări)
+- **Data:** 2026-09-19 · **Versiune:** 0.14.1 (Jocuri fulger cu grafice și grafuri: temele „Grafice și tabele” și „Hărți și arbori”, 32 de tipuri noi de întrebări, plus remedierile recenziei de cod)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -44,9 +44,8 @@
     măsurat pe ecran);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.14.0 e publicat (întâi regulile Firestore, ruleset `673d0bb7`, apoi site-ul), cu E2E pe site-ul live 1665/1665.
-  - Remedierile recenziei de cod (v0.14.1, jurnalul din 19 septembrie) sunt în `main`, local, nepublicate. Publicarea: `npm run deploy`
-    (regulile Firestore nu se schimbă), apoi E2E pe site-ul live și tag `v0.14.1`.
+- **Următorul pas:** v0.14.1 e publicat (remedierile recenziei de cod; regulile Firestore au rămas cele din v0.14.0, ruleset `673d0bb7`),
+  cu E2E pe site-ul live 1665/1665.
   - Copilul joacă temele noi și strânge medalii; din rundele reale se reglează `fastMs` și pragurile de stele.
   - Rămân: verificarea în Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
   - Apoi: secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul) și temele „în curând” din Jocuri fulger.
@@ -165,6 +164,18 @@
   - **Verificare:** npm test 102/102, reguli 16/16, E2E 1665/1665, E2E cont 82/82.
   - **Publicare:** întâi regulile (`fulgerTopics()` cu temele noi, ruleset `673d0bb7`), apoi site-ul prin GitHub Actions (rularea
     35429835230); E2E pe site-ul live 1665/1665, tag `v0.14.0`.
+- [x] M30 (v0.14.1): recenzia codului pentru grafice și grafuri.
+  - **Cum:** patru recenzori independenți, pe zone; fiecare constatare verificată în cod, reparații mici, fără verificări defensive.
+  - **Reparate:**
+    - întrebări ambigue sau ușor de ghicit („cu 5 mai mult” citit „5 mai”, bara ascunsă din scară, scurtăturile de la drumul cel mai
+      bogat și de la „cei mai mulți prieteni”, drumul marcat abia vizibil);
+    - pastile și linii suprapuse în desene;
+    - numele pentru cititorul de ecran (pictograma dădea răspunsul, arborii nu se puteau urmări, „Greșelile tale” desenate fără
+      răspuns);
+    - regulile care nu puteau prinde greșeli de sens.
+  - **Verificare:** npm test 103/103 (regulile graficelor și grafurilor pe 3000 de semințe), E2E 1665/1665.
+  - **Publicare:** site-ul prin GitHub Actions (rularea 35435426680; regulile Firestore nu se schimbă); E2E pe site-ul live 1665/1665,
+    tag `v0.14.1`.
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -649,4 +660,6 @@
     - `says` nu mai găsește „5 mai” în „15 mai”;
     - regulile graficelor și grafurilor rulează pe 3000 de semințe;
     - E2E-ul „Greșelilor tale” nu mai trece doar datorită săgeților dintre plăcuțe.
-  - **Rezultate:** npm test 103/103, E2E 1665/1665 (nepublicat: v0.14.1 așteaptă acordul pentru publicare).
+  - **Rezultate:** npm test 103/103, E2E 1665/1665.
+  - **Publicat:** site-ul prin GitHub Actions (rularea 35435426680; regulile Firestore nu se schimbă); E2E pe site-ul live 1665/1665,
+    tag `v0.14.1`.
