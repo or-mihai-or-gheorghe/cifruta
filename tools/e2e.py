@@ -752,12 +752,13 @@ def fulger_flow(run: Run, page: Page, vp: str):
 
 
 # temele ale căror tipuri au toate un desen (figuri, grafice, hărți), cu tipurile lor
-DRAWN_TOPICS = """Promise.all([import('./data/fulger.js'), import('./js/fulger/kinds.js')]).then(([{ default: c }, { isDrawn }]) => c.topics
-  .filter((t) => !t.soon && t.levels.every((l) => l.mix.every((m) => isDrawn(m.kind))))
-  .map((t) => ({ id: t.id, kinds: [...new Set(t.levels.flatMap((l) => l.mix.map((m) => m.kind)))] })))"""
+TOPIC_KINDS = """Promise.all([import('./data/fulger.js'), import('./js/fulger/kinds.js')]).then(([{ default: c }, { isDrawn }]) => c.topics
+  .filter((t) => !t.soon)
+  .slice(1)
+  .map((t) => ({ id: t.id, drawn: t.levels.every((l) => l.mix.every((m) => isDrawn(m.kind))), kinds: [...new Set(t.levels.flatMap((l) => l.mix.map((m) => m.kind)))] })))"""
 # cel mai mic text dintr-un grafic sau o hartă, în pixeli pe ecran (null la desenele care nu sunt grafice)
 FULGER_TEXT = """(() => { const svg = document.querySelector('[data-testid=fg-figure] svg');
-  if (!svg || !/v-(chart-|metro|network|bracket|tree|venn)/.test(svg.getAttribute('class'))) return null;
+  if (!svg || !/v-(chart-|metro|network|bracket|tree|venn|abacus)/.test(svg.getAttribute('class'))) return null;
   const scale = svg.getScreenCTM().a; let min = Infinity;
   for (const t of svg.querySelectorAll('text')) min = Math.min(min, parseFloat(t.getAttribute('font-size')) * scale);
   return Math.round(min * 10) / 10; })()"""
@@ -773,20 +774,24 @@ def answer_drawn(page: Page, s: dict, correct: bool):
         page.get_by_test_id(f"fg-opt-{s['answerIndex' if correct else 'wrongIndex']}").click()
 
 
-def fulger_drawn_flow(run: Run, page: Page, vp: str):
-    """Jocuri fulger cu desene (figuri, grafice, hărți), pe fiecare temă: exemplele desenate de pe carduri, fiecare tip cu seria pornită
-    (desenul și variantele încap pe ecran, textul graficelor se citește), răspunsul corect cu desenul rezolvat, cel greșit cu răspunsul
-    arătat și „Greșelile tale” cu desene."""
+def fulger_topics_flow(run: Run, page: Page, vp: str):
+    """Jocurile fulger, temă cu temă (toate în afară de prima, jucată în amănunt de fulger_flow): fiecare tip cu seria pornită (desenul
+    și variantele încap pe ecran, textul graficelor se citește), răspunsul corect cu desenul rezolvat, cel greșit cu răspunsul arătat și
+    „Greșelile tale”. La temele desenate, exemplele de pe carduri sunt desene."""
     run.goto(page, "")
     page.evaluate("localStorage.removeItem('cifruta:fulger')")
     state = lambda: page.evaluate("window.__dbg.fulger.state()")
-    for topic in page.evaluate(DRAWN_TOPICS):
+    for topic in page.evaluate(TOPIC_KINDS):
         tid, kinds = topic["id"], topic["kinds"]
         run.goto(page, f"fulger/{tid}")
-        samples = page.get_by_test_id(f"fg-topic-{tid}").locator("li.fg-sample--art")
-        undrawn = page.get_by_test_id(f"fg-topic-{tid}").locator("li.fg-sample--art:not(:has(svg, img))").count()
         overflow = page.get_by_test_id(f"fg-topic-{tid}").locator(".fg-level").evaluate_all("cards => cards.filter((c) => [...c.querySelectorAll('.fg-sample')].some((s) => s.getBoundingClientRect().right > c.getBoundingClientRect().right + 1)).length")
-        run.check(samples.count() == 6 and undrawn == 0 and overflow == 0, f"[{vp}] {tid}: exemplele de pe cele 3 carduri sunt desene și încap în carduri ({samples.count()} exemple, {undrawn} fără desen, {overflow} carduri depășite)")
+        if topic["drawn"]:
+            samples = page.get_by_test_id(f"fg-topic-{tid}").locator("li.fg-sample--art")
+            undrawn = page.get_by_test_id(f"fg-topic-{tid}").locator("li.fg-sample--art:not(:has(svg, img))").count()
+            run.check(samples.count() == 6 and undrawn == 0 and overflow == 0, f"[{vp}] {tid}: exemplele de pe cele 3 carduri sunt desene și încap în carduri ({samples.count()} exemple, {undrawn} fără desen, {overflow} carduri depășite)")
+        else:
+            samples = page.get_by_test_id(f"fg-topic-{tid}").locator("li.fg-sample")
+            run.check(samples.count() >= 6 and overflow == 0, f"[{vp}] {tid}: exemplele de pe cele 3 carduri încap în carduri ({samples.count()} exemple, {overflow} carduri depășite)")
         run.shot(page, f"{vp}-fulger-{tid}-tema")
         run.goto(page, f"fulger/{tid}/avansat", debug=True)
         page.get_by_test_id("fg-start").click()
@@ -822,11 +827,18 @@ def fulger_drawn_flow(run: Run, page: Page, vp: str):
         page.wait_for_selector("[data-testid=fg-results]")
         page.get_by_test_id("fg-results").click()  # sare peste numărătoare
         page.wait_for_timeout(300)
-        mistakes = page.locator("[data-testid=fg-mistakes] .fg-mistake--figure").count()
-        # fiecare greșeală arată răspunsul bun: un desen, un emoji sau un text (la numărat, variantele sunt numere)
-        # (semnele și săgețile dintre plăcuțe nu contează: fără desene sau nume, rândul ar fi gol)
-        shown = page.evaluate("[...document.querySelectorAll('[data-testid=fg-mistakes] .fg-mistake--figure .fg-mistake__ok')].filter((ok) => ok.querySelector('svg, img') || [...ok.childNodes].some((c) => !(c.classList?.contains('u-visually-hidden')) && c.textContent.replace(/[\\s<>=→+]/g, ''))).length")
-        run.check(mistakes == min(5, len(kinds) // 2) and shown == mistakes, f"[{vp}] {tid}: „Greșelile tale” arată răspunsul bun la fiecare greșeală ({mistakes} greșeli, {shown} cu răspunsul arătat)")
+        mistakes = page.locator("[data-testid=fg-mistakes] .fg-mistake").count()
+        figures = page.locator("[data-testid=fg-mistakes] .fg-mistake--figure").count()
+        # fiecare greșeală arată răspunsul bun: un desen, un emoji, un nume, un număr sau (la comparări) semnul singur
+        # (o ordonare din care ar rămâne doar săgețile nu contează)
+        shown = page.evaluate(
+            "[...document.querySelectorAll('[data-testid=fg-mistakes] .fg-mistake__ok')].filter((ok) => {"
+            "  const text = [...ok.childNodes].filter((c) => !c.classList?.contains('u-visually-hidden')).map((c) => c.textContent).join('').replace(/\\s/g, '');"
+            "  return ok.querySelector('svg, img') || /[\\p{L}\\p{N}]/u.test(text) || /^[<>=]$/.test(text);"
+            "}).length"
+        )
+        drawn_ok = figures == mistakes if topic["drawn"] else figures <= mistakes
+        run.check(mistakes == min(5, len(kinds) // 2) and shown == mistakes and drawn_ok, f"[{vp}] {tid}: „Greșelile tale” arată răspunsul bun la fiecare greșeală ({mistakes} greșeli, {shown} cu răspunsul arătat, {figures} cu desen)")
         run.layout_ok(page, f"[{vp}] {tid} rezultate")
         run.shot(page, f"{vp}-fulger-{tid}-rezultate")
     page.evaluate("localStorage.removeItem('cifruta:fulger')")
@@ -847,6 +859,7 @@ def fulger_screens(run: Run, browser, base: str):
         ("pozitii-trasee", ("robot-lung", "coordonate", "interior")),
         ("grafice-tabele", ("timp-doua-serii", "grafic-compara", "grafic-ordine", "venn", "tabel", "cerc-felii")),
         ("harti-arbori", ("drum-compara", "linie-ordine", "arbore-clasificare", "turneu", "drum-scurt", "veverita-drum", "veverita-bogat", "arbore-alegeri")),
+        ("numere-1000", ("sort-4-1000-dir", "cmp-expr-1000", "add-3op-1000", "nr-litere", "nr-numaratoare", "sir-1000")),
     ]
     for name, opts, min_text in screens:
         context = browser.new_context(locale="ro-RO", **opts)
@@ -1069,7 +1082,7 @@ def main() -> int:
                 avatar_studio_flow(run, page, vp)
             if not args.only or fulger_only:
                 fulger_flow(run, page, vp)
-                fulger_drawn_flow(run, page, vp)
+                fulger_topics_flow(run, page, vp)
             if tests:
                 pages_flow(run, page, tests[0], vp)
             for test in tests:

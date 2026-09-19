@@ -28,7 +28,7 @@ registerVisual('abacus', {
         out += `<ellipse class="v-abacus__bead" data-rod="${k}" data-i="${b}" cx="${x}" cy="${110 - 11 * b}" rx="16" ry="5.5" fill="${PLACE[k].color}" ${st(1.5)}/>`;
       }
       out += `<rect x="${x - 13}" y="126" width="26" height="15" rx="3" fill="${PLACE[k].color}" ${st(1.5)}/>`;
-      out += txt(x, 134, k, { size: 11, fill: C.white });
+      out += txt(x, 134, k, { size: 13, fill: C.white });
     });
     return out;
   },

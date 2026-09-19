@@ -332,14 +332,29 @@ export const KINDS_1000 = {
       do n = int(rand, 360, 739);
       while (n % 100 === 50 || n % 100 === 0);
       const answer = Math.round(n / 100) * 100;
+      const up = n % 100 > 50; // se rotunjește în sus, deci suta în care s-ar rotunji greșit e cea de dedesubt
+      const other = up ? answer - 100 : answer + 100;
+      const ask = { op: 'rotunjire' };
+      // jumătate din întrebări au patru sute la rând care le cuprind pe amândouă (suta bună și cea vecină), cu răspunsul pe o
+      // poziție la întâmplare dintre cele posibile; la celelalte, variantele vin din greșelile tipice
+      if (rand() < 0.5) {
+        const below = up ? int(rand, 1, 3) : int(rand, 0, 2);
+        return numberQuestion('rotunjire-sute', rand, {
+          prompt: `Cât e ${n} rotunjit la sute?`,
+          key: `${n}`,
+          answer,
+          fixed: [0, 1, 2, 3].map((i) => answer + (i - below) * 100),
+          ask,
+        });
+      }
       return numberQuestion('rotunjire-sute', rand, {
         prompt: `Cât e ${n} rotunjit la sute?`,
         key: `${n}`,
         answer,
-        // sutele vecine (cea în care s-ar rotunji greșit) și numărul rotunjit la zeci (nerotunjit până la sute)
-        typical: [answer - 100, answer + 100, Math.round(n / 10) * 10, answer - 200, answer + 200, answer - 300, answer + 300],
+        // suta vecină, numărul rotunjit la zeci (nerotunjit până la sute) și sutele mai depărtate
+        typical: [other, answer - 100, answer + 100, Math.round(n / 10) * 10, answer - 200, answer + 200, answer - 300, answer + 300],
         max: MAX,
-        ask: { op: 'rotunjire' },
+        ask,
       });
     },
   },

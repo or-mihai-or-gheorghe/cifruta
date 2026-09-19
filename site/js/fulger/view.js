@@ -311,7 +311,8 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     let body;
     let strip = null;
     if (q.mode === 'figure') {
-      const prompt = h('p', { class: `fg-prompt${promptLength(q.prompt) > 45 ? ' fg-prompt--long' : ''}`, html: promptHTML(q.prompt) });
+      // fără desen, cerința e singură în card (un șir de numere, o rotunjire): se scrie mai mare
+      const prompt = h('p', { class: `fg-prompt${q.figure ? '' : ' fg-prompt--solo'}${promptLength(q.prompt) > 45 ? ' fg-prompt--long' : ''}`, html: promptHTML(q.prompt) });
       body = h('div', { class: 'fg-q fg-q--figure', 'data-testid': 'fg-question' }, prompt, figure);
     } else if (q.figure) {
       // comparare sau ordonare pe un desen: cardul are doar desenul, iar legenda și operanzii stau în rândul de deasupra butoanelor
@@ -373,7 +374,9 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     });
     // variantele cu piese sau rețele (multe căsuțe mici) stau pe două coloane pe telefoanele înalte, ca să iasă mai mari
     const detailed = q.mode === 'figure' && q.choices.some((id) => q.options[id].v === 'cell-grid');
-    answers.className = `fg-answers fg-answers--${q.mode}${detailed ? ' fg-answers--detailed' : ''}${strip ? ' fg-answers--strip' : ''}`;
+    // numerele lungi (patru cifre) n-ar încăpea în patru butoane pe un telefon îngust
+    const wide = q.mode === 'figure' && q.choices.some((id) => String(q.options[id].text ?? '').length >= 4);
+    answers.className = `fg-answers fg-answers--${q.mode}${detailed ? ' fg-answers--detailed' : ''}${wide ? ' fg-answers--wide' : ''}${strip ? ' fg-answers--strip' : ''}`;
     answers.style.setProperty('--n', String(buttons.length));
     answers.setAttribute('aria-busy', 'true');
     answers.replaceChildren(...[strip, ...buttons].filter(Boolean));

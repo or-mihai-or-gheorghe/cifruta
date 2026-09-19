@@ -350,6 +350,8 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
   .fg-fig--chart { --fig-h: clamp(5.5rem, 30vh, 15rem); }
   .fg-q--drawn .fg-fig { --fig-h: clamp(5.5rem, 28vh, 15rem); }
 }
+/* cerința singură în card (un șir de numere, o rotunjire): mai mare, ca numerele să se citească de departe */
+.fg-prompt--solo { font-size: clamp(1.5rem, 1.1rem + 2.2vw, 2.4rem); }
 .fg-prompt--long { font-size: clamp(1rem, 0.9rem + 0.6vw, 1.35rem); text-wrap: balance; }
 .fg-prompt__emoji,
 .fg-strip .c-emoji,
@@ -450,6 +452,10 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 /* piesele și rețelele au căsuțe mici: pe telefoanele înalte, două coloane le dau loc să se vadă */
 @media (max-width: 40rem) and (min-height: 44rem) {
   .fg-answers--detailed { grid-template-columns: repeat(2, 1fr); }
+}
+/* numerele de patru cifre nu încap în patru butoane pe un ecran îngust */
+@media (max-width: 40rem) {
+  .fg-answers--wide { grid-template-columns: repeat(2, 1fr); }
 }
 .fg-opt__art { --opt-h: clamp(2.8rem, 10vh, 5rem); display: block; width: min(100%, calc(var(--opt-h) * var(--ar, 1))); }
 .fg-opt__art .c-emoji,
