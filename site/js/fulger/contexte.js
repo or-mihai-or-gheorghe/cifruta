@@ -111,7 +111,6 @@ export const NAMES = [
 /** Lunile din anul școlar (fără diacritice problematice în prescurtări). */
 export const MONTHS = ['septembrie', 'octombrie', 'noiembrie', 'martie', 'aprilie', 'mai', 'iunie'];
 export const WEEK = ['luni', 'marti', 'miercuri', 'joi', 'vineri'];
-export const dayName = (id) => DAYS[id]?.[1] ?? id;
 export const dayOption = (id) => ({ text: DAYS[id][0], note: DAYS[id][1], alt: DAYS[id][1] });
 export const dateOption = (d, month) => ({ text: String(d), note: month, alt: `${d} ${month}` });
 

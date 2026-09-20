@@ -225,7 +225,7 @@ function medalShelf(data, { catalog, won }, topics) {
         const list = mine.filter((m) => m.kind === kind);
         return h(
           'div',
-          { class: `fg-metal__group fg-metal__group--${kind}`, style: { '--n': String(list.length) } },
+          { class: `fg-metal__group fg-metal__group--${kind}` },
           h('h4', { class: 'fg-metal__label', id: `fg-metal-${metal.id}-${kind}` }, label),
           h('ul', { class: 'fg-medals', 'aria-labelledby': `fg-metal-${metal.id}-${kind}` }, list.map(card)),
         );
@@ -241,8 +241,7 @@ function medalShelf(data, { catalog, won }, topics) {
           levelPill(metal.level),
           chip(`${mine.filter((m) => won.has(m.id)).length} din ${mine.length}`, 'fg-metal__count'),
         ),
-        // până la 5 teme, pe ecran lat, medaliile temelor și cele în plus încap pe un rând; cu mai multe, grupurile stau unul sub altul
-        h('div', { class: `fg-metal__groups${topics.length <= 5 ? ' is-row' : ''}` }, group('topic', 'Medaliile temelor'), group('extra', 'Medalii în plus')),
+        h('div', { class: 'fg-metal__groups' }, group('topic', 'Medaliile temelor'), group('extra', 'Medalii în plus')),
       );
     }),
   );

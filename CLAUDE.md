@@ -88,7 +88,8 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   - Formele întrebărilor (`choice`, `compare`, `sorting`) vin din `js/fulger/intrebari.js`, ca să le poată folosi ambele module.
   - La numerele de trei cifre, `numberQuestion` și `choice` cer `max` (implicit caută variante până la 100).
   - O întrebare `figure` **fără desen** (doar cerință și patru variante) e bună pentru șiruri, rotunjire sau numere scrise cu
-    litere: cerința se scrie mai mare, iar variantele de patru cifre trec pe două coloane pe ecranele înguste.
+    litere: cu variante numerice, cerința se scrie mai mare, iar cele de patru cifre trec pe două coloane pe ecranele înguste
+    (`numericOptions` din `js/fulger/view.js`: altfel, variantele-nume ale pictogramei ar trece și ele pe două coloane).
   - Eticheta „fără / cu trecere” are câte o pereche pentru 0–100 (`mat.op.*`) și pentru 0–1000 (`mat.op1000.*`).
 - **Tip cu figuri în Jocuri fulger:** o intrare în `SHAPE_KINDS` (`js/fulger/kinds-forme.js`, `mode: 'figure'`), al cărei `generate(rand)`
   întoarce `figureQuestion(kind, rand, { prompt, figure, solved, key, answer, distractors })`: desene din bancă (`glyph`, `glyph-cells`,

@@ -27,6 +27,8 @@ const spoken = (text) => String(text).replace(/−/g, 'minus');
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
 /** Plăcile unei ordonări: numerele (la calcule) sau id-urile plăcuțelor desenate (la grafice). */
 const tilesOf = (q) => q.tiles ?? q.numbers;
+/** Întrebare cu variante numerice (șiruri, rotunjire, numere scrise cu litere): numerele sunt conținutul, nu desene sau nume. */
+const numericOptions = (q) => q.mode === 'figure' && q.choices.every((id) => /^\d+$/.test(String(q.options[id].text ?? '')));
 /** O latură a comparării: textul unui calcul sau desenele de pe un grafic, unite cu „+”. */
 const sideText = (side, plus = ' + ') => (Array.isArray(side) ? side.map(artName).join(plus) : side);
 const SEPARATORS = { asc: '<', desc: '>', path: '→' };
@@ -311,8 +313,9 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     let body;
     let strip = null;
     if (q.mode === 'figure') {
-      // fără desen, cerința e singură în card (un șir de numere, o rotunjire): se scrie mai mare
-      const prompt = h('p', { class: `fg-prompt${q.figure ? '' : ' fg-prompt--solo'}${promptLength(q.prompt) > 45 ? ' fg-prompt--long' : ''}`, html: promptHTML(q.prompt) });
+      // numere fără desen: cerința e singură în card (un șir, o rotunjire), deci se scrie mai mare
+      const solo = !q.figure && numericOptions(q);
+      const prompt = h('p', { class: `fg-prompt${solo ? ' fg-prompt--solo' : ''}${promptLength(q.prompt) > 45 ? ' fg-prompt--long' : ''}`, html: promptHTML(q.prompt) });
       body = h('div', { class: 'fg-q fg-q--figure', 'data-testid': 'fg-question' }, prompt, figure);
     } else if (q.figure) {
       // comparare sau ordonare pe un desen: cardul are doar desenul, iar legenda și operanzii stau în rândul de deasupra butoanelor
@@ -375,7 +378,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     // variantele cu piese sau rețele (multe căsuțe mici) stau pe două coloane pe telefoanele înalte, ca să iasă mai mari
     const detailed = q.mode === 'figure' && q.choices.some((id) => q.options[id].v === 'cell-grid');
     // numerele lungi (patru cifre) n-ar încăpea în patru butoane pe un telefon îngust
-    const wide = q.mode === 'figure' && q.choices.some((id) => String(q.options[id].text ?? '').length >= 4);
+    const wide = numericOptions(q) && q.choices.some((id) => q.options[id].text.length >= 4);
     answers.className = `fg-answers fg-answers--${q.mode}${detailed ? ' fg-answers--detailed' : ''}${wide ? ' fg-answers--wide' : ''}${strip ? ' fg-answers--strip' : ''}`;
     answers.style.setProperty('--n', String(buttons.length));
     answers.setAttribute('aria-busy', 'true');

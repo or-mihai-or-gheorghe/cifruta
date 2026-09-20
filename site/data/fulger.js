@@ -91,7 +91,7 @@ export default {
       id: 'numere-1000',
       title: 'Numere până la 1000',
       short: 'Până la 1000',
-      text: 'Sute, zeci și unități: formarea numerelor, comparări, ordonări și calcule fără trecere peste ordin.',
+      text: 'Sute, zeci și unități: formarea numerelor, comparări, ordonări și calcule fără trecere peste ordin (la Avansat, cu o trecere simplă).',
       icon: 'cuburi',
       grade: 2,
       concepts: [
@@ -139,7 +139,7 @@ export default {
         },
         {
           id: 'avansat',
-          warmup: ['add-1000-fara', 'cmp-expr-1000'],
+          warmup: ['add-1000-fara', 'cmp-1000'],
           mix: [
             { kind: 'add-3op-1000', weight: 2 },
             { kind: 'cmp-expr-1000', weight: 2 },

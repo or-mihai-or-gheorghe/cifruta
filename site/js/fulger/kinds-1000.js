@@ -3,7 +3,7 @@
 // singură trecere simplă: la unități (345 + 27) sau cu un împrumut din zeci (452 − 28), niciodată două și niciodată la sute.
 // Variantele greșite vin din greșelile tipice: ordinul mutat, zeroul sărit, o zece sau o sută în plus, trecerea uitată.
 
-import { numberToWords } from '../core/ro.js';
+import { cantitate, numberToWords } from '../core/ro.js';
 import { trecere } from '../core/rules.js';
 import { choice, compare, numberQuestion, sorting } from './intrebari.js';
 import { distinct, int, pickOne } from './rand.js';
@@ -63,7 +63,7 @@ export const KINDS_1000 = {
         S: s,
         Z: z,
         U: u,
-        alt: `numărătoare cu ${s} mărgele pe tija sutelor, ${z} pe a zecilor și ${u} pe a unităților`,
+        alt: `numărătoare cu ${cantitate(s, 'mărgea', 'mărgele')} pe tija sutelor, ${z} pe a zecilor și ${u} pe a unităților`,
       };
       return numberQuestion('nr-numaratoare', rand, {
         prompt: 'Ce număr arată numărătoarea?',
@@ -87,18 +87,18 @@ export const KINDS_1000 = {
     points: 2,
     fastMs: 5500,
     mode: 'figure',
-    promptMax: 60,
     concepts: [SCRIERE],
     generate(rand) {
       const [s, z, u] = [int(rand, 1, 9), int(rand, 0, 9), int(rand, 0, 9)];
       const answer = num(s, z, u);
-      // bucățile scrise una după alta („patru sute șapte” → 4007), zeroul sărit (47) și cifrele în altă ordine
-      const glued = z === 0 ? 1000 * s + u : 1000 * s + 10 * z + u;
+      // la numerele cu zero la zeci: bucățile scrise una după alta („patru sute șapte” → 4007) și zeroul sărit (47);
+      // la celelalte, cifrele în altă ordine și o zece sau o sută în plus (altfel variantele s-ar deosebi după lungime)
+      const zeroTens = z === 0 ? [1000 * s + u, 10 * s + u] : [];
       return numberQuestion('nr-litere', rand, {
         prompt: `Scrie cu cifre: ${numberToWords(answer)}`,
         key: `${answer}`,
         answer,
-        typical: [glued, 10 * s + u, num(s, u, z), num(z, s, u), num(u, z, s), answer + 10, answer - 10, answer + 100, answer - 100],
+        typical: [...zeroTens, num(s, u, z), num(z, s, u), num(u, z, s), answer + 10, answer - 10, answer + 100, answer - 100, answer + 1, answer - 1],
         max: 9999,
         ask: { op: 'litere' },
       });
@@ -116,9 +116,12 @@ export const KINDS_1000 = {
       const h = int(rand, 4, 7);
       const r = 100 * h;
       const near = [r - 100, r + 100, r - 200, r + 200, r - 300, r + 300];
+      // termenii calculului ajung și ei printre variante; sunt greșeli slabe, dar un interval mai strâns al răspunsului
+      // (ca să-i putem scoate) ar face din „varianta din mijloc” o scurtătură și mai mare: 71% față de 49%, măsurat
       if (rand() < 0.55) {
         const a = int(rand, 1, h - 1);
-        return choice('op-sute', rand, `${100 * a}${PLUS}${100 * (h - a)}`, [...near, 100 * Math.abs(h - 2 * a)], MAX);
+        // cealaltă operație; la termeni egali diferența e 0, care n-are ce căuta printre variante
+        return choice('op-sute', rand, `${100 * a}${PLUS}${100 * (h - a)}`, [...near, 100 * Math.abs(h - 2 * a)].filter((v) => v >= 100), MAX);
       }
       const b = int(rand, 1, 9 - h);
       return choice('op-sute', rand, `${100 * (h + b)}${MINUS}${100 * b}`, [...near, 100 * (h + 2 * b)], MAX);
@@ -270,9 +273,12 @@ export const KINDS_1000 = {
       if (roll < 0.85) {
         const s = int(rand, 1, 9); // zeroul pe alt loc: 305 și 350
         const d = int(rand, 1, 9);
-        return compare('cmp-1000', num(s, 0, d), num(s, d, 0));
+        // numărul cu zeroul la mijloc e mereu cel mic, deci laturile se dau la întâmplare (altfel răspunsul ar fi mereu „<”)
+        const [p, q] = [num(s, 0, d), num(s, d, 0)];
+        return rand() < 0.5 ? compare('cmp-1000', p, q) : compare('cmp-1000', q, p);
       }
-      const [x, y] = distinct(rand, 2, 85, 125); // în jurul sutei: 99 și 100
+      // în jurul sutei: unul sub 100, celălalt peste (99 și 100), în ordine la întâmplare
+      const [x, y] = rand() < 0.5 ? [int(rand, 85, 99), int(rand, 100, 115)] : [int(rand, 100, 115), int(rand, 85, 99)];
       return compare('cmp-1000', x, y);
     },
   },
@@ -306,12 +312,17 @@ export const KINDS_1000 = {
         if (answer < 200 || answer > 800) continue;
         const other = Math.abs(step) === 10 ? 100 : 10;
         const shown = terms.map((x, i) => (i === hole ? '?' : x));
+        // un număr care stă deja în cerință se elimină din ochi: îl păstrăm doar pe cel dinainte de gol („îl repet pe ultimul”)
+        const printed = new Set(hole === 3 ? terms.slice(0, 3) : terms.filter((_, i) => i !== hole));
+        // pasul greșit (+1 în loc de +10), pasul celălalt, un pas sau doi în plus ori în minus
+        const wrong = [terms[hole - 1] + Math.sign(step), answer + step, answer - 2 * step, answer + 2 * step]
+          .concat([other, -other, 2 * other, -2 * other].map((d) => answer + d))
+          .filter((x) => !printed.has(x));
         return numberQuestion('sir-1000', rand, {
           prompt: hole === 3 ? `Ce urmează? ${terms.slice(0, 3).join(', ')}` : `Ce lipsește? ${shown.join(', ')}`,
           key: `${first}:${step}:${hole}`,
           answer,
-          // pasul greșit (+1 în loc de +10), pasul celălalt, un pas în plus sau în minus
-          typical: [terms[hole - 1] + Math.sign(step), answer - step, answer + step, answer - 2 * step, answer + 2 * step, answer + other, answer - other],
+          typical: [answer - step, ...wrong],
           max: MAX,
           ask: { op: 'sir' },
         });

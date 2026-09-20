@@ -103,7 +103,7 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
     const positions = [0, 0, 0, 0];
     const relations = { '<': 0, '=': 0, '>': 0 };
     const dirs = new Set();
-    const carry = { cu: 0, fara: 0 };
+    const carry = { cu: 0, fara: 0, max: 0 };
     for (let seed = 1; seed <= SEEDS; seed++) {
       const q = kind.generate(seededRandom(seed));
       const where = `${id} (sămânța ${seed}): ${JSON.stringify(q)}`;
@@ -141,6 +141,7 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
         assert.deepEqual(q.choices, [...q.choices].sort((a, b) => a - b), where);
         positions[q.choices.indexOf(q.answer)]++;
         carry[carries(q.text) ? 'cu' : 'fara']++;
+        carry.max = Math.max(carry.max, ...terms(q.text), q.answer);
       } else if (q.mode === 'compare') {
         if (q.figure) {
           // pe desen: laturile sunt liste de desene cu nume diferite; relația o verifică regula tipului
@@ -171,12 +172,13 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
     }
     if (kind.mode === 'choice') {
       // „fără trecere” doar dacă nu apare niciodată trecerea, „cu trecere” doar dacă apare mereu, amândouă dacă apar amândouă
-      // (fiecare etichetă are varianta ei până la 100 și până la 1000)
-      const tags = [FARA, CU].map((ids) => kind.concepts.some((c) => ids.includes(c)));
+      // (eticheta e a intervalului tipului: `mat.op.*` până la 100, `mat.op1000.*` mai sus)
+      const pair = carry.max > 100 ? 1 : 0;
+      const tags = [FARA, CU].map((ids) => kind.concepts.includes(ids[pair]));
       assert.deepEqual(tags, [carry.fara > 0, carry.cu > 0], `${id}: etichetele de trecere față de ${JSON.stringify(carry)}`);
     }
     if (kind.mode === 'compare') assert.ok(Object.values(relations).every((n) => n >= SEEDS * 0.1), `${id}: semnele ${JSON.stringify(relations)}`);
-    if (id === 'sort-4-dir') assert.deepEqual([...dirs].sort(), ['asc', 'desc']);
+    if (id.endsWith('-dir')) assert.deepEqual([...dirs].sort(), ['asc', 'desc'], `${id}: ambele sensuri`);
   }
 });
 

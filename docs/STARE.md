@@ -1,7 +1,7 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-19 · **Versiune:** 0.15.0 (Jocuri fulger: tema „Numere până la 1000”, a doua după cea de 0–100, cu 18 tipuri noi de întrebări)
+- **Data:** 2026-09-20 · **Versiune:** 0.15.1 (Jocuri fulger: tema „Numere până la 1000”, a doua după cea de 0–100, cu 18 tipuri noi de întrebări; recenzia codului)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -41,11 +41,13 @@
     cerință, sensul și răspunsul, calculate din datele desenului, pe 3000 de semințe), mărimea textului din desenele jocurilor, avatarele (textul canonic, id-urile
     publicate, fiecare combinație desenată) și medaliile (catalogul, pragurile, medaliile unei runde, datele vechi);
   - 16 teste ale regulilor Firestore pe emulator, inclusiv 65 de intrări într-o tranzacție;
-  - E2E cu 1799 de verificări pe 3 ecrane și tastatură, plus telefon ținut orizontal și telefon mic (cu seria pornită, textul desenelor
+  - E2E cu 1801 de verificări pe 3 ecrane și tastatură, plus telefon ținut orizontal și telefon mic (cu seria pornită, textul desenelor
     măsurat pe ecran, fiecare temă jucată tip cu tip);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
 - **Următorul pas:** v0.15.0 e publicat (întâi regulile Firestore, ruleset `69018eff`, apoi site-ul), cu E2E pe site-ul live 1799/1799.
+  - Remedierile recenziei de cod (v0.15.1, jurnalul din 20 septembrie) sunt în `main`, local, nepublicate. Publicarea: `npm run deploy`
+    (regulile Firestore nu se schimbă), apoi E2E pe site-ul live și tag `v0.15.1`.
   - Copilul joacă temele noi și strânge medalii; din rundele reale se reglează `fastMs` și pragurile de stele.
   - Rămân: verificarea în Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
   - Apoi: secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul) și temele „în curând” din Jocuri fulger.
@@ -187,6 +189,20 @@
     E2E 1799/1799, E2E cont 82/82.
   - **Publicare:** întâi regulile (`fulgerTopics()` cu tema nouă, ruleset `69018eff`), apoi site-ul prin GitHub Actions (rularea
     35473169543); E2E pe site-ul live 1799/1799, tag `v0.15.0`.
+- [x] M32 (v0.15.1): recenzia codului pentru tema „Numere până la 1000”.
+  - **Cum:** doi recenzori independenți (conținutul celor 18 tipuri și regulile lor · integrarea: refactorul, arena, E2E, cloudul);
+    fiecare constatare verificată prin simulare sau în browser înainte de reparare.
+  - **Reparate, la întrebări:** comparările cu zeroul la mijloc dădeau mereu „<” (48/18/34 → 41/18/41); distractorii șirurilor
+    erau numere deja scrise în cerință (o întrebare din 150 avea răspunsul singurul număr nou); variantele „scrie cu cifre” se
+    deosebeau după lungime; numărătoarea spunea „1 mărgele”; adunarea de sute cu termeni egali avea 0 printre variante.
+  - **Reparate, în interfață:** două schimbări din v0.15.0 atingeau teme publicate — variantele treceau pe două coloane la orice
+    text de patru caractere (numele din pictogramă) și cerința se scria mai mare la orice întrebare fără desen (intrusul, figurile).
+    Acum amândouă privesc doar întrebările cu variante numerice.
+  - **Reparate, la verificări:** eticheta „fără / cu trecere” accepta perechea celuilalt interval; garda tranzacției de avatar era
+    tautologică; „Greșelile tale” accepta semnul singur și pe rândurile desenate; fluxul pe teme sărea „prima temă” după poziție.
+  - **Nereparat, măsurat:** termenii unui calcul cu sute rotunde rămân printre variante — scoaterea lor ar strânge intervalul
+    răspunsului și ar face din „varianta din mijloc” o scurtătură mai mare (71% față de 49%).
+  - **Verificare:** npm test 103/103, E2E 1801/1801, reguli 16/16.
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -318,6 +334,8 @@
 | 2026-09-19 | Variantele-zi și variantele-dată stau în ordinea din calendar; o variantă din afara desenului apare doar la „cele mai multe”; la răspunsuri mici, 0 rămâne printre variante | ordinea firească se citește mai ușor; un rând care lipsește are 0, deci ar fi și el „cel mai puțin”; fără 0, un răspuns de 1 sau 2 ar sta mereu primul |
 | 2026-09-19 | Tema „Numere până la 1000” vine imediat după cea de 0–100 (a doua în listă, deci și pe pagina jocului, pe prima pagină și în clasament) | cererea utilizatorului: pasul următor după 0–100 |
 | 2026-09-19 | În jocul de 0–1000, trecerea peste ordin e doar la Avansat și doar simplă: o trecere la unități (345 + 27) sau un împrumut din zeci (452 − 28), niciodată două și niciodată la sute | cererea utilizatorului („operații care nu necesită schimbări sau schimbări complicate de ordin”) și unitatea 2 din manual („adunarea cu trecere peste ordinul unităților”, „scăderea cu împrumut la ordinul zecilor”); completează decizia din 12 septembrie, care privea secțiunea de teste |
+| 2026-09-20 | Distractorii unei întrebări nu sunt numere pe care copilul le vede deja în cerință (termenii unui șir); dacă scoaterea lor ar strânge intervalul răspunsului (sutele rotunde), se păstrează, pentru că scurtătura care apare e mai mare | măsurat: la șiruri, 24% din întrebări aveau două variante deja scrise și 0,65% trei; la sutele rotunde, „varianta din mijloc” ar fi urcat de la 49% la 71% |
+| 2026-09-20 | O schimbare de aspect legată de un tip nou se leagă de o însușire a întrebării (variante numerice), nu de lipsa desenului | „fără desen” prindea și tipuri publicate din alte teme: variantele-nume ale pictogramei ieșeau din ecran la 360 px, iar cerința intrusului se scria cu 50% mai mare |
 | 2026-09-19 | O întrebare cu variante poate avea doar cerință, fără desen (șiruri, rotunjire, numere scrise cu litere): cerința se scrie mai mare, iar variantele de patru cifre trec pe două coloane pe ecranele înguste | numerele sunt conținutul întrebării, nu un desen; patru numere de patru cifre nu încap pe un rând la 360 px |
 
 ## Probleme cunoscute
@@ -699,6 +717,30 @@
   - **Rezultate:** npm test 103/103, reguli 16/16, E2E 1799/1799, E2E cont 82/82.
   - **Publicat:** regulile Firestore (ruleset `69018eff`), apoi site-ul prin GitHub Actions (rularea 35473169543); E2E pe site-ul
     live 1799/1799, tag `v0.15.0`.
+
+- **2026-09-20 (recenzia temei „Numere până la 1000”, v0.15.1)**
+  - **Cererea utilizatorului:** recenzie de cod, reparat ce se confirmă, fără extindere de scop și fără programare ultra-defensivă;
+    pe parcurs, și defectele sau datoriile tehnice mici văzute de mine.
+  - **Cum:** doi recenzori independenți, pe zone (conținutul generatoarelor și regulile · integrarea: refactorul, arena, E2E, cloudul).
+    Fiecare constatare a fost măsurată înainte de reparare, iar două s-au dovedit altfel decât în raport.
+  - **Cel mai important:** două schimbări ale arenei din v0.15.0 atingeau teme publicate (variantele-nume ale pictogramei treceau pe
+    două coloane și ieșeau din ecran la 360 px; cerința se scria mai mare la intrus, figuri, simetrie). Condiția e acum „variante
+    numerice”, iar pictograma se încearcă și pe telefonul mic.
+  - **Întrebări:** comparările cu zeroul la mijloc („305 ◻ 350”) puneau mereu numărul mic în stânga, deci „<” câștiga 48% din
+    întrebări; ramura „în jurul sutei” dădea și perechi de două cifre; distractorii șirurilor erau numere deja scrise în cerință
+    (24% aveau două, 0,65% trei, adică răspunsul era singurul număr nou); la „scrie cu cifre”, 4007 și 47 apăreau și la numere fără
+    zero la zeci, unde variantele se deosebeau după lungime; numărătoarea spunea „1 mărgele”; „300 + 300” avea 0 printre variante.
+  - **Verificări care nu mai puteau pica:** eticheta „fără / cu trecere” accepta perechea celuilalt interval, garda tranzacției de
+    avatar era o tautologie, „Greșelile tale” accepta semnul singur și pe rândurile desenate, iar fluxul E2E pe teme sărea prima temă
+    după poziție, nu după id.
+  - **Două constatări măsurate altfel decât în raport:** la sutele rotunde, scoaterea termenilor din variante (raportat ca
+    remediu) ar fi strâns intervalul răspunsului și ar fi ridicat scurtătura „varianta din mijloc” de la 49% la 71% — am reparat
+    doar 0-ul; la șiruri, filtrarea simplă a numerelor deja scrise lăsa `withChoices` să completeze cu ±1, ±2, ±3 (1385 de
+    întrebări din 30 000 cu variante nerotunde), așa că am adăugat întâi distractori rotunzi (±2 × pasul celălalt).
+  - **Datorie tehnică:** ramura moartă „grupurile pe un rând” de pe raftul de medalii (de la 6 teme încoace nu se mai atingea),
+    `dayName` nefolosit, un comentariu rămas în urmă în E2E, verificarea ambelor sensuri legată de un singur tip de ordonare și
+    textul temei, care promitea „fără trecere peste ordin” deși Avansatul are o trecere simplă.
+  - **Rezultate:** npm test 103/103, E2E 1801/1801, reguli 16/16.
 
   **De făcut data viitoare:** copilul joacă tema nouă → `fastMs` și pragurile de stele; verificarea în Firestore a clasamentelor
   mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.

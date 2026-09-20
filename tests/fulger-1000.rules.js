@@ -59,8 +59,9 @@ export const RULES_1000 = {
   'op-sute': ({ text, answer, choices }) => {
     const [a, b] = terms(text);
     const op = text.includes('−') ? '-' : '+';
+    // toate variantele sunt sute întregi, niciuna 0
     return (
-      a % 100 === 0 && b % 100 === 0 && inRange(answer, 400, 700) && crossings(op, a, b) === 0 && choices.every((c) => c % 100 === 0)
+      a % 100 === 0 && b % 100 === 0 && inRange(answer, 400, 700) && crossings(op, a, b) === 0 && choices.every((c) => c % 100 === 0 && c > 0)
     );
   },
 
