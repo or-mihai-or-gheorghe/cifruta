@@ -45,9 +45,8 @@
     măsurat pe ecran, fiecare temă jucată tip cu tip);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.15.0 e publicat (întâi regulile Firestore, ruleset `69018eff`, apoi site-ul), cu E2E pe site-ul live 1799/1799.
-  - Remedierile recenziei de cod (v0.15.1, jurnalul din 20 septembrie) sunt în `main`, local, nepublicate. Publicarea: `npm run deploy`
-    (regulile Firestore nu se schimbă), apoi E2E pe site-ul live și tag `v0.15.1`.
+- **Următorul pas:** v0.15.1 e publicat (doar site-ul: regulile Firestore nu s-au schimbat față de ruleset-ul `69018eff` de la
+  v0.15.0), cu E2E pe site-ul live 1801/1801.
   - Copilul joacă temele noi și strânge medalii; din rundele reale se reglează `fastMs` și pragurile de stele.
   - Rămân: verificarea în Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
   - Apoi: secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul) și temele „în curând” din Jocuri fulger.
@@ -203,6 +202,8 @@
   - **Nereparat, măsurat:** termenii unui calcul cu sute rotunde rămân printre variante — scoaterea lor ar strânge intervalul
     răspunsului și ar face din „varianta din mijloc” o scurtătură mai mare (71% față de 49%).
   - **Verificare:** npm test 103/103, E2E 1801/1801, reguli 16/16.
+  - **Publicare:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
+    1801/1801, tag `v0.15.1`.
 
 ## Catalog
 | id | titlu | versiune | status | validat | timp estimat | timp real |
@@ -741,6 +742,9 @@
     `dayName` nefolosit, un comentariu rămas în urmă în E2E, verificarea ambelor sensuri legată de un singur tip de ordonare și
     textul temei, care promitea „fără trecere peste ordin” deși Avansatul are o trecere simplă.
   - **Rezultate:** npm test 103/103, E2E 1801/1801, reguli 16/16.
+  - **Publicat:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
+    1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
+    tag `v0.15.1`.
 
   **De făcut data viitoare:** copilul joacă tema nouă → `fastMs` și pragurile de stele; verificarea în Firestore a clasamentelor
   mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
