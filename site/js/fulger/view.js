@@ -135,13 +135,14 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
   const place = (v) => `${Math.min(100, (v / trackMax) * 100).toFixed(2)}%`;
   const marks = lvl.stars.map((s, i) => h('span', { class: 'fg-track__mark', style: { left: place(s) }, 'data-testid': `fg-mark-${i + 1}` }, stars(0, 1)));
   const flag = best ? h('span', { class: 'fg-track__flag', style: { left: place(best) }, html: emojiHTML('steag') }) : null;
+  const runner = h('span', { class: 'fg-track__runner', html: visualSVG({ v: 'mascot', mood: 'vesela' }) });
   const track = h(
     'div',
     { class: 'fg-track', 'aria-hidden': 'true' },
     h('span', { class: 'fg-track__rail' }, h('span', { class: 'fg-track__fill' })),
     marks,
     flag,
-    h('span', { class: 'fg-track__lane' }, h('span', { class: 'fg-track__runner', html: visualSVG({ v: 'mascot', mood: 'vesela' }) })),
+    h('span', { class: 'fg-track__lane' }, runner),
   );
 
   // ——— scena ———
@@ -218,21 +219,39 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     overlay.replaceChildren(h('div', { class: 'fg-panel fg-panel--bare' }, h('div', { class: 'fg-lights', 'aria-hidden': 'true' }, lights), word));
     const steps = [['Pe locuri…', 'is-red', 'ready'], ['Fiți gata…', 'is-yellow', 'ready'], ['START!', 'is-green', 'go']];
     const gap = reduced ? 350 : 600;
+    const hold = reduced ? 250 : 450; // cât mai stă „START!” pe ecran după lumina verde, ca la reluarea din pauză
     const light = ([text, cls, sound], i) => {
       lights[i].classList.add(cls);
+      pop(lights[i], 'is-on');
       word.textContent = text;
+      word.classList.toggle('is-final', i === steps.length - 1);
       pop(word, 'is-slam');
       play(sound);
       live.textContent = text;
     };
     steps.forEach((step, i) => (i ? later(i * gap, () => light(step, i)) : light(step, i))); // prima lumină sună chiar în clic
-    later(steps.length * gap + 100, startPlay);
+    later((steps.length - 1) * gap + hold, startPlay); // pașii pornesc de la 0, deci ultima lumină e la (n-1) × gap
+  }
+
+  /** Overlay-ul pleacă stingându-se, ca runda să nu apară dintr-o dată; `pause()` oprește stingerea începută. */
+  function hideOverlay() {
+    if (reduced) {
+      overlay.hidden = true;
+      overlay.replaceChildren();
+      return;
+    }
+    overlay.classList.add('is-out');
+    later(150, () => {
+      if (!overlay.classList.contains('is-out')) return; // între timp s-a pus pauză
+      overlay.classList.remove('is-out');
+      overlay.hidden = true;
+      overlay.replaceChildren();
+    });
   }
 
   function startPlay() {
     phase = 'playing';
-    overlay.hidden = true;
-    overlay.replaceChildren();
+    hideOverlay();
     arena.classList.add('is-playing');
     last = performance.now();
     frame = requestAnimationFrame(tick);
@@ -271,6 +290,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
           live.textContent = 'Mai sunt 10 secunde. Sprint final!';
         }
         pop(timeText, 'anim-tick');
+        if (second <= 3) pop(timer, 'anim-tick');
         play('tick', { step: second <= 3 ? 4 : 0 });
       }
     }
@@ -279,7 +299,9 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
       const fast = KINDS[question.kind].fastMs;
       const t = elapsed - askedAt;
       const left = t <= fast ? 1 - t / fast : 1 - (t - fast) / fast;
-      bolt.classList.toggle('is-rapid', t > fast);
+      const rapid = t > fast;
+      if (rapid && !bolt.classList.contains('is-rapid')) pop(bolt, 'anim-tick'); // bara se reumple: e a doua treaptă, nu un salt
+      bolt.classList.toggle('is-rapid', rapid);
       bolt.classList.toggle('is-gone', left <= 0);
       boltBar.style.transform = `scaleX(${Math.max(0, left).toFixed(3)})`;
     }
@@ -383,6 +405,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     answers.style.setProperty('--n', String(buttons.length));
     answers.setAttribute('aria-busy', 'true');
     answers.replaceChildren(...[strip, ...buttons].filter(Boolean));
+    if (!reduced) pop(answers, 'is-enter');
     const said = promptSpoken(q.prompt);
     live.textContent =
       q.mode === 'figure'
@@ -463,7 +486,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     countUp(basketNum, alune, 450, before);
     burst(fx, btn);
     flyTo(fx, btn, basketNum, `+${res.alune}`, { gold: res.turbo });
-    later(reduced ? 0 : 480, () => pop(basket, 'anim-pop'));
+    after(reduced ? 0 : 420, () => pop(basket, 'anim-pop')); // fix când aluna ajunge în coș
     if (res.speed) {
       const tier = config.speed.find((s) => s.id === res.speed);
       badge(fx, card, tier.label, { icon: res.speed === 'fulger' ? 'fulger' : null, cls: res.speed });
@@ -519,9 +542,11 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
 
   function paintProgress() {
     track.style.setProperty('--p', Math.min(1, alune / trackMax).toFixed(4));
+    pop(runner, 'is-hop');
     while (litStars < lvl.stars.length && alune >= lvl.stars[litStars]) {
       marks[litStars].querySelector('.c-star')?.classList.add('is-on');
       marks[litStars].classList.add('is-lit');
+      burst(fx, marks[litStars], 5);
       play('star');
       litStars++;
     }
@@ -545,6 +570,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
   /** Mascota își schimbă fața pentru o clipă; cu `text` apare și bula ei. */
   function react(mood, text = '') {
     buddy.innerHTML = visualSVG({ v: 'mascot', mood });
+    pop(buddy, 'anim-pop');
     if (text) {
       spokeAt = elapsed;
       say.textContent = text;
@@ -564,6 +590,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     phase = 'paused';
     arena.classList.add('is-paused');
     const resumeBtn = h('button', { type: 'button', class: 'c-btn c-btn--primary c-btn--lg', 'data-testid': 'fg-resume', onClick: () => resume() }, 'Continuă');
+    overlay.classList.remove('is-out');
     overlay.hidden = false;
     overlay.replaceChildren(
       h(
@@ -588,8 +615,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     play('go');
     later(reduced ? 0 : 450, () => {
       if (phase !== 'paused') return;
-      overlay.hidden = true;
-      overlay.replaceChildren();
+      hideOverlay();
       arena.classList.remove('is-paused');
       phase = 'playing';
       last = performance.now();
@@ -610,7 +636,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     stamp(fx, 'TIMP!');
     play('buzzer');
     live.textContent = 'Timpul a expirat!';
-    later(reduced ? 400 : 1100, () => onEnd(round.summary()));
+    later(reduced ? 400 : 900, () => onEnd(round.summary()));
   }
 
   function onKey(e) {

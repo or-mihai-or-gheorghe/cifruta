@@ -13,8 +13,36 @@
 .v-clock__hand { transform-box: view-box; transform-origin: 50px 50px; transition: transform 400ms var(--ease-out); }
 .v-abacus__bead.is-new { transform-box: fill-box; animation: anim-drop 250ms var(--ease-out) both; }
 .v-bar-chart__bar { transform-box: fill-box; transform-origin: bottom; }
-.ex-break .v-mascot__confetti, .ex-summary__art .v-mascot__confetti { animation: anim-twinkle 1.4s ease-in-out infinite alternate; }
-.ex-break .v-mascot__confetti:nth-of-type(2n), .ex-summary__art .v-mascot__confetti:nth-of-type(2n) { animation-delay: -0.7s; }
+/* Mascota: părțile ei se mișcă încet, fiecare cu durata ei, ca bucla să nu se simtă mecanică (durate diferite, niciun delay
+   negativ: altfel desenul oprit — sigla, pista — ar îngheța la mijlocul mișcării, nu în poziția de repaus). Detaliile fine se
+   pierd sub ~3rem, deci la mărimile mici nu se desenează, iar mișcarea pornește doar în containerele mari, prin --mascot-play. */
+.v-mascot__body { transform-box: view-box; transform-origin: 51px 106px; animation: anim-mascot-breathe 3.6s ease-in-out infinite; }
+.v-mascot__head { transform-box: view-box; transform-origin: 50px 70px; animation: anim-mascot-tilt 7.2s ease-in-out infinite; }
+.v-mascot__ear { transform-box: view-box; animation: anim-mascot-ear 6.4s var(--ease-out) infinite; }
+.v-mascot__ear--l { transform-origin: 36px 33px; }
+.v-mascot__ear--r { transform-origin: 64px 33px; animation-duration: 5.8s; }
+.v-mascot__eye { transform-box: fill-box; transform-origin: center; animation: anim-mascot-blink 5.6s var(--ease-out) infinite; }
+.v-mascot__tail { transform-box: view-box; transform-origin: 68px 98px; animation: anim-mascot-tail 3.8s ease-in-out infinite; }
+.v-mascot__nut { transform-box: fill-box; transform-origin: center; animation: anim-bob 4.6s ease-in-out infinite; }
+.v-mascot__think { transform-box: fill-box; transform-origin: center; animation: anim-bob 4.4s ease-in-out infinite; }
+.v-mascot__wave { transform-box: view-box; transform-origin: 70px 84px; animation: anim-mascot-wave 2.4s ease-in-out infinite; }
+.v-mascot__spark { transform-box: fill-box; transform-origin: center; animation: anim-mascot-spark 2.8s ease-in-out infinite; }
+.v-mascot__confetti { transform-box: fill-box; transform-origin: center; animation: anim-mascot-confetti 2.6s ease-in-out infinite; }
+.v-mascot__confetti:nth-of-type(2n) { animation-duration: 3.1s; }
+.v-mascot__confetti:nth-of-type(3n) { animation-duration: 3.7s; }
+.c-logo__art .v-mascot__fine,
+.fg-track__runner .v-mascot__fine,
+.v-inline .v-mascot__fine { display: none; }
+/* pornită doar pe ecranele mari: nu în siglă, nu pe pista din joc (acolo se mișcă deja containerul) */
+.c-hero__art,
+.c-mascot__art,
+.ex-summary__art,
+.acc-signin__art,
+.fg-buddy,
+.fg-panel__art,
+.fg-hub__mascot { --mascot-play: running; }
+/* regula asta stă ultima: pusă înaintea vreunui `animation`, shorthand-ul ar reseta starea */
+.v-mascot [class*='v-mascot__'] { animation-play-state: var(--mascot-play, paused); }
 
 /* Peisajele: mișcare lentă, pornită doar pe intro (--scene-play) și la hover pe cardul testului. */
 .v-scene__rays { transform-box: fill-box; transform-origin: center; animation: anim-spin 24s linear infinite; }

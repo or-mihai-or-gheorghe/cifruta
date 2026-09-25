@@ -150,7 +150,10 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
 - SVG animat: partea care se mișcă stă într-un `<g class="v-<desen>__<parte>">` **fără atribut `transform`** (nici pe copii, dacă
   grupul se rotește — Chromium le strică); `transform-box` doar pe aceste grupuri, niciodată cu `*`. Ancore existente:
   `v-clock__hand--h/--m` (rotite din `clock/view.js`), `v-abacus__bead` (+ `is-new`), `v-scene__rays/cloud/boat/stars/rocket/sign/tree`
-  (pornite de `--scene-play` pe intro și la hover pe card), `v-mascot__confetti`. `tests/visuals.test.js` impune regula.
+  (pornite de `--scene-play` pe intro și la hover pe card), iar la mascotă `v-mascot__tail/body/head/ear--l/--r/eye/nut/think/wave/spark/confetti`
+  (pornite de `--mascot-play`, doar în containerele mari) plus `v-mascot__fine` (detaliile care nu se desenează la mărimi mici).
+  `tests/visuals.test.js` impune regula, iar un keyframe de mascotă începe și se termină în poziția de repaus, ca desenul oprit
+  (`animation-play-state: paused`) și cel de la mișcare redusă să arate corect.
 - Un test durează **exact 45 de minute** (`config.estMin`, suma `estMin` a exercițiilor; validatorul refuză altă sumă). Cronometrul din
   player numără invers din `draft.activeMs` (doar cât e afișat un exercițiu); la 0 nu trimite nimic. Istoricul (încercări + ciorne) se
   șterge din casetele „Pentru părinți” (`clearHistory(testIds | null)` din `core/storage.js`, `refresh()` din `core/router.js`).

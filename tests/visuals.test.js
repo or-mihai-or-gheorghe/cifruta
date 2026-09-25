@@ -39,6 +39,19 @@ test('fiecare vizual randează corect toate demo-urile', () => {
   }
 });
 
+test('mascota își păstrează ancorele animate, fără niciun atribut transform', () => {
+  // părțile animate din CSS se agață de grupurile astea; confetti-ul e desenat ca poligon tocmai ca să n-aibă nevoie de `transform`
+  const always = ['v-mascot__tail', 'v-mascot__body', 'v-mascot__head', 'v-mascot__ear--l', 'v-mascot__ear--r', 'v-mascot__fine'];
+  for (const mood of ['vesela', 'ganditoare', 'sarbatoreste', 'incurajeaza']) {
+    const svg = visualSVG({ v: 'mascot', mood });
+    for (const cls of always) assert.ok(svg.includes(cls), `mascot ${mood}: lipsește ${cls}`);
+    assert.ok(!/ transform="/.test(svg), `mascot ${mood}: atributul transform strică animațiile din CSS`);
+  }
+  assert.ok(visualSVG({ v: 'mascot', mood: 'sarbatoreste' }).includes('v-mascot__confetti'));
+  assert.ok(visualSVG({ v: 'mascot', mood: 'incurajeaza' }).includes('v-mascot__wave'));
+  assert.ok(visualSVG({ v: 'mascot', mood: 'ganditoare' }).includes('v-mascot__think'));
+});
+
 test('parametrii din markup (text) funcționează ca și cei numerici', () => {
   const fromText = visualSVG({ v: 'number-line', min: '0', max: '100', minor: '10', labels: '0,50,100', marker: '48' });
   const fromNumbers = visualSVG({ v: 'number-line', min: 0, max: 100, minor: 10, labels: [0, 50, 100], marker: 48 });

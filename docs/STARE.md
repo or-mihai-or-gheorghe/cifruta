@@ -1,7 +1,7 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-20 · **Versiune:** 0.15.1 (Jocuri fulger: tema „Numere până la 1000”, a doua după cea de 0–100, cu 18 tipuri noi de întrebări; recenzia codului)
+- **Data:** 2026-09-25 · **Versiune:** 0.16.0 (animațiile Jocurilor fulger reglate — semaforul pornea runda cu 700 ms după „START!” — și Cifruța desenată mai bogat, cu părți care se mișcă)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -41,12 +41,14 @@
     cerință, sensul și răspunsul, calculate din datele desenului, pe 3000 de semințe), mărimea textului din desenele jocurilor, avatarele (textul canonic, id-urile
     publicate, fiecare combinație desenată) și medaliile (catalogul, pragurile, medaliile unei runde, datele vechi);
   - 16 teste ale regulilor Firestore pe emulator, inclusiv 65 de intrări într-o tranzacție;
-  - E2E cu 1801 de verificări pe 3 ecrane și tastatură, plus telefon ținut orizontal și telefon mic (cu seria pornită, textul desenelor
-    măsurat pe ecran, fiecare temă jucată tip cu tip);
+  - E2E cu 1807 de verificări pe 3 ecrane și tastatură, plus telefon ținut orizontal și telefon mic (cu seria pornită, textul desenelor
+    măsurat pe ecran, fiecare temă jucată tip cu tip, mascota care se mișcă doar unde trebuie);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
 - **Următorul pas:** v0.15.1 e publicat (doar site-ul: regulile Firestore nu s-au schimbat față de ruleset-ul `69018eff` de la
   v0.15.0), cu E2E pe site-ul live 1801/1801.
+  - v0.16.0 (animațiile jocului și mascota, jurnalul din 25 septembrie) e în `main`, local, nepublicată. Publicarea: `npm run deploy`
+    (regulile Firestore nu se schimbă), apoi E2E pe site-ul live și tag `v0.16.0`.
   - Copilul joacă temele noi și strânge medalii; din rundele reale se reglează `fastMs` și pragurile de stele.
   - Rămân: verificarea în Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
   - Apoi: secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul) și temele „în curând” din Jocuri fulger.
@@ -188,6 +190,24 @@
     E2E 1799/1799, E2E cont 82/82.
   - **Publicare:** întâi regulile (`fulgerTopics()` cu tema nouă, ruleset `69018eff`), apoi site-ul prin GitHub Actions (rularea
     35473169543); E2E pe site-ul live 1799/1799, tag `v0.15.0`.
+- [x] M33 (v0.16.0): animațiile Jocurilor fulger și mascota Cifruța.
+  - **Bugul semaforului:** pașii se programează de la 0 (0, 600, 1200 ms), dar startul rundei se calcula cu `steps.length * gap`,
+    adică un pas întreg peste ultima lumină: „START!” rămânea pe ecran 700 ms, deși formula („+100 ms”) arăta altă intenție, iar
+    reluarea din pauză folosea 450 ms. Acum runda pornește la 450 ms după lumina verde (măsurat în browser: 457 ms).
+  - **Alte nepotriviri reparate:** intrarea cardului 180 → 150 ms (cât `inputDelayMs`); pocnetul coșului venea după întrebarea
+    următoare și curgea și în pauză (acum pe timpul rundei, la aterizarea alunei, cu zborul scurtat 600 → 420 ms); pasul stelelor
+    de la rezultate 320 → 380 ms (cât ștampila lor); trecerea la rezultate 1100 → 900 ms.
+  - **Lustruire:** becurile se aprind cu o săltare și cele stinse stau mai șterse, „START!” e verde și mai mare, overlay-ul se
+    stinge în loc să dispară dintr-o dată, pastila fulgerului anunță treapta a doua (bara se reumple), prietena de lângă card
+    reacționează vizibil, variantele apar odată cu cardul (doar opacitate, ca pozițiile să rămână măsurabile).
+  - **Momente noi:** veverița saltă la fiecare avans pe pistă, steaua prinsă împrăștie alune, inelul cronometrului pulsează în
+    ultimele 3 secunde.
+  - **Cifruța:** desenul are sprâncene, mustăți, degete la lăbuțe, puf pe piept, umbră sub bărbie, smocuri pe coadă și licăr în
+    ochi și pe alună; părțile stau în grupuri-ancoră și se mișcă încet (respiră, clipește, dă din coadă, tresare din urechi,
+    salută, confetti) doar în containerele mari — nu în siglă și nu pe pista din joc, unde se mișcă deja containerul. Detaliile
+    fine nu se desenează la mărimile mici, iar confetti-ul e poligon, ca desenul să n-aibă niciun atribut `transform`.
+  - **Verificare:** npm test 104/104 (test nou pentru ancorele mascotei), E2E 1807/1807 (trei verificări noi: mascota se mișcă pe
+    prima pagină, stă pe loc în siglă și pe pistă).
 - [x] M32 (v0.15.1): recenzia codului pentru tema „Numere până la 1000”.
   - **Cum:** doi recenzori independenți (conținutul celor 18 tipuri și regulile lor · integrarea: refactorul, arena, E2E, cloudul);
     fiecare constatare verificată prin simulare sau în browser înainte de reparare.
@@ -335,6 +355,8 @@
 | 2026-09-19 | Variantele-zi și variantele-dată stau în ordinea din calendar; o variantă din afara desenului apare doar la „cele mai multe”; la răspunsuri mici, 0 rămâne printre variante | ordinea firească se citește mai ușor; un rând care lipsește are 0, deci ar fi și el „cel mai puțin”; fără 0, un răspuns de 1 sau 2 ar sta mereu primul |
 | 2026-09-19 | Tema „Numere până la 1000” vine imediat după cea de 0–100 (a doua în listă, deci și pe pagina jocului, pe prima pagină și în clasament) | cererea utilizatorului: pasul următor după 0–100 |
 | 2026-09-19 | În jocul de 0–1000, trecerea peste ordin e doar la Avansat și doar simplă: o trecere la unități (345 + 27) sau un împrumut din zeci (452 − 28), niciodată două și niciodată la sute | cererea utilizatorului („operații care nu necesită schimbări sau schimbări complicate de ordin”) și unitatea 2 din manual („adunarea cu trecere peste ordinul unităților”, „scăderea cu împrumut la ordinul zecilor”); completează decizia din 12 septembrie, care privea secțiunea de teste |
+| 2026-09-25 | Mișcarea mascotei pornește prin `--mascot-play` (ca peisajele prin `--scene-play`), doar în containerele mari; keyframe-urile ei încep și se termină în poziția de repaus și n-au delay negativ | desenul oprit (sigla, alergătorul de pe pistă) și cel de la mișcare redusă trebuie să arate exact ca desenul, nu înghețat la mijlocul unei mișcări |
+| 2026-09-25 | Detaliile fine ale unui desen (mustăți, sprâncene, degete) stau într-un grup `__fine`, ascuns în containerele mici | la 2,2rem (alergătorul) o linie de 1,5 unități are 0,4 px: devine o pată, nu un detaliu |
 | 2026-09-20 | Distractorii unei întrebări nu sunt numere pe care copilul le vede deja în cerință (termenii unui șir); dacă scoaterea lor ar strânge intervalul răspunsului (sutele rotunde), se păstrează, pentru că scurtătura care apare e mai mare | măsurat: la șiruri, 24% din întrebări aveau două variante deja scrise și 0,65% trei; la sutele rotunde, „varianta din mijloc” ar fi urcat de la 49% la 71% |
 | 2026-09-20 | O schimbare de aspect legată de un tip nou se leagă de o însușire a întrebării (variante numerice), nu de lipsa desenului | „fără desen” prindea și tipuri publicate din alte teme: variantele-nume ale pictogramei ieșeau din ecran la 360 px, iar cerința intrusului se scria cu 50% mai mare |
 | 2026-09-19 | O întrebare cu variante poate avea doar cerință, fără desen (șiruri, rotunjire, numere scrise cu litere): cerința se scrie mai mare, iar variantele de patru cifre trec pe două coloane pe ecranele înguste | numerele sunt conținutul întrebării, nu un desen; patru numere de patru cifre nu încap pe un rând la 360 px |
@@ -745,6 +767,25 @@
   - **Publicat:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
+
+- **2026-09-25 (animațiile jocului și Cifruța, v0.16.0)**
+  - **Cererea utilizatorului:** o trecere peste animațiile din Jocuri fulger, cu îmbunătățiri, fără refactor și fără schimbări de
+    funcționalitate; bănuia un bug de timing la semafor; în plus, mai mult detaliu și mișcare pentru Cifruța.
+  - **Bugul era real:** pașii semaforului se programează de la 0 (`i * gap` → 0, 600, 1200 ms), dar startul rundei se calcula cu
+    `steps.length * gap + 100` = 1900 ms, adică un pas întreg peste ultima lumină. „+100 ms” arăta intenția (o clipă după verde),
+    iar reluarea din pauză folosea deja 450 ms. Codul era neatins de la v0.8.0.
+  - **Alegerile utilizatorului** (întrebate înainte de plan): lustruire plus câteva momente noi; „START!” = start (450 ms, ca la
+    reluare); Cifruța cu detaliu peste tot, dar mișcare doar pe ecranele mari.
+  - **Cum s-a lucrat:** două cartografieri independente (animațiile arenei · mascota și desenele animate) și o proiectare separată
+    pentru mascotă; fiecare schimbare privită în browser (capturi la 35, 45, 96, 176 și 330 px) și măsurată acolo unde avea timpi.
+  - **Lecții:**
+    - un keyframe de ambianță trebuie să înceapă și să se termine în poziția de repaus, altfel desenul oprit (`paused`) sau cel de
+      la mișcare redusă rămâne strâmb; la fel, un delay negativ îngheață desenul oprit la mijlocul mișcării (măsurat: coada siglei
+      stătea rotită 2,5°) — părțile se desincronizează prin durate diferite, nu prin delay;
+    - detaliile fine trebuie să poată fi stinse la mărimi mici: la 2,2rem, o linie de 1,5 unități din 120 are 0,4 px;
+    - confetti-ul mascotei se desenează ca poligon cu colțurile calculate, ca desenul să n-aibă niciun atribut `transform` (CSS-ul
+      l-ar înlocui, iar regula proiectului îl interzice pe grupurile animate).
+  - **Rezultate:** npm test 104/104, E2E 1807/1807.
 
   **De făcut data viitoare:** copilul joacă tema nouă → `fastMs` și pragurile de stele; verificarea în Firestore a clasamentelor
   mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.

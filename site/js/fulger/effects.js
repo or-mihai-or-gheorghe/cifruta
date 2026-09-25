@@ -46,7 +46,7 @@ export function flyTo(layer, from, to, text, { gold = false } = {}) {
   const a = center(from, layer);
   const b = center(to, layer);
   const style = { '--x': `${Math.round(a.x)}px`, '--y': `${Math.round(a.y)}px`, '--dx': `${Math.round(b.x - a.x)}px`, '--dy': `${Math.round(b.y - a.y)}px` };
-  spawn(layer, h('span', { class: `fg-fly${gold ? ' is-gold' : ''}`, style }, text), 650);
+  spawn(layer, h('span', { class: `fg-fly${gold ? ' is-gold' : ''}`, style }, text), 470); // cât zborul (420 ms) plus o clipă
 }
 
 /** Insignă scurtă în colțul de sus al lui `anchor` („Fulger!”, „Rapid!”). */

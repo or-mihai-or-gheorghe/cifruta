@@ -286,6 +286,7 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 .fg-track__flag.is-passed { opacity: 0.45; }
 .fg-track__lane { position: absolute; inset: 0; transform: translateX(calc(var(--p, 0) * 100%)); transition: transform 400ms var(--ease-out); pointer-events: none; }
 .fg-track__runner { position: absolute; top: 50%; left: 0; width: 2.2rem; height: 2.2rem; margin: -1.5rem 0 0 -1.1rem; }
+.fg-track__runner.is-hop { animation: anim-nudge 400ms var(--ease-out); }
 .fg-track__runner svg { width: 100%; height: 100%; }
 
 /* întrebarea */
@@ -304,7 +305,7 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
   background: var(--c-surface);
   box-shadow: var(--sh-2);
 }
-.fg-card.is-enter { animation: anim-card-in 180ms var(--ease-out) both; }
+.fg-card.is-enter { animation: anim-card-in 150ms var(--ease-out) both; } /* cât `inputDelayMs` din data/fulger.js */
 .fg-arena.is-turbo .fg-card { border-color: var(--c-accent-dark); box-shadow: 0 0 0 4px rgb(255 200 61 / 0.45), var(--sh-2); }
 
 .fg-q {
@@ -411,6 +412,7 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 
 /* variantele și plăcile */
 .fg-answers { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sp-3); }
+.fg-answers.is-enter { animation: anim-fade var(--dur-1) var(--ease-out); }
 .fg-answers--compare { grid-template-columns: repeat(3, 1fr); }
 .fg-answers--sort { grid-template-columns: repeat(var(--n, 4), 1fr); }
 .fg-opt {
@@ -539,7 +541,7 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
   font-size: var(--fs-2);
   white-space: nowrap;
   box-shadow: 0 2px 0 var(--c-accent-dark);
-  animation: anim-fly 600ms cubic-bezier(0.45, 0, 0.7, 0.2) both;
+  animation: anim-fly 420ms cubic-bezier(0.45, 0, 0.7, 0.2) both;
 }
 .fg-fly.is-gold { background: linear-gradient(135deg, #fff1b0, var(--c-accent)); box-shadow: 0 0 0 2px var(--c-accent-dark); }
 .fg-badge {
@@ -610,7 +612,9 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
   padding: var(--gutter);
   background: color-mix(in srgb, var(--c-paper) 82%, transparent);
   backdrop-filter: blur(3px);
+  transition: opacity 150ms var(--ease-out);
 }
+.fg-overlay.is-out { opacity: 0; pointer-events: none; } /* cât se stinge, atingerile ajung la variante */
 .fg-panel {
   display: grid;
   justify-items: center;
@@ -630,12 +634,15 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 .fg-panel__text { color: var(--c-ink-soft); }
 .fg-panel__goal { font-family: var(--font-title); font-weight: 700; color: var(--c-brand-dark); }
 .fg-lights { display: flex; gap: var(--sp-3); padding: 0.6rem 0.9rem; border-radius: var(--r-pill); background: var(--c-ink); }
-.fg-light { width: 2.6rem; height: 2.6rem; border-radius: 50%; background: var(--v-coal); transition: background-color var(--dur-1), box-shadow var(--dur-1); }
+.fg-light { width: 2.6rem; height: 2.6rem; border-radius: 50%; background: var(--v-coal); opacity: 0.45; transition: background-color var(--dur-1), box-shadow var(--dur-1), opacity var(--dur-1); }
+.fg-light.is-red, .fg-light.is-yellow, .fg-light.is-green { opacity: 1; }
+.fg-light.is-on { animation: anim-pop var(--dur-3) var(--ease-spring); }
 .fg-light.is-red { background: var(--v-red); box-shadow: 0 0 18px var(--v-red); }
 .fg-light.is-yellow { background: var(--v-yellow); box-shadow: 0 0 18px var(--v-yellow); }
 .fg-light.is-green { background: var(--v-green); box-shadow: 0 0 18px var(--v-green); }
 .fg-go { --rot: -3deg; min-height: 1.1em; font-family: var(--font-title); font-weight: 800; font-size: clamp(2.2rem, 1.5rem + 4vw, 4rem); line-height: 1.1; color: var(--c-brand-dark); }
 .fg-go.is-slam { animation: anim-slam 380ms var(--ease-spring) both; }
+.fg-go.is-final { font-size: clamp(2.6rem, 1.7rem + 4.6vw, 4.6rem); color: var(--c-ok-ink); }
 
 /* ——— Rezultatele ——— */
 .fg-score-card {

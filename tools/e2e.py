@@ -105,6 +105,15 @@ def smoke(run: Run, page: Page, vp: str):
         run.check(page.locator("main").inner_text().strip() != "", f"[{vp}] pagina „{name}” are conținut")
         run.layout_ok(page, f"[{vp}] {name}")
         run.shot(page, f"{vp}-{name}")
+        if name == "acasa":
+            # mascota se mișcă pe ecranele mari, dar stă pe loc în siglă, unde detaliile fine nici nu se desenează
+            play = page.evaluate(
+                "(() => { const st = (sel) => { const el = document.querySelector(sel); return el ? getComputedStyle(el).animationPlayState : 'lipsă'; };"
+                "  const fine = document.querySelector('.c-logo__art .v-mascot__fine');"
+                "  return { erou: st('.c-hero__art .v-mascot__tail'), sigla: st('.c-logo__art .v-mascot__tail'), fine: fine ? getComputedStyle(fine).display : 'lipsă' }; })()"
+            )
+            run.check(play["erou"] == "running" and play["sigla"] == "paused" and play["fine"] == "none",
+                      f"[{vp}] Cifruța se mișcă pe pagina de început, dar stă pe loc în siglă, fără detalii fine ({play})")
         if name == "sectiune":
             # dacă desenul nu s-a încărcat (de ex. rețea căzută), verificarea eșuează în loc să oprească toată suita
             state = page.evaluate("(() => { const g = document.querySelector(\".c-card__media [class^='v-scene__']\"); return g ? getComputedStyle(g).animationPlayState : 'lipsă'; })()")
@@ -618,6 +627,8 @@ def fulger_flow(run: Run, page: Page, vp: str):
     run.shot(page, f"{vp}-fulger-runda")
     fit = page.evaluate(FULGER_FIT)
     run.check(fit["bottom"] <= fit["vh"] and fit["scroll"] <= 1, f"[{vp}] fulger: variantele încap pe ecran, fără derulare în rundă ({fit})")
+    runner = page.evaluate("(() => { const el = document.querySelector('.fg-track__runner .v-mascot__tail'); return el ? getComputedStyle(el).animationPlayState : 'lipsă'; })()")
+    run.check(runner == "paused", f"[{vp}] fulger: veverița de pe pistă stă pe loc, se mișcă doar pista ({runner})")
     for _ in range(5):
         answer()
     s = state()

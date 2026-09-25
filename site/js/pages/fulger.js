@@ -575,7 +575,7 @@ function results(container, topic, lvl, summary, pending) {
     step(() => {
       starBox.children[i].classList.add('is-on', 'is-stamped');
       play('star');
-    }, 320);
+    }, 380); // cât ștampila stelei (350 ms): fiecare se așază înainte să plece următoarea
   }
   step(() => reveal(buddy), 350);
   if (ribbon) {

@@ -61,6 +61,44 @@
   from { stroke-dashoffset: var(--len, 400); }
   to { stroke-dashoffset: 0; }
 }
+/* Mascota (grupurile din js/visuals/mascot.js): fiecare pornește și se încheie în poziția de repaus, ca desenul să arate bine
+   și oprit (animation-play-state: paused) și la mișcare redusă, unde rămâne un singur cadru. */
+@keyframes anim-mascot-breathe {
+  0%, 100% { transform: none; }
+  50% { transform: scale(1.015, 1.03); }
+}
+@keyframes anim-mascot-blink {
+  0%, 90%, 100% { transform: none; }
+  94% { transform: scaleY(0.12); }
+}
+@keyframes anim-mascot-tail {
+  0%, 100% { transform: none; }
+  50% { transform: rotate(-3.5deg); }
+}
+@keyframes anim-mascot-ear {
+  0%, 86%, 100% { transform: none; }
+  90% { transform: rotate(-6deg); }
+  94% { transform: rotate(3deg); }
+}
+@keyframes anim-mascot-tilt {
+  0%, 100% { transform: none; }
+  40% { transform: rotate(2.5deg); }
+  70% { transform: rotate(-1.5deg); }
+}
+@keyframes anim-mascot-wave {
+  0%, 100% { transform: none; }
+  25% { transform: rotate(-9deg); }
+  60% { transform: rotate(6deg); }
+}
+@keyframes anim-mascot-spark {
+  0%, 100% { transform: none; opacity: 1; }
+  50% { transform: scale(0.82) rotate(-12deg); opacity: 0.7; }
+}
+@keyframes anim-mascot-confetti {
+  0%, 100% { transform: none; opacity: 1; }
+  50% { transform: translateY(3px) rotate(18deg); opacity: 0.45; }
+}
+
 /* Calcul fulger (clasele sunt în 08-fulger.css) */
 @keyframes anim-shake {
   0%, 100% { transform: none; }
