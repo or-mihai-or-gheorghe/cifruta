@@ -46,9 +46,9 @@
     măsurat pe ecran, fiecare temă jucată tip cu tip, mascota care se mișcă doar unde trebuie);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.17.0 (cele două teste noi) e în `main`, local, nepublicată. Publicarea: `npm run deploy` (regulile
-  Firestore nu se schimbă), apoi E2E pe site-ul live și tag `v0.17.0`.
-- **Publicat până acum:** v0.16.1 (rularea 36297320271, tag `v0.16.1`; regulile Firestore nu s-au schimbat față de
+- **Următorul pas:** v0.17.0 e publicată (rularea 36302230466, tag `v0.17.0`; regulile Firestore nu se schimbă), cu **E2E pe
+  site-ul live 1957/1957**. Copilul are acum 8 teste în secțiunea 0–1000 și 4 de recapitulare.
+- **Publicat înainte:** v0.16.1 (rularea 36297320271, tag `v0.16.1`; regulile Firestore nu s-au schimbat față de
   ruleset-ul `69018eff` de la v0.15.0). E2E pe site-ul live: 1807 trecute și 5 eșuate — toate cinci, un **503 trecător de la
   GitHub Pages** pe `js/components/board-link.js` în primele minute după publicare, care a rupt și importul lui `pages/fulger.js`;
   fișierul întoarce acum 200. v0.16.0 rămăsese fără tag (sesiunea s-a închis în timpul E2E-ului live, la 526 de verificări și zero
@@ -227,6 +227,8 @@
     din secțiune: `mat.op.necunoscut`, `mat.op.proba`, `mat.op.comparare-expresii`, `mat.mas.calendar`.
   - **Verificare:** npm test 106/106, E2E pe fiecare test 99/99 pe cele trei ecrane, E2E complet 1957/1957; toate cele 22 de
     exerciții privite în browser; auditul textelor (652 de texte) n-a găsit nicio egalitate falsă și niciun calcul cu trecere.
+  - **Publicare:** site-ul prin GitHub Actions (rularea 36302230466; regulile Firestore nu se schimbă), tag `v0.17.0`; E2E pe
+    site-ul live 1957/1957, fără nicio eroare de rețea de data asta.
 - [x] M34 (v0.16.1): desenul mascotei, citit cu ochii altcuiva.
   - **Cererea utilizatorului:** în poziția cu mâna ridicată să rămână doar lăbuța, fără deget ridicat (se putea citi ca un gest
     ofensator); în poziția principală, lăbuțele și aluna să nu mai fie simetrice, oglindite — două cerculețe cu un oval la mijloc,
@@ -266,8 +268,8 @@
 | u1-t4 | Sondajul clasei | 3 | publicat | npm test + E2E | 45 | – |
 | u1-t5 | Concursul sportiv al școlii | 2 | publicat | npm test + E2E | 45 | – |
 | u1-t6 | Corpul meu în numere | 3 | publicat | npm test + E2E | 45 | – |
-| u1-t7 | Misiune în spațiu | 1 | nepublicat | npm test + E2E | 45 | – |
-| u1-t8 | Elevul de serviciu | 1 | nepublicat | npm test + E2E | 45 | – |
+| u1-t7 | Misiune în spațiu | 1 | publicat | npm test + E2E | 45 | – |
+| u1-t8 | Elevul de serviciu | 1 | publicat | npm test + E2E | 45 | – |
 
 ## Decizii
 | data | decizie | motiv |
@@ -816,6 +818,7 @@
     - un audit propriu al textelor (fiecare egalitate scrisă în enunț sau explicație, trecută prin `calc` și `trecere`) a prins o
       adunare cu trecere ascunsă într-o explicație de ghicitoare.
   - **Rezultate:** npm test 106/106, E2E pe fiecare test 99/99, E2E complet 1957/1957.
+  - **Publicat:** site-ul prin GitHub Actions (rularea 36302230466), tag `v0.17.0`; E2E pe site-ul live 1957/1957.
 
 - **2026-09-27 (desenul mascotei, v0.16.1)**
   - **Cererea utilizatorului:** degetul ridicat din poziția cu mâna sus se putea citi ca gest ofensator, iar în poziția principală
