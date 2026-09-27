@@ -1,7 +1,7 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-25 · **Versiune:** 0.16.0 (animațiile Jocurilor fulger reglate — semaforul pornea runda cu 700 ms după „START!” — și Cifruța desenată mai bogat, cu părți care se mișcă)
+- **Data:** 2026-09-27 · **Versiune:** 0.16.1 (Cifruța: poziția lăbuțelor și mâna ridicată, redesenate ca să nu se poată citi greșit)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -47,8 +47,10 @@
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
 - **Următorul pas:** v0.15.1 e publicat (doar site-ul: regulile Firestore nu s-au schimbat față de ruleset-ul `69018eff` de la
   v0.15.0), cu E2E pe site-ul live 1801/1801.
-  - v0.16.0 (animațiile jocului și mascota, jurnalul din 25 septembrie) e în `main`, local, nepublicată. Publicarea: `npm run deploy`
-    (regulile Firestore nu se schimbă), apoi E2E pe site-ul live și tag `v0.16.0`.
+  - v0.16.0 (animațiile jocului și mascota) e publicată — rularea 36221664319, tag `v0.16.0`; E2E pe site-ul live s-a oprit odată
+    cu sesiunea, la 526 de verificări și zero eșuate, deci îl reia publicarea lui v0.16.1.
+  - v0.16.1 (desenul mascotei, jurnalul din 27 septembrie) e în `main`, local, nepublicată. Publicarea: `npm run deploy`
+    (regulile Firestore nu se schimbă), apoi E2E pe site-ul live și tag `v0.16.1`.
   - Copilul joacă temele noi și strânge medalii; din rundele reale se reglează `fastMs` și pragurile de stele.
   - Rămân: verificarea în Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
   - Apoi: secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul) și temele „în curând” din Jocuri fulger.
@@ -208,6 +210,17 @@
     fine nu se desenează la mărimile mici, iar confetti-ul e poligon, ca desenul să n-aibă niciun atribut `transform`.
   - **Verificare:** npm test 104/104 (test nou pentru ancorele mascotei), E2E 1807/1807 (trei verificări noi: mascota se mișcă pe
     prima pagină, stă pe loc în siglă și pe pistă).
+  - **Publicare:** site-ul prin GitHub Actions (rularea 36221664319; regulile Firestore nu se schimbă), tag `v0.16.0`; E2E pe
+    site-ul live s-a oprit odată cu sesiunea, la 526 de verificări și zero eșuate.
+- [x] M34 (v0.16.1): desenul mascotei, citit cu ochii altcuiva.
+  - **Cererea utilizatorului:** în poziția cu mâna ridicată să rămână doar lăbuța, fără deget ridicat (se putea citi ca un gest
+    ofensator); în poziția principală, lăbuțele și aluna să nu mai fie simetrice, oglindite — două cerculețe cu un oval la mijloc,
+    pe linia mediană, se puteau citi greșit.
+  - **Reparat:** salutul are acum o lăbuță deschisă, cu trei degete (`wavePaw`); aluna se ține într-o parte, prinsă de o lăbuță de
+    dedesubt (37, 86) și sprijinită de alta, mai sus și mai mică (54, 76, la 0,9), deci grupul e pe diagonală și în afara liniei
+    mediane. Aceeași prindere a alunei la „se gândește” și „te încurajează”.
+  - **În plus:** dinții sunt doi, nu un bloc; aluna are codiță; smocurile urechilor sunt mai groase, ca să arate a blană.
+  - **Verificare:** npm test 104/104, E2E 1807/1807; desenul privit la 35, 60, 110, 260 și 420 px, plus antetul și atelierul.
 - [x] M32 (v0.15.1): recenzia codului pentru tema „Numere până la 1000”.
   - **Cum:** doi recenzori independenți (conținutul celor 18 tipuri și regulile lor · integrarea: refactorul, arena, E2E, cloudul);
     fiecare constatare verificată prin simulare sau în browser înainte de reparare.
@@ -767,6 +780,16 @@
   - **Publicat:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
+
+- **2026-09-27 (desenul mascotei, v0.16.1)**
+  - **Cererea utilizatorului:** degetul ridicat din poziția cu mâna sus se putea citi ca gest ofensator, iar în poziția principală
+    lăbuțele simetrice cu aluna la mijloc („două cerculețe și un oval”) se puteau citi greșit. Plus: alte îmbunătățiri, dacă văd.
+  - **Ce am schimbat:** salutul e doar o lăbuță deschisă, cu trei degete; aluna se ține într-o parte, cu lăbuțele la înălțimi
+    diferite și de mărimi diferite, deci nimic nu mai e oglindit pe linia mediană. În plus: doi dinți în loc de un bloc, codiță la
+    alună, smocuri de urechi mai groase.
+  - **Lecția:** un desen simetric pe linia mediană, cu forme rotunde de o parte și de alta a uneia alungite, se poate citi altfel
+    decât a fost gândit — pozițiile mascotei se privesc și cu ochii cuiva care n-a desenat-o, la toate mărimile.
+  - **Rezultate:** npm test 104/104, E2E 1807/1807.
 
 - **2026-09-25 (animațiile jocului și Cifruța, v0.16.0)**
   - **Cererea utilizatorului:** o trecere peste animațiile din Jocuri fulger, cu îmbunătățiri, fără refactor și fără schimbări de

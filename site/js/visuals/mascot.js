@@ -20,13 +20,18 @@ const eye = (x, dx = 0, dy = 0) =>
   `<circle cx="${x + dx + 1.5}" cy="${40.5 + dy}" r="1.7" fill="${C.white}"/>` +
   `<circle cx="${x + dx - 1.7}" cy="${43.8 + dy}" r="0.9" fill="${C.white}" opacity=".6"/></g>`;
 const happyEye = (x) => `<path d="M${x - 4.5} 43 Q${x} 37 ${x + 4.5} 43" fill="none" stroke="${C.ink}" stroke-width="2.8" stroke-linecap="round"/>`;
-const paw = (x, y) =>
-  `<ellipse cx="${x}" cy="${y}" rx="5.5" ry="4.5" fill="${C.orange}" ${st(2)}/>` +
-  `<g class="v-mascot__fine"><path d="M${x - 2} ${y - 2.8} V${y - 0.4} M${x + 2} ${y - 2.8} V${y - 0.4}" fill="none" stroke="${C.orangeDark}" stroke-width="1.4" stroke-linecap="round"/></g>`;
+const paw = (x, y, s = 1) =>
+  `<ellipse cx="${x}" cy="${y}" rx="${5.5 * s}" ry="${4.5 * s}" fill="${C.orange}" ${st(2)}/>` +
+  `<g class="v-mascot__fine"><path d="M${x - 2 * s} ${y - 2.8 * s} V${y - 0.4 * s} M${x + 2 * s} ${y - 2.8 * s} V${y - 0.4 * s}" fill="none" stroke="${C.orangeDark}" stroke-width="1.4" stroke-linecap="round"/></g>`;
+/** Lăbuța ridicată a salutului: deschisă, cu trei degete, fără niciun deget ridicat. */
+const wavePaw = (x, y) =>
+  `<ellipse cx="${x}" cy="${y}" rx="6.2" ry="6.9" fill="${C.orange}" ${st(2)}/>` +
+  `<g class="v-mascot__fine"><path d="M${x - 3} ${y - 4.4} V${y - 1.6} M${x} ${y - 5} V${y - 2.2} M${x + 3} ${y - 4.4} V${y - 1.6}" fill="none" stroke="${C.orangeDark}" stroke-width="1.4" stroke-linecap="round"/></g>`;
 const nut = (x, y) =>
   `<g class="v-mascot__nut"><ellipse cx="${x}" cy="${y}" rx="8" ry="9" fill="${C.brown}" ${st(2)}/>` +
   `<path d="M${x - 8} ${y - 3} C${x - 7} ${y - 12} ${x + 7} ${y - 12} ${x + 8} ${y - 3} C${x + 3} ${y - 5} ${x - 3} ${y - 5} ${x - 8} ${y - 3} Z" fill="${C.brownLight}" ${st(1.5)}/>` +
-  `<ellipse cx="${x - 3}" cy="${y + 2.5}" rx="1.6" ry="2.8" fill="${C.white}" opacity=".3"/></g>`;
+  `<ellipse cx="${x - 3}" cy="${y + 2.5}" rx="1.6" ry="2.8" fill="${C.white}" opacity=".3"/>` +
+  `<g class="v-mascot__fine"><path d="M${x + 1} ${y - 10} C${x + 1.5} ${y - 13} ${x + 3} ${y - 13.5} ${x + 4} ${y - 12.5}" fill="none" stroke="${C.brown}" stroke-width="1.8" stroke-linecap="round"/></g></g>`;
 
 // coada, cu două smocuri; urechile, fiecare cu ancora ei; corpul, care respiră (tălpile rămân pe loc)
 const TAIL = `
@@ -39,12 +44,12 @@ const EARS = `
   <g class="v-mascot__ear v-mascot__ear--l">
     <path d="M31 36 C24 22 27 10 34 7 C41 13 43 24 41 31 Z" fill="${C.orange}" ${st(2.5)}/>
     <path d="M34 28 C31 21 32 15 35 12 C38 16 39 22 38 26 Z" fill="${C.pink}"/>
-    <path d="M34 7 C32 3 35 1 38 3" fill="none" stroke="${C.ink}" stroke-width="2" stroke-linecap="round"/>
+    <path d="M34 7 C32.5 3.5 34.5 1.5 36.5 3.2" fill="none" stroke="${C.ink}" stroke-width="2.8" stroke-linecap="round"/>
   </g>
   <g class="v-mascot__ear v-mascot__ear--r">
     <path d="M69 36 C76 22 73 10 66 7 C59 13 57 24 59 31 Z" fill="${C.orange}" ${st(2.5)}/>
     <path d="M66 28 C69 21 68 15 65 12 C62 16 61 22 62 26 Z" fill="${C.pink}"/>
-    <path d="M66 7 C68 3 65 1 62 3" fill="none" stroke="${C.ink}" stroke-width="2" stroke-linecap="round"/>
+    <path d="M66 7 C67.5 3.5 65.5 1.5 63.5 3.2" fill="none" stroke="${C.ink}" stroke-width="2.8" stroke-linecap="round"/>
   </g>`;
 const BODY = `
   <ellipse cx="41" cy="108" rx="10" ry="5" fill="${C.orangeDark}" ${st(2)}/><ellipse cx="61" cy="108" rx="10" ry="5" fill="${C.orangeDark}" ${st(2)}/>
@@ -87,16 +92,19 @@ registerVisual('mascot', {
   label: (p) => `Veverița Cifruța ${MOODS[p.mood] ?? MOODS.vesela}`,
   render: (p) => {
     const mood = MOODS[p.mood] ? p.mood : 'vesela';
-    const teeth = `<rect x="47.5" y="57" width="5" height="5" rx="1" fill="${C.white}" stroke="${C.ink}" stroke-width="1"/>`;
+    const teeth =
+      `<rect x="47.5" y="57" width="5" height="5" rx="1" fill="${C.white}" stroke="${C.ink}" stroke-width="1"/>` +
+      `<g class="v-mascot__fine"><path d="M50 57.6 V61.4" stroke="${C.ink}" stroke-width="0.9" stroke-linecap="round"/></g>`;
     const smile = `<path d="M43 55 Q46.5 59 50 55.5 Q53.5 59 57 55" fill="none" stroke="${C.ink}" stroke-width="1.8" stroke-linecap="round"/>`;
 
     if (mood === 'vesela') {
-      return `${TAIL}${BODY}${head(`${eye(41)}${eye(59)}${teeth}${smile}`)}${nut(51, 80)}${paw(41, 82)}${paw(61, 82)}`;
+      // aluna stă într-o parte, prinsă de o lăbuță de dedesubt și sprijinită de cealaltă, mai sus și mai mică
+      return `${TAIL}${BODY}${head(`${eye(41)}${eye(59)}${teeth}${smile}`)}${nut(45, 81)}${paw(37, 86)}${paw(54, 76, 0.9)}`;
     }
     if (mood === 'ganditoare') {
       const mouth = `<path d="M45 57.5 Q50 56 55 57.5" fill="none" stroke="${C.ink}" stroke-width="1.8" stroke-linecap="round"/>`;
       return `${TAIL}${BODY}${head(`${eye(41, -1.5, -2)}${eye(59, -1.5, -2)}${teeth}${mouth}`)}
-        ${nut(46, 82)}${paw(38, 84)}${paw(62, 64)}
+        ${nut(45, 81)}${paw(37, 86)}${paw(62, 64)}
         <g class="v-mascot__think">
           <circle cx="76" cy="16" r="2.5" fill="${C.white}" ${st(1.5)}/><circle cx="85" cy="11" r="3.5" fill="${C.white}" ${st(1.5)}/>
           <ellipse cx="104" cy="13" rx="14" ry="11" fill="${C.white}" ${st(2)}/>${txt(104, 14, '?', { size: 15, weight: 800 })}
@@ -109,20 +117,20 @@ registerVisual('mascot', {
       ].map(confettiPiece).join('');
       const face = `${happyEye(41)}${happyEye(59)}
         <path d="M43 55 Q50 68 57 55 Z" fill="${C.ink}"/><path d="M46.5 60 Q50 64.5 53.5 60 Z" fill="${C.pink}"/>`;
+      // brațele nu stau oglindit: dreptul urcă puțin mai sus, ca bucuria să pară vie, nu desenată la compas
       return `${confetti}${TAIL}
-        <path d="M34 76 L22 58 M68 76 L80 58" stroke="${C.ink}" stroke-width="9" stroke-linecap="round"/>
-        <path d="M34 76 L22 58 M68 76 L80 58" stroke="${C.orange}" stroke-width="5" stroke-linecap="round"/>
-        ${BODY}${head(face)}${paw(22, 56)}${paw(80, 56)}`;
+        <path d="M34 76 L22 58 M68 76 L81 55" stroke="${C.ink}" stroke-width="9" stroke-linecap="round"/>
+        <path d="M34 76 L22 58 M68 76 L81 55" stroke="${C.orange}" stroke-width="5" stroke-linecap="round"/>
+        ${BODY}${head(face)}${paw(22, 56)}${paw(81, 52, 0.95)}`;
     }
     // incurajeaza
     const mouth = `<path d="M42 55 Q50 64 58 55" fill="none" stroke="${C.ink}" stroke-width="2" stroke-linecap="round"/>`;
     return `${TAIL}${BODY}${head(`${happyEye(41)}${eye(59)}${teeth}${mouth}`)}
       <g class="v-mascot__wave">
         <path d="M70 84 L84 66" stroke="${C.ink}" stroke-width="9" stroke-linecap="round"/><path d="M70 84 L84 66" stroke="${C.orange}" stroke-width="5" stroke-linecap="round"/>
-        <ellipse cx="85" cy="63" rx="6" ry="7" fill="${C.orange}" ${st(2)}/>
-        <path d="M85 56 V50" stroke="${C.ink}" stroke-width="7" stroke-linecap="round"/><path d="M85 56 V50" stroke="${C.orange}" stroke-width="3.5" stroke-linecap="round"/>
+        ${wavePaw(85, 63)}
       </g>
-      ${nut(46, 82)}${paw(38, 84)}
+      ${nut(45, 81)}${paw(37, 86)}
       <g class="v-mascot__spark"><path d="M100 44 L102.5 50 L109 50.5 L104 54.5 L105.5 61 L100 57.5 L94.5 61 L96 54.5 L91 50.5 L97.5 50 Z" fill="${C.yellow}" ${st(1.5)}/></g>`;
   },
   demos: Object.keys(MOODS).map((mood) => ({ mood })),
