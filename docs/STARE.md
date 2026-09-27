@@ -1,7 +1,7 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-27 · **Versiune:** 0.16.1 (Cifruța: poziția lăbuțelor și mâna ridicată, redesenate ca să nu se poată citi greșit)
+- **Data:** 2026-09-27 · **Versiune:** 0.17.0 (încă două teste în secțiunea 0–1000: „Misiune în spațiu” și „Elevul de serviciu”)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -22,7 +22,8 @@
   un nivel al unei teme aduc medalia de bronz, argint sau aur, iar aceeași medalie la 2, 3 și 5 teme aduce „dublul”, colecția și cupa;
   acum 33 de medalii, pe raftul de pe pagina jocului, pe cardurile nivelurilor și pe prima pagină). Conținut: **4 teste
   de recapitulare a clasei I** (T1–T4 v2)
-  și **6 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc), toate
+  și **8 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc, spațiu,
+  școală), toate
   exercițiile cu desen sau emoji, fără răspunsuri „la vedere”, cu probleme în mai mulți pași și sarcini deschise la avansat.
   **Contul familiei** (v0.9.0, `docs/cloud.md`): părintele intră cu Google și face profiluri de copii (poreclă și avatar desenat, cu
   acordul părintelui).
@@ -41,11 +42,13 @@
     cerință, sensul și răspunsul, calculate din datele desenului, pe 3000 de semințe), mărimea textului din desenele jocurilor, avatarele (textul canonic, id-urile
     publicate, fiecare combinație desenată) și medaliile (catalogul, pragurile, medaliile unei runde, datele vechi);
   - 16 teste ale regulilor Firestore pe emulator, inclusiv 65 de intrări într-o tranzacție;
-  - E2E cu 1807 de verificări pe 3 ecrane și tastatură, plus telefon ținut orizontal și telefon mic (cu seria pornită, textul desenelor
+  - E2E cu 1957 de verificări pe 3 ecrane și tastatură, plus telefon ținut orizontal și telefon mic (cu seria pornită, textul desenelor
     măsurat pe ecran, fiecare temă jucată tip cu tip, mascota care se mișcă doar unde trebuie);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.16.1 e publicată (rularea 36297320271, tag `v0.16.1`; regulile Firestore nu s-au schimbat față de
+- **Următorul pas:** v0.17.0 (cele două teste noi) e în `main`, local, nepublicată. Publicarea: `npm run deploy` (regulile
+  Firestore nu se schimbă), apoi E2E pe site-ul live și tag `v0.17.0`.
+- **Publicat până acum:** v0.16.1 (rularea 36297320271, tag `v0.16.1`; regulile Firestore nu s-au schimbat față de
   ruleset-ul `69018eff` de la v0.15.0). E2E pe site-ul live: 1807 trecute și 5 eșuate — toate cinci, un **503 trecător de la
   GitHub Pages** pe `js/components/board-link.js` în primele minute după publicare, care a rupt și importul lui `pages/fulger.js`;
   fișierul întoarce acum 200. v0.16.0 rămăsese fără tag (sesiunea s-a închis în timpul E2E-ului live, la 526 de verificări și zero
@@ -211,6 +214,19 @@
     prima pagină, stă pe loc în siglă și pe pistă).
   - **Publicare:** site-ul prin GitHub Actions (rularea 36221664319; regulile Firestore nu se schimbă), tag `v0.16.0`; E2E pe
     site-ul live s-a oprit odată cu sesiunea, la 526 de verificări și zero eșuate.
+- [x] M35 (v0.17.0): încă două teste în secțiunea „Numerele de la 0 la 1000”.
+  - **Cererea:** încă două teste, cu adunări și scăderi numai fără trecere peste ordin; temele alese de utilizator: spațiu și școală.
+  - **u1-t7 „Misiune în spațiu”:** numărătoarea sutelor (407, cu zecile 0), harta cerului pe căsuțe cu litere și cifre, sonde scrise
+    cu litere, simțurile în imponderabilitate, axa și rotunjirea, coborârea din 100 în 100, combustibilul în doi pași, comparări
+    fără calcul, planul misiunii în trei pași cu decizie, încărcătura după reguli (cel mult 700 kg) și fișa cu cifre șterse.
+  - **u1-t8 „Elevul de serviciu”:** plăcile de o sută (403), cuvintele calculelor, cotele cărților, igiena, ceasul și durata,
+    tabelul cu totaluri pe două direcții, cercurile școlii în diagrama Venn, proba scăderii, rafturile în trei pași cu o dată în
+    plus, plata în trei feluri și calendarul lunii.
+  - **Acoperire:** șase concepte care n-aveau niciun exercițiu în tot site-ul primesc acum unul — `mat.geo.coordonate`,
+    `med.corp.simturi`, `mat.mas.masa`, `mat.op1000.reconstituire`, `mat.op.terminologie`, `mat.log.venn` — plus patru care lipseau
+    din secțiune: `mat.op.necunoscut`, `mat.op.proba`, `mat.op.comparare-expresii`, `mat.mas.calendar`.
+  - **Verificare:** npm test 106/106, E2E pe fiecare test 99/99 pe cele trei ecrane, E2E complet 1957/1957; toate cele 22 de
+    exerciții privite în browser; auditul textelor (652 de texte) n-a găsit nicio egalitate falsă și niciun calcul cu trecere.
 - [x] M34 (v0.16.1): desenul mascotei, citit cu ochii altcuiva.
   - **Cererea utilizatorului:** în poziția cu mâna ridicată să rămână doar lăbuța, fără deget ridicat (se putea citi ca un gest
     ofensator); în poziția principală, lăbuțele și aluna să nu mai fie simetrice, oglindite — două cerculețe cu un oval la mijloc,
@@ -250,6 +266,8 @@
 | u1-t4 | Sondajul clasei | 3 | publicat | npm test + E2E | 45 | – |
 | u1-t5 | Concursul sportiv al școlii | 2 | publicat | npm test + E2E | 45 | – |
 | u1-t6 | Corpul meu în numere | 3 | publicat | npm test + E2E | 45 | – |
+| u1-t7 | Misiune în spațiu | 1 | nepublicat | npm test + E2E | 45 | – |
+| u1-t8 | Elevul de serviciu | 1 | nepublicat | npm test + E2E | 45 | – |
 
 ## Decizii
 | data | decizie | motiv |
@@ -367,6 +385,7 @@
 | 2026-09-19 | Variantele-zi și variantele-dată stau în ordinea din calendar; o variantă din afara desenului apare doar la „cele mai multe”; la răspunsuri mici, 0 rămâne printre variante | ordinea firească se citește mai ușor; un rând care lipsește are 0, deci ar fi și el „cel mai puțin”; fără 0, un răspuns de 1 sau 2 ar sta mereu primul |
 | 2026-09-19 | Tema „Numere până la 1000” vine imediat după cea de 0–100 (a doua în listă, deci și pe pagina jocului, pe prima pagină și în clasament) | cererea utilizatorului: pasul următor după 0–100 |
 | 2026-09-19 | În jocul de 0–1000, trecerea peste ordin e doar la Avansat și doar simplă: o trecere la unități (345 + 27) sau un împrumut din zeci (452 − 28), niciodată două și niciodată la sute | cererea utilizatorului („operații care nu necesită schimbări sau schimbări complicate de ordin”) și unitatea 2 din manual („adunarea cu trecere peste ordinul unităților”, „scăderea cu împrumut la ordinul zecilor”); completează decizia din 12 septembrie, care privea secțiunea de teste |
+| 2026-09-27 | În cele două teste noi din 0–1000, niciun calcul nu are trecere peste ordin — nici măcar sub 100, unde regula secțiunii ar fi permis-o | cererea utilizatorului era „fără trecere peste ordin”, iar o adunare cu trecere strecurată într-o explicație ar fi contrazis-o; celelalte 6 teste păstrează calculele cu trecere sub 100 |
 | 2026-09-25 | Mișcarea mascotei pornește prin `--mascot-play` (ca peisajele prin `--scene-play`), doar în containerele mari; keyframe-urile ei încep și se termină în poziția de repaus și n-au delay negativ | desenul oprit (sigla, alergătorul de pe pistă) și cel de la mișcare redusă trebuie să arate exact ca desenul, nu înghețat la mijlocul unei mișcări |
 | 2026-09-25 | Detaliile fine ale unui desen (mustăți, sprâncene, degete) stau într-un grup `__fine`, ascuns în containerele mici | la 2,2rem (alergătorul) o linie de 1,5 unități are 0,4 px: devine o pată, nu un detaliu |
 | 2026-09-20 | Distractorii unei întrebări nu sunt numere pe care copilul le vede deja în cerință (termenii unui șir); dacă scoaterea lor ar strânge intervalul răspunsului (sutele rotunde), se păstrează, pentru că scurtătura care apare e mai mare | măsurat: la șiruri, 24% din întrebări aveau două variante deja scrise și 0,65% trei; la sutele rotunde, „varianta din mijloc” ar fi urcat de la 49% la 71% |
@@ -779,6 +798,24 @@
   - **Publicat:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
+
+- **2026-09-27 (încă două teste la 0–1000, v0.17.0)**
+  - **Cererea utilizatorului:** „mai adaugă 2 teste la 0-1000 fără adunări și scăderi fără trecere peste ordin”. Fraza se putea citi
+    în trei feluri, deci am întrebat: a ales „cu ±, dar numai fără trecere, ca acum”, cu temele **spațiu** și **școală**.
+  - **Cum am lucrat:** înainte de plan am verificat în cod, rulând, fiecare mecanism nou (cifre ascunse cu `search`, termen
+    necunoscut cu `expr`, desenul `venn`, calendarul din `data-table`, coordonatele din `robot-grid`, `money` cu `distinct`) și am
+    trecut **toate** numerele prin `trecere()` și toate ghicitorile prin `searchNumbers` — o ghicitoare a fost respinsă fiindcă
+    avea două răspunsuri.
+  - **Rezultatul:** `u1-t7 „Misiune în spațiu”` și `u1-t8 „Elevul de serviciu”`, fiecare cu 11 exerciții și 45 de minute, care
+    acoperă șase concepte fără niciun exercițiu în tot site-ul și încă patru care lipseau din secțiune.
+  - **Lecții:**
+    - un rând de `fill` care conține text nu se verifică deloc fără `calc:` — nici relația, nici trecerea peste ordin;
+    - la eticheta „fără trecere” se verifică **și** expresia din `expr`, nu doar rândul afișat;
+    - la reconstituirea unui calcul, validatorul nu verifică unicitatea globală: o singură cifră necunoscută pe coloană;
+    - desenul `venn` acceptă numere până la 30, deci numerele mari stau în al doilea subpunct;
+    - un audit propriu al textelor (fiecare egalitate scrisă în enunț sau explicație, trecută prin `calc` și `trecere`) a prins o
+      adunare cu trecere ascunsă într-o explicație de ghicitoare.
+  - **Rezultate:** npm test 106/106, E2E pe fiecare test 99/99, E2E complet 1957/1957.
 
 - **2026-09-27 (desenul mascotei, v0.16.1)**
   - **Cererea utilizatorului:** degetul ridicat din poziția cu mâna sus se putea citi ca gest ofensator, iar în poziția principală
