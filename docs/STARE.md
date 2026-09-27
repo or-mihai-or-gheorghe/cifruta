@@ -45,12 +45,11 @@
     măsurat pe ecran, fiecare temă jucată tip cu tip, mascota care se mișcă doar unde trebuie);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.15.1 e publicat (doar site-ul: regulile Firestore nu s-au schimbat față de ruleset-ul `69018eff` de la
-  v0.15.0), cu E2E pe site-ul live 1801/1801.
-  - v0.16.0 (animațiile jocului și mascota) e publicată — rularea 36221664319, tag `v0.16.0`; E2E pe site-ul live s-a oprit odată
-    cu sesiunea, la 526 de verificări și zero eșuate, deci îl reia publicarea lui v0.16.1.
-  - v0.16.1 (desenul mascotei, jurnalul din 27 septembrie) e în `main`, local, nepublicată. Publicarea: `npm run deploy`
-    (regulile Firestore nu se schimbă), apoi E2E pe site-ul live și tag `v0.16.1`.
+- **Următorul pas:** v0.16.1 e publicată (rularea 36297320271, tag `v0.16.1`; regulile Firestore nu s-au schimbat față de
+  ruleset-ul `69018eff` de la v0.15.0). E2E pe site-ul live: 1807 trecute și 5 eșuate — toate cinci, un **503 trecător de la
+  GitHub Pages** pe `js/components/board-link.js` în primele minute după publicare, care a rupt și importul lui `pages/fulger.js`;
+  fișierul întoarce acum 200. v0.16.0 rămăsese fără tag (sesiunea s-a închis în timpul E2E-ului live, la 526 de verificări și zero
+  eșuate); tag-ul e pus acum.
   - Copilul joacă temele noi și strânge medalii; din rundele reale se reglează `fastMs` și pragurile de stele.
   - Rămân: verificarea în Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
   - Apoi: secțiunea U2 (Adunarea și scăderea până la 1000 · Pământul) și temele „în curând” din Jocuri fulger.
@@ -790,6 +789,9 @@
   - **Lecția:** un desen simetric pe linia mediană, cu forme rotunde de o parte și de alta a uneia alungite, se poate citi altfel
     decât a fost gândit — pozițiile mascotei se privesc și cu ochii cuiva care n-a desenat-o, la toate mărimile.
   - **Rezultate:** npm test 104/104, E2E 1807/1807.
+  - **Publicat:** site-ul prin GitHub Actions (rularea 36297320271; regulile Firestore nu se schimbă), tag `v0.16.1`. Pe site-ul
+    live: 1807 trecute, 5 eșuate, toate un 503 trecător de la GitHub Pages pe un singur fișier, în primele minute după publicare.
+    Tot atunci s-a pus și tag-ul `v0.16.0`, rămas în urmă.
 
 - **2026-09-25 (animațiile jocului și Cifruța, v0.16.0)**
   - **Cererea utilizatorului:** o trecere peste animațiile din Jocuri fulger, cu îmbunătățiri, fără refactor și fără schimbări de
