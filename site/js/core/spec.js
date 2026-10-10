@@ -10,6 +10,13 @@ import { trecere } from './rules.js';
 import { hasVisual, visualErrors } from '../visuals/index.js';
 
 const LEVEL_IDS = config.levels.map((l) => l.id);
+
+/** Un calcul desenat (column-op) cu rezultatul scris este corect? */
+const columnOpCorrect = (v) => {
+  const terms = String(v.terms ?? '').split(',').map(Number);
+  const minus = /^[-−–]$/.test(String(v.op ?? '+').trim());
+  return (minus ? terms[0] - terms[1] : terms.reduce((s, t) => s + t, 0)) === Number(v.result);
+};
 const CU_TRECERE = ['mat.op.cu-trecere', 'mat.op1000.cu-trecere'];
 const FARA_TRECERE = ['mat.op.fara-trecere', 'mat.op1000.fara-trecere'];
 const EXERCISE_KEYS = new Set(['id', 'level', 'estMin', 'points', 'concepts', 'title', 'context', 'explain', 'parts']);
@@ -93,6 +100,13 @@ export function validateTest(raw, { concepts } = {}) {
       }
       errors.push(...partErrors.map((e) => `${pw}: ${e}`));
       if (partErrors.length) continue;
+      // „Cine s-a grăbit și a greșit?”: cheia sunt exact calculele desenate greșite (sau exact cele corecte)
+      if (part.type === 'mark' && Array.isArray(part.key) && part.items.every((it) => it.visual?.v === 'column-op' && /^\d+$/.test(String(it.visual.result ?? '')))) {
+        const wrong = part.items.filter((it) => !columnOpCorrect(it.visual)).map((it) => it.id).sort().join(', ');
+        const right = part.items.filter((it) => columnOpCorrect(it.visual)).map((it) => it.id).sort().join(', ');
+        const key = [...part.key].sort().join(', ');
+        if (key !== wrong && key !== right) errors.push(`${pw}: cheia (${key}) nu e nici lista calculelor greșite (${wrong}), nici a celor corecte (${right})`);
+      }
       for (const src of logic.expressions?.(part) ?? []) {
         try {
           ops.push(...trace(src));

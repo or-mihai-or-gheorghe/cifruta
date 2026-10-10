@@ -95,12 +95,86 @@ registerVisual('ten-frame', {
 /** Geometria axei în viewBox: liniuța lui min e la x0, a lui max la x0 + len (folosită și de slider). */
 export const LINE = { x0: 16, len: 280 };
 
+// Salturi pe axă (calcul în minte): hops = opririle (numere sau „?”), jumps = salturile (+100, −2…). Fără jumps, salturile se
+// calculează din opriri. Axa nu e la scară: fiecare salt are o lățime minimă, ca etichetele să se citească pe telefon.
+const hopsOf = (p) => list(p.hops).map((s) => String(s).trim());
+const jumpsOf = (p) => {
+  const stops = hopsOf(p);
+  if (has(p.jumps)) return list(p.jumps).map((s) => Number(String(s).replace(/[−–]/g, '-').replace(/^\+/, '')));
+  return stops.slice(1).map((s, i) => Number(s) - Number(stops[i]));
+};
+const fmtJump = (d) => (d > 0 ? `+${d}` : `−${Math.abs(d)}`);
+const mixedHops = (p) => jumpsOf(p).some((d) => d < 0) && jumpsOf(p).some((d) => d > 0);
+const HOP_Y = 64;
+
+function hopsLine(p) {
+  const stops = hopsOf(p);
+  const jumps = jumpsOf(p);
+  const MIN = 46;
+  const L = 270;
+  const total = jumps.reduce((s, d) => s + Math.abs(d), 0) || 1;
+  const widths = jumps.map((d) => MIN + ((L - MIN * jumps.length) * Math.abs(d)) / total);
+  const xs = [0];
+  jumps.forEach((d, i) => xs.push(xs[i] + Math.sign(d) * widths[i]));
+  const lo = Math.min(...xs);
+  const span = Math.max(...xs) - lo;
+  const X = xs.map((x) => x - lo + 25 + (L - span) / 2);
+  const mixed = mixedHops(p);
+  let out = `<line x1="8" y1="${HOP_Y}" x2="306" y2="${HOP_Y}" ${st(3)}/><path d="M304 ${HOP_Y - 6} L314 ${HOP_Y} L304 ${HOP_Y + 6} Z" fill="${C.ink}"/>`;
+  jumps.forEach((d, i) => {
+    const [a, b] = [X[i], X[i + 1]];
+    const below = mixed && d < 0;
+    const height = Math.min(30, 14 + Math.abs(b - a) / 8);
+    const y0 = below ? HOP_Y + 13 : HOP_Y - 13;
+    const cy = below ? y0 + 2 * height : y0 - 2 * height;
+    const mx = (a + b) / 2;
+    out += `<path d="M${a} ${y0} Q ${mx} ${cy} ${b} ${y0}" fill="none" stroke="${C.purpleDark}" stroke-width="2.5" stroke-linecap="round"/>`;
+    const ang = Math.atan2(y0 - cy, b - mx);
+    const tip = (k) => `${(b - 9 * Math.cos(ang + k)).toFixed(1)} ${(y0 - 9 * Math.sin(ang + k)).toFixed(1)}`;
+    out += `<path d="M${tip(0.5)} L${b} ${y0} L${tip(-0.5)}" fill="none" stroke="${C.purpleDark}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+    out += txt(mx, below ? y0 + height + 12 : y0 - height - 9, fmtJump(d), { size: 15, fill: C.purpleDark });
+  });
+  stops.forEach((s, i) => {
+    const w = Math.max(30, s.length * 9 + 12);
+    out += `<rect x="${(X[i] - w / 2).toFixed(1)}" y="${HOP_Y - 12}" width="${w}" height="24" rx="8" fill="${s === '?' ? C.yellowLight : C.white}" ${st(2)}/>`;
+    out += txt(X[i], HOP_Y, s, { size: 15 });
+  });
+  return out;
+}
+
+function hopsErrors(p) {
+  const stops = hopsOf(p);
+  const errors = [];
+  if (stops.length < 2 || stops.length > 6) return ['hops: între 2 și 6 opriri'];
+  for (const s of stops) if (s !== '?' && !(Number.isInteger(Number(s)) && Number(s) >= 0 && Number(s) <= 1000)) errors.push(`hops: „${s}” nu e un număr 0–1000 sau „?”`);
+  if (!has(p.jumps)) {
+    if (stops.includes('?')) errors.push('hops cu „?” cere și jumps');
+    return errors;
+  }
+  const jumps = jumpsOf(p);
+  if (jumps.length !== stops.length - 1) return [...errors, 'jumps trebuie să aibă un salt mai puțin decât opririle'];
+  if (jumps.some((d) => !Number.isInteger(d) || d === 0)) errors.push('jumps: salturi întregi, diferite de 0');
+  if (stops[0] === '?') return [...errors, 'prima oprire trebuie să fie un număr'];
+  let v = Number(stops[0]);
+  jumps.forEach((d, i) => {
+    v += d;
+    if (v < 0 || v > 1000) errors.push(`hops: oprirea ${i + 2} iese din 0–1000`);
+    if (stops[i + 1] !== '?' && Number(stops[i + 1]) !== v) errors.push(`hops: ${stops[i]} ${fmtJump(d)} nu dă ${stops[i + 1]}`);
+  });
+  return errors;
+}
+
 registerVisual('number-line', {
   group: GROUP,
   defaults: { min: 0, max: 100, minor: 10, labels: '0,50,100' },
-  viewBox: '0 0 320 72',
-  label: (p) => `axa numerelor de la ${num(p.min, 0)} la ${num(p.max, 100)}${has(p.marker) ? `, cu un semn la ${p.marker}` : ''}`,
+  check: (p) => (has(p.hops) ? hopsErrors(p) : []),
+  viewBox: (p) => (has(p.hops) ? `0 0 320 ${mixedHops(p) ? 128 : 84}` : '0 0 320 72'),
+  label: (p) =>
+    has(p.hops)
+      ? `axa cu salturi: de la ${hopsOf(p)[0]}, ${jumpsOf(p).map(fmtJump).join(', ')}`
+      : `axa numerelor de la ${num(p.min, 0)} la ${num(p.max, 100)}${has(p.marker) ? `, cu un semn la ${p.marker}` : ''}`,
   render: (p) => {
+    if (has(p.hops)) return hopsLine(p);
     const min = num(p.min, 0);
     const max = num(p.max, 100);
     const minor = Math.max(1, num(p.minor, 10));
@@ -120,7 +194,14 @@ registerVisual('number-line', {
     }
     return out;
   },
-  demos: [{ marker: 48, icon: 'racheta' }, { min: 20, max: 100, minor: 5, labels: '20,40,60,80,100' }, { min: 0, max: 1000, minor: 100, labels: '0,500,1000', marker: 460, icon: 'masina' }],
+  demos: [
+    { marker: 48, icon: 'racheta' },
+    { min: 20, max: 100, minor: 5, labels: '20,40,60,80,100' },
+    { min: 0, max: 1000, minor: 100, labels: '0,500,1000', marker: 460, icon: 'masina' },
+    { hops: '245,345,375,377' },
+    { hops: '465,?,?,?', jumps: '−100,−30,−2' },
+    { hops: '145,?,?', jumps: '+400,−2' },
+  ],
 });
 
 // ——— Termometrul ———
@@ -291,19 +372,70 @@ registerVisual('place-value', {
 
 // ——— Cuburi de 1, bare de 10, plăci de 100 ———
 const parts1000 = (n) => ({ h: Math.floor(n / 100), t: Math.floor((n % 100) / 10), u: n % 10 });
+// Cu { s, z, u } desenul arată bucățile înainte de schimb (13 cuburi, 12 bare, o sută desfăcută în 10 bare), iar `group`
+// încercuiește 10 cuburi ('u') sau 10 bare ('z'); cu { n }, numărul scris obișnuit.
+const isCounts = (p) => has(p.s) || has(p.z) || has(p.u);
+const countsOf = (p) => ({ h: num(p.s, 0), t: num(p.z, 0), u: num(p.u, 0) });
+
+function baseTenCounts(p) {
+  const { h, t, u } = countsOf(p);
+  let out = '';
+  let y = 6;
+  for (let i = 0; i < h; i++) {
+    out += `<rect x="${6 + i * 46}" y="${y}" width="40" height="40" fill="${C.s}" ${st(1.5)}/>`;
+    for (let k = 1; k < 10; k++) {
+      out += `<line x1="${6 + i * 46 + 4 * k}" y1="${y}" x2="${6 + i * 46 + 4 * k}" y2="${y + 40}" stroke="${C.ink}" stroke-width=".6"/>`;
+      out += `<line x1="${6 + i * 46}" y1="${y + 4 * k}" x2="${46 + i * 46}" y2="${y + 4 * k}" stroke="${C.ink}" stroke-width=".6"/>`;
+    }
+  }
+  if (h) y += 48;
+  for (let i = 0; i < t; i++) {
+    const x = 6 + (i % 10) * 14;
+    const yy = y + Math.floor(i / 10) * 46;
+    out += `<rect x="${x}" y="${yy}" width="8" height="40" fill="${C.z}" ${st(1.5)}/>`;
+    for (let k = 1; k < 10; k++) out += `<line x1="${x}" y1="${yy + 4 * k}" x2="${x + 8}" y2="${yy + 4 * k}" stroke="${C.ink}" stroke-width=".6"/>`;
+  }
+  if (p.group === 'z' && t >= 10) out += `<rect x="2" y="${y - 3}" width="140" height="46" rx="8" fill="none" stroke="${C.ink}" stroke-width="2" stroke-dasharray="5 4"/>`;
+  if (t) y += 46 * Math.ceil(t / 10) + 2;
+  for (let i = 0; i < u; i++) out += `<rect x="${6 + (i % 10) * 14}" y="${y + Math.floor(i / 10) * 13}" width="8" height="8" fill="${C.u}" ${st(1.5)}/>`;
+  if (p.group === 'u' && u >= 10) out += `<rect x="2" y="${y - 3}" width="140" height="14" rx="6" fill="none" stroke="${C.ink}" stroke-width="2" stroke-dasharray="5 4"/>`;
+  return out;
+}
+
 registerVisual('base-ten', {
   group: GROUP,
   defaults: { n: 245 },
+  check: (p) => {
+    if (!isCounts(p)) return Number.isInteger(num(p.n, NaN)) && num(p.n) >= 0 && num(p.n) <= 999 ? [] : ['n trebuie să fie un număr întreg între 0 și 999'];
+    const { h, t, u } = countsOf(p);
+    const errors = [];
+    if (!(Number.isInteger(h) && h >= 0 && h <= 10)) errors.push('s trebuie să fie între 0 și 10');
+    for (const [k, v] of [['z', t], ['u', u]]) if (!(Number.isInteger(v) && v >= 0 && v <= 20)) errors.push(`${k} trebuie să fie între 0 și 20`);
+    if (has(p.group) && !['u', 'z'].includes(p.group)) errors.push('group este „u” sau „z”');
+    if (p.group === 'u' && u < 10) errors.push('group „u” cere cel puțin 10 cuburi');
+    if (p.group === 'z' && t < 10) errors.push('group „z” cere cel puțin 10 bare');
+    return errors;
+  },
   viewBox: (p) => {
+    if (isCounts(p)) {
+      const { h, t, u } = countsOf(p);
+      return `0 0 ${Math.max(150, 10 + h * 46)} ${10 + (h ? 48 : 0) + (t ? 46 * Math.ceil(t / 10) + 2 : 0) + (u ? 13 * Math.ceil(u / 10) + 3 : 0)}`;
+    }
     const { h, t, u } = parts1000(Math.max(0, Math.min(999, num(p.n, 0))));
     return `0 0 ${Math.max(110, 10 + h * 46, 10 + t * 14, 10 + u * 14)} ${10 + (h ? 48 : 0) + (t ? 48 : 0) + (u ? 16 : 0)}`;
   },
   label: (p) => {
+    if (isCounts(p)) {
+      const { h, t, u } = countsOf(p);
+      const ring = p.group === 'u' ? ', 10 cuburi încercuite' : p.group === 'z' ? ', 10 bare încercuite' : '';
+      return `${cantitate(h, 'placă de 100', 'plăci de 100')}, ${cantitate(t, 'bară de 10', 'bare de 10')}, ${cantitate(u, 'cub de 1', 'cuburi de 1')}${ring}`;
+    }
     const n = Math.max(0, Math.min(999, num(p.n, 0)));
     const { h, t, u } = parts1000(n);
     return `${cantitate(h, 'placă de 100', 'plăci de 100')}, ${cantitate(t, 'bară de 10', 'bare de 10')}, ${cantitate(u, 'cub de 1', 'cuburi de 1')}: ${n}`;
   },
   render: (p) => {
+    if (isCounts(p)) return baseTenCounts(p);
     const { h, t, u } = parts1000(Math.max(0, Math.min(999, num(p.n, 0))));
     let out = '';
     let y = 6;
@@ -320,5 +452,5 @@ registerVisual('base-ten', {
     for (let i = 0; i < u; i++) out += `<rect x="${6 + i * 14}" y="${y}" width="8" height="8" fill="${C.u}" ${st(1.5)}/>`;
     return out;
   },
-  demos: [{ n: 245 }, { n: 416 }, { n: 7 }],
+  demos: [{ n: 245 }, { n: 416 }, { n: 7 }, { s: 2, z: 4, u: 13, group: 'u' }, { s: 3, z: 12, u: 5, group: 'z' }, { s: 2, z: 10, u: 4 }],
 });

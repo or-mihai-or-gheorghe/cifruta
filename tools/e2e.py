@@ -182,6 +182,32 @@ def types_flow(run: Run, page: Page, vp: str):
 
     typing("fill-tree", {"a": 40, "b": 7, "c": 80, "d": 0}); ok("fill-tree")
 
+    # calculul în scris: cifrele se scriu de la unități spre stânga, iar focusul trece singur la cifra următoare
+    col = page.locator(tid("demo-fill-column"))
+    col.locator(tid("blank-c")).click()
+    page.keyboard.type("236")
+    digits = page.evaluate("window.__dbg.answer('fill-column').a")
+    run.check([digits.get(k) for k in "cba"] == ["2", "3", "6"], f"[{vp}] calcul în scris: 2, 3, 6 ajung la unități, zeci și sute")
+    focused = lambda: page.evaluate("document.activeElement?.dataset?.testid")
+    run.check(focused() == "blank-f", f"[{vp}] calcul în scris: după sute, focusul trece la unitățile calculului următor ({focused()})")
+    page.keyboard.press("Backspace")
+    run.check(focused() == "blank-a", f"[{vp}] calcul în scris: Backspace pe o casetă goală se întoarce la cifra de dinainte ({focused()})")
+    typing("fill-column", {"f": 5, "e": 4, "d": 2, "h": 2, "g": 4})
+    part = page.get_by_test_id("part-fill-column-a")
+    part.get_by_test_id("minte-0-z").fill("1")
+    run.check(page.evaluate("window.__dbg.answer('fill-column').a['~0.z']") == "1", f"[{vp}] calcul în scris: căsuța „ține minte” se păstrează în răspuns")
+    ok("fill-column")
+    cell = col.locator(".ex-blank--digit").first.bounding_box()
+    run.check(cell["width"] >= 40 and cell["height"] >= 44, f"[{vp}] calcul în scris: casetele cifrelor au cel puțin 40 × 44 px ({cell['width']:.0f} × {cell['height']:.0f})")
+    one, two = (col.locator(".ex-col").nth(i).bounding_box() for i in (0, 1))
+    stacked = two["y"] >= one["y"] + one["height"] - 1
+    run.check(stacked == (vp == "telefon"), f"[{vp}] calcul în scris: două calcule {'unul sub altul' if vp == 'telefon' else 'alăturate'}")
+    page.locator(tid("demo-solution-fill-column")).click()
+    marks = part.locator(".ex-minte").evaluate_all("els => els.map((e) => e.value)")
+    run.check(marks == ["1", "1", "3", "9", "10"], f"[{vp}] calcul în scris: soluția scrie deasupra coloanelor ce se ține minte ({marks})")
+
+    typing("fill-pyramid", {"a": 265, "b": 226, "c": 491}); ok("fill-pyramid")
+
     watch_pops(page, tid("demo-categorize"))
     tap(tid("item-vaca")); tap(tid("bin-dom"))
     if touch:
@@ -747,6 +773,10 @@ def fulger_flow(run: Run, page: Page, vp: str):
     page.get_by_test_id("fg-clear").click()
     page.get_by_test_id("modal-confirm").click()
     page.wait_for_function(f"document.querySelector('[data-testid=fg-topic-{FULGER_TOPIC}]')?.innerText.includes('Nou')")
+    try:  # raftul se redesenează după cardul temei: așteptăm numărul, ca verificarea să nu citească starea de dinainte
+        page.wait_for_function(f"document.querySelector('[data-testid=fg-medals-count]')?.innerText.trim() === '(0 din {medals})'", timeout=5000)
+    except PlaywrightTimeoutError:
+        pass
     cleared = page.get_by_test_id("fg-medals-count").inner_text()
     run.check(page.evaluate("localStorage.getItem('cifruta:fulger')") is None and cleared == f"(0 din {medals})", f"[{vp}] fulger: ștergerea din „Pentru părinți” scoate rundele, recordurile și medaliile ({cleared})")
 
@@ -994,6 +1024,15 @@ def keyboard_flow(run: Run, browser, base: str):
     left = (answer("money") or {}).get("f1", {}).get("10")
     in_wallet = page.evaluate("!!document.activeElement?.closest('[data-testid=wallet-f1]')")
     run.check(added == 1 and not left and in_wallet, f"[tastatură] o bancnotă se scoate din portofel, focusul rămâne în portofel ({added} → {left})")
+
+    # calculul în scris: Shift+Tab de la sute ajunge la căsuța „ține minte”, iar o cifră scrisă acolo nu mută focusul
+    part = page.get_by_test_id("part-fill-column-a")
+    part.get_by_test_id("blank-a").focus()
+    page.keyboard.press("Shift+Tab")
+    on_helper = page.evaluate("document.activeElement?.dataset.testid")
+    page.keyboard.type("1")
+    stays = page.evaluate("document.activeElement?.dataset.testid")
+    run.check(on_helper and on_helper.startswith("minte-0-") and stays == on_helper, f"[tastatură] calcul în scris: Shift+Tab ajunge la „ține minte” ({on_helper}), iar scrisul acolo nu mută focusul ({stays})")
 
     cards = lambda: page.locator("[data-testid=demo-order] .ex-order__card").evaluate_all("els => els.map((e) => e.dataset.id)")
     first, third = cards()[0], cards()[2]

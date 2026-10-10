@@ -57,6 +57,9 @@
 .v-scene__tram { animation: anim-drift 7s ease-in-out infinite alternate; }
 .v-scene__flag { transform-box: fill-box; transform-origin: left center; animation: anim-swing 3s ease-in-out infinite alternate; }
 .v-scene__ball { transform-box: fill-box; transform-origin: center; animation: anim-bob 2s ease-in-out infinite; }
+.v-scene__birds { animation: anim-drift 9s ease-in-out infinite alternate; }
+.v-scene__smoke { animation: anim-float 3s ease-in-out infinite; }
+.v-scene__waves { animation: anim-drift 4s ease-in-out infinite alternate; }
 /* ultima regulă: shorthand-ul `animation` de mai sus ar reseta play-state */
 .v-scene [class^='v-scene__'], .v-scene__stars circle { animation-play-state: var(--scene-play, paused); }
 .ex-intro__scene, .c-card--link:hover { --scene-play: running; }

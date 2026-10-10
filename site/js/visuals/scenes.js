@@ -184,6 +184,49 @@ const SCENES = {
         <g class="v-scene__ball"><circle cx="150" cy="96" r="9" fill="${C.white}" ${st(2)}/><path d="M150 90 L155 94 L153 100 H147 L145 94 Z" fill="${C.ink}"/></g>`;
     },
   },
+  munte: {
+    label: 'munții și cabana',
+    draw: () => {
+      const pine = (x, y, s) => `<path d="M${x} ${y} L${x - 9 * s} ${y + 22 * s} H${x + 9 * s} Z" fill="${C.greenDark}" ${st(1.5)}/><rect x="${x - 1.5 * s}" y="${y + 22 * s}" width="${3 * s}" height="${5 * s}" fill="${C.brown}"/>`;
+      return `
+        <rect width="300" height="120" fill="${C.sky}"/>
+        ${sunRays(258, 24, 12)}${cloud(24, 14, 0.85)}
+        <g class="v-scene__birds"><path d="M118 30 q5 -5 10 0 q5 -5 10 0 M144 20 q4 -4 8 0 q4 -4 8 0" fill="none" stroke="${C.ink}" stroke-width="2" stroke-linecap="round"/></g>
+        <path d="M-10 102 L66 34 L142 102 Z" fill="${C.grayDark}" ${st(2)}/>
+        <path d="M50 48 L66 34 L82 48 L75 45 L69 51 L62 44 L56 50 Z" fill="${C.white}" ${st(1.5)}/>
+        <path d="M86 102 L176 20 L266 102 Z" fill="${C.gray}" ${st(2)}/>
+        <path d="M155 39 L176 20 L197 39 L189 36 L182 43 L174 35 L166 42 Z" fill="${C.white}" ${st(1.5)}/>
+        <path d="M206 102 L262 52 L318 102 Z" fill="${C.grayDark}" ${st(2)}/>
+        <path d="M0 98 C60 92 120 102 180 96 C230 92 270 96 300 94 V120 H0 Z" fill="${C.grass}"/>
+        <g class="v-scene__tree">${pine(34, 74, 1)}${pine(54, 80, 0.8)}</g>
+        <rect x="200" y="86" width="36" height="22" fill="${C.brownLight}" ${st(2)}/>
+        <path d="M195 88 L218 70 L241 88 Z" fill="${C.red}" ${st(2)}/>
+        <rect x="213" y="96" width="9" height="12" fill="${C.brown}" ${st(1.5)}/>
+        <rect x="227" y="74" width="6" height="9" fill="${C.brown}" ${st(1.5)}/>
+        <g class="v-scene__smoke"><circle cx="231" cy="66" r="4" fill="${C.white}" ${st(1.5)}/><circle cx="236" cy="57" r="5" fill="${C.white}" ${st(1.5)}/></g>`;
+    },
+  },
+  dunare: {
+    label: 'fluviul și vaporul',
+    draw: () => {
+      const reed = (x, h) => `<line x1="${x}" y1="114" x2="${x}" y2="${114 - h}" stroke="${C.greenDark}" stroke-width="2" stroke-linecap="round"/><ellipse cx="${x}" cy="${114 - h}" rx="2.5" ry="5" fill="${C.brown}"/>`;
+      return `
+        <rect width="300" height="120" fill="${C.sky}"/>
+        ${sunRays(36, 24, 12)}${cloud(190, 10, 0.9)}
+        <g class="v-scene__birds"><path d="M232 34 q5 -5 10 0 q5 -5 10 0 M258 26 q4 -4 8 0 q4 -4 8 0" fill="none" stroke="${C.ink}" stroke-width="2" stroke-linecap="round"/></g>
+        <path d="M0 60 C60 52 120 64 180 56 C230 50 270 56 300 52 V66 H0 Z" fill="${C.grass}"/>
+        <rect y="64" width="300" height="38" fill="${C.blue}"/>
+        <g class="v-scene__waves"><path d="M14 78 q8 -4 16 0 q8 4 16 0 M196 88 q8 -4 16 0 q8 4 16 0 M64 94 q8 -4 16 0 q8 4 16 0" fill="none" stroke="${C.white}" stroke-width="2" stroke-linecap="round" opacity=".7"/></g>
+        <g class="v-scene__boat">
+          <path d="M108 80 H196 L186 94 H118 Z" fill="${C.red}" ${st(2)}/>
+          <rect x="124" y="66" width="52" height="14" fill="${C.white}" ${st(2)}/>
+          <path d="M132 71 H140 M148 71 H156 M164 71 H170" stroke="${C.blueDark}" stroke-width="3" stroke-linecap="round"/>
+          <rect x="160" y="54" width="8" height="12" fill="${C.yellow}" ${st(1.5)}/>
+        </g>
+        <path d="M0 100 C60 94 140 106 200 98 C240 94 280 98 300 100 V120 H0 Z" fill="${C.grassLight}"/>
+        ${reed(16, 22)}${reed(24, 16)}${reed(268, 20)}${reed(278, 26)}`;
+    },
+  },
 };
 
 registerVisual('scene', {

@@ -1,6 +1,7 @@
 // Importă (și înregistrează) toate modulele băncii vizuale.
 import './holders.js';
 import './tools.js';
+import './calcule.js';
 import './money.js';
 import './geometry.js';
 import './nature.js';

@@ -1,10 +1,15 @@
-// fill — casete de completat în șabloane; layout-uri inline, steps, table, tree, chain.
+// fill — casete de completat în șabloane; layout-uri inline, steps, table, tree, chain, column (calcul în scris), pyramid.
 
 import { h, pop } from '../../core/dom.js';
 import { play } from '../../core/sound.js';
 import { md } from '../../core/markup.js';
+import { LOCURI, marcajeTrecere } from '../../core/rules.js';
 import { expectedTag, feedbackBox, isLocked, setState } from '../_view.js';
-import { blankLabel, keyOf, kindOf } from './logic.js';
+import { blankLabel, columnNumbers, columnRows, keyOf, kindOf } from './logic.js';
+
+const PLACE_LETTER = { u: 'U', z: 'Z', s: 'S', m: 'M' };
+const PLACE_NAME = { u: 'unități', z: 'zeci', s: 'sute', m: 'mii' };
+const capFirst = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const BLANK = /\[\[(\w+)\]\]/g;
 const SEGMENTS = { relation: ['<', '=', '>'], sign: ['+', '−'] };
@@ -14,6 +19,12 @@ const niceMinus = (s) => String(s).replace(/\{\{.*?\}\}|-/g, (m) => (m === '-' ?
 
 export default {
   howto: (part) => {
+    if (part.layout === 'column') {
+      return part.minte === false
+        ? 'Scrie câte o cifră în fiecare căsuță, începând cu unitățile.'
+        : 'Scrie câte o cifră în fiecare căsuță, începând cu unitățile. Căsuțele mici de sus sunt pentru „ține minte” și nu se notează.';
+    }
+    if (part.layout === 'pyramid') return 'Atinge o cărămidă goală și scrie numărul.';
     const kinds = new Set(Object.values(part.blanks ?? {}).map(kindOf));
     const typing = kinds.has('number') || kinds.has('text');
     const signs = [kinds.has('relation') && '<, = sau >', kinds.has('sign') && '+ sau −'].filter(Boolean).join(', ');
@@ -124,8 +135,151 @@ export default {
       };
     }
 
+    // ——— calculul în scris: o casetă pe cifră, scrisă de la unități spre stânga ———
+    const order = []; // ordinea în care se completează cifrele (coloanele de la dreapta, de sus în jos)
+    const inputs = {};
+    const focusAt = (k) => {
+      const next = inputs[order[k]];
+      if (!next) return;
+      next.focus();
+      next.select?.();
+    };
+
+    function digitWidget(id) {
+      const label = blankLabel(part, id);
+      const input = h('input', {
+        class: 'ex-blank ex-blank--digit',
+        type: 'text',
+        inputmode: 'numeric',
+        pattern: '[0-9]*',
+        autocomplete: 'off',
+        spellcheck: 'false',
+        'aria-label': label ? capFirst(label) : 'cifră',
+        'data-testid': `blank-${id}`,
+      });
+      inputs[id] = input;
+      const show = (v) => {
+        input.value = v === undefined || v === null ? '' : String(v);
+        input.classList.toggle('has-value', input.value !== '');
+      };
+      // o cifră tastată înlocuiește cifra din casetă, iar focusul trece la cifra următoare (spre stânga)
+      input.addEventListener('beforeinput', (e) => {
+        if (e.inputType !== 'insertText' || !e.data) return;
+        e.preventDefault();
+        if (isLocked(mode)) return;
+        const d = e.data.replace(/\D/g, '').slice(-1);
+        if (!d) return;
+        show(d);
+        change(id, d);
+        focusAt(order.indexOf(id) + 1);
+      });
+      input.addEventListener('input', () => {
+        const d = input.value.replace(/\D/g, '').slice(-1);
+        show(d);
+        change(id, d);
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && input.value === '') {
+          e.preventDefault();
+          focusAt(order.indexOf(id) - 1);
+        }
+      });
+      input.addEventListener('focus', () => input.select());
+      return {
+        wrap: h('span', { class: 'ex-blank-wrap ex-blank-wrap--digit' }, input),
+        set: show,
+        lock(l) {
+          input.readOnly = l;
+          input.tabIndex = l ? -1 : 0;
+        },
+      };
+    }
+
+    /** Căsuța „ține minte” de deasupra unei coloane: opțională, nu se notează, se păstrează în ciornă sub ~<rând>.<loc>. */
+    function helperWidget(key, label) {
+      const input = h('input', {
+        class: 'ex-minte',
+        type: 'text',
+        inputmode: 'numeric',
+        pattern: '[0-9]*',
+        maxlength: '2',
+        autocomplete: 'off',
+        spellcheck: 'false',
+        'aria-label': label,
+        'data-testid': `minte-${key.slice(1).replace('.', '-')}`,
+      });
+      const show = (v) => {
+        input.value = v === undefined || v === null ? '' : String(v);
+        input.classList.toggle('has-value', input.value !== '');
+      };
+      input.addEventListener('input', () => {
+        show(input.value.replace(/\D/g, '').slice(0, 2));
+        change(key, input.value);
+      });
+      return {
+        wrap: h('span', { class: 'ex-minte-wrap' }, input),
+        set: show,
+        lock(l) {
+          input.readOnly = l;
+          input.tabIndex = l ? -1 : 0;
+        },
+        helper: true,
+        solution: null,
+        input,
+      };
+    }
+
     for (const [id, blank] of Object.entries(blanks)) {
-      widgets[id] = ['relation', 'sign', 'select'].includes(kindOf(blank)) ? segmentWidget(id, blank) : numberWidget(id, blank);
+      if (part.layout === 'column') widgets[id] = digitWidget(id);
+      else widgets[id] = ['relation', 'sign', 'select'].includes(kindOf(blank)) ? segmentWidget(id, blank) : numberWidget(id, blank);
+    }
+
+    /** Un calcul în scris: coloanele (M, S, Z, U), căsuțele „ține minte”, termenii, semnul, linia și rezultatul. */
+    function renderColumn(row) {
+      const cols = Math.max(row.result.length, ...row.terms.map((t) => t.length));
+      const places = Array.from({ length: cols }, (_, i) => LOCURI[cols - 1 - i]);
+      const cells = [];
+      for (const p of places) cells.push(h('span', { class: `ex-col__place c-pv--${p}`, 'aria-hidden': 'true' }, PLACE_LETTER[p]));
+      cells.push(h('span', { class: 'ex-col__gap', 'aria-hidden': 'true' }));
+      const marks = row.solution ? marcajeTrecere(row.op, columnNumbers(row)) : {};
+      for (const p of places) {
+        const wanted = part.minte !== false && (row.op === '-' || p !== 'u');
+        if (!wanted) {
+          cells.push(h('span', { class: 'ex-col__gap', 'aria-hidden': 'true' }));
+          continue;
+        }
+        const key = `~${row.index}.${p}`;
+        const w = helperWidget(key, `Ține minte la ${PLACE_NAME[p]} (opțional): ${row.tpl.replace(/\[\[\w+\]\]/g, '…').replace(/…+/g, '…')}`);
+        w.solution = marks[p] ?? '';
+        widgets[key] = w;
+        cells.push(h('span', { class: 'ex-col__cell ex-col__cell--minte' }, w.wrap));
+      }
+      cells.push(h('span', { class: 'ex-col__gap', 'aria-hidden': 'true' }));
+      const line = (list, extra, sign) => {
+        const pad = cols - list.length;
+        for (let i = 0; i < cols; i++) {
+          const c = list[i - pad];
+          if (!c) cells.push(h('span', { class: `ex-col__cell ${extra}` }));
+          else if (c.id) cells.push(h('span', { class: `ex-col__cell ${extra}` }, widgets[c.id]?.wrap ?? ''));
+          else cells.push(h('span', { class: `ex-col__cell ex-col__digit ${extra}`, 'aria-hidden': 'true' }, String(c.d)));
+        }
+        cells.push(h('span', { class: `ex-col__sign ${extra}`, 'aria-hidden': 'true' }, sign ?? ''));
+      };
+      row.terms.forEach((t, i) => line(t, '', i === 0 ? (row.op === '-' ? '−' : '+') : ''));
+      line(row.result, 'is-result');
+      // ordinea de completare: coloanele de la unități spre stânga, în fiecare coloană de sus în jos
+      for (let k = 0; k < cols; k++) {
+        for (const list of [...row.terms, row.result]) {
+          const c = list[list.length - 1 - k];
+          if (c?.id) order.push(c.id);
+        }
+      }
+      return h(
+        'figure',
+        { class: 'ex-col', role: 'group', 'aria-label': `Calcul în scris: ${row.tpl.replace(/\[\[\w+\]\]/g, '…').replace(/…+/g, '…').replace(/-/g, '−')}`, style: { '--cols': cols } },
+        row.label ? h('figcaption', { class: 'ex-col__label', html: md(row.label) }) : null,
+        h('div', { class: 'ex-col__grid' }, cells),
+      );
     }
 
     /** Șablon → fragmente de text (mini-markup) și casete. */
@@ -179,6 +333,20 @@ export default {
           ),
         ),
       );
+    } else if (layout === 'column') {
+      body = h('div', { class: 'ex-cols' }, columnRows(part).filter((row) => !row.invalid).map(renderColumn));
+    } else if (layout === 'pyramid') {
+      body = h(
+        'div',
+        { class: 'ex-pyramids' },
+        (part.pyramids ?? []).map((p) =>
+          h(
+            'div',
+            { class: 'ex-pyramid' },
+            (p.rows ?? []).map((row) => h('div', { class: 'ex-pyramid__row' }, row.map((c) => h('span', { class: 'ex-brick' }, renderTemplate(String(c), 'ex-tpl ex-brick__tpl'))))),
+          ),
+        ),
+      );
     } else if (layout === 'chain') {
       body = h(
         'div',
@@ -206,7 +374,14 @@ export default {
       },
       mode(m) {
         mode = m;
-        for (const w of Object.values(widgets)) w.lock(isLocked(m));
+        for (const w of Object.values(widgets)) {
+          w.lock(isLocked(m));
+          // la soluție, căsuțele „ține minte” arată ce se scrie deasupra coloanelor, ca în manual
+          if (w.helper) {
+            w.wrap.classList.toggle('is-solution', m === 'solution');
+            if (m === 'solution') w.set(w.solution);
+          }
+        }
       },
       showResult(res) {
         const notes = [];
@@ -219,7 +394,7 @@ export default {
           if (!r.ok) w.wrap.append(expectedTag(expected));
           if (r.feedback) notes.push(r.feedback);
         }
-        feedbackArea.replaceChildren(...notes.map((n) => feedbackBox(n)));
+        feedbackArea.replaceChildren(...[...new Set(notes)].map((n) => feedbackBox(n)));
       },
       destroy() {},
     };

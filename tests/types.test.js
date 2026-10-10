@@ -295,3 +295,51 @@ test('route: segmente cu lungimi, timp de schimbare, cheie împreună cu reguli'
   assert.deepEqual(logic.validate(tram), []);
   assert.ok(logic.validate({ ...tram, map: { ...city, transfer: 0 } }).some((e) => e.includes('mai scurt (9 minute)')));
 });
+
+test('fill pe coloane: cifrele se calculează, cifrele ascunse sunt unice, greșelile tipice primesc mesaj', () => {
+  const fill = getLogic('fill');
+  const part = (rows) => ({ type: 'fill', layout: 'column', rows, blanks: Object.fromEntries(rows.join('').match(/\[\[(\w+)\]\]/g).map((m) => [m.slice(2, -2), {}])) });
+  const p = part(['347 + 285 = [[a]][[b]][[c]]', '403 − 158 = [[d]][[e]][[f]]', '6[[g]]3 − 25[[h]] = [[i]]45']);
+  assert.deepEqual(fill.validate(p), []);
+  assert.deepEqual(fill.solution(p), { a: 6, b: 3, c: 2, d: 2, e: 4, f: 5, g: 0, h: 8, i: 3 });
+  assert.deepEqual(fill.expressions(p), ['347 + 285 = 632', '403 − 158 = 245', '603 − 258 = 345']);
+  assert.match(blankLabel(p, 'b'), /^cifra zecilor rezultatului: 347 \+ 285 = …$/);
+  assert.match(blankLabel(p, 'g'), /^cifra zecilor descăzutului/);
+  // căsuțele „ține minte” nu se notează și nu contează la progres
+  const answer = { ...fill.solution(p), '~0.z': '1', '~1.u': '10' };
+  assert.equal(fill.evaluate(p, answer).earned, 9);
+  assert.equal(fill.answered(p, { '~0.z': '1' }), 0);
+  // o cifră e o singură cifră: „06” nu trece drept 6
+  assert.equal(fill.evaluate(p, { ...fill.solution(p), a: '06' }).items.find((i) => i.id === 'a').ok, false);
+  const hint = (given) => fill.evaluate(p, { ...fill.solution(p), ...given }).items.filter((i) => i.feedback).map((i) => i.feedback);
+  assert.match(hint({ b: '2' })[0], /^7 \+ 5 = 12: s-a format o zece nouă/);
+  assert.match(hint({ e: '5' })[0], /^La zeci avem 0: desfacem o sută/);
+  assert.match(hint({ d: '3' })[0], /a plecat la zeci: rămân 3/);
+  assert.deepEqual(fill.validate(part(['[[a]][[b]]7 + 2[[c]]5 = 632'])), ['fill: „[[a]][[b]]7 + 2[[c]]5 = 632” are mai multe completări (trebuie exact una)']);
+  assert.match(fill.validate(part(['158 − 403 = [[a]][[b]][[c]]'])).join(), /nicio completare/);
+  assert.match(fill.validate(part(['347 + 285 = 6[[a]]'])).join(), /nicio completare/);
+  assert.match(fill.validate({ ...part(['347 + 285 = [[a]][[b]][[c]]']), blanks: { a: { answer: 5 }, b: {}, c: {} } }).join(), /cifra calculată este 6, nu 5/);
+});
+
+test('fill piramidă: valorile se află prin propagare, iar o piramidă cu mai multe completări e refuzată', () => {
+  const fill = getLogic('fill');
+  const p = { type: 'fill', layout: 'pyramid', pyramids: [{ rows: [['848'], ['394', '[[x]]'], ['[[p]]', '221', '[[q]]'], ['48', '[[r]]', '96', '[[s]]']] }], blanks: { x: {}, p: {}, q: {}, r: {}, s: {} } };
+  assert.deepEqual(fill.validate(p), []);
+  assert.deepEqual(fill.solution(p), { x: 454, p: 173, q: 233, r: 125, s: 137 });
+  assert.match(blankLabel(p, 'r'), /^cărămida 2 din rândul de jos/);
+  const loose = { type: 'fill', layout: 'pyramid', pyramids: [{ rows: [['[[t]]'], ['[[a]]', '[[b]]'], ['125', '[[c]]', '86']] }], blanks: { t: {}, a: {}, b: {}, c: {} } };
+  assert.match(fill.validate(loose).join(), /prea multe necunoscute|mai multe completări/);
+});
+
+test('build și order: ținta și valorile pot fi calcule, verificate pentru „cu / fără trecere”', () => {
+  const build = getLogic('build');
+  const b = { type: 'build', tool: 'abacus', places: ['S', 'Z', 'U'], items: [{ id: 'i1', label: 'ouă', calc: '148 + 136' }] };
+  assert.deepEqual(build.validate(b), []);
+  assert.deepEqual(build.solution(b), { i1: { S: 2, Z: 8, U: 4 } });
+  assert.deepEqual(build.expressions(b), ['148 + 136']);
+  assert.match(build.validate({ ...b, items: [{ id: 'i1', calc: '148 + 136', target: 274 }] }).join(), /148 \+ 136 = 284, nu 274/);
+  const order = getLogic('order');
+  const o = { type: 'order', direction: 'asc', items: [{ id: 'z', text: '146 + 38', calc: '146 + 38', tag: 'Z' }, { id: 'e', text: '512 − 27', calc: '512 - 27', tag: 'E' }], reveal: { word: 'ZE' } };
+  assert.deepEqual(order.validate(o), []);
+  assert.deepEqual(order.expressions(o), ['146 + 38', '512 - 27']);
+});

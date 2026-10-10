@@ -97,3 +97,16 @@ test('barele au înălțimea proporțională cu valoarea lor', () => {
     assert.ok(bars.length >= 2 && bars.every((r) => Math.abs(r - bars[0]) < 0.2), `${JSON.stringify(params)}: ${bars}`);
   }
 });
+
+test('desenele pentru calculul în scris își verifică parametrii', () => {
+  assert.deepEqual(visualErrors({ v: 'base-ten', s: 2, z: 4, u: 13, group: 'u' }), []);
+  assert.match(visualErrors({ v: 'base-ten', s: 2, z: 4, u: 7, group: 'u' }).join(), /cel puțin 10 cuburi/);
+  assert.match(visualErrors({ v: 'base-ten', z: 25 }).join(), /z trebuie să fie între 0 și 20/);
+  assert.deepEqual(visualErrors({ v: 'number-line', hops: '465,?,?,?', jumps: '−100,−30,−2' }), []);
+  assert.match(visualErrors({ v: 'number-line', hops: '245,345,376', jumps: '+100,+30' }).join(), /345 \+30 nu dă 376/);
+  assert.match(visualErrors({ v: 'number-line', hops: '245,?' }).join(), /cere și jumps/);
+  assert.deepEqual(visualErrors({ v: 'column-op', op: '-', terms: '452,176', result: '324' }), []);
+  assert.match(visualErrors({ v: 'column-op', op: '-', terms: '176,452' }).join(), /primul e cel mai mare/);
+  // numele desenului nu spune opririle ascunse ale axei
+  assert.doesNotMatch(visualSVG({ v: 'number-line', hops: '465,?,?,?', jumps: '−100,−30,−2' }), /aria-label="[^"]*(365|335|333)/);
+});

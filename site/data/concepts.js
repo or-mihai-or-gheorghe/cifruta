@@ -69,6 +69,10 @@ export default {
   'mat.op1000.fara-trecere': { domain: 'mat', title: 'Adunări și scăderi până la 1000, fără trecere peste ordin', grade: 2, competencies: ['1.4'], source: ['manual', 'auxiliar', 'programa', 'standarde'] },
   'mat.op1000.cu-trecere': { domain: 'mat', title: 'Adunări și scăderi până la 1000, cu trecere peste ordin', grade: 2, competencies: ['1.4'], source: ['manual', 'auxiliar', 'en2'] },
   'mat.op1000.reconstituire': { domain: 'mat', title: 'Reconstituirea calculelor cu cifre lipsă', grade: 2, competencies: ['1.4'], source: ['auxiliar'] },
+  'mat.op1000.grupare': { domain: 'mat', title: 'Gruparea și desfacerea: 10 unități = 1 zece, 10 zeci = 1 sută', grade: 2, competencies: ['1.1', '1.4'], source: ['manual', 'auxiliar', 'programa'] },
+  'mat.op1000.in-scris': { domain: 'mat', title: 'Adunarea și scăderea în scris, pe coloane', grade: 2, competencies: ['1.4'], source: ['manual', 'auxiliar', 'programa'] },
+  'mat.op1000.strategii': { domain: 'mat', title: 'Calcul mental până la 1000: pe ordine, în salturi, cu numere rotunde', grade: 2, competencies: ['1.4'], source: ['manual', 'imbogatire'] },
+  'mat.op1000.estimare': { domain: 'mat', title: 'Estimarea rezultatului prin rotunjire, ca verificare', grade: 2, competencies: ['1.3', '1.4'], source: ['programa', 'imbogatire'] },
   'mat.op.inmultire': { domain: 'mat', title: 'Înmulțirea ca adunare repetată de termeni egali', grade: 2, competencies: ['1.5'], source: ['programa', 'en2'] },
   'mat.op.impartire': { domain: 'mat', title: 'Împărțirea ca scădere repetată', grade: 2, competencies: ['1.5'], source: ['programa', 'en2'] },
 

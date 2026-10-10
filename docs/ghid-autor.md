@@ -29,7 +29,7 @@ bare, țarcuri) fac parte din enunț: dacă le schimbi numerele sau conținutul,
 ```js
 export default {
   schema: 1, id: 'recap-c1-t1', version: 1,
-  theme: 'mare' | 'piata' | 'spatiu' | 'ferma',       // culoarea de accent + peisajul de pe card
+  theme: 'mare' | 'piata' | 'spatiu' | 'ferma' | 'munte' | 'dunare' | …, // culoarea de accent + peisajul de pe card
   title: 'Amintiri din vacanță', subtitle: '…',
   story: 'Povestea citită de mascotă la începutul testului.',
   exercises: [ /* exerciții */ ],
@@ -62,10 +62,10 @@ export default {
 | `fill` | `layout`, `rows` / `trees` / `chains` / `head`, `blanks`, `checks?` (vezi mai jos) | `{ blankId: valoare }` |
 | `slider` | `skin: 'line'\|'thermometer'`, `min, max, step`, `ticks: { minor, major?, labels? }`, `unit?`, `items: [{ id, label, answer, tolerance? }]` | `{ itemId: număr }` |
 | `match` | `left: [{ id, text, visual?, calc?, feedback? }]`, `right: [{ id, text?, label?, visual?, calc? }]`, `key: { leftId: rightId }` | `{ leftId: rightId }` |
-| `order` | `items: [{ id, text, tag?, emoji? }]`, `direction: 'asc'\|'desc'` sau `key` + `constraints`, `itemVisual?`, `reveal: { word }` | `[id, …]` |
+| `order` | `items: [{ id, text, tag?, emoji?, calc? }]`, `direction: 'asc'\|'desc'` sau `key` + `constraints`, `itemVisual?`, `reveal: { word }` (cu `calc`, valoarea e rezultatul calculului: codul secret) | `[id, …]` |
 | `categorize` | `bins: [{ id, label, visual? }]`, `items: [{ id, text, emoji?, visual?, bin }]` | `{ itemId: binId }` |
 | `mark` | `items: [{ id, n? , text?, visual? }]`, `itemVisual?`, `rule` sau `key`; cu paletă: `palette: [{ id: 'verde', label }]` + `item.color`; **sarcină deschisă:** `rules: { count?: n \| {min,max}, sum?: {min,max} (pe `item.n`), include?, exclude?, noun?: ['produs','produse'], unit?: 'lei' }` — orice selecție bună ia tot creditul | `[id, …]` sau `{ id: culoare }` |
-| `build` | `tool: 'abacus'`, `places: ['Z','U']` (sau `['S','Z','U']`), `items: [{ id, label, target }]` | `{ itemId: { Z, U } }` |
+| `build` | `tool: 'abacus'`, `places: ['Z','U']` (sau `['S','Z','U']`), `items: [{ id, label, target }]` sau `items: [{ id, label, calc: '148 + 136' }]` (ținta = calculul) | `{ itemId: { Z, U } }` |
 | `clock` | `step: 30`, `items: [{ id, label?, answer: { h, m } }]` | `{ itemId: { h, m } }` |
 | `money` | `allowed: [1, 5, 10, 20, 50]`, `target`, `items: [{ id, label }]`, `distinct?` (feluri diferite), `fewest?` (cele mai puține bancnote) | `{ itemId: { '10': 1, '1': 2 } }` |
 | `route` | `map: { w, h, stops: [{ id, label, x, y, side? }], lines: [{ id, label, color: 'rosie'\|'albastra'\|'verde'\|'gri'\|…, stops: [ids] }], segments?: [{ a, b, n, at? }], unit?: 'pași'\|'minute'\|'km'\|'metri', transfer?: 4 }` (definită o dată în fișier; cu `segments`, lungimea drumului e suma segmentelor plus `transfer` la fiecare schimbare de linie), `from`, `to`, `rules?: { via?, avoid?, maxStops?, maxChanges?, maxTotal?, lines? }`, `key?: [ids]` (singurul cel mai scurt dintre drumurile care respectă `rules`; alt drum bun ia jumătate). Pentru drumuri de mașină sau poteci, fiecare drum e o linie cu două stații, `color: 'gri'`. | `[stopId, …]` |
@@ -94,6 +94,19 @@ export default {
 - **Cititorul de ecran** aude fiecare casetă cu șablonul ei („Căsuță: 40 + 8 = …”; în tabel, capul rândului și al coloanei;
   în arbore, „zeci din 47”). `blank.label` înlocuiește eticheta automată când e nevoie.
 - **O casetă apare o singură dată** în șabloane (validatorul verifică); o relație între casete se scrie în `checks`.
+- **Calculul în scris** (`layout: 'column'`): `rows: ['347 + 285 = [[a]][[b]][[c]]', { t: '403 − 158 = [[d]][[e]][[f]]', label }]` —
+  o casetă pe cifră, scrisă de la unități spre stânga (focusul trece singur, Backspace înapoi); la adunare 2–3 termeni, la scădere doi.
+  - Cifrele **se calculează**: `blanks: { a: {}, … }` (un `answer` scris de mână se verifică). Cifrele ascunse în termeni
+    (`'3[[g]]7 + [[h]]85 = 632'`, cel mult 6) se caută toate și trebuie să aibă **o singură** completare.
+  - **Căsuțele „ține minte”** de deasupra coloanelor (transportul la adunare, „10” și cifra micșorată la scădere, ca în manual) sunt
+    opționale, nu se notează și se păstrează în ciornă sub cheile `~<rând>.<loc>` (`'~0.z'`); la soluție arată marcajele corecte.
+    `minte: false` le ascunde.
+  - **Mesaje automate** pe cifrele rezultatului: transportul uitat, cifra mică scăzută din cea mare, împrumutul fără micșorare,
+    împrumutul peste zero. Un `feedback` scris de autor are prioritate.
+  - Un rezultat de 1000 are 4 căsuțe și își dă de gol mia: la sumele exacte de 1000, ascunde mai bine cifre din termeni.
+- **Piramida** (`layout: 'pyramid'`): `pyramids: [{ rows: [['868'], ['452', '[[m]]'], ['185', '[[b]]', '[[c]]']] }]`, de sus în jos;
+  fiecare cărămidă e suma celor două de sub ea. Valorile se calculează (propagare, plus cel mult o necunoscută la bază încercată
+  0–1000) și trebuie să fie unice; toate relațiile se verifică, și cele dintre numerele date.
 
 ### Etichetele „cu / fără trecere peste ordin”
 - Definiția, pe coloane: la **adunare** e cu trecere dacă suma cifrelor unei coloane e cel puțin 10 (7 + 5, 28 + 12);
@@ -125,11 +138,11 @@ HTML nu este permis (se afișează ca text).
 - **Date și grafice:** `bar-chart {labels, values, emojis?, step, max?, hide?, numbers?}` · `pictogram {labels, values, emoji, each, unit}` · `tally {labels, values}` · `pie {slices, filled, labels?}` sau `pie {groups: '3,2,2,1', names}` (felii egale colorate pe categorii, cu legendă fără numere) · `data-table {head: 'A|B', rows: 'x|1;y|2', highlight?}` · `podium {names, values?}`.
 - **Oraș și transport:** `route-map {stops, lines, segments?, unit?, path?, from?, to?, w, h}` (`segment.at` mută eticheta de lungime pe segment, departe de numele stațiilor) (liste de obiecte → doar din date, nu din `{{v:}}`) · `signpost {label, n, unit}`.
 - **Magazin:** `shelf {products: 'minge:120,carte:60'}` · `receipt {title, lines: 'Ghete|230,Rucsac|128', total?}` (`total` poate fi greșit intenționat sau `'?'`) · `note-list {title, lines, checked?}`.
-- **Unelte:** `abacus {places, S, Z, U}` · `egg-carton {full, loose}` · `ten-frame {n}` · `number-line {min, max, minor, labels, marker, icon}` (`icon` = orice emoji) · `thermometer {min, max, minor, major, value}` · `ruler {length, from, to}` · `clock {h, m}` · `balance {left, right}` · `bar-model {parts, total}` · `place-value {s, z, u}` (cifră sau `?`) · `base-ten {n}` (plăci de 100, bare de 10, cuburi).
+- **Unelte:** `abacus {places, S, Z, U}` · `egg-carton {full, loose}` · `ten-frame {n}` · `number-line {min, max, minor, labels, marker, icon}` (`icon` = orice emoji) · `thermometer {min, max, minor, major, value}` · `ruler {length, from, to}` · `clock {h, m}` · `balance {left, right}` · `bar-model {parts, total}` · `place-value {s, z, u}` (cifră sau `?`) · `base-ten {n}` (plăci de 100, bare de 10, cuburi) sau `base-ten {s, z, u, group?}` (bucățile înainte de schimb: 13 cuburi, 12 bare, o sută desfăcută; `group: 'u'|'z'` încercuiește 10 bucăți) · `number-line {hops, jumps?}` (salturi pe axă pentru calculul în minte: `hops: '245,?,?,?', jumps: '+100,+30,+2'`; opririle `?` nu apar în numele desenului) · `column-op {op, terms, result?, carries?, mark?}` (un calcul în scris desenat, eventual greșit intenționat: „Cine s-a grăbit și a greșit?”; pe elementele unui `mark` cu `key`, validatorul cere ca cheia să fie exact calculele greșite).
 - **Bani:** `banknote {value: 1|5|10|20|50|100|200|500}` · `coin {value: 1|5|10|50}` (bani).
 - **Geometrie:** `shape {name: triunghi|patrat|dreptunghi|cerc}` · `solid {name: cub|cuboid|cilindru|sfera|con}` · `rocket-shapes` · `triangle-fan {cuts}` · `square-grid {n}`.
 - **Natură și corp:** `organ {name: inima|plamanii|creierul|stomacul|rinichii}` · `plant` · `vegetable {name: morcov|ridiche|sfecla|salata|spanac|varza|rosie|ardei|castravete}` · `energy {name: soare|vant|apa|carbune|petrol|gaze}` · `sky-body {name: soare|pamant|luna}` · `farm-grid {cells, labels}`.
-- **Mascotă și decor:** `mascot {mood: vesela|ganditoare|sarbatoreste|incurajeaza}` · `level-icon {level}` · `scene {theme: mare|piata|spatiu|ferma|magazin|oras|scoala|stadion}` (o temă nouă cere și tokenii `[data-theme]` din `00-tokens.css`).
+- **Mascotă și decor:** `mascot {mood: vesela|ganditoare|sarbatoreste|incurajeaza}` · `level-icon {level}` · `scene {theme: mare|piata|spatiu|ferma|magazin|oras|scoala|stadion|munte|dunare}` (o temă nouă cere și tokenii `[data-theme]` din `00-tokens.css`).
 - **Medalii:** `award {metal: bronz|argint|aur, form?: medalie|dublu|colectie|cupa, icon?, n?}` (medalia unei teme din Jocurile fulger, cu emoji-ul temei în mijloc, sau formele medaliilor în plus; `n` = numărul de pe cupă).
 - **Avatare:** `avatar {avatar: vulpe.culoare-albastru.cap-coroana}` (avatarul unui profil, textul canonic din `core/avatar.js`; animalele, culorile, fundalurile și accesoriile se văd la `#/atelier/avatare`).
 - **Grafice și grafuri (făcute pentru Jocurile fulger):**
@@ -185,8 +198,11 @@ schimbă doar rotația), bila nouă de pe numărătoare, confetti-ul mascotei (d
   mai multe soluții, verificarea rezultatului, „găsește greșeala”, mersul invers.
 - Diacritice corecte (ș, ț cu virgulă). Acordul cu numeralul: **1 leu**, 19 lei, **20 de lei**, 101 lei, **1 grad**,
   **22 de grade** (în șabloane cu casete folosește formulări neutre: „Rest (lei): [[a]]”). În cod: `cantitate(n, 'leu', 'lei')`.
-- **Fără concepte viitoare:** în secțiunea 0–1000 nu folosim înmulțirea, împărțirea, fracțiile (jumătatea, sfertul) sau adunări și
-  scăderi până la 1000 cu trecere peste ordin. Nivelul avansat devine mai greu prin **mai mulți pași**: compararea ramurilor unui traseu,
+- **Fără concepte viitoare:** nu folosim înmulțirea, împărțirea sau fracțiile (jumătatea, sfertul). În secțiunea „Numerele de la 0
+  la 1000” nici adunări și scăderi până la 1000 cu trecere peste ordin. În secțiunea „Adunarea și scăderea până la 1000” trecerile
+  sunt progresive: la ușor și la intermediar cel mult **o trecere** pe calcul, la avansat cel mult **trei** (două treceri, împrumut
+  peste zero, sume până la 1000), toate rezultatele în 0–1000 și 1–2 exerciții de explorarea mediului (`tests/content.test.js`
+  verifică). Nivelul avansat devine mai greu prin **mai mulți pași**: compararea ramurilor unui traseu,
   „ce se schimbă dacă…”, date combinate din două reprezentări (tabel și grafic, două grafice), condiții ascunse într-o poveste.
 - **Sarcini deschise și pași mulți (gândirea creativă):** la nivelul avansat, cel puțin o sarcină cu **mai multe răspunsuri bune**
   verificate prin reguli (`mark.rules`, `route.rules`, `chart.rules`, `money.distinct`), o problemă în **3+ pași** (`fill` cu
@@ -219,9 +235,11 @@ Mesaje gata făcute pentru greșeli frecvente (din `docs/cercetare.md`):
 - rigla de la 1: „Pornim de la 0 și numărăm spațiile dintre liniuțe.”
 - ora și jumătate: „Acul mic a trecut de 5, dar n-a ajuns la 6: e 5 și jumătate.”
 - numără bancnotele, nu valoarea: „Contează ce scrie pe bani, nu câte bucăți ai.”
+- la calculul pe coloane, mesajele vin singure (din `fill/logic.js`): „7 + 5 = 12: s-a format o zece nouă. Adaug-o la zeci: …”,
+  „La zeci avem 0: desfacem o sută în 10 zeci…”, „La sute, o sută a plecat la zeci: rămân 3…”.
 
 ## 8. Timp estimat (pentru `estMin`; suma pe test trebuie să fie exact 45 de minute)
-Calcule simple 20–30 s/item · cu trecere peste ordin 45–60 s/item · alegere 30–45 s · ordonare de 6–7 numere 1–1,5 min ·
+Calcule simple 20–30 s/item · cu trecere peste ordin 45–60 s/item · un calcul pe coloane 1–1,5 min · cifre ascunse sau piramidă 2–3 min · alegere 30–45 s · ordonare de 6–7 numere 1–1,5 min ·
 unire 4 perechi 2–3 min · problemă cu o operație 2–3 min, cu două operații 4–5 min · bani cu mai multe soluții 3–4 min.
 La începutul clasei a II-a se adaugă ~20–30 s pentru citirea fiecărui enunț. Timpul real se notează în `docs/STARE.md`.
 

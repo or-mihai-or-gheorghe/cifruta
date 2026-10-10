@@ -26,7 +26,7 @@ Mascota: **Veverița Cifruța**. Repo public `or-mihai-or-gheorghe/cifruta`; sit
 site/                      ← publicat
   index.html, css/main.css (@layer: tokens, base, layout, components, exercises, visuals, animations, utilities)
   js/app.js                pornire + router
-  js/core/                 expr (calcule fără eval) · rules · markup · spec (validare) · scoring · registry
+  js/core/                 expr (calcule fără eval) · rules (și calculul în scris: coloane, treceri, marcajeTrecere) · markup · spec (validare) · scoring · registry
                            storage (localStorage simplu) · loader · router · dom (h, pop, countUp) · ro (diacritice, cantitate) · lint · dnd · sound
                            forme (figuri: contur, cheie canonică, nume, axe) · grile (piese din căsuțe, desfășurările cubului)
                            avatar (avatarul desenat: liste, text canonic, nume, alegerea la întâmplare)
@@ -37,6 +37,7 @@ site/                      ← publicat
   js/visuals/              banca vizuală: registerVisual(nume, {render, label, demos}); all.js le importă pe toate;
                            avatar (desenul și accesoriile) · avatar-animals (cele 24 de animale) · avatar-parts (blănuri, ochi, umeri)
                            grafice (bare, linii, pictograme, tabel, cerc, Venn) · grafuri (hartă, rețea, turneu, arbore): desenele jocurilor
+                           calcule (column-op: un calcul în scris desenat, eventual greșit)
   js/fulger/               Jocuri fulger (jocuri pe viteză, pe teme, #/fulger): kinds (calcule până la 100), kinds-1000 (numerele până
                            la 1000), kinds-forme (figuri), kinds-grafice și kinds-grafuri (grafice, hărți, arbori), generate cu
                            sămânță, cu concepte · intrebari (formele întrebărilor: calcule și desene) · contexte (unități, nume, zile,
@@ -52,7 +53,7 @@ _surse/ scanările PDF (ignorate de git) — deschide-le doar dacă docs/curricu
 ```
 
 ## Tipuri de exerciții (13)
-`choice` · `truefalse` · `fill` (layout inline/steps/table/tree/chain; casete number/relation/sign/select/text) ·
+`choice` · `truefalse` · `fill` (layout inline/steps/table/tree/chain/column/pyramid; casete number/relation/sign/select/text) ·
 `slider` · `match` (săgeți) · `order` (+ cuvânt secret / indicii logice) · `categorize` · `mark` (+ paletă / `rules` de set) ·
 `build` (numărătoare) · `clock` · `money` · `route` (stații atinse în ordine pe harta liniilor; `key` sau `rules`) ·
 `chart` (grafic cu bare construit; `key` sau `rules`). Exemple complete: `site/data/demo.js` (vizibile la `#/atelier/tipuri`); ghid: `docs/ghid-autor.md`.
@@ -177,6 +178,10 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   validatorul cere cel puțin o soluție (o găsește prin enumerare: `mark` ≤ 12 elemente, `chart` ≤ 200 000 de combinații, `route`
   ≤ 12 stații) și, la `route` cu `key`, un singur drum cel mai scurt. `chart.key` nu acceptă 0 (bară neatinsă). Hărțile (`route-map`,
   liste de obiecte) și tabelele se pun în `context.visual` / `part.visual`, nu în `{{v:}}` (valorile n-au voie cu spații).
+- Calculul în scris (`fill` cu `layout: 'column'`): cifrele se calculează din rând (`'347 + 285 = [[a]][[b]][[c]]'`), cifrele ascunse
+  în termeni trebuie să aibă o singură completare, iar căsuțele „ține minte” se salvează sub `~<rând>.<loc>` și nu se notează
+  (`evaluate`/`answered` citesc doar `blanks`). Piramida (`layout: 'pyramid'`) se rezolvă prin propagare. Regula secțiunii
+  „Adunarea și scăderea până la 1000” (plafonul de treceri pe nivel 1 / 1 / 3, calcule în 0–1000, 1–2 MEM) stă în `tests/content.test.js`.
 - Structura unui test tematic (secțiunea 0–1000): poveste comună, ≥ 6 tipuri, formare + comparare/ordonare + încă un concept
   `mat.nr1000.*` în fiecare test, 1–2 exerciții MEM, la intermediar două probleme în 2 pași, la avansat: problemă în 3+ pași
   (`fill` cu `layout: 'steps'`), sarcină deschisă cu reguli și un puzzle (`search`, cifre ascunse, mers invers, greșeala din bon/tabel).

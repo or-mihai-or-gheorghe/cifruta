@@ -159,10 +159,7 @@ export default {
       subtitle: 'Fără și cu trecere peste ordin · Pământul',
       icon: 'planeta',
       color: 'intermediar',
-      groups: [
-        { id: 'u2-operatii', title: 'Adunarea și scăderea 0–1000', tests: [], soon: true },
-        { id: 'u2-pamant', title: 'Pământul: uscat, apă, aer, relief', tests: [], soon: true },
-      ],
+      groups: [{ id: 'u2-operatii', title: 'Călătorie pe Planeta Albastră', tests: [], soon: true }],
     },
     {
       id: 'logica',
@@ -184,7 +181,7 @@ export default {
         {
           id: 'demo',
           title: 'Toate tipurile de exerciții',
-          tests: [{ id: 'demo', file: 'demo.js', version: 1, theme: 'mare', title: 'Toate tipurile de exerciții', subtitle: 'Pagina de atelier pentru autori', estMin: 45, exercises: 19 }],
+          tests: [{ id: 'demo', file: 'demo.js', version: 1, theme: 'mare', title: 'Toate tipurile de exerciții', subtitle: 'Pagina de atelier pentru autori', estMin: 45, exercises: 21 }],
         },
       ],
     },

@@ -144,6 +144,7 @@
 .c-pv--s { background: var(--c-s); }
 .c-pv--z { background: var(--c-z); }
 .c-pv--u { background: var(--c-u); }
+.c-pv--m { background: var(--c-brand-dark); }
 
 .c-emoji {
   display: inline-block;

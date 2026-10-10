@@ -95,7 +95,7 @@ async function types(wrap, ctls) {
         ctl.showResults(res);
         status.textContent = `${formatNumber(res.earnedPoints)} din ${cantitate(res.points, 'punct', 'puncte')}`;
       } }, 'Verifică'),
-      h('button', { class: 'c-btn c-btn--sm', onClick: () => ctl.showSolution() }, 'Soluția'),
+      h('button', { class: 'c-btn c-btn--sm', 'data-testid': `demo-solution-${ex.id}`, onClick: () => ctl.showSolution() }, 'Soluția'),
       h('button', { class: 'c-btn c-btn--ghost c-btn--sm', onClick: async () => {
         ctl.destroy();
         ctl.el.remove();

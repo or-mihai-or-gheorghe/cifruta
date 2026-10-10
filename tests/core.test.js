@@ -224,3 +224,25 @@ test('scoring: conceptele se creditează pe subpunct (part.concepts)', () => {
   assert.ok(errs.some((e) => e.includes('nu e printre conceptele exercițiului')));
   assert.ok(errs.some((e) => e.includes('nu e exersat de niciun subpunct')));
 });
+
+test('calculul în scris: coloane, treceri cu împrumutul propagat și ce se ține minte', async () => {
+  const { coloane, marcajeTrecere, treceri } = await import('../site/js/core/rules.js');
+  assert.deepEqual(treceri('+', 156, 128), ['u']);
+  assert.deepEqual(treceri('+', 347, 285), ['u', 'z']);
+  assert.deepEqual(treceri('-', 403, 158), ['u', 'z']);
+  assert.deepEqual(treceri('+', 625, 375), ['u', 'z', 's']);
+  assert.deepEqual(treceri('-', 1000, 375), ['u', 'z', 's']);
+  assert.deepEqual(treceri('+', 235, 178, 296), ['u', 'z']);
+  assert.deepEqual(coloane('+', [275, 368, 357]).map((c) => c.digit).reverse(), [1, 0, 0, 0]);
+  assert.deepEqual(marcajeTrecere('+', [347, 285]), { z: '1', s: '1' });
+  assert.deepEqual(marcajeTrecere('+', [275, 368, 357]), { z: '2', s: '2', m: '1' });
+  assert.deepEqual(marcajeTrecere('-', [862, 148]), { u: '10', z: '5' });
+  assert.deepEqual(marcajeTrecere('-', [403, 158]), { u: '10', z: '9', s: '3' });
+  // pe un eșantion: trecere() rămâne echivalent cu „cel puțin o coloană cu trecere”, iar scăderea oglindește adunarea
+  for (let a = 0; a <= 1000; a += 7) {
+    for (let b = 0; a + b <= 1000; b += 13) {
+      assert.equal(trecere('+', a, b), treceri('+', a, b).length > 0, `${a} + ${b}`);
+      assert.deepEqual(treceri('-', a + b, a), treceri('+', a, b), `${a + b} − ${a}`);
+    }
+  }
+});

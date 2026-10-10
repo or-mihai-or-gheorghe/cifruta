@@ -78,6 +78,9 @@ export default {
     if (!part.key) {
       const values = part.items.map(valueOf);
       if (new Set(values).size !== values.length) errors.push('order: valori egale — ordinea nu e unică');
+      for (const it of part.items) {
+        if (it.value !== undefined && it.calc !== undefined && calc(String(it.calc)) !== it.value) errors.push(`order.${it.id}: ${it.calc} = ${calc(String(it.calc))}, nu ${it.value}`);
+      }
     }
     if (part.constraints && ids.length > 8) errors.push('order: indiciile se verifică doar pentru cel mult 8 elemente');
     else if (part.constraints) {
@@ -92,6 +95,9 @@ export default {
     }
     return errors;
   },
+
+  /** Calculele de pe cartonașe (codul secret), pentru verificarea „cu / fără trecere”. */
+  expressions: (part) => (part.key ? [] : part.items.filter((it) => it.calc !== undefined).map((it) => String(it.calc))),
 
   count: () => 1,
   answered: (part, ans) => (isBlank(ans) ? 0 : 1),

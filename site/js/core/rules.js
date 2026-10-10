@@ -64,6 +64,58 @@ export function trecere(op, a, b) {
   return false;
 }
 
+// ——— Calculul în scris: coloanele unui calcul ———
+
+/** Locurile cifrelor, de la dreapta: unități, zeci, sute, mii. */
+export const LOCURI = ['u', 'z', 's', 'm'];
+
+/**
+ * Coloanele unui calcul în scris, de la unități spre stânga: cifrele termenilor (`digits`), ce primește coloana de la dreapta
+ * (`in`: transportul la adunare, zecea dată la scădere), ce trimite spre stânga (`out`) și cifra rezultatului (`digit`).
+ * La adunare 2–3 termeni, la scădere doi (descăzutul nu e mai mic decât scăzătorul).
+ */
+export function coloane(op, terms) {
+  const nums = terms.map((t) => Math.abs(Math.trunc(Number(t))));
+  const width = Math.max(1, ...nums.map((n) => String(n).length));
+  const out = [];
+  let carry = 0;
+  for (let i = 0; i < width || (op === '+' && carry); i++) {
+    const digits = nums.map((n) => Math.floor(n / 10 ** i) % 10);
+    const inc = carry;
+    let digit;
+    if (op === '+') {
+      const sum = digits.reduce((s, d) => s + d, 0) + inc;
+      digit = sum % 10;
+      carry = Math.floor(sum / 10);
+    } else {
+      const diff = digits[0] - inc - digits[1];
+      carry = diff < 0 ? 1 : 0;
+      digit = diff + 10 * carry;
+    }
+    out.push({ place: LOCURI[i], digits, in: inc, out: carry, digit });
+  }
+  return out;
+}
+
+/** Coloanele cu trecere peste ordin, cu împrumutul propagat: treceri('-', 403, 158) → ['u', 'z']. */
+export const treceri = (op, ...terms) => coloane(op, terms).filter((c) => c.out > 0).map((c) => c.place);
+
+/**
+ * Ce se scrie deasupra coloanelor, ca în manual: la adunare, transportul primit (1 sau 2); la scădere, 10 deasupra coloanei care
+ * doar a primit o zece, iar deasupra celei care a dat o zece, cifra ei micșorată (cu 10 în plus dacă și ea a primit).
+ * marcajeTrecere('-', [403, 158]) → { u: '10', z: '9', s: '3' }
+ */
+export function marcajeTrecere(op, terms) {
+  const marks = {};
+  for (const c of coloane(op, terms)) {
+    if (op === '+') {
+      if (c.in) marks[c.place] = String(c.in);
+    } else if (c.in) marks[c.place] = String(c.digits[0] - 1 + 10 * c.out);
+    else if (c.out) marks[c.place] = '10';
+  }
+  return marks;
+}
+
 // ——— Bani ———
 
 export const moneySum = (combo) =>
