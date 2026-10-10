@@ -40,8 +40,13 @@ class QuietHandler(SimpleHTTPRequestHandler):
         pass
 
 
+class LocalServer(ThreadingHTTPServer):
+    # o pagină cere ~40 de module deodată; cu coada implicită de 5 conexiuni, macOS reseta conexiunile (ERR_CONNECTION_RESET)
+    request_queue_size = 128
+
+
 def serve() -> tuple[ThreadingHTTPServer, str]:
-    httpd = ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(QuietHandler, directory=str(SITE)))
+    httpd = LocalServer(("127.0.0.1", 0), functools.partial(QuietHandler, directory=str(SITE)))
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
     return httpd, f"http://127.0.0.1:{httpd.server_address[1]}/"
 

@@ -1,7 +1,7 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-09-27 · **Versiune:** 0.17.0 (încă două teste în secțiunea 0–1000: „Misiune în spațiu” și „Elevul de serviciu”)
+- **Data:** 2026-10-11 · **Versiune:** 0.17.0 (încă două teste în secțiunea 0–1000: „Misiune în spațiu” și „Elevul de serviciu”)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -407,8 +407,8 @@
   (laptop, telefon, iPad). Dacă popup-ul e blocat des pe telefoane, varianta e Firebase Hosting cu login prin redirect.
 - În limitele regulilor, un client priceput poate trimite un scor inventat în clasament (fără Cloud Functions nu se verifică pe
   server); există moderarea din `#/admin`.
-- În browser, Calcul fulger păstrează ultimele 30 de runde pentru toate temele împreună (recordurile și medaliile rămân; în cont, toate
-  rundele rămân în cloud): când apar teme noi, istoricul pe temă se subțiază; se revede la a doua temă.
+- În browser, Jocurile fulger păstrează ultimele 60 de runde (`keepRounds`, din v0.11.0) pentru toate temele împreună (recordurile și
+  medaliile rămân; în cont, toate rundele rămân în cloud): cu 8 teme jucabile, istoricul pe temă se subțiază.
 - Redenumirea și ieșirea din clasament lucrează într-o tranzacție pe toată lista `boards` a profilului, iar o tranzacție Firestore are
   cel mult 500 de scrieri: după câteva sute de clasamente într-un profil (ani de runde săptămânale) vor trebui împărțite în loturi.
   Numărul clasamentelor fiecărui profil se vede în `#/admin`.
@@ -455,7 +455,6 @@
   săptămâni (intrările rămân din v0.10.2); schimbarea profilului care joacă cu un PIN al părintelui; Firebase Hosting cu login prin redirect, dacă popup-ul e blocat des.
 - Avatarul, mai departe: accesorii câștigate cu medalii sau cumpărate cu alune (împreună cu magazinul Cifruței), mai multe animale și
   accesorii, fundaluri cu model, avatarul copilului pe ecranul de rezultate și în Jocurile fulger.
-- Publicare automată la push: `gh auth refresh -h github.com -s workflow` + mutarea workflow-ului în `.github/workflows/` + sursa Pages „GitHub Actions”.
 - GitHub Actions: acțiunile din `.github/workflows/pages.yml` (`checkout@v4`, `setup-node@v4`, `configure-pages@v5`, `deploy-pages@v4`,
   `upload-artifact@v4`) țintesc Node.js 20, pe care GitHub îl rulează forțat pe Node.js 24 (avertisment văzut la publicarea v0.13.0);
   de trecut la versiunile lor pentru Node.js 24.
@@ -800,6 +799,24 @@
   - **Publicat:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
+
+- **2026-10-11 (mediul de lucru pe un Mac nou și documentația)**
+  - **Cererea utilizatorului:** întâi o analiză a proiectului, fără schimbări; apoi „rezolvă punctele 1-2”: mediul pentru E2E și
+    emulatoare, instalat persistent („nu doar în această sesiune”), și documentația rămasă în urmă.
+  - **Mediul:** clona nouă avea doar Node 26, deci mergea numai `npm test`. Instalate, toate persistente: `npm ci`
+    (firebase-tools 15.30.0), `brew install openjdk@21` (21.0.12, găsit acum de `tools/with-java21.sh`), Playwright 1.63 pentru
+    Python 3.14 din Homebrew (`pip install --user --break-system-packages`, din cauza PEP 668) cu Chromium în
+    `~/Library/Caches/ms-playwright`, `brew install poppler` (scanările se pot citi). Pașii stau în README, „Mediul de lucru”.
+  - **E2E pica intermitent** (23 + 5 la cont, 19 eșecuri la cel complet): toate cererile căzute (`ERR_CONNECTION_RESET`,
+    `ERR_SOCKET_NOT_CONNECTED`) mergeau spre serverul local din `tools/e2e.py`, nu spre Google — confirmat cu `requestfailed`.
+    `ThreadingHTTPServer` are o coadă de 5 conexiuni, iar o pagină cere ~40 de module deodată; cu `request_queue_size = 128`
+    totul trece.
+  - **Documentația:** README (8 teste la 0–1000, Jocurile fulger, contul, publicarea prin GitHub Actions în locul ramurii
+    `gh-pages`), CLAUDE.md (publicarea, pașii mediului), backlogul (publicarea automată era făcută din v0.10.2), „30 de runde” →
+    60 în STARE și `docs/cloud.md`.
+  - **De știut:** npm 11.20 nu mai rulează scripturile de instalare neaprobate (`re2`, `protobufjs`, `@firebase/util`,
+    `fsevents`); emulatoarele merg fără ele. `npm audit` arată 26 de vulnerabilități, toate în uneltele de dezvoltare.
+  - **Rezultate:** npm test 106/106, reguli 16/16, E2E 1957/1957, E2E cont 82/82.
 
 - **2026-09-27 (încă două teste la 0–1000, v0.17.0)**
   - **Cererea utilizatorului:** „mai adaugă 2 teste la 0-1000 fără adunări și scăderi fără trecere peste ordin”. Fraza se putea citi

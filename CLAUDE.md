@@ -1,7 +1,7 @@
 # Cifruța — exerciții interactive pentru clasa a II-a
 
 Site static cu teste interactive de **Matematică și explorarea mediului** pentru un copil de clasa a II-a (România).
-Mascota: **Veverița Cifruța**. Repo public `or-mihai-or-gheorghe/cifruta`; site live: https://or-mihai-or-gheorghe.github.io/cifruta/ (folderul `site/`, ramura `gh-pages`).
+Mascota: **Veverița Cifruța**. Repo public `or-mihai-or-gheorghe/cifruta`; site live: https://or-mihai-or-gheorghe.github.io/cifruta/ (folderul `site/`, publicat prin GitHub Actions).
 
 **La începutul fiecărei sesiuni citește `docs/STARE.md`** (stadiu, decizii, backlog, jurnal). La final actualizează-l și fă commit.
 
@@ -59,6 +59,8 @@ _surse/ scanările PDF (ignorate de git) — deschide-le doar dacă docs/curricu
 Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual` (desen deasupra casetelor), `feedback: [{ if, text }]` pentru greșeli tipice.
 
 ## Comenzi
+- Mediul, o singură dată pe un calculator nou (README, „Mediul de lucru”): `npm ci`, `brew install openjdk@21` (găsit de
+  `tools/with-java21.sh`), Playwright pentru Python și Chromium. `npm test` merge și fără ele.
 - `npm test` — teste unitare + validarea întregului conținut (schemă, răspunsuri, unicitate, durată exact 45 min, diacritice,
   etichete „cu / fără trecere”) + verifică dacă tabelul de acoperire din `docs/curriculum.md` e la zi (`npm run acoperire` îl regenerează).
 - `npm run serve` — site local la http://localhost:8080 (`?debug=1` expune `window.__dbg`).
@@ -169,6 +171,8 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
 - Contrast: textul colorat folosește tokenii `--c-*-ink` (≥ 4,5:1, verificat de `tests/css.test.js`); culorile vii rămân pe
   fundaluri, buline și linii. Casetele de completat se prezintă cititorului de ecran cu șablonul lor (`blankLabel` din `fill/logic.js`).
 - E2E: `--only <id>` sare fluxurile de atelier și de tastatură (`types_flow`, `keyboard_flow`) — rulează și fără `--only`.
+  Serverul local din `tools/e2e.py` are `request_queue_size = 128`: cu coada implicită (5), macOS resetează conexiunile când o
+  pagină cere ~40 de module deodată (`ERR_CONNECTION_RESET` pe `127.0.0.1`).
 - Sarcini deschise (`mark.rules`, `route.rules`, `chart.rules`, `money.distinct`): orice răspuns care respectă regulile ia tot creditul;
   validatorul cere cel puțin o soluție (o găsește prin enumerare: `mark` ≤ 12 elemente, `chart` ≤ 200 000 de combinații, `route`
   ≤ 12 stații) și, la `route` cu `key`, un singur drum cel mai scurt. `chart.key` nu acceptă 0 (bară neatinsă). Hărțile (`route-map`,

@@ -138,8 +138,9 @@ poate verifica pe server, așa că există moderarea din `#/admin` (redenumire, 
   - clasamentul văzut de doi părinți, refuzul pentru anonimi;
   - adminul care redenumește, blochează și deblochează.
   - Pentru capturi în `test-results/cloud-*.png`, cu emulatoarele pornite: `python3 tools/e2e_cloud.py --shots`.
-- `firebase-tools` 15 cere **Java 21**. `tools/with-java21.sh` folosește un JDK 21 dezarhivat în `~/.cache/cifruta/jdk-21`
-  (de exemplu Temurin), dacă există.
+- `firebase-tools` 15 cere **Java 21**. `tools/with-java21.sh` caută un JDK 21 dezarhivat în `~/.cache/cifruta/jdk-21`
+  (de exemplu Temurin), apoi `openjdk@21` din Homebrew (`brew install openjdk@21`); altfel rămâne Java-ul sistemului. Instalarea
+  uneltelor: README, „Mediul de lucru”.
 
 ## Capcane
 
@@ -157,4 +158,4 @@ poate verifica pe server, așa că există moderarea din `#/admin` (redenumire, 
 - o rundă: ~3 citiri și ~5 scrieri;
 - o vizită în clasament: ~22 de citiri;
 - o salvare de avatar: cel mult 42 de citiri și 42 de scrieri (profilul și intrările din clasamentele afișate);
-- activarea unui profil: încercările, cel mult 30 de runde și starea.
+- activarea unui profil: încercările, cel mult 60 de runde (`keepRounds`) și starea.
