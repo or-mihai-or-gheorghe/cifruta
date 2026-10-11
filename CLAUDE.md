@@ -88,7 +88,7 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   **nu** cere versiune nouă (răspunsurile și ciornele nu sunt afectate); `npm test` verifică numele desenului.
 - **Tip nou în Jocuri fulger (calcule):** o intrare în `KINDS` (`js/fulger/kinds.js` pentru 0–100, `kinds-1000.js` pentru numerele până
   la 1000, `kinds-calcule-1000.js` pentru calculele cu trecere până la 1000: `label`, `points`, `fastMs`, `mode`, `concepts` din
-  `data/concepts.js`, `generate(rand)` cu răspunsul calculat și variante din greșeli tipice), o linie în `mix`-ul unui nivel al unei teme
+  `data/concepts.js`, `generate(rand)` cu răspunsul calculat și variantele dintr-o formă fixă, vezi mai jos), o linie în `mix`-ul unui nivel al unei teme
   din `data/fulger.js` și regulile tipului în `RULES` din `tests/fulger.test.js` (cele de la 1000: `tests/fulger-1000.rules.js`, cele cu
   trecere: `tests/fulger-calcule-1000.rules.js`); testul de calibrare spune dacă pragurile de stele mai sunt potrivite, iar conceptele
   temei trebuie să fie exact conceptele tipurilor ei (etichetele „fără / cu trecere” se verifică).
@@ -112,11 +112,22 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
     cloud.
   - **Forma variantelor nu arată răspunsul.** Greșelile simetrice (±1, ±10, ±100) lasă răspunsul la mijlocul a trei numere egal
     depărtate, iar „cifrele completate până la 9” îl pun lângă un vecin: un copil care nu socotește, dar se uită la tipare, lua stele.
-    La tema cu trecere, calculele de trei cifre au variantele „în pătrat” (`gridChoice` / `gridChoices`: {x, x + 10, x + 100, x + 110},
-    răspunsul într-un colț la întâmplare, rezultatul între 110 și 889), iar estimarea, completarea până la sută și cifra lipsă își aleg
-    întâi fereastra de patru valori la rând, apoi locul răspunsului; nicio variantă nu repetă un număr din calcul. Testul „ghicitorul pe
-    tipare” din `tests/fulger.test.js` cere cel mult 32% pe fiecare tip al temei (la întâmplare: 25%); temele mai vechi cu calcule au
-    încă tiparele (backlog).
+    De aceea, la toate temele cu calcule, variantele au o formă fixă (`SHAPES` și `shapeChoices` din `js/fulger/rand.js`), cu răspunsul
+    pe un loc al ei ales la întâmplare:
+    - la calcule, `calcChoice` / `calcChoices` (`js/fulger/intrebari.js`) aleg o formă din familia calculului (`calcFamily`): sute
+      rotunde → sute la rând; unitățile rezultatului vizibile în calcul → forme care păstrează unitățile; cu trecere → fără numere la
+      rând (unitățile singure ar da răspunsul), iar la un termen mic un rând de zeci; altfel oricare. Variantele nu sunt absurde (o
+      sumă mai mică decât un termen, o diferență mai mare decât descăzutul) când calculul lasă loc; la calculele cu o cifră și la sute
+      rotunde, `plausible: false` (locul la întâmplare are întâietate);
+    - la numere citite: câte o greșeală pe fiecare ordin (numărătoarea) sau o unitate și o zece în aceeași sută, când sutele se văd sau
+      se aud („șapte sute patru”, „400 + 30 + 7”);
+    - estimarea, completarea până la sută și cifra lipsă își aleg întâi fereastra de patru valori, apoi locul răspunsului; nicio
+      variantă nu repetă un număr din calcul (la tema cu trecere).
+
+    Testul din `tests/fulger.test.js` pune pe fiecare tip al temelor cu calcule trei ghicitori: pe tipare (cel mult 32%; la
+    întâmplare 25%), pe tipare după ce scoate variantele absurde (cel mult 36%, fără calculele cu o cifră) și pe unități, la calculele
+    cu trecere (cel mult 55%); regulile verifică familia formelor (`isShape`, `calcOptions`, `inSameHundred` din
+    `tests/fulger-1000.rules.js`). Câteva tipuri cu sume din temele cu desene (arbori, bare, drumuri) au încă 33–47% (backlog).
 - **Tip cu figuri în Jocuri fulger:** o intrare în `SHAPE_KINDS` (`js/fulger/kinds-forme.js`, `mode: 'figure'`), al cărei `generate(rand)`
   întoarce `figureQuestion(kind, rand, { prompt, figure, solved, key, answer, distractors })`: desene din bancă (`glyph`, `glyph-cells`,
   `cell-grid`, `robot-grid`, `net`, `solid`, `farm-grid`), emoji sau texte; distractorii vin din greșeli tipice, iar id-ul unei variante e
@@ -244,7 +255,10 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
 - Jocuri fulger: timpul rundei curge doar în bucla `requestAnimationFrame` din `js/fulger/view.js` și stă pe loc în pauză; ce ține
   de timpul rundei (întârzierea de la apariție, pauzele după răspuns) se programează cu `after()` pe acest timp, nu cu `setTimeout`.
   Punctajul (viteza contează doar în serie), pauzele (1 s; „Hopa” la greșeli mai rapide decât cititul) și stelele vin din
-  `engine.js` + `data/fulger.js`; pragurile de stele sunt verificate prin simulare în `tests/fulger.test.js`. Rundele stau în
+  `engine.js` + `data/fulger.js`; pragurile de stele sunt verificate prin simulare în `tests/fulger.test.js`, la fel pe toate temele:
+  a treia stea (medalia) între 85% și 100% din mediana unui copil foarte pregătit (95% corecte, la 0,8–1,4 din timpul „fulger”), deci
+  o ia în cam jumătate din runde; a doua între 70% și 100% din mediana unui copil bun; prima sub copilul încet dar sigur și peste
+  ghicit (pragurile noi: `FULGER_CALIBRARE=1`, rotunjite la 5). Rundele stau în
   `cifruta:fulger` și se șterg din „Pentru părinți” de pe pagina jocului (`#/fulger`, toate temele odată), nu odată cu istoricul testelor.
   Pagina jocului arată temele desfășurate, grupate (titlu, explicație, „Ce exersăm”, nivelurile; cele „în curând” la final), fără pagini
   separate: `#/fulger/<temă>` e aceeași pagină, derulată la temă. E2E: `?debug=1` → `window.__dbg.fulger` (`state`, `force`,
