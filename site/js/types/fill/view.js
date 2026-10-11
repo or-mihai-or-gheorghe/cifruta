@@ -24,7 +24,7 @@ export default {
         ? 'Scrie câte o cifră în fiecare căsuță, începând cu unitățile.'
         : 'Scrie câte o cifră în fiecare căsuță, începând cu unitățile. Căsuțele mici de sus sunt pentru „ține minte” și nu se notează.';
     }
-    if (part.layout === 'pyramid') return 'Atinge o cărămidă goală și scrie numărul.';
+    if (part.layout === 'pyramid') return 'Atinge o căsuță goală din piramidă și scrie numărul.';
     const kinds = new Set(Object.values(part.blanks ?? {}).map(kindOf));
     const typing = kinds.has('number') || kinds.has('text');
     const signs = [kinds.has('relation') && '<, = sau >', kinds.has('sign') && '+ sau −'].filter(Boolean).join(', ');
@@ -92,7 +92,8 @@ export default {
       const kind = kindOf(blank);
       const values = kind === 'select' ? blank.options.map(String) : SEGMENTS[kind];
       const shown = (v) => (kind === 'sign' ? niceMinus(v) : String(v)); // variantele de la select se compară exact
-      const group = h('span', { class: `ex-seg${kind === 'select' ? ' ex-seg--words' : ''}`, role: 'radiogroup', 'aria-label': labelOf(id, 'Alege') });
+      const words = kind === 'select' ? ` ex-seg--words${values.length > 3 ? ' ex-seg--many' : ''}` : '';
+      const group = h('span', { class: `ex-seg${words}`, role: 'radiogroup', 'aria-label': labelOf(id, 'Alege') });
       const buttons = values.map((v) =>
         h(
           'button',

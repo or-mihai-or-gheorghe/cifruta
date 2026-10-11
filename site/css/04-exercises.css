@@ -234,8 +234,9 @@
 .ex-level-result:nth-child(2) .c-star.is-on { animation-delay: 750ms; }
 .ex-level-result:nth-child(3) .c-star.is-on { animation-delay: 1000ms; }
 
-.ex-review { display: grid; gap: var(--sp-5); }
-.ex-review__item { display: grid; gap: var(--sp-3); }
+.ex-review { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-5); }
+/* minmax(0, 1fr): un tabel lat se derulează în cadrul lui, nu lățește pagina (pe telefon, butoanele de dedesubt nu se mai puteau atinge) */
+.ex-review__item { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-3); }
 .ex-review__score { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--font-title); font-weight: 700; }
 .ex-review__score.is-correct, .ex-review__score.is-wrong, .ex-review__score.is-partial { color: var(--state, var(--c-warn)); }
 .ex-review__actions { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
@@ -294,6 +295,8 @@
   -webkit-tap-highlight-color: transparent;
 }
 .ex-seg--words .ex-seg__btn { font-size: var(--fs-1); }
+/* multe variante (zilele săptămânii) trec pe rândul următor, nu ies din card */
+.ex-seg--many { flex-wrap: wrap; justify-content: center; border-radius: var(--r-3); }
 .ex-seg__btn:hover:not(:disabled) { background: var(--c-brand-soft); }
 .ex-seg__btn:active:not(:disabled) { transform: scale(0.92); }
 .ex-seg__btn.is-selected { background: var(--c-brand); color: var(--c-on-brand); }
@@ -306,6 +309,12 @@
 .ex-table thead th { background: var(--c-theme-bg); font-family: var(--font-title); }
 .ex-table tbody th { background: var(--c-surface-2); font-family: var(--font-body); font-weight: 700; text-align: left; }
 .ex-table .ex-tpl { font-size: var(--fs-2); }
+/* pe telefon, tabelele cu casete încap fără derulare: celule strânse, cifre mai mici în casete */
+@media (max-width: 30rem) {
+  .ex-table th, .ex-table td, .ex-table .ex-tpl { padding: 0.3rem 0.35rem; font-size: var(--fs-1); }
+  .ex-table .ex-tpl { padding: 0; }
+  .ex-table .ex-blank { width: calc(var(--digits, 2) * 0.66em + 0.9em); font-size: var(--fs-1); }
+}
 
 .ex-trees { display: flex; flex-wrap: wrap; gap: var(--sp-5) var(--sp-7); }
 .ex-tree { display: grid; grid-template-columns: auto auto; justify-content: center; justify-items: center; column-gap: var(--sp-4); color: var(--c-ink-soft); }
@@ -344,7 +353,8 @@
 .ex-col__place { display: grid; place-items: center; width: 1.9rem; height: 1.5rem; border-radius: 0.4em; color: var(--c-on-brand); font-size: var(--fs-0); }
 .ex-col__cell { position: relative; display: grid; place-items: center; width: var(--cell); min-height: 2.7rem; }
 .ex-col__cell--minte { min-height: 2.8rem; }
-.ex-col__cell.is-result { border-top: 3px solid var(--c-ink); padding-top: 0.3rem; }
+/* stretch: o casetă face rândul mai înalt; fără el, linia de deasupra rezultatului s-ar rupe în trepte */
+.ex-col__cell.is-result { align-self: stretch; border-top: 3px solid var(--c-ink); padding-top: 0.3rem; }
 .ex-col__digit { color: var(--c-ink); }
 .ex-col__sign { justify-self: start; padding-left: 0.15rem; color: var(--c-brand-dark); }
 .ex-blank--digit { width: 2.6rem; min-width: 2.6rem; height: 3.1rem; }

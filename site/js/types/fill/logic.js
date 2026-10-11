@@ -506,6 +506,8 @@ export default {
     }
     for (const [id, b] of Object.entries(blanks)) {
       if (key[id] === undefined) errors.push(`fill.${id}: nu pot deduce răspunsul`);
+      // mesajele se arată doar la răspunsuri greșite: unul legat de răspunsul corect nu apare niciodată
+      for (const fb of b.feedback ?? []) if (String(fb.if).replace(/−/g, '-') === String(key[id]).replace(/−/g, '-')) errors.push(`fill.${id}: mesajul pentru „${fb.if}” e legat chiar de răspunsul corect`);
       if (kindOf(b) === 'number' && b.answer !== undefined && b.expr !== undefined && calc(b.expr) !== b.answer) {
         errors.push(`fill.${id}: ${b.expr} = ${calc(b.expr)}, nu ${b.answer}`);
       }

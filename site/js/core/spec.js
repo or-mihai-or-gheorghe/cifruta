@@ -20,6 +20,8 @@ const columnOpCorrect = (v) => {
 const CU_TRECERE = ['mat.op.cu-trecere', 'mat.op1000.cu-trecere'];
 const FARA_TRECERE = ['mat.op.fara-trecere', 'mat.op1000.fara-trecere'];
 const EXERCISE_KEYS = new Set(['id', 'level', 'estMin', 'points', 'concepts', 'title', 'context', 'explain', 'parts']);
+// desenele cu date: în context, fără `size: 'lg'`, ies cam de 77 px pe telefon și nu se mai pot citi
+const DATA_VISUALS = new Set(['data-table', 'number-line', 'bar-chart', 'bar-model', 'pictogram', 'pie', 'venn', 'tally', 'route-map']);
 
 /** Un exercițiu cu o singură parte poate fi scris fără `parts`: câmpurile părții stau direct pe exercițiu. */
 export function normalizeExercise(ex) {
@@ -67,6 +69,7 @@ export function validateTest(raw, { concepts } = {}) {
       else for (const e of visualErrors(spec)) errors.push(`${path}: ${e}`);
     };
     checkVisual(ex.context?.visual, `${where}.context.visual`);
+    if (DATA_VISUALS.has(ex.context?.visual?.v) && ex.context.size !== 'lg') errors.push(`${where}.context: desenul „${ex.context.visual.v}” are date și cere size: 'lg'`);
 
     const partIds = new Set();
     const ops = []; // adunările și scăderile din exercițiu, pentru etichetele „cu / fără trecere”

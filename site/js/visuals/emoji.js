@@ -200,7 +200,6 @@ export const EMOJI = {
   trandafir: { char: '🌹', code: '1f339', label: 'trandafir' },
   ziar: { char: '📰', code: '1f4f0', label: 'ziar' },
   'sticla-plastic': { char: '🧴', code: '1f9f4', label: 'sticlă de plastic' },
-  sticla: { char: '🍾', code: '1f37e', label: 'sticlă' },
   borcan: { char: '🫙', code: '1fad9', label: 'borcan' },
 };
 

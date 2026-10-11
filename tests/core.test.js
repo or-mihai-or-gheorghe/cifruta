@@ -145,6 +145,11 @@ test('spec: desenele din conținut trebuie să existe în bancă', () => {
   const errors = validateTest(bad).errors.filter((e) => e.includes('desen necunoscut'));
   assert.equal(errors.length, 2, errors.join('; '));
   assert.deepEqual(validateTest(demo).errors, []);
+  // un desen cu date în context cere mărimea mare
+  const small = { ...demo, exercises: [{ ...first, context: { text: 'Date', visual: { v: 'number-line', min: 0, max: 10 } } }, ...demo.exercises.slice(1)] };
+  assert.match(validateTest(small).errors.join(), /number-line.*size: 'lg'/);
+  small.exercises[0].context.size = 'lg';
+  assert.deepEqual(validateTest(small).errors.filter((e) => e.includes("size: 'lg'")), []);
 });
 
 test('scoring: calificative și scor total', () => {

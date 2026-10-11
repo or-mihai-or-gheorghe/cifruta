@@ -33,7 +33,7 @@ export function cantitate(n, singular, plural) {
   return `${formatNumber(n)} ${de ? 'de ' : ''}${plural}`;
 }
 
-const SINGULAR = { lei: 'leu', bani: 'ban', grade: 'grad', minute: 'minut', ore: 'oră', puncte: 'punct', ouă: 'ou', mere: 'măr', litri: 'litru', centimetri: 'centimetru', pași: 'pas', metri: 'metru', grame: 'gram', kilograme: 'kilogram' };
+const SINGULAR = { lei: 'leu', bani: 'ban', grade: 'grad', minute: 'minut', ore: 'oră', puncte: 'punct', ouă: 'ou', mere: 'măr', litri: 'litru', centimetri: 'centimetru', pași: 'pas', metri: 'metru', grame: 'gram', kilograme: 'kilogram', kilometri: 'kilometru' };
 
 /** Forma de singular pentru unitățile folosite în conținut: singularOf('grade') → „grad”. */
 export const singularOf = (plural) => SINGULAR[plural] ?? plural;
