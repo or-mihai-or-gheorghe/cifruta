@@ -100,6 +100,10 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
   assert.deepEqual(Object.keys(RULES).sort(), Object.keys(KINDS).sort(), 'fiecare tip are regulile lui în test');
   for (const [id, kind] of Object.entries(KINDS)) {
     assert.ok(kind.concepts?.length && kind.concepts.every((c) => concepts[c]), `${id}: concepte din data/concepts.js`);
+    // un calcul lung își poate ridica plafonul pauzei „Hopa”, dar nu peste timpul lui „fulger”
+    if (kind.pauseMaxMs !== undefined) {
+      assert.ok(Number.isInteger(kind.pauseMaxMs) && kind.pauseMaxMs > config.guard.pauseMaxMs && kind.pauseMaxMs <= kind.fastMs, `${id}: pauseMaxMs`);
+    }
     const positions = [0, 0, 0, 0];
     const relations = { '<': 0, '=': 0, '>': 0 };
     const dirs = new Set();
@@ -266,6 +270,7 @@ test('fulger: rezumatul adună alunele, seria cea mai lungă și bonusul de prec
   assert.equal(s.alune, results.reduce((sum, r) => sum + r.alune, 0));
   assert.equal(s.base + s.speedBonus + s.streakBonus, s.alune);
   assert.equal(s.precisionBonus, Math.round(s.alune * 0.1)); // 11 din 12 corecte
+  assert.equal(s.precisionMin, config.precision.minAnswers); // nivelul nu cere alt prag
   assert.equal(s.total, s.alune + s.precisionBonus);
   assert.equal(s.stars, starsFor(levelConfig(LEGACY_TOPIC, 'usor'), s.total));
   assert.equal(Object.values(s.byKind).reduce((n, k) => n + k.total, 0), 12);
@@ -280,6 +285,8 @@ test('fulger: bonusul de precizie și stelele', () => {
   assert.equal(precisionBonus(10, 10, 100), 20);
   assert.equal(precisionBonus(10, 9, 100), 10);
   assert.equal(precisionBonus(10, 8, 100), 0);
+  assert.equal(precisionBonus(7, 7, 100, 7), 20); // un nivel lent: bonusul de la 7 răspunsuri
+  assert.equal(precisionBonus(6, 6, 100, 7), 0);
   assert.equal(starsFor(usor, 29), 0);
   assert.equal(starsFor(usor, 30), 1);
   assert.equal(starsFor(levelConfig(LEGACY_TOPIC, 'avansat'), 235), 3);
@@ -311,6 +318,9 @@ test('fulger: temele și nivelurile trimit doar la tipuri, concepte și iconițe
       }
       for (const kind of lvl.warmup) assert.ok(lvl.mix.some((m) => m.kind === kind), `${topic.id}/${lvl.id}: încălzirea ${kind} nu e în amestec`);
       assert.ok(lvl.stars.length === 3 && lvl.stars.every((s, i) => i === 0 || s > lvl.stars[i - 1]), `${topic.id}/${lvl.id}: pragurile de stele cresc`);
+      if (lvl.precisionMin !== undefined) {
+        assert.ok(Number.isInteger(lvl.precisionMin) && lvl.precisionMin >= 1 && lvl.precisionMin <= config.precision.minAnswers, `${topic.id}/${lvl.id}: precisionMin`);
+      }
     }
     const fromKinds = [...new Set([...kinds].flatMap((k) => KINDS[k].concepts))].sort();
     assert.deepEqual(fromKinds, [...topic.concepts].sort(), `${topic.id}: conceptele temei sunt conceptele tipurilor ei`);
@@ -385,6 +395,8 @@ test('fulger: pragurile de stele se potrivesc cu copiii simulați (mediana a 200
       if (process.env.FULGER_CALIBRARE) console.log(where); // FULGER_CALIBRARE=1 node --test tests/fulger.test.js: medianele, pentru praguri
       assert.ok(m.rapid >= three && m.bun >= two && m.incet >= one, where);
       assert.ok(m.ghicitRepede < one && m.ghicitLent < one, where);
+      // ghicitul rămâne mult sub copilul încet: altfel la întrebările lungi ar costa mai puțin decât socotitul (pauza „Hopa”)
+      assert.ok(Math.max(m.ghicitRepede, m.ghicitLent) < 0.75 * m.incet, `${where}: ghicitul se apropie de copilul încet`);
     }
   }
 });

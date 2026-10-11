@@ -44,12 +44,16 @@ export function scoreAnswer({ kind, ms, streak }) {
   return { alune, base, speedExtra: withSpeed - base, streakExtra: alune - withSpeed, speed: speed?.id ?? null };
 }
 
-/** Cât stau butoanele blocate după un răspuns. O greșeală mai rapidă decât cititul (nu la sortări) primește pauza lungă. */
+/**
+ * Cât stau butoanele blocate după un răspuns. O greșeală mai rapidă decât cititul (nu la sortări) primește pauza lungă, cât timpul
+ * „fulger”, plafonată la `guard.pauseMaxMs`; un calcul lung își poate ridica plafonul (`pauseMaxMs` pe tip), ca ghicitul să nu coste
+ * mai puțin decât socotitul.
+ */
 export function pauseAfter({ kind, correct, ms }) {
   if (correct) return { pauseMs: config.feedbackMs, guarded: false };
-  const { fastMs, mode } = KINDS[kind];
+  const { fastMs, mode, pauseMaxMs = config.guard.pauseMaxMs } = KINDS[kind];
   const guarded = mode !== 'sort' && ms < Math.max(config.guard.minMs, config.guard.below * fastMs);
-  const long = Math.min(config.guard.pauseMaxMs, Math.max(config.guard.pauseMinMs, fastMs));
+  const long = Math.min(pauseMaxMs, Math.max(config.guard.pauseMinMs, fastMs));
   return { pauseMs: guarded ? long : config.cooldownMs, guarded };
 }
 
@@ -64,9 +68,9 @@ export function milestone(streak) {
   return null;
 }
 
-/** Bonusul de precizie de la final, în alune. */
-export function precisionBonus(answered, correct, alune) {
-  const { minAnswers, perfect, high } = config.precision;
+/** Bonusul de precizie de la final, în alune; un nivel lent îl poate da de la mai puține răspunsuri (`precisionMin`). */
+export function precisionBonus(answered, correct, alune, minAnswers = config.precision.minAnswers) {
+  const { perfect, high } = config.precision;
   if (answered < minAnswers) return 0;
   if (correct === answered) return Math.round(alune * perfect);
   return correct / answered >= high.from ? Math.round(alune * high.bonus) : 0;
@@ -158,7 +162,8 @@ export function createRound({ topic, level, seed = newSeed() }) {
       const correct = answers.filter((a) => a.correct).length;
       const sum = (key) => answers.reduce((s, a) => s + a[key], 0);
       const alune = sum('alune');
-      const bonus = precisionBonus(answered, correct, alune);
+      const precisionMin = lvl.precisionMin ?? config.precision.minAnswers;
+      const bonus = precisionBonus(answered, correct, alune, precisionMin);
       const byKind = {};
       let run = 0;
       let bestStreak = 0;
@@ -182,6 +187,7 @@ export function createRound({ topic, level, seed = newSeed() }) {
         speedBonus: sum('speedExtra'),
         streakBonus: sum('streakExtra'),
         precisionBonus: bonus,
+        precisionMin,
         total,
         bestStreak,
         fast: answers.filter((a) => a.speed === 'fulger').length,

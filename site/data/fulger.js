@@ -10,7 +10,8 @@ export default {
   feedbackMs: 450, // după un răspuns corect, până la întrebarea următoare
   cooldownMs: 1000, // după o greșeală
   // o greșeală mai rapidă decât cititul (sub 40% din timpul „fulger”, minimum 0,8 s; nu la sortări)
-  // primește o pauză cât timpul „fulger” (între 3 și 9 s: la graficele citite încet, timpul „fulger” trece de 9 s)
+  // primește o pauză cât timpul „fulger” (între 3 și 9 s: la graficele citite încet, timpul „fulger” trece de 9 s);
+  // un calcul lung își ridică plafonul cu `pauseMaxMs` pe tip, altfel ghicitul ar costa mai puțin decât socotitul
   guard: { below: 0.4, minMs: 800, pauseMinMs: 3000, pauseMaxMs: 9000 },
   // viteza contează doar în serie: până la timpul „fulger” ×2, până la dublul lui ×1,5
   speed: [
@@ -24,7 +25,7 @@ export default {
   ],
   // după Turbo, seria se sărbătorește din 5 în 5
   milestones: { every: 5, labels: { 15: 'Senzațional!', 20: 'De neoprit!' }, later: 'Legendar!' },
-  // la final, cu cel puțin 10 răspunsuri: toate corecte +20%, cel puțin 90% corecte +10%
+  // la final, cu cel puțin 10 răspunsuri (un nivel lent poate cere mai puține: `precisionMin`): toate corecte +20%, cel puțin 90% corecte +10%
   precision: { minAnswers: 10, perfect: 0.2, high: { from: 0.9, bonus: 0.1 } },
   warmupCount: 3, // primele întrebări vin din tipurile de încălzire ale nivelului
   noRepeat: 12, // o întrebare nu revine printre ultimele 12

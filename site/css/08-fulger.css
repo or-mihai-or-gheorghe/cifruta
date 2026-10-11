@@ -381,6 +381,7 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 .fg-review__row .fg-review__art { width: min(100%, calc(1.8rem * var(--ar, 1))); }
 .fg-review__row .fg-review__text { width: auto; } /* numele și zilele din rând au lățimea lor */
 .fg-review__opts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.35rem; }
+.fg-review__opts--calcs { grid-template-columns: repeat(2, 1fr); }
 .fg-review__opt { display: grid; place-items: center; min-height: 3rem; padding: 0.25rem; border: 2px solid var(--c-line); border-radius: var(--r-2); }
 .fg-review__opt.is-answer { border-color: var(--c-ok-ink); background: var(--c-ok-bg); }
 .fg-review__art { display: block; width: min(100%, calc(2.4rem * var(--ar, 1))); }
@@ -454,6 +455,9 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 @media (max-width: 40rem) {
   .fg-answers--wide { grid-template-columns: repeat(2, 1fr); }
 }
+/* variantele-calcule („470 + 50 = 520”): două coloane pe orice ecran, fiecare calcul pe un singur rând */
+.fg-answers--calcs { grid-template-columns: repeat(2, 1fr); }
+.fg-answers--calcs .fg-opt { font-size: clamp(1rem, 0.7rem + 1.4vw, 1.6rem); white-space: nowrap; }
 .fg-opt__art { --opt-h: clamp(2.8rem, 10vh, 5rem); display: block; width: min(100%, calc(var(--opt-h) * var(--ar, 1))); }
 .fg-opt__art .c-emoji,
 .fg-fig .c-emoji,
@@ -766,6 +770,7 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
   .fg-q { font-size: clamp(1.8rem, 1.2rem + 3vh, 2.4rem); }
   .fg-q--sort { font-size: 1.25rem; }
   .fg-opt { min-height: 3.3rem; font-size: 1.6rem; }
+  .fg-answers--calcs .fg-opt { font-size: 1.1rem; }
   .fg-prompt { font-size: 1.05rem; }
   .fg-fig { --fig-h: clamp(5rem, 38vh, 8.5rem); }
   .fg-fig--chart { --fig-h: clamp(5rem, 38vh, 8.5rem); }

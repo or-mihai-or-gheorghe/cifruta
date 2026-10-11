@@ -401,7 +401,9 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     const detailed = q.mode === 'figure' && q.choices.some((id) => q.options[id].v === 'cell-grid');
     // numerele lungi (patru cifre) n-ar încăpea în patru butoane pe un telefon îngust
     const wide = numericOptions(q) && q.choices.some((id) => q.options[id].text.length >= 4);
-    answers.className = `fg-answers fg-answers--${q.mode}${detailed ? ' fg-answers--detailed' : ''}${wide ? ' fg-answers--wide' : ''}${strip ? ' fg-answers--strip' : ''}`;
+    // variantele-calcule („470 + 50 = 520”) stau pe două coloane, cu litera mai mică, ca fiecare să încapă pe un rând
+    const calcs = q.mode === 'figure' && q.choices.every((id) => String(q.options[id].text ?? '').includes(' = '));
+    answers.className = `fg-answers fg-answers--${q.mode}${detailed ? ' fg-answers--detailed' : ''}${wide ? ' fg-answers--wide' : ''}${calcs ? ' fg-answers--calcs' : ''}${strip ? ' fg-answers--strip' : ''}`;
     answers.style.setProperty('--n', String(buttons.length));
     answers.setAttribute('aria-busy', 'true');
     answers.replaceChildren(...[strip, ...buttons].filter(Boolean));

@@ -315,9 +315,10 @@ function roundPage(container, topic, lvl) {
 
 const STAR_WORDS = ['prima', 'a doua', 'a treia'];
 
-/** De ce lipsește bonusul de precizie (null când s-a câștigat). */
+/** De ce lipsește bonusul de precizie (null când s-a câștigat); pragul răspunsurilor e al nivelului. */
 function precisionHint(summary) {
-  const { minAnswers, high } = config.precision;
+  const { high } = config.precision;
+  const minAnswers = summary.precisionMin ?? config.precision.minAnswers;
   if (summary.precisionBonus) return null;
   const ratio = `${Math.round(high.from * 10)} din 10 corecte`;
   return summary.answered < minAnswers ? `de la ${minAnswers} răspunsuri, cu ${ratio}` : `cu ${ratio}`;

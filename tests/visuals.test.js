@@ -107,6 +107,20 @@ test('desenele pentru calculul în scris își verifică parametrii', () => {
   assert.match(visualErrors({ v: 'number-line', hops: '245,?' }).join(), /cere și jumps/);
   assert.deepEqual(visualErrors({ v: 'column-op', op: '-', terms: '452,176', result: '324' }), []);
   assert.match(visualErrors({ v: 'column-op', op: '-', terms: '176,452' }).join(), /primul e cel mai mare/);
+  // o cifră lipsă: o singură completare, rezultatul scris, fără `carries`; numele desenului nu spune cifra
+  assert.deepEqual(visualErrors({ v: 'column-op', op: '+', terms: '3?7,285', result: '632' }), []);
+  assert.deepEqual(visualErrors({ v: 'column-op', op: '-', terms: '603,258', result: '3?5', mark: 'Z' }), []);
+  assert.match(visualErrors({ v: 'column-op', op: '+', terms: '3?7,285', result: '633' }).join(), /singur fel \(are 0\)/);
+  assert.match(visualErrors({ v: 'column-op', op: '+', terms: '3?7,28?', result: '632' }).join(), /cel mult o cifră lipsă/);
+  assert.match(visualErrors({ v: 'column-op', op: '+', terms: '3?7,285' }).join(), /rezultatul se scrie cu cifre/);
+  assert.match(visualErrors({ v: 'column-op', op: '+', terms: '3?7,285', result: '?' }).join(), /rezultatul se scrie cu cifre/);
+  assert.match(visualErrors({ v: 'column-op', op: '+', terms: '3?7,285', result: '632', carries: true }).join(), /carries/);
+  // „?00 + 400 = 500”: doar 1 se potrivește (0 nu stă în fața unui număr)
+  assert.deepEqual(visualErrors({ v: 'column-op', op: '+', terms: '?00,400', result: '500' }), []);
+  const hidden = visualSVG({ v: 'column-op', op: '+', terms: '3?7,285', result: '632' });
+  assert.match(hidden, /aria-label="calcul în scris: 3, cifra lipsă, 7 \+ 285 = 632"/);
+  assert.match(hidden, /stroke-dasharray/);
+  assert.match(visualSVG({ v: 'column-op', op: '+', terms: '?47,85', result: '432' }), /aria-label="calcul în scris: cifra lipsă, 47 \+ 85 = 432"/);
   // numele desenului nu spune opririle ascunse ale axei
   assert.doesNotMatch(visualSVG({ v: 'number-line', hops: '465,?,?,?', jumps: '−100,−30,−2' }), /aria-label="[^"]*(365|335|333)/);
 });

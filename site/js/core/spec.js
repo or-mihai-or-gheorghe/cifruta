@@ -104,7 +104,8 @@ export function validateTest(raw, { concepts } = {}) {
       errors.push(...partErrors.map((e) => `${pw}: ${e}`));
       if (partErrors.length) continue;
       // „Cine s-a grăbit și a greșit?”: cheia sunt exact calculele desenate greșite (sau exact cele corecte)
-      if (part.type === 'mark' && Array.isArray(part.key) && part.items.every((it) => it.visual?.v === 'column-op' && /^\d+$/.test(String(it.visual.result ?? '')))) {
+      // (doar calculele întregi: unul cu o cifră lipsă nu e nici corect, nici greșit)
+      if (part.type === 'mark' && Array.isArray(part.key) && part.items.every((it) => it.visual?.v === 'column-op' && /^\d+$/.test(String(it.visual.result ?? '')) && !String(it.visual.terms ?? '').includes('?'))) {
         const wrong = part.items.filter((it) => !columnOpCorrect(it.visual)).map((it) => it.id).sort().join(', ');
         const right = part.items.filter((it) => columnOpCorrect(it.visual)).map((it) => it.id).sort().join(', ');
         const key = [...part.key].sort().join(', ');
