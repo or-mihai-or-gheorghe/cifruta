@@ -12,8 +12,12 @@ explicații pe înțelesul copiilor. Mascota site-ului este **Veverița Cifruța
   *Excursie cu trenul și cu mașina*, *Sondajul clasei*, *Concursul sportiv al școlii*, *Corpul meu în numere*,
   *Misiune în spațiu*, *Elevul de serviciu* — cu grafice, pictograme, hărți de linii, orare, bani de 100–500 de lei și corpul
   omenesc; la nivelul avansat, probleme în mai mulți pași și sarcini deschise cu mai multe răspunsuri bune.
+- **Adunarea și scăderea până la 1000** — 8 teste „Călătorie pe Planeta Albastră”, cu trecere peste ordin (progresiv, pe
+  niveluri) și cu Pământul în fiecare test: *Muzeul Planetei Albastre*, *Cabana din munți*, *Culesul de pe deal*, *De la bob la
+  pâine*, *Pe Dunăre, până la mare*, *Grădina zoologică*, *Festivalul zmeelor*, *Patrula verde de Ziua Pământului* — cu
+  calculul în scris pe coloane, proba, piramida numerelor, salturi pe axă și estimări.
 - 13 tipuri de exerciții: alegere, adevărat/fals, casete de completat (rânduri, tabele, arbori, lanțuri, probleme cu
-  plan), axa numerelor și termometrul, unire cu săgeți, ordonare cu cuvânt secret, sortare în coșuri, colorare (și cu reguli
+  plan, calcul în scris pe coloane, piramidă), axa numerelor și termometrul, unire cu săgeți, ordonare cu cuvânt secret, sortare în coșuri, colorare (și cu reguli
   de buget), numărătoare, ceas, bani, traseu pe harta liniilor, grafic cu bare construit de copil.
 - La final: scor, calificativ, stele pe niveluri, explicații pas cu pas, rezolvarea completă și „Mai încerc o dată”.
 - **Jocuri fulger** — runde de 2 minute pe 8 teme (adunări și scăderi până la 100, numerele până la 1000, șiruri și intruși,

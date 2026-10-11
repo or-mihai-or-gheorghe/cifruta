@@ -219,7 +219,16 @@ schimbă doar rotația), bila nouă de pe numărătoare, confetti-ul mascotei (d
 - **Răspunsul nu stă la vedere:** variantele nu repetă pictograma sau textul din desen (țarcurile → doar numele animalelor),
   o variantă corectă nu spune rezultatul altui subpunct (T4-e10: a) estimează, b) calculează), contextul nu dă prima pereche
   din exercițiu, iar suma din portofel nu se vede în timpul rezolvării. Amestecă variantele (`shuffle: true`) când n-au o ordine
-  naturală; la mersul invers copilul alege și semnul (`kind: 'sign'`), nu doar numărul.
+  naturală; la mersul invers copilul alege și semnul (`kind: 'sign'`), nu doar numărul. Un subpunct de mai jos nu scrie răspunsul
+  unuia de mai sus: după „alege cel mai scurt drum”, lungimea drumului ales stă într-o casetă cu `expr` (ascunsă), nu în
+  „125 + 92 + 45”; un rezultat nu apare ca termen în calculul pe coloane de dedesubt; titlul nu spune cuvântul secret, iar
+  povestea spune că literele sunt ascunse („pe spatele fiecărui zmeu”).
+- **Pe telefonul de 360 px:** un desen cu date pus în context (tabel, axă, grafic, model cu bare, pictogramă, hartă) are
+  `size: 'lg'` (validatorul cere); un tabel cu casete de trei cifre are cel mult 4 coloane, cu etichetele lungi pe rânduri;
+  un grafic de construit are un pas care cere cel mult ~25 de apăsări (20 sau 50 la sute); pe axa 0–1000, toleranța unui
+  `slider` e de cel puțin 25.
+- **Unitățile din mesajele generate se scriu cu litere** (`tag`, `slider.unit`, `map.unit`, `mark.rules.unit`): `cantitate`
+  pune „de”, deci „590 de metri”, „1000 de grame”, nu „590 de m”. În enunțuri, simbolurile rămân: „386 m”, „245 kg”.
 
 ## 7. Explicații și mesaje de feedback
 Șablon: **Ce ne cere? → idee (desen) → pași → proba → capcana**. Lăudăm strategia, nu copilul („Încă nu — hai să privim zecile”).
@@ -237,6 +246,10 @@ Mesaje gata făcute pentru greșeli frecvente (din `docs/cercetare.md`):
 - numără bancnotele, nu valoarea: „Contează ce scrie pe bani, nu câte bucăți ai.”
 - la calculul pe coloane, mesajele vin singure (din `fill/logic.js`): „7 + 5 = 12: s-a format o zece nouă. Adaug-o la zeci: …”,
   „La zeci avem 0: desfacem o sută în 10 zeci…”, „La sute, o sută a plecat la zeci: rămân 3…”.
+
+Un mesaj se leagă de un răspuns **greșit** (`if`): unul legat de răspunsul corect nu s-ar arăta niciodată (validatorul îl refuză).
+Numărul din `if` vine chiar din greșeala descrisă în text: la 365 − 148, cifra mică din cea mare dă 223, împrumutul fără micșorare
+dă 227, iar transportul uitat la 236 + 189 dă 315 (uitat doar la unități: 415).
 
 ## 8. Timp estimat (pentru `estMin`; suma pe test trebuie să fie exact 45 de minute)
 Calcule simple 20–30 s/item · cu trecere peste ordin 45–60 s/item · un calcul pe coloane 1–1,5 min · cifre ascunse sau piramidă 2–3 min · alegere 30–45 s · ordonare de 6–7 numere 1–1,5 min ·

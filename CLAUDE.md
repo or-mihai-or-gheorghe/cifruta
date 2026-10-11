@@ -182,6 +182,19 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   în termeni trebuie să aibă o singură completare, iar căsuțele „ține minte” se salvează sub `~<rând>.<loc>` și nu se notează
   (`evaluate`/`answered` citesc doar `blanks`). Piramida (`layout: 'pyramid'`) se rezolvă prin propagare. Regula secțiunii
   „Adunarea și scăderea până la 1000” (plafonul de treceri pe nivel 1 / 1 / 3, calcule în 0–1000, 1–2 MEM) stă în `tests/content.test.js`.
+- Lecțiile testelor U2 (v0.18.0), pe telefonul de 360 px:
+  - un desen cu date în context (`data-table`, `number-line`, `bar-chart`, `bar-model`, `pictogram`, `pie`, `venn`, `tally`,
+    `route-map`) cere `size: 'lg'`, altfel iese de ~77 px (validatorul refuză);
+  - un tabel cu casete de trei cifre încape cu cel mult 4 coloane: etichetele lungi stau pe rânduri (tabelul se întoarce);
+  - un mesaj `feedback` legat de răspunsul corect nu apare niciodată (validatorul îl refuză), iar textul lui trebuie să descrie
+    chiar greșeala care dă acel număr (transportul uitat, cifra mică din cea mare, împrumutul fără micșorare);
+  - un subpunct nu arată răspunsul altuia: nici drumul cel mai scurt prin segmentele lui, nici un rezultat ca termen pe coloane
+    (lungimea drumului ales stă într-o casetă cu `expr`, ascunsă);
+  - unitățile din mesajele generate (`tag`, `slider.unit`, `map.unit`, `mark.rules.unit`) se scriu cu litere: `cantitate` pune „de”,
+    deci „590 de m” e greșit, „590 de metri” e corect;
+  - graficul `chart` se construiește doar din + și −: pasul (20, 50) ține apăsările sub ~25; la `slider` pe 0–1000, răspunsul stă pe
+    grila pasului și toleranța e de cel puțin 25 (pe telefon, 1 px ≈ 4 unități);
+  - literele unui cuvânt secret (`order.reveal`) sunt ascunse până la final, deci titlul nu spune cuvântul.
 - Structura unui test tematic (secțiunea 0–1000): poveste comună, ≥ 6 tipuri, formare + comparare/ordonare + încă un concept
   `mat.nr1000.*` în fiecare test, 1–2 exerciții MEM, la intermediar două probleme în 2 pași, la avansat: problemă în 3+ pași
   (`fill` cu `layout: 'steps'`), sarcină deschisă cu reguli și un puzzle (`search`, cifre ascunse, mers invers, greșeala din bon/tabel).
