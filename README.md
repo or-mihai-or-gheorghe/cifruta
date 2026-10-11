@@ -20,9 +20,9 @@ explicații pe înțelesul copiilor. Mascota site-ului este **Veverița Cifruța
   plan, calcul în scris pe coloane, piramidă), axa numerelor și termometrul, unire cu săgeți, ordonare cu cuvânt secret, sortare în coșuri, colorare (și cu reguli
   de buget), numărătoare, ceas, bani, traseu pe harta liniilor, grafic cu bare construit de copil.
 - La final: scor, calificativ, stele pe niveluri, explicații pas cu pas, rezolvarea completă și „Mai încerc o dată”.
-- **Jocuri fulger** — runde de 2 minute pe 8 teme (adunări și scăderi până la 100, numerele până la 1000, șiruri și intruși,
-  puzzle cu forme, figuri și corpuri, poziții și trasee, grafice și tabele, hărți și arbori), fiecare cu trei niveluri, stele,
-  recorduri și medalii.
+- **Jocuri fulger** — runde de 2 minute pe 9 teme (adunări și scăderi până la 100, numerele până la 1000, adunări și scăderi până
+  la 1000 cu trecere, șiruri și intruși, puzzle cu forme, figuri și corpuri, poziții și trasee, grafice și tabele, hărți și arbori),
+  fiecare cu trei niveluri, stele, recorduri și medalii.
 - **Contul familiei** (opțional) — părintele intră cu Google și face profiluri pentru copii (poreclă și avatar desenat);
   rezultatele se păstrează și în cloud, iar cei din cont văd clasamentul.
 - Funcționează pe telefon, tabletă și calculator; progresul se salvează în browser.

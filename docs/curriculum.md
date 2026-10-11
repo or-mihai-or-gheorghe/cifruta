@@ -100,7 +100,7 @@ Ce altă documentare am folosit (exemple de exerciții, aplicații, UX): `docs/c
 | Familii de operații (7 + 5, 5 + 7, 12 − 5, 12 − 7) | I | ➕ | `mat.op.familii` |
 | Termeni: termen, sumă, total, diferență | I | 📜 | `mat.op.terminologie` |
 | Descăzut, scăzător; reconstituirea calculelor cu cifre lipsă | II | 📘📜 | `mat.op1000.reconstituire` |
-| Adunări și scăderi 0–1000 fără / cu trecere (în Jocuri fulger, la Avansat, doar o trecere simplă: la unități sau cu împrumut din zeci; în secțiunea U2, progresiv: o trecere la ușor și la intermediar, până la trei la avansat — două treceri, împrumut peste zero, sume până la 1000) | II | 📘📜 | `mat.op1000.fara-trecere`, `mat.op1000.cu-trecere` |
+| Adunări și scăderi 0–1000 fără / cu trecere (în Jocuri fulger, la „Numere până la 1000”, doar o trecere simplă la Avansat: la unități sau cu împrumut din zeci; tema fulger „Adunări și scăderi până la 1000”: zeci peste sută, o trecere oriunde, apoi două și împrumutul peste zero; în secțiunea U2, progresiv: o trecere la ușor și la intermediar, până la trei la avansat — două treceri, împrumut peste zero, sume până la 1000) | II | 📘📜 | `mat.op1000.fara-trecere`, `mat.op1000.cu-trecere` |
 | Gruparea și desfacerea: 10 unități = 1 zece, 10 zeci = 1 sută (cuburile înainte de schimb, o sută desfăcută) | II | 📘📜 | `mat.op1000.grupare` |
 | Adunarea și scăderea în scris, pe coloane: transportul, împrumutul, împrumutul peste zero | II | 📘📜 | `mat.op1000.in-scris` |
 | Calcul în minte până la 1000: pe ordine (200 + 80 + 13), în salturi pe axă, cu numere rotunde (398 + 145 = 400 + 145 − 2) | II | 📘➕ | `mat.op1000.strategii` |

@@ -1,7 +1,8 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-10-11 · **Versiune:** 0.18.0 (secțiunea „Adunarea și scăderea până la 1000”: 8 teste „Călătorie pe Planeta Albastră”)
+- **Data:** 2026-10-11 · **Versiune:** 0.19.0 (Jocuri fulger: tema „Adunări și scăderi până la 1000”; înainte, în 0.18.0, secțiunea
+  U2 cu 8 teste „Călătorie pe Planeta Albastră”)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -14,14 +15,15 @@
   jocurilor: bare, grafice în timp, pictograme, tabele, cercul cu felii, Venn, harta liniilor, rețeaua, turneul, arborele; 10 peisaje animate), sunete discrete cu buton de oprire, atelier pentru
   autori (și cu întrebările generate ale jocurilor), **Jocurile fulger** (`#/fulger`: teme desfășurate pe pagina jocului, fiecare cu trei
   niveluri: „Adunări și scăderi până la 100”, „Numere până la 1000” (sute, zeci și unități, comparări, ordonări, șiruri, rotunjire și
-  calcule fără trecere), patru teme cu figuri, fără calcule, „Șiruri și intruși”, „Puzzle cu forme”, „Figuri și corpuri”, „Poziții și
+  calcule fără trecere), „Adunări și scăderi până la 1000” (cu trecere: zeci peste sută, regrupări, o trecere, apoi două și împrumutul
+  peste zero, trei termeni, cifra lipsă din calculul în scris, calculul greșit, estimări, numere aproape rotunde), patru teme cu figuri, fără calcule, „Șiruri și intruși”, „Puzzle cu forme”, „Figuri și corpuri”, „Poziții și
   trasee”, și două teme cu grafice și grafuri, „Grafice și tabele” și „Hărți și arbori”; înmulțirea, împărțirea și ecuațiile simple
   apar „în curând”; runde de 2 minute,
-  90 de tipuri de întrebări generate (16 cu calcule până la 100, 18 cu numerele până la 1000, 24 cu figuri, 32 cu grafice, hărți și
-  arbori), fiecare cu conceptele ei („Ce exersăm”), alune cu bonus de viteză și
+  104 tipuri de întrebări generate (16 cu calcule până la 100, 18 cu numerele până la 1000, 14 cu trecere până la 1000, 24 cu figuri,
+  32 cu grafice, hărți și arbori), fiecare cu conceptele ei („Ce exersăm”), alune cu bonus de viteză și
   de serie, Turbo, pistă spre stele și record, medalii pe niveluri, „Greșelile tale” și ținta următoarei stele la rezultate: 3 stele la
   un nivel al unei teme aduc medalia de bronz, argint sau aur, iar aceeași medalie la 2, 3 și 5 teme aduce „dublul”, colecția și cupa;
-  acum 33 de medalii, pe raftul de pe pagina jocului, pe cardurile nivelurilor și pe prima pagină). Conținut: **4 teste
+  acum 36 de medalii, pe raftul de pe pagina jocului, pe cardurile nivelurilor și pe prima pagină). Conținut: **4 teste
   de recapitulare a clasei I** (T1–T4 v2),
   **8 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc, spațiu,
   școală) și **8 teste „Călătorie pe Planeta Albastră”** (adunarea și scăderea până la 1000 cu trecere peste ordin, cu Pământul:
@@ -39,24 +41,26 @@
   - Fără configurarea Firebase, site-ul arată ca în v0.8.1, plus legătura „Confidențialitate” din subsol.
 
   **Calitate:**
-  - 123 de teste Node, plus validarea conținutului (cu regula secțiunii U2: trecerile pe nivel, calculele în 0–1000, cifrele
+  - 124 de teste Node, plus validarea conținutului (cu regula secțiunii U2: trecerile pe nivel, calculele în 0–1000, cifrele
     calculate și unicitatea cifrelor ascunse), a tabelului de acoperire (fiecare concept are acum cel puțin un exercițiu) și a contrastului, calibrarea stelelor din Jocurile fulger
-    pe fiecare temă și nivel, regulile independente ale celor 24 de tipuri cu figuri și ale celor 32 cu grafice și grafuri (numele din
-    cerință, sensul și răspunsul, calculate din datele desenului, pe 3000 de semințe), mărimea textului din desenele jocurilor, avatarele (textul canonic, id-urile
+    pe fiecare temă și nivel, regulile independente ale celor 24 de tipuri cu figuri, ale celor 32 cu grafice și grafuri (numele din
+    cerință, sensul și răspunsul, calculate din datele desenului, pe 3000 de semințe) și ale celor 14 cu trecere până la 1000 (și forma
+    variantelor: „în pătrat”, ferestre, nicio variantă egală cu un termen), „ghicitorul pe tipare” la tema cu trecere, mărimea textului din desenele jocurilor, avatarele (textul canonic, id-urile
     publicate, fiecare combinație desenată) și medaliile (catalogul, pragurile, medaliile unei runde, datele vechi);
-  - 16 teste ale regulilor Firestore pe emulator, inclusiv 65 de intrări într-o tranzacție;
-  - E2E cu 2567 de verificări pe 3 ecrane și tastatură (și calculul în scris: scrierea de la dreapta la stânga, Backspace, căsuțele
+  - 16 teste ale regulilor Firestore pe emulator, inclusiv 73 de intrări într-o tranzacție;
+  - E2E cu 2691 de verificări pe 3 ecrane și tastatură (și calculul în scris: scrierea de la dreapta la stânga, Backspace, căsuțele
     „ține minte”, așezarea pe telefon; piramida cu o cărămidă greșită, graficul ținut apăsat, săgețile în grupurile radio), plus telefon ținut orizontal și telefon mic (cu seria pornită, textul desenelor
     măsurat pe ecran, fiecare temă jucată tip cu tip, mascota care se mișcă doar unde trebuie);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.18.0 e publicată (rularea 38120183318, tag `v0.18.0`; E2E pe site-ul live 2566/2567, iar verificarea
-  care a picat — un peisaj de pe cardurile secțiunii de recapitulare, încă neîncărcat la prima vizită după publicare — trece la
-  reluare, de trei ori din trei).
+- **Următorul pas:** v0.19.0 (tema fulger „Adunări și scăderi până la 1000”) e gata de publicare, după confirmarea utilizatorului:
+  întâi regulile Firestore (`npm run deploy:rules`, cu tema nouă în `fulgerTopics()`), apoi site-ul (`npm run deploy`), E2E pe site-ul
+  live și tag `v0.19.0`. v0.18.0 e publicată (rularea 38120183318, tag `v0.18.0`).
+  - Copilul joacă tema nouă pe fiecare nivel: din tabelul „Pentru părinți” (timpul mediu pe tip) se reglează `fastMs` și pragurile.
   - Copilul încearcă un test U2 pe dispozitivul lui: timpii reali, căsuțele „ține minte”, calculul pe coloane pe telefon.
-  - Copilul joacă temele Jocurilor fulger și strânge medalii; din rundele reale se reglează `fastMs` și pragurile de stele.
+  - De hotărât: variantele fără tipare și la temele mai vechi cu calcule (vezi „Probleme cunoscute”).
   - Rămân: verificarea în Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
-  - Apoi: tema U2 din Jocuri fulger, temele „în curând” și înmulțirea (după scanările noi).
+  - Apoi: temele „în curând” și înmulțirea (după scanările noi).
 - **Publicat înainte:** v0.17.0 (rularea 36302230466, tag `v0.17.0`; regulile Firestore nu s-au schimbat), cu E2E pe site-ul
   live 1957/1957. Din v0.18.0, acțiunile din `pages.yml` rulează pe Node 24 (fără avertismentul de Node 20).
 
@@ -286,6 +290,38 @@
     24; regulile Firestore nu se schimbă), tag `v0.18.0`; E2E pe site-ul live 2566/2567 — singura verificare căzută (pe tabletă,
     peisajul unui card din secțiunea de recapitulare, „lipsă” la prima încărcare după publicare) trece la reluare, de trei ori din
     trei.
+- [x] M37 (v0.19.0): Jocuri fulger, tema „Adunări și scăderi până la 1000” (cu trecere peste ordin), a treia, după cele cu calcule.
+  - **Cererea:** o temă fulger pentru U2, cu cele trei niveluri și aceeași logică, așezată după calcule și înaintea logicii și a
+    formelor; punctajul și pragurile medaliilor potrivite, pentru că un calcul de trei cifre cu trecere cere mai mult timp.
+  - **Conținut:** 14 tipuri noi în `js/fulger/kinds-calcule-1000.js`, plus `add-1000-cu` și `sub-1000-cu` refolosite la Ușor:
+    - Ușor: zeci rotunde peste sută, regrupări („4 sute, 13 zeci și 5 unități”), cât lipsește până la suta următoare, comparări fără
+      calcul (același termen, capcana descăzutului, termeni schimbați sau compensați);
+    - Intermediar: o trecere la unități sau la zeci, un împrumut din zeci sau din sute, cifra lipsă din calculul în scris (desenul
+      `column-op` cu „?”), calculul greșit dintre patru, estimarea la sute;
+    - Avansat: două treceri, două împrumuturi (40% peste zero), trei termeni, numere aproape rotunde (+198, −297, −302), cât lipsește
+      până la 1000.
+  - **Punctajul pe măsura timpului:** timpul „fulger” de la 4,5 s la 13 s, alunele de la 2 la 8 (≈ 1 la 2 s, mai multe la nivelurile
+    grele); stelele din calibrare, cu marginile celorlalte teme: 30/82/205, 33/88/240, 31/95/245. Două câmpuri noi, alese de utilizator:
+    `precisionMin: 7` la Avansat (un copil bun răspunde acolo la 8–9 întrebări; cu 10, bonusul venea în 9% din runde, acum ~53%) și
+    `pauseMaxMs` pe tip, cât timpul „fulger”, la cele 5 calcule mai lungi de 9 s (cu plafonul de 9 s, ghicitul strângea 0,79 din cât
+    strânge un copil încet, acum 0,60–0,67). Medaliile: aceeași regulă (3 stele), tema aduce bronz, argint și aur, raftul are 36.
+  - **Cod:** `column-op` ascunde o cifră (o singură completare, numele desenului n-o spune); variantele-calcule pe două coloane
+    (`fg-answers--calcs`); la „Greșelile tale”, calculul greșit apare cu cel corect alături; exemplele de pe carduri diferă de la un
+    nivel la altul; etichetele tipurilor sunt unice (`sort-4-1000-dir` și-a schimbat eticheta).
+  - **Recenzia** (doi recenzori independenți, fiecare constatare măsurată înainte de reparare): nicio greșeală de răspuns, dar forma
+    variantelor arăta răspunsul — un copil care alegea mijlocul a trei numere egal depărtate, mai marele din doi vecini sau calculul
+    absurd lua prima stea în 83–92% din runde. Acum variantele calculelor stau „în pătrat” ({x, x + 10, x + 100, x + 110}, celelalte
+    colțuri fiind transportul uitat sau dublat), estimarea, completarea până la sută și cifra lipsă își aleg întâi fereastra, calculul
+    greșit nu se mai vede din ochi, cifra lipsă stă doar în coloanele trecerii: 22–28% din runde, iar pe tipuri tiparul nimerește
+    răspunsul în 23–29% din întrebări (la întâmplare: 25%). Testul „ghicitorul pe tipare” păzește tema. Aceeași formă au primit și
+    `add-1000-cu`, `sub-1000-cu` (la `sub-1000-cu`, unitățile singure dădeau răspunsul în 49% din întrebări): „Numere până la 1000 /
+    Avansat” coboară de la 88% la 52%.
+  - **Măsurat:** un prag pe raportul ghicit / copil încet ar fi fost fragil (±0,08 de la un set de semințe la altul, iar „Hărți și
+    arbori / Avansat” are 0,72); testul cere în schimb ca un calcul fără desen mai lung de 9 s să-și ridice pauza și afișează raportul la
+    calibrare. E2E: după o greșeală, saltul fix de 9,5 s peste pauză a devenit unul în pași de 250 ms (cu 13,5 s fix, runda de 2 minute
+    se termina înaintea ultimelor tipuri de la „Numere până la 1000”).
+  - **Verificare:** npm test 124/124, reguli 16/16, E2E complet 2691/2691 (înainte și după reparațiile din recenzie), E2E pe jocurile
+    fulger 844/844, E2E cont 82/82; capturile fiecărui tip nou privite pe laptop, tabletă, telefon, telefon culcat și 360×640.
 - [x] M34 (v0.16.1): desenul mascotei, citit cu ochii altcuiva.
   - **Cererea utilizatorului:** în poziția cu mâna ridicată să rămână doar lăbuța, fără deget ridicat (se putea citi ca un gest
     ofensator); în poziția principală, lăbuțele și aluna să nu mai fie simetrice, oglindite — două cerculețe cu un oval la mijloc,
@@ -452,6 +488,11 @@
 | 2026-09-19 | Variantele-zi și variantele-dată stau în ordinea din calendar; o variantă din afara desenului apare doar la „cele mai multe”; la răspunsuri mici, 0 rămâne printre variante | ordinea firească se citește mai ușor; un rând care lipsește are 0, deci ar fi și el „cel mai puțin”; fără 0, un răspuns de 1 sau 2 ar sta mereu primul |
 | 2026-09-19 | Tema „Numere până la 1000” vine imediat după cea de 0–100 (a doua în listă, deci și pe pagina jocului, pe prima pagină și în clasament) | cererea utilizatorului: pasul următor după 0–100 |
 | 2026-09-19 | În jocul de 0–1000, trecerea peste ordin e doar la Avansat și doar simplă: o trecere la unități (345 + 27) sau un împrumut din zeci (452 − 28), niciodată două și niciodată la sute | cererea utilizatorului („operații care nu necesită schimbări sau schimbări complicate de ordin”) și unitatea 2 din manual („adunarea cu trecere peste ordinul unităților”, „scăderea cu împrumut la ordinul zecilor”); completează decizia din 12 septembrie, care privea secțiunea de teste |
+| 2026-10-11 | Tema fulger „Adunări și scăderi până la 1000” (`adunari-scaderi-1000`) stă după „Numere până la 1000”, înaintea temelor de logică și de forme; 14 tipuri noi, plus `add-1000-cu` și `sub-1000-cu` refolosite la Ușor | cererea utilizatorului; tema U2 amânată în v0.18.0 |
+| 2026-10-11 | Punctajul pe măsura timpului: alunele unui tip ≈ 1 la 2 s de timp „fulger” (mai multe la nivelurile grele), iar stelele (deci medaliile) se calibrează cu marginile celorlalte teme; runda, seriile și regula medaliilor rămân | cererea utilizatorului: un calcul de trei cifre cu trecere cere mai mult timp în aceleași 2 minute |
+| 2026-10-11 | La Avansatul temei cu trecere, bonusul de precizie vine de la 7 răspunsuri (`precisionMin` pe nivel); celelalte teme rămân la 10 | decizia utilizatorului; un copil bun răspunde acolo la 8–9 întrebări, iar cu 10 bonusul venea în 9% din runde (la celelalte teme, 50–65%) |
+| 2026-10-11 | Un calcul fără desen mai lung de 9 s are pauza „Hopa” cât timpul lui (`pauseMaxMs`, cerut de test); întrebările cu desen rămân la 9 s (decizia din 19 septembrie) | decizia utilizatorului; cu plafonul de 9 s, ghicitul strângea 0,79 din cât strânge un copil încet dar sigur |
+| 2026-10-11 | Variantele calculelor din tema cu trecere stau „în pătrat” ({x, x + 10, x + 100, x + 110}), iar ferestrele (estimare, completare, cifra lipsă) se aleg înaintea răspunsului; nicio variantă nu repetă un număr din calcul | recenzia: un copil care se uita doar la forma variantelor lua prima stea în 83–92% din runde, acum în 22–28% |
 | 2026-10-11 | Secțiunea U2 are treceri progresive pe calcul: cel mult una la ușor și la intermediar, cel mult trei la avansat (două treceri, împrumut peste zero, sume până la 1000), toate calculele în 0–1000 | varianta aleasă de utilizator; manualul predă doar o trecere, caietul auxiliar le amestecă pe toate; regula se verifică automat |
 | 2026-10-11 | Calculul în scris e un `fill` cu `layout: 'column'`: cifrele se calculează din rând, iar căsuțele „ține minte” sunt opționale, nu se notează, se păstrează în ciornă și apar corect în rezolvare | aranjamentul interactiv ales de utilizator; ce ține minte copilul e un ajutor, nu un răspuns |
 | 2026-10-11 | Un singur grup U2, „Călătorie pe Planeta Albastră”, cu Pământul în fiecare test (1–2 exerciții); tema U2 din Jocuri fulger se amână | cererea utilizatorului |
@@ -482,7 +523,7 @@
 - În limitele regulilor, un client priceput poate trimite un scor inventat în clasament (fără Cloud Functions nu se verifică pe
   server); există moderarea din `#/admin`.
 - În browser, Jocurile fulger păstrează ultimele 60 de runde (`keepRounds`, din v0.11.0) pentru toate temele împreună (recordurile și
-  medaliile rămân; în cont, toate rundele rămân în cloud): cu 8 teme jucabile, istoricul pe temă se subțiază.
+  medaliile rămân; în cont, toate rundele rămân în cloud): cu 9 teme jucabile, istoricul pe temă se subțiază.
 - Redenumirea și ieșirea din clasament lucrează într-o tranzacție pe toată lista `boards` a profilului, iar o tranzacție Firestore are
   cel mult 500 de scrieri: după câteva sute de clasamente într-un profil (ani de runde săptămânale) vor trebui împărțite în loturi.
   Numărul clasamentelor fiecărui profil se vede în `#/admin`.
@@ -492,18 +533,23 @@
   reîncărcare; o salvare din ea trimite textul neschimbat, pe care regulile îl acceptă.
 - Săptămânile trecute păstrează avatarul de atunci (încă nu se afișează). La scor egal, ordinea din clasament se poate schimba după o
   salvare de avatar, pentru că se schimbă `updatedAt`.
-- O salvare de avatar rescrie într-o tranzacție până la 65 de intrări (8 teme), fiecare verificată cu `getAfter` pe profil: pe emulator trece,
+- O salvare de avatar rescrie într-o tranzacție până la 73 de intrări (9 teme), fiecare verificată cu `getAfter` pe profil: pe emulator trece,
   dar documentația Firestore nu spune limpede dacă citirile repetate ale aceluiași document intră o singură dată în limita de accesări.
 - Medaliile pentru recordurile de dinainte de v0.13.0 apar pe raft fără sărbătorire (nu sunt „noi”) și se salvează la prima rundă
   terminată, din orice temă. Un prag de stele ridicat mai târziu ascunde o medalie doar dacă era dedusă și încă nesalvată.
 - Cele 6 medalii vechi rămân în `cifruta:fulger` și în `state/fulger`, ignorate; ștergerea rundelor din „Pentru părinți” șterge și
-  medaliile. Raftul are 33 de medalii, deci pe telefon pagina jocului se lungește (grila are 3 coloane).
+  medaliile. Raftul are 36 de medalii, deci pe telefon pagina jocului se lungește (grila are 3 coloane).
 - Pragurile de stele și `fastMs` ale temelor cu grafice și grafuri vin din simulare, cu aceleași rapoarte ca la celelalte teme; citirea
   unui desen poate dura mai mult la un copil real.
 - Pe telefonul ținut orizontal, textul graficelor și al hărților are 11–15 px (pragul din E2E e 11 px): se citește, dar e mic.
 - Pe hărți, insigna cu numărul liniei atinge stația de la capăt (pe rândurile de sus și de jos nu are loc mai departe); cifrele rămân
   întregi.
 - Pinguinul are pene („Are pene?” → da), iar mulți copii cred altfel: întrebarea e corectă, dar poate surprinde.
+- Jocuri fulger, temele mai vechi cu calcule: variantele simetrice (±1, ±10, ±100) lasă răspunsul la mijlocul a trei numere egal
+  depărtate sau lângă un vecin. Un copil care se uită doar la tipare ia prima stea în 80–85% din runde la „Adunări și scăderi până
+  la 100” și în 46–76% la „Numere până la 1000” (Ușor, Intermediar); tema cu trecere e păzită de testul „ghicitorul pe tipare”.
+- La 320 px lățime, pagina Jocurilor fulger se derulează 31 px în lateral (antetul temei și conceptele), iar pe 568×320 tipurile
+  desenate se derulează 24–57 px; E2E verifică 360×640 și 844×390.
 - GitHub Actions: eticheta `ubuntu-latest` trece pe Ubuntu 26 din 19 octombrie 2026 (anunț la publicarea v0.18.0). Fluxul folosește
   doar Node și npm, deci nu ar trebui să se schimbe nimic; de privit prima publicare de după.
 
@@ -511,8 +557,8 @@
 - Scanările actuale acoperă manualul până la înmulțire; utilizatorul adaugă scanări noi după finalizarea etapei curente.
 - Secțiuni noi după manual: după U1 (Numerele 0–1000) și U2 (Adunarea și scăderea până la 1000), înmulțirea.
 - Tipuri noi: balanță interactivă, hotspot pe imagine, calendar, desen/simetrie (traseul și graficul cu bare există din v0.6.0).
-- Jocuri fulger: tema „Adunări și scăderi până la 1000” cu trecere peste ordin (din U2): cifra lipsă dintr-un calcul pe coloane,
-  calculul greșit dintre patru, estimarea la sute.
+- Jocuri fulger, temele mai vechi cu calcule: variantele fără tipare, ca la tema cu trecere („în pătrat” sau ferestre alese întâi),
+  cu „ghicitorul pe tipare” pe toate tipurile; `precisionMin` și la alte niveluri lente („Hărți și arbori / Avansat”), după rundele reale.
 - Din auditul secțiunii 0–1000, neaplicate: condiția încălcată evidențiată la verificare, schimbările de linie marcate pe traseu,
   indicii treptate, pașii unei probleme afișați pe rând, animații legate de operație (gruparea din 5 în 5, simbolul care se desface,
   deplasarea pe axă).
@@ -873,6 +919,30 @@
   - **Publicat:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
+
+- **2026-10-11 (tema fulger „Adunări și scăderi până la 1000”, v0.19.0)**
+  - **Cererea utilizatorului:** o categorie nouă de jocuri fulger pentru U2, cu cele trei niveluri și logica celorlalte, după calcule
+    și înaintea logicii și a formelor; punctajul sau pragurile medaliilor potrivite pentru calculele de trei cifre, mai lungi.
+  - **Planul**, în două treceri (a doua cerută de utilizator: „rafinare, îmbunătățire și verificare”):
+    - măsurat întâi pe temele de acum: răspunsurile pe rundă, alunele pe secundă, marginile pragurilor; prototipurile celor 14 tipuri,
+      rulate în memorie;
+    - două decizii ale utilizatorului: bonusul de precizie de la 7 răspunsuri la Avansat; pauza „Hopa” cât calculul la tipurile mai
+      lungi de 9 s (găsit în a doua trecere: cu plafonul de 9 s, ghicitul strângea 0,79 din cât strânge un copil încet dar sigur).
+  - **Construit** în trei commit-uri (capabilitățile, tema, reparațiile din recenzie), fiecare cu npm test verde; doi recenzori
+    independenți, fiecare constatare măsurată înainte de reparare.
+  - **Lecții:**
+    - forma variantelor poate arăta răspunsul: greșelile simetrice (±10, ±100) îl lasă la mijloc, iar o greșeală „cu 1 mai puțin” îl
+      pune lângă un vecin; calibrarea nu prindea asta, pentru că ghicitorii ei aleg la întâmplare, așa că un „ghicitor pe tipare”
+      păzește acum tema (și a arătat aceeași slăbiciune la temele vechi cu calcule);
+    - un prag pe raportul ghicit / copil încet ar fi fost fragil (±0,08 de la un set de semințe la altul): regula a devenit una de
+      structură (un calcul fără desen mai lung de 9 s are pauza cât timpul lui);
+    - un calcul greșit „cu o sută în minus” poate fi absurd (400 − 70 = 430, o diferență mai mare decât descăzutul): greșeala trebuie
+      să fie mai mică decât al doilea termen;
+    - în E2E, salturile fixe peste pauze consumă runda de 2 minute: pauza se sare exact.
+  - **Rezultate:** npm test 124/124, reguli 16/16, E2E complet 2691/2691 (și pe codul final), E2E pe jocurile fulger 844/844,
+    E2E cont 82/82.
+  - **De făcut:** publicarea, după confirmarea utilizatorului (întâi regulile Firestore, apoi site-ul); copilul joacă tema nouă →
+    `fastMs` și pragurile; de hotărât: variantele fără tipare și la temele vechi cu calcule.
 
 - **2026-10-11 (a doua trecere pe U2 și datoriile mărunte, tot v0.18.0)**
   - **Cererea utilizatorului:** „mai fă o trecere de îmbunătățire, rafinare și verificare”, apoi „include și low effort tech debts

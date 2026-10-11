@@ -37,9 +37,10 @@ site/                      ← publicat
   js/visuals/              banca vizuală: registerVisual(nume, {render, label, demos}); all.js le importă pe toate;
                            avatar (desenul și accesoriile) · avatar-animals (cele 24 de animale) · avatar-parts (blănuri, ochi, umeri)
                            grafice (bare, linii, pictograme, tabel, cerc, Venn) · grafuri (hartă, rețea, turneu, arbore): desenele jocurilor
-                           calcule (column-op: un calcul în scris desenat, eventual greșit)
+                           calcule (column-op: un calcul în scris desenat, eventual greșit sau cu o cifră lipsă „?”)
   js/fulger/               Jocuri fulger (jocuri pe viteză, pe teme, #/fulger): kinds (calcule până la 100), kinds-1000 (numerele până
-                           la 1000), kinds-forme (figuri), kinds-grafice și kinds-grafuri (grafice, hărți, arbori), generate cu
+                           la 1000), kinds-calcule-1000 (adunări și scăderi până la 1000, cu trecere), kinds-forme (figuri),
+                           kinds-grafice și kinds-grafuri (grafice, hărți, arbori), generate cu
                            sămânță, cu concepte · intrebari (formele întrebărilor: calcule și desene) · contexte (unități, nume, zile,
                            date) · rand · art (desenul și numele unei variante, cerința cu
                            emoji) · engine (temele, runda și punctajul, pur) · records (chei „temă:nivel”, datele vechi) · medals
@@ -86,16 +87,36 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
 - **Desen nou într-un exercițiu publicat:** `context.visual` / `part.visual` / `itemVisual` / `item.visual` / `bin.visual` din bancă;
   **nu** cere versiune nouă (răspunsurile și ciornele nu sunt afectate); `npm test` verifică numele desenului.
 - **Tip nou în Jocuri fulger (calcule):** o intrare în `KINDS` (`js/fulger/kinds.js` pentru 0–100, `kinds-1000.js` pentru numerele până
-  la 1000: `label`, `points`, `fastMs`, `mode`, `concepts` din `data/concepts.js`, `generate(rand)` cu răspunsul calculat și variante din
-  greșeli tipice), o linie în `mix`-ul unui nivel al unei teme din `data/fulger.js` și regulile tipului în `RULES` din
-  `tests/fulger.test.js` (cele de la 1000: `tests/fulger-1000.rules.js`); testul de calibrare spune dacă pragurile de stele mai sunt
-  potrivite, iar conceptele temei trebuie să fie exact conceptele tipurilor ei (etichetele „fără / cu trecere” se verifică).
+  la 1000, `kinds-calcule-1000.js` pentru calculele cu trecere până la 1000: `label`, `points`, `fastMs`, `mode`, `concepts` din
+  `data/concepts.js`, `generate(rand)` cu răspunsul calculat și variante din greșeli tipice), o linie în `mix`-ul unui nivel al unei teme
+  din `data/fulger.js` și regulile tipului în `RULES` din `tests/fulger.test.js` (cele de la 1000: `tests/fulger-1000.rules.js`, cele cu
+  trecere: `tests/fulger-calcule-1000.rules.js`); testul de calibrare spune dacă pragurile de stele mai sunt potrivite, iar conceptele
+  temei trebuie să fie exact conceptele tipurilor ei (etichetele „fără / cu trecere” se verifică).
   - Formele întrebărilor (`choice`, `compare`, `sorting`) vin din `js/fulger/intrebari.js`, ca să le poată folosi ambele module.
   - La numerele de trei cifre, `numberQuestion` și `choice` cer `max` (implicit caută variante până la 100).
   - O întrebare `figure` **fără desen** (doar cerință și patru variante) e bună pentru șiruri, rotunjire sau numere scrise cu
     litere: cu variante numerice, cerința se scrie mai mare, iar cele de patru cifre trec pe două coloane pe ecranele înguste
     (`numericOptions` din `js/fulger/view.js`: altfel, variantele-nume ale pictogramei ar trece și ele pe două coloane).
   - Eticheta „fără / cu trecere” are câte o pereche pentru 0–100 (`mat.op.*`) și pentru 0–1000 (`mat.op1000.*`).
+  - `numberQuestion` primește mereu `ask` (fără el rămâne `ask: undefined`, iar verificarea după JSON pică), iar `solved` stă doar la
+    întrebările cu desen (E2E caută desenul rezolvat). Variantele-calcule („470 + 50 = 520”, texte în `figureQuestion`) stau pe două
+    coloane (`fg-answers--calcs`).
+  - **Punctajul pe măsura timpului:** alunele unui tip sunt cam 1 la 2 s de timp „fulger” (0,35–0,65 pe secundă, mai multe la nivelurile
+    grele), ca o temă cu calcule lungi să dea tot atâtea alune pe minut. Un tip fără desen mai lung de 9 s are `pauseMaxMs = fastMs`
+    (testul o cere): cu pauza „Hopa” plafonată sub timpul lui, ghicitul ar costa mai puțin decât socotitul. La un nivel unde un copil
+    bun răspunde la mai puțin de 10 întrebări, `precisionMin` coboară pragul bonusului de precizie (Avansatul temei cu trecere: 7).
+    Raportul ghicit / copil încet se vede la `FULGER_CALIBRARE=1` (fluctuează cu ±0,08 de la un set de semințe la altul).
+  - Un tip poate intra și în altă temă (statisticile pentru părinți se adună sub etichetă, deci etichetele sunt unice: testul o cere);
+    tipurile proprii ale nivelului stau primele în amestec, pentru exemplele de pe carduri, iar fiecare nivel al unei teme cu calcule
+    are un tip `choice` și unul `compare` (E2E cere 6 exemple). Id-urile tipurilor sunt permanente: stau în `byKind`, în browser și în
+    cloud.
+  - **Forma variantelor nu arată răspunsul.** Greșelile simetrice (±1, ±10, ±100) lasă răspunsul la mijlocul a trei numere egal
+    depărtate, iar „cifrele completate până la 9” îl pun lângă un vecin: un copil care nu socotește, dar se uită la tipare, lua stele.
+    La tema cu trecere, calculele de trei cifre au variantele „în pătrat” (`gridChoice` / `gridChoices`: {x, x + 10, x + 100, x + 110},
+    răspunsul într-un colț la întâmplare, rezultatul între 110 și 889), iar estimarea, completarea până la sută și cifra lipsă își aleg
+    întâi fereastra de patru valori la rând, apoi locul răspunsului; nicio variantă nu repetă un număr din calcul. Testul „ghicitorul pe
+    tipare” din `tests/fulger.test.js` cere cel mult 32% pe fiecare tip al temei (la întâmplare: 25%); temele mai vechi cu calcule au
+    încă tiparele (backlog).
 - **Tip cu figuri în Jocuri fulger:** o intrare în `SHAPE_KINDS` (`js/fulger/kinds-forme.js`, `mode: 'figure'`), al cărei `generate(rand)`
   întoarce `figureQuestion(kind, rand, { prompt, figure, solved, key, answer, distractors })`: desene din bancă (`glyph`, `glyph-cells`,
   `cell-grid`, `robot-grid`, `net`, `solid`, `farm-grid`), emoji sau texte; distractorii vin din greșeli tipice, iar id-ul unei variante e
@@ -254,7 +275,8 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
     Culorile seriilor sunt `--v-series-1..4`.
   - **Bara fulgerului** e o pastilă pe marginea de sus a cardului (absolută, fără înălțime proprie). E2E verifică încăperea cu seria
     pornită (`setStreak(3)`) și că pastila nu acoperă cerința (`bolt` din `FULGER_FIT`).
-  - **Pauza „Hopa”** e plafonată la `guard.pauseMaxMs` (9 s), pentru tipurile lente.
+  - **Pauza „Hopa”** e plafonată la `guard.pauseMaxMs` (9 s), pentru tipurile lente (un calcul fără desen își ridică plafonul cu
+    `pauseMaxMs`, cât timpul lui).
   - **Un singur răspuns bun:** maximul și minimul întrebate sunt stricte, iar valorile stau pe liniile grilei. Cel mai scurt drum, linia,
     stația de schimb, prietenul comun și drumul cel mai bogat sunt unice. Regulile verifică toate acestea. O variantă din afara desenului
     are 0, deci apare doar la „cele mai multe”.
@@ -267,8 +289,9 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   - **Scurtăturile** (drumul lacom, cea mai mare creangă, nodul din mijlocul rețelei) se refac de cele mai multe ori, ca răspunsul să
     ceară calculul; frecvența lor se măsoară prin simulare.
   - **Numele desenului** (pentru cititorul de ecran) citește datele, nu rezultatul: fără „cel mai mare”, total sau câștigător.
-  - **E2E:** `DRAWN_TOPICS` (temele cu toate tipurile desenate) și `fulger_drawn_flow` joacă fiecare tip, cu un răspuns corect și unul
-    greșit; `fulger_screens` le încearcă pe 844×390 și pe 360×640.
+  - **E2E:** `TOPIC_KINDS` (temele jucabile, în afară de prima) și `fulger_topics_flow` joacă fiecare tip, cu un răspuns corect și unul
+    greșit (după greșeală, `FULGER_SKIP_PAUSE` sare exact peste pauza „Hopa”, ca runda de 2 minute să ajungă la toate tipurile);
+    `fulger_screens` le încearcă pe 844×390 și pe 360×640.
 - Medaliile Jocurilor fulger (`js/fulger/medals.js`, configurarea `medals` din `data/fulger.js`, desenul `award`):
   - **Regula:** 3 stele la un nivel al unei teme aduc medalia metalului nivelului (bronz la Ușor, argint la Intermediar, aur la Avansat);
     aceeași medalie la 2, 3 și 5 teme aduce medaliile în plus (dublu, colecția, cupa).
