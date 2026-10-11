@@ -53,9 +53,9 @@
     măsurat pe ecran, fiecare temă jucată tip cu tip, mascota care se mișcă doar unde trebuie);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.19.0 (tema fulger „Adunări și scăderi până la 1000”) e gata de publicare, după confirmarea utilizatorului:
-  întâi regulile Firestore (`npm run deploy:rules`, cu tema nouă în `fulgerTopics()`), apoi site-ul (`npm run deploy`), E2E pe site-ul
-  live și tag `v0.19.0`. v0.18.0 e publicată (rularea 38120183318, tag `v0.18.0`).
+- **Următorul pas:** v0.19.0 e publicată: regulile Firestore (ruleset `ee21fbac`), apoi site-ul (rularea 38163564398), tag `v0.19.0`;
+  E2E pe site-ul live 2689/2691 — cele două verificări căzute (peisajul unui card, pe laptop și pe tabletă, „lipsă” la prima vizită
+  după publicare) trec la reluare, de șase ori din șase.
   - Copilul joacă tema nouă pe fiecare nivel: din tabelul „Pentru părinți” (timpul mediu pe tip) se reglează `fastMs` și pragurile.
   - Copilul încearcă un test U2 pe dispozitivul lui: timpii reali, căsuțele „ține minte”, calculul pe coloane pe telefon.
   - De hotărât: variantele fără tipare și la temele mai vechi cu calcule (vezi „Probleme cunoscute”).
@@ -322,6 +322,9 @@
     se termina înaintea ultimelor tipuri de la „Numere până la 1000”).
   - **Verificare:** npm test 124/124, reguli 16/16, E2E complet 2691/2691 (înainte și după reparațiile din recenzie), E2E pe jocurile
     fulger 844/844, E2E cont 82/82; capturile fiecărui tip nou privite pe laptop, tabletă, telefon, telefon culcat și 360×640.
+  - **Publicare (după confirmarea utilizatorului):** întâi regulile Firestore (ruleset `ee21fbac`), apoi site-ul prin GitHub Actions
+    (rularea 38163564398), tag `v0.19.0`; E2E pe site-ul live 2689/2691 — singurele verificări căzute (peisajul unui card din
+    secțiunea de recapitulare, „lipsă” la prima încărcare după publicare) trec la reluare, de șase ori din șase.
 - [x] M34 (v0.16.1): desenul mascotei, citit cu ochii altcuiva.
   - **Cererea utilizatorului:** în poziția cu mâna ridicată să rămână doar lăbuța, fără deget ridicat (se putea citi ca un gest
     ofensator); în poziția principală, lăbuțele și aluna să nu mai fie simetrice, oglindite — două cerculețe cu un oval la mijloc,
@@ -941,8 +944,10 @@
     - în E2E, salturile fixe peste pauze consumă runda de 2 minute: pauza se sare exact.
   - **Rezultate:** npm test 124/124, reguli 16/16, E2E complet 2691/2691 (și pe codul final), E2E pe jocurile fulger 844/844,
     E2E cont 82/82.
-  - **De făcut:** publicarea, după confirmarea utilizatorului (întâi regulile Firestore, apoi site-ul); copilul joacă tema nouă →
-    `fastMs` și pragurile; de hotărât: variantele fără tipare și la temele vechi cu calcule.
+  - **Publicat:** regulile Firestore (ruleset `ee21fbac`), apoi site-ul (rularea 38163564398), tag `v0.19.0`; E2E pe site-ul live
+    2689/2691, iar cele două verificări căzute (peisajul trecător de pe un card) trec la reluare.
+  - **De făcut:** copilul joacă tema nouă → `fastMs` și pragurile; variantele fără tipare și la temele vechi cu calcule (cerut
+    imediat după publicare, împreună cu praguri mai blânde).
 
 - **2026-10-11 (a doua trecere pe U2 și datoriile mărunte, tot v0.18.0)**
   - **Cererea utilizatorului:** „mai fă o trecere de îmbunătățire, rafinare și verificare”, apoi „include și low effort tech debts
