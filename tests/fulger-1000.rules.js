@@ -12,7 +12,7 @@ const numbersIn = (text) => (String(text).match(/\d+/g) ?? []).map(Number);
 const optionValues = (q) => q.choices.map((id) => Number(q.options[id].text));
 
 /** Variantele unei întrebări cu cerință: patru numere diferite, crescătoare, iar răspunsul e cel așteptat. */
-function numberAnswer(q, expected) {
+export function numberAnswer(q, expected) {
   const nums = optionValues(q);
   return (
     Number.isInteger(expected) &&
@@ -23,7 +23,7 @@ function numberAnswer(q, expected) {
 }
 
 /** Câte treceri peste ordin are calculul: la adunare, coloanele care trec de 9; la scădere, împrumuturile. */
-function crossings(op, a, b) {
+export function crossings(op, a, b) {
   let count = 0;
   let carry = 0;
   for (let x = a, y = b; x > 0 || y > 0; x = Math.floor(x / 10), y = Math.floor(y / 10)) {

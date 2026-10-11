@@ -15,6 +15,7 @@
 import { trecere } from '../core/rules.js';
 import { choice, compare, sorting } from './intrebari.js';
 import { KINDS_1000 } from './kinds-1000.js';
+import { CALC_1000_KINDS } from './kinds-calcule-1000.js';
 import { CHART_KINDS } from './kinds-grafice.js';
 import { MAP_KINDS } from './kinds-grafuri.js';
 import { SHAPE_KINDS } from './kinds-forme.js';
@@ -306,6 +307,7 @@ export const KINDS = {
     },
   },
   ...KINDS_1000,
+  ...CALC_1000_KINDS,
   ...SHAPE_KINDS,
   ...CHART_KINDS,
   ...MAP_KINDS,

@@ -13,12 +13,13 @@ import {
   topicConfig, topicStars, topicTotal,
 } from '../site/js/fulger/engine.js';
 import { artName, promptLength, promptSpoken } from '../site/js/fulger/art.js';
-import { KINDS } from '../site/js/fulger/kinds.js';
+import { isDrawn, KINDS } from '../site/js/fulger/kinds.js';
 import { LEGACY_TOPIC, LEVEL_IDS, normalizeFulger, recordKey, splitKey } from '../site/js/fulger/records.js';
 import '../site/js/visuals/all.js';
 import { EMOJI } from '../site/js/visuals/emoji.js';
 import { visualErrors, visualSVG } from '../site/js/visuals/index.js';
 import { RULES_1000 } from './fulger-1000.rules.js';
+import { CALC_1000_RULES } from './fulger-calcule-1000.rules.js';
 import { SHAPE_RULES } from './fulger-forme.rules.js';
 import { CHART_RULES } from './fulger-grafice.rules.js';
 import { MAP_RULES } from './fulger-grafuri.rules.js';
@@ -61,6 +62,7 @@ const RULES = {
     [left, right].some((x) => /[+−]/.test(x)) && Math.abs(calc(left) - calc(right)) <= 3 && [left, right].every((x) => inRange(calc(x), 10, 100)),
   'sort-4-dir': ({ numbers }) => numbers.length === 4 && numbers.every((x) => inRange(x, 0, 100)),
   ...RULES_1000, // numerele până la 1000: tests/fulger-1000.rules.js
+  ...CALC_1000_RULES, // adunările și scăderile până la 1000, cu trecere: tests/fulger-calcule-1000.rules.js
   ...SHAPE_RULES, // tipurile cu figuri: regulile sunt în tests/fulger-forme.rules.js
   ...CHART_RULES, // tipurile cu grafice: tests/fulger-grafice.rules.js
   ...MAP_RULES, // hărțile, rețelele și arborii: tests/fulger-grafuri.rules.js
@@ -104,6 +106,9 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
     if (kind.pauseMaxMs !== undefined) {
       assert.ok(Number.isInteger(kind.pauseMaxMs) && kind.pauseMaxMs > config.guard.pauseMaxMs && kind.pauseMaxMs <= kind.fastMs, `${id}: pauseMaxMs`);
     }
+    // și trebuie să și-l ridice: cu pauza plafonată sub timpul calculului, ghicitul ar costa mai puțin decât socotitul; la desene
+    // (grafice, hărți) pauza rămâne plafonată la 9 s, ca să nu fie prea lungă (decizia din 19 septembrie)
+    if (!isDrawn(id) && kind.fastMs > config.guard.pauseMaxMs) assert.equal(kind.pauseMaxMs, kind.fastMs, `${id}: pauseMaxMs = fastMs`);
     const positions = [0, 0, 0, 0];
     const relations = { '<': 0, '=': 0, '>': 0 };
     const dirs = new Set();
@@ -186,9 +191,9 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
   }
 });
 
-test('fulger: regulile graficelor și ale grafurilor pe încă 2500 de semințe (ramurile rare ale datelor)', () => {
+test('fulger: regulile graficelor, ale grafurilor și ale calculelor cu trecere pe încă 2500 de semințe (ramurile rare)', () => {
   // ramurile rare scapă din 500 de semințe: „cu 5 mai mult”, într-o lună de mai, se citea ca data „5 mai” (1 întrebare din 1000)
-  for (const id of Object.keys({ ...CHART_RULES, ...MAP_RULES })) {
+  for (const id of Object.keys({ ...CHART_RULES, ...MAP_RULES, ...CALC_1000_RULES })) {
     for (let seed = SEEDS + 1; seed <= 3000; seed++) {
       const q = KINDS[id].generate(seededRandom(seed));
       assert.ok(RULES[id](q), `${id} (sămânța ${seed}) încalcă regulile tipului: ${JSON.stringify(q)}`);
@@ -216,6 +221,9 @@ test('fulger: pauzele după greșeli; ghicitul prea rapid primește pauza lungă
   assert.deepEqual(pauseAfter({ kind: 'cmp-20', correct: false, ms: 900 }), { pauseMs: 3000, guarded: true }); // sub 1 s
   assert.deepEqual(pauseAfter({ kind: 'sort-4-dir', correct: false, ms: 300 }), { pauseMs: 1000, guarded: false });
   assert.deepEqual(pauseAfter({ kind: 'timp-total', correct: false, ms: 1000 }), { pauseMs: 9000, guarded: true }); // plafonul de 9 s
+  // un calcul lung își ridică plafonul: ghicitul nu costă mai puțin decât socotitul
+  assert.deepEqual(pauseAfter({ kind: 'sub-1000-doua-imprumuturi', correct: false, ms: 1000 }), { pauseMs: 13000, guarded: true });
+  assert.deepEqual(pauseAfter({ kind: 'sub-1000-doua-imprumuturi', correct: false, ms: 6000 }), { pauseMs: 1000, guarded: false }); // peste 5,2 s
 });
 
 test('fulger: pragurile de serie și Turbo', () => {
@@ -391,12 +399,12 @@ test('fulger: pragurile de stele se potrivesc cu copiii simulați (mediana a 200
         ghicitRepede: median(guesser(450)),
         ghicitLent: median(guesser(900)),
       };
-      const where = `${topic.id}/${id}: ${JSON.stringify(m)}, praguri ${one}/${two}/${three}`;
+      // raportul ghicit / copil încet (cu mediane), doar ca informație: fluctuează cu ±0,08 de la un set de semințe la altul
+      const guess = (Math.max(m.ghicitRepede, m.ghicitLent) / m.incet).toFixed(2);
+      const where = `${topic.id}/${id}: ${JSON.stringify(m)}, ghicit/încet ${guess}, praguri ${one}/${two}/${three}`;
       if (process.env.FULGER_CALIBRARE) console.log(where); // FULGER_CALIBRARE=1 node --test tests/fulger.test.js: medianele, pentru praguri
       assert.ok(m.rapid >= three && m.bun >= two && m.incet >= one, where);
       assert.ok(m.ghicitRepede < one && m.ghicitLent < one, where);
-      // ghicitul rămâne mult sub copilul încet: altfel la întrebările lungi ar costa mai puțin decât socotitul (pauza „Hopa”)
-      assert.ok(Math.max(m.ghicitRepede, m.ghicitLent) < 0.75 * m.incet, `${where}: ghicitul se apropie de copilul încet`);
     }
   }
 });
