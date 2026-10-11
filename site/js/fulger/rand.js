@@ -38,12 +38,33 @@ export function withChoices(rand, answer, typical = [], { min = 0, max = 100 } =
 }
 
 /**
- * Patru variante „în pătrat”: răspunsul și vecinii lui cu o zece și cu o sută ({x, x + 10, x + 100, x + 110}), cu răspunsul într-un
- * colț la întâmplare. Forma nu depinde de locul răspunsului, deci nici mijlocul a trei numere egal depărtate, nici două numere vecine
- * nu-l arată, iar unitățile sunt aceleași la toate; o zece sau o sută în plus ori în minus sunt chiar greșelile tipice (transportul
- * uitat sau dublat). Răspunsul trebuie să stea între 110 și 889, ca toate colțurile să încapă între 0 și 999.
+ * Formele variantelor: deplasările față de cea mai mică, crescătoare. `grid`: o zece și o sută (transportul uitat sau dublat la zeci și
+ * la sute); `grid10`: o unitate și o zece; `line`: patru numere la rând; `tens`: patru zeci la rând; `hundreds`: patru sute la rând;
+ * `place`: câte o greșeală pe fiecare ordin (unități, zeci, sute), pentru numerele citite pe numărătoare.
  */
-export function gridChoices(rand, answer) {
-  const x = answer - 10 * int(rand, 0, 1) - 100 * int(rand, 0, 1);
-  return [x, x + 10, x + 100, x + 110];
+export const SHAPES = {
+  grid: [0, 10, 100, 110],
+  grid10: [0, 1, 10, 11],
+  line: [0, 1, 2, 3],
+  tens: [0, 10, 20, 30],
+  hundreds: [0, 100, 200, 300],
+  place: [0, 1, 10, 100],
+};
+
+/**
+ * Patru variante într-o formă fixă, cu răspunsul pe un loc al formei ales la întâmplare dintre cele care țin toate variantele între
+ * `min` și `max`. Locul răspunsului nu se vede din formă: un copil care alege după tipar (mijlocul a trei numere egal depărtate, mai
+ * marele din doi vecini) nimerește cam o dată din patru.
+ */
+export function shapeChoices(rand, answer, shape, { min = 0, max = Infinity } = {}) {
+  const fits = shape.filter((d) => answer - d >= min && answer - d + shape.at(-1) <= max);
+  if (!fits.length) throw new Error(`fulger: forma [${shape}] nu încape în jurul lui ${answer}`);
+  const base = answer - fits[int(rand, 0, fits.length - 1)];
+  return shape.map((d) => base + d);
 }
+
+/**
+ * Patru variante „în pătrat”: răspunsul și vecinii lui cu o zece și cu o sută ({x, x + 10, x + 100, x + 110}), cu răspunsul într-un
+ * colț la întâmplare; unitățile sunt aceleași la toate. Răspunsul trebuie să stea între 110 și 889, ca toate colțurile să încapă.
+ */
+export const gridChoices = (rand, answer) => shapeChoices(rand, answer, SHAPES.grid, { max: 999 });

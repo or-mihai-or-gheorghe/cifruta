@@ -1,10 +1,10 @@
 // Regulile tipurilor temei „Adunări și scăderi până la 1000” (js/fulger/kinds-calcule-1000.js), verificate de tests/fulger.test.js
 // pe întrebările generate. Fiecare regulă citește singură datele întrebării (calculul, cerința, desenul, variantele) și recalculează
 // răspunsul cu codul ei: trecerile le numără pe coloane (`crossings`), cifra lipsă o caută printre cele 10 cifre, estimarea o rotunjește.
-// Verifică și forma variantelor, ca să nu arate răspunsul: „în pătrat” la calcule, ferestre de patru valori la rând, nicio variantă
-// egală cu un termen, calculul greșit fără o greșeală vizibilă din ochi.
+// Verifică și forma variantelor, ca să nu arate răspunsul: o formă fixă la calcule, fără variante absurde, ferestre de patru valori
+// la rând, nicio variantă egală cu un termen, calculul greșit fără o greșeală vizibilă din ochi.
 
-import { crossings, isGrid, numberAnswer } from './fulger-1000.rules.js';
+import { calcOptions, crossings, isGrid, numberAnswer } from './fulger-1000.rules.js';
 
 const terms = (text) => text.split(/ [+−] /).map(Number);
 const opOf = (text) => (text.includes('−') ? '-' : '+');
@@ -27,7 +27,7 @@ function crossingPlaces(op, a, b) {
   return places;
 }
 
-/** Un calcul cu doi termeni, cu numărul de treceri cerut, rezultatul între 110 și 889 și variantele „în pătrat”. */
+/** Un calcul cu doi termeni, cu numărul de treceri cerut, rezultatul între 110 și 889 și variantele într-o formă fixă, plauzibile. */
 function gridTwoTerms({ text, answer, choices }, { op, count, minA = 100, minB = 10 }) {
   const t = terms(text);
   const [a, b] = t;
@@ -39,7 +39,8 @@ function gridTwoTerms({ text, answer, choices }, { op, count, minA = 100, minB =
     answer === value(op, a, b) &&
     inRange(answer, 110, 889) &&
     crossings(op, a, b) === count &&
-    isGrid(choices, answer, t)
+    calcOptions({ text, answer, choices }, 999) &&
+    !choices.some((c) => t.includes(c))
   );
 }
 
@@ -209,7 +210,8 @@ export const CALC_1000_RULES = {
       inRange(answer, 110, 889) &&
       // cel puțin o coloană trece de 9
       [1, 10, 100].some((p) => t.reduce((s, x) => s + (Math.floor(x / p) % 10), 0) >= 10) &&
-      isGrid(choices, answer, t)
+      calcOptions({ text, answer, choices }, 999) &&
+      !choices.some((c) => t.includes(c))
     );
   },
 
@@ -219,7 +221,7 @@ export const CALC_1000_RULES = {
     // al doilea termen e la 1–3 de o sută întreagă: sub ea la adunare, sub ea sau peste ea la scădere
     const off = b % 100;
     const nearRound = off >= 97 || (op === '-' && off >= 1 && off <= 3);
-    return nearRound && b >= 97 && crossings(op, a, b) >= 1 && q.answer === value(op, a, b) && inRange(q.answer, 110, 889) && isGrid(q.choices, q.answer, [a, b]);
+    return nearRound && b >= 97 && crossings(op, a, b) >= 1 && q.answer === value(op, a, b) && inRange(q.answer, 110, 889) && calcOptions(q, 999) && !q.choices.some((c) => c === a || c === b);
   },
 
   'pana-la-1000': (q) => {

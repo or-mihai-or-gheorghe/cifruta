@@ -260,7 +260,7 @@ function parentsBox(rounds) {
     h(
       'div',
       { class: 'c-explain__body' },
-      h('p', { class: 'u-small u-muted' }, 'O stea înseamnă un copil sigur pe răspunsuri, trei stele unul sigur și foarte rapid; atingerile la întâmplare nu ajung la stele.'),
+      h('p', { class: 'u-small u-muted' }, 'O stea înseamnă un copil sigur pe răspunsuri, trei stele (și medalia) unul foarte bine pregătit, sigur și rapid; atingerile la întâmplare nu ajung la stele.'),
       last.length
         ? h(
             'ul',
@@ -270,7 +270,8 @@ function parentsBox(rounds) {
                 'li',
                 { class: 'c-history__row' },
                 h('span', {}, h('strong', {}, title(r)), ` — ${formatDateTime(r.at)} · ${alune(r.total)} · ${r.correct} corecte din ${r.correct + r.wrong}`),
-                stars(r.stars ?? 0),
+                // stelele după pragurile de acum (cele salvate cu runda pot fi după praguri mai vechi), ca la recorduri și medalii
+                stars(levelConfig(r.topic, r.level) ? starsFor(levelConfig(r.topic, r.level), r.total ?? 0) : (r.stars ?? 0)),
               ),
             ),
           )

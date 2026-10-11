@@ -18,7 +18,7 @@ import { LEGACY_TOPIC, LEVEL_IDS, normalizeFulger, recordKey, splitKey } from '.
 import '../site/js/visuals/all.js';
 import { EMOJI } from '../site/js/visuals/emoji.js';
 import { visualErrors, visualSVG } from '../site/js/visuals/index.js';
-import { RULES_1000 } from './fulger-1000.rules.js';
+import { calcOptions, RULES_1000 } from './fulger-1000.rules.js';
 import { CALC_1000_RULES } from './fulger-calcule-1000.rules.js';
 import { SHAPE_RULES } from './fulger-forme.rules.js';
 import { CHART_RULES } from './fulger-grafice.rules.js';
@@ -32,32 +32,33 @@ const CU = ['mat.op.cu-trecere', 'mat.op1000.cu-trecere'];
 
 // Regulile fiecărui tip, verificate pe întrebările generate
 const RULES = {
-  'add-1c': ({ text }) => terms(text).every((x) => inRange(x, 1, 9)),
-  'add-1c-2c': ({ text }) => inRange(terms(text)[0], 1, 9) && inRange(terms(text)[1], 10, 20),
-  'sub-20-fara': ({ text }) => {
-    const [a, b] = terms(text);
-    return inRange(a, 11, 19) && inRange(b, 1, 9) && !trecere('-', a, b);
+  // la calcule, variantele au o formă fixă și nu sunt absurde când calculul lasă loc (calcOptions, din tests/fulger-1000.rules.js)
+  'add-1c': (q) => terms(q.text).every((x) => inRange(x, 1, 9)) && calcOptions(q, 30, { plausible: false }),
+  'add-1c-2c': (q) => inRange(terms(q.text)[0], 1, 9) && inRange(terms(q.text)[1], 10, 20) && calcOptions(q, 40, { plausible: false }),
+  'sub-20-fara': (q) => {
+    const [a, b] = terms(q.text);
+    return inRange(a, 11, 19) && inRange(b, 1, 9) && !trecere('-', a, b) && calcOptions(q, 30, { plausible: false });
   },
   'cmp-20': ({ left, right }) => inRange(left, 0, 20) && inRange(right, 0, 20),
   'sort-3-20': ({ numbers, dir }) => numbers.length === 3 && dir === 'asc' && numbers.every((x) => inRange(x, 0, 20)),
-  'sub-20-cu': ({ text }) => {
-    const [a, b] = terms(text);
-    return inRange(a, 11, 18) && inRange(b, 2, 9) && trecere('-', a, b);
+  'sub-20-cu': (q) => {
+    const [a, b] = terms(q.text);
+    return inRange(a, 11, 18) && inRange(b, 2, 9) && trecere('-', a, b) && calcOptions(q, 20, { plausible: false });
   },
-  'add-100-fara': ({ text, answer }) => {
-    const [a, b] = terms(text);
-    return answer <= 99 && Math.max(a, b) >= 10 && !trecere('+', a, b);
+  'add-100-fara': (q) => {
+    const [a, b] = terms(q.text);
+    return q.answer <= 99 && Math.max(a, b) >= 10 && !trecere('+', a, b) && calcOptions(q, 100);
   },
-  'sub-100-fara': ({ text, answer }) => {
-    const [a, b] = terms(text);
-    return a <= 99 && b >= 1 && answer >= 1 && !trecere('-', a, b);
+  'sub-100-fara': (q) => {
+    const [a, b] = terms(q.text);
+    return a <= 99 && b >= 1 && q.answer >= 1 && !trecere('-', a, b) && calcOptions(q, 100);
   },
-  'add-3op-1c': ({ text }) => terms(text).length === 3 && terms(text).every((x) => inRange(x, 1, 9)),
+  'add-3op-1c': (q) => terms(q.text).length === 3 && terms(q.text).every((x) => inRange(x, 1, 9)) && calcOptions(q, 40, { plausible: false }),
   'cmp-100': ({ left, right }) => inRange(left, 0, 100) && inRange(right, 0, 100),
   'sort-4-100': ({ numbers, dir }) => numbers.length === 4 && dir === 'asc' && numbers.every((x) => inRange(x, 0, 100)),
-  'add-100-cu': ({ text, answer }) => answer <= 100 && trecere('+', ...terms(text)),
-  'sub-100-cu': ({ text, answer }) => terms(text)[0] <= 100 && answer >= 1 && trecere('-', ...terms(text)),
-  'add-3op-100': ({ text, answer }) => terms(text).length === 3 && answer <= 100 && terms(text).reduce((s, x) => s + (x % 10), 0) >= 10,
+  'add-100-cu': (q) => q.answer <= 100 && trecere('+', ...terms(q.text)) && calcOptions(q, 100),
+  'sub-100-cu': (q) => terms(q.text)[0] <= 100 && q.answer >= 1 && trecere('-', ...terms(q.text)) && calcOptions(q, 100),
+  'add-3op-100': (q) => terms(q.text).length === 3 && q.answer <= 100 && terms(q.text).reduce((s, x) => s + (x % 10), 0) >= 10 && calcOptions(q, 100),
   'cmp-expr': ({ left, right }) =>
     [left, right].some((x) => /[+−]/.test(x)) && Math.abs(calc(left) - calc(right)) <= 3 && [left, right].every((x) => inRange(calc(x), 10, 100)),
   'sort-4-dir': ({ numbers }) => numbers.length === 4 && numbers.every((x) => inRange(x, 0, 100)),
@@ -77,6 +78,9 @@ function carries(text) {
   if (t.length === 2) return trecere(text.includes('−') ? '-' : '+', t[0], t[1]);
   return [1, 10, 100].some((p) => t.reduce((s, x) => s + (Math.floor(x / p) % 10), 0) >= 10);
 }
+
+/** Calculul din text trece peste ordin (ca `carries`). */
+const carriesOf = (text) => carries(text);
 
 /** Un răspuns greșit la întâmplare. */
 function wrongAnswer(q, rand) {
@@ -224,18 +228,55 @@ function patternPick(q) {
   return texts ? (q.choices.find((c, i) => absurd(texts[i])) ?? null) : null;
 }
 
-test('fulger: la tema cu trecere până la 1000, forma variantelor nu arată răspunsul (ghicitorul pe tipare, 1000 de semințe)', () => {
-  // temele mai vechi cu calcule au încă astfel de tipare (variantele ±1, ±10 puse simetric lasă răspunsul la mijloc): backlog
-  const topic = topicConfig('adunari-scaderi-1000');
-  const kinds = [...new Set(topic.levels.flatMap((l) => l.mix.map((m) => m.kind)))].filter((k) => KINDS[k].mode !== 'compare');
+/** Șansa unui copil care scoate întâi variantele absurde (o sumă cel mult cât un termen, o diferență cel puțin cât descăzutul), apoi
+ * alege după tipar printre celelalte. */
+function magnitudeOdds(q) {
+  let pool = q;
+  if (q.mode === 'choice') {
+    const nums = terms(q.text);
+    const minus = q.text.includes('−');
+    const ok = q.choices.filter((c) => (minus ? c < nums[0] : c > Math.max(...nums)));
+    if (ok.length) pool = { ...q, choices: ok };
+  }
+  const pick = patternPick(pool);
+  return pick === null ? 1 / pool.choices.length : pick === q.answer ? 1 : 0;
+}
+
+/** Șansa unui copil care socotește doar unitățile și alege la întâmplare printre variantele cu cifra unităților bună. */
+function unitsOdds(q) {
+  const same = q.choices.filter((c) => c % 10 === q.answer % 10);
+  return 1 / same.length;
+}
+
+// calculele cu o cifră (și cele pe sute rotunde): răspunsul pe oricare loc are întâietate față de plauzibilitate
+const ONE_DIGIT = ['add-1c', 'add-1c-2c', 'sub-20-fara', 'sub-20-cu', 'add-3op-1c', 'op-sute'];
+
+test('fulger: la temele cu calcule, forma variantelor nu arată răspunsul (ghicitorii pe tipare, pe mărimi și pe unități)', () => {
+  // temele cu desene au câteva tipuri cu sume (arbori, bare, drumuri) la 33–47%: backlog
+  const calcTopics = ['adunari-scaderi-100', 'numere-1000', 'adunari-scaderi-1000'].map(topicConfig);
+  const kinds = [...new Set(calcTopics.flatMap((t) => t.levels.flatMap((l) => l.mix.map((m) => m.kind))))].filter((k) => !['compare', 'sort'].includes(KINDS[k].mode));
+  const SEEDS_GUESS = 2000;
   for (const id of kinds) {
     let hits = 0;
-    for (let seed = 1; seed <= 1000; seed++) {
+    let magnitude = 0;
+    let units = 0;
+    let carries = 0;
+    for (let seed = 1; seed <= SEEDS_GUESS; seed++) {
       const q = KINDS[id].generate(seededRandom(seed));
       const pick = patternPick(q);
       hits += pick === null ? 1 / q.choices.length : pick === q.answer ? 1 : 0;
+      magnitude += magnitudeOdds(q);
+      // la calculele cu trecere, cu mai multe cifre: unitățile singure nu trebuie să dea răspunsul (trecerea decide)
+      if (q.mode === 'choice' && q.answer >= 20 && !ONE_DIGIT.includes(id) && carriesOf(q.text)) {
+        units += unitsOdds(q);
+        carries++;
+      }
     }
-    assert.ok(hits / 1000 <= 0.32, `${id}: tiparele variantelor nimeresc răspunsul în ${Math.round(hits / 10)}% din întrebări (la întâmplare 25%)`);
+    assert.ok(hits / SEEDS_GUESS <= 0.32, `${id}: tiparele variantelor nimeresc răspunsul în ${Math.round((100 * hits) / SEEDS_GUESS)}% din întrebări (la întâmplare 25%)`);
+    if (!ONE_DIGIT.includes(id)) {
+      assert.ok(magnitude / SEEDS_GUESS <= 0.36, `${id}: scoțând variantele absurde, tiparul nimerește ${Math.round((100 * magnitude) / SEEDS_GUESS)}% (la întâmplare 25%)`);
+    }
+    if (carries) assert.ok(units / carries <= 0.55, `${id}: doar din unități, răspunsul se nimerește în ${Math.round((100 * units) / carries)}% din calculele cu trecere`);
   }
 });
 
@@ -333,12 +374,13 @@ test('fulger: bonusul de precizie și stelele', () => {
   assert.equal(precisionBonus(10, 8, 100), 0);
   assert.equal(precisionBonus(7, 7, 100, 7), 20); // un nivel lent: bonusul de la 7 răspunsuri
   assert.equal(precisionBonus(6, 6, 100, 7), 0);
-  assert.equal(starsFor(usor, 29), 0);
-  assert.equal(starsFor(usor, 30), 1);
-  assert.equal(starsFor(levelConfig(LEGACY_TOPIC, 'avansat'), 235), 3);
-  assert.deepEqual(nextStar(usor, 29), { index: 0, at: 30 });
-  assert.deepEqual(nextStar(usor, 80), { index: 2, at: 175 });
-  assert.equal(nextStar(usor, 175), null);
+  const [one, two, three] = usor.stars;
+  assert.equal(starsFor(usor, one - 1), 0);
+  assert.equal(starsFor(usor, one), 1);
+  assert.equal(starsFor(levelConfig(LEGACY_TOPIC, 'avansat'), levelConfig(LEGACY_TOPIC, 'avansat').stars[2]), 3);
+  assert.deepEqual(nextStar(usor, one - 1), { index: 0, at: one });
+  assert.deepEqual(nextStar(usor, two), { index: 2, at: three });
+  assert.equal(nextStar(usor, three), null);
 });
 
 test('fulger: temele și nivelurile trimit doar la tipuri, concepte și iconițe cunoscute', () => {
@@ -435,6 +477,7 @@ test('fulger: pragurile de stele se potrivesc cu copiii simulați (mediana a 200
       const median = (decide) => Array.from({ length: 200 }, (_, i) => playRound(topic.id, id, 101 + i, decide).total).sort((a, b) => a - b)[100];
       const m = {
         rapid: median(honest(0.95, [0.6, 1.1])),
+        foartePregatit: median(honest(0.95, [0.8, 1.4])),
         bun: median(honest(0.9, [0.9, 1.8])),
         incet: median(honest(0.9, [1.6, 3])),
         ghicitRepede: median(guesser(450)),
@@ -444,7 +487,11 @@ test('fulger: pragurile de stele se potrivesc cu copiii simulați (mediana a 200
       const guess = (Math.max(m.ghicitRepede, m.ghicitLent) / m.incet).toFixed(2);
       const where = `${topic.id}/${id}: ${JSON.stringify(m)}, ghicit/încet ${guess}, praguri ${one}/${two}/${three}`;
       if (process.env.FULGER_CALIBRARE) console.log(where); // FULGER_CALIBRARE=1 node --test tests/fulger.test.js: medianele, pentru praguri
-      assert.ok(m.rapid >= three && m.bun >= two && m.incet >= one, where);
+      // a treia stea (medalia) o ia un copil foarte pregătit în cam jumătate din runde: nici imposibilă, nici gratuită; a doua, un copil
+      // bun în majoritatea rundelor; prima, un copil încet dar sigur; atingerile la întâmplare rămân sub ea
+      assert.ok(m.foartePregatit >= three && three >= 0.85 * m.foartePregatit, `${where}: a treia stea față de copilul foarte pregătit`);
+      assert.ok(m.bun >= two && two >= 0.7 * m.bun, `${where}: a doua stea față de copilul bun`);
+      assert.ok(m.incet >= one, where);
       assert.ok(m.ghicitRepede < one && m.ghicitLent < one, where);
     }
   }

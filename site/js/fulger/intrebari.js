@@ -4,8 +4,9 @@
 // răspunsul.
 
 import { calc, relation } from '../core/expr.js';
+import { coloane } from '../core/rules.js';
 import { artId, figureQuestion } from './kinds-forme.js';
-import { gridChoices, shuffle, withChoices } from './rand.js';
+import { shapeChoices, SHAPES, shuffle, withChoices } from './rand.js';
 
 export const REL = (a, b) => (a < b ? '<' : a > b ? '>' : '=');
 
@@ -17,10 +18,60 @@ export function choice(kind, rand, text, typical, max) {
   return { kind, mode: 'choice', key: `${kind}:${text}`, text, answer, choices: withChoices(rand, answer, typical, { max }) };
 }
 
-/** Un calcul cu variantele „în pătrat” (`gridChoices`): fără tipare care să arate răspunsul; rezultatul stă între 110 și 889. */
-export function gridChoice(kind, rand, text) {
+/**
+ * Familiile formelor pentru variantele unui calcul: `plausible` — formele încercate printre variantele plauzibile (cea cu cele mai multe
+ * locuri pentru răspuns); `fallback` — formele încercate în ordine când acolo nu sunt măcar trei locuri (prima care încape toată).
+ * - `hundreds` (sute rotunde): patru sute la rând;
+ * - `units` (unitățile rezultatului se văd din calcul: scăzătorul rotund, sau la adunare cel mult un termen cu unități): forme care
+ *   păstrează unitățile;
+ * - `crossing` (cu trecere peste ordin): fără patru numere la rând, care ar lăsa unitățile să dea răspunsul; la un termen mic, rezerva
+ *   e un rând de zeci (853 − 10, 863: transportul uitat sau dublat), ca după variantele absurde să nu rămână doi vecini;
+ * - `plain`: oricare.
+ */
+const FAMILIES = {
+  hundreds: { plausible: [SHAPES.hundreds], fallback: [SHAPES.hundreds] },
+  units: { plausible: [SHAPES.grid, SHAPES.tens], fallback: [SHAPES.tens, SHAPES.grid] },
+  crossing: { plausible: [SHAPES.grid, SHAPES.grid10, SHAPES.tens], fallback: [SHAPES.tens, SHAPES.grid10, SHAPES.grid] },
+  plain: { plausible: [SHAPES.grid, SHAPES.grid10, SHAPES.line], fallback: [SHAPES.line, SHAPES.grid10, SHAPES.grid] },
+};
+
+/** Familia formelor potrivite unui calcul (`FAMILIES`). */
+export function calcFamily(text) {
+  const nums = text.split(/ [+−] /).map(Number);
+  const minus = text.includes('−');
+  if (nums.every((n) => n % 100 === 0)) return 'hundreds';
+  if (minus ? nums[1] % 10 === 0 : nums.filter((n) => n % 10 !== 0).length <= 1) return 'units';
+  return coloane(minus ? '-' : '+', nums).some((c) => c.out > 0) ? 'crossing' : 'plain';
+}
+
+/**
+ * Variantele unui calcul (doi sau trei termeni), fără tipare și, cu `plausible`, fără variante absurde (o sumă mai mică decât un termen,
+ * o diferență mai mare decât descăzutul): o formă a familiei calculului (`calcFamily`), cu răspunsul pe un loc la întâmplare — printre
+ * locurile plauzibile, dacă sunt măcar trei, altfel oriunde între `min` și `max`. La calculele cu o cifră (`plausible: false`), locul la
+ * întâmplare are întâietate: prima formă care încape toată, de preferat patru numere la rând (la sute rotunde, sute la rând).
+ */
+export function calcChoices(rand, text, { min = 0, max, plausible = true }) {
   const answer = calc(text);
-  return { kind, mode: 'choice', key: `${kind}:${text}`, text, answer, choices: gridChoices(rand, answer) };
+  const nums = text.split(/ [+−] /).map(Number);
+  const minus = text.includes('−');
+  const family = calcFamily(text);
+  const places = (shape, lo, hi) => shape.filter((d) => answer - d >= lo && answer - d + shape.at(-1) <= hi).length;
+  const best = (list, lo, hi) => list.reduce((a, b) => (places(b, lo, hi) > places(a, lo, hi) ? b : a));
+  const whole = (list) => list.find((s) => places(s, min, max) === 4) ?? best(list, min, max);
+  if (!plausible) {
+    const pool = family === 'hundreds' ? FAMILIES.hundreds.fallback : [...(family === 'units' ? [SHAPES.tens, SHAPES.grid] : []), SHAPES.line, SHAPES.grid10, SHAPES.grid];
+    return shapeChoices(rand, answer, whole(pool), { min, max });
+  }
+  const lo = Math.max(min, minus ? 0 : Math.max(...nums) + 1);
+  const hi = Math.min(max, minus ? nums[0] - 1 : max);
+  const shape = best(FAMILIES[family].plausible, lo, hi);
+  if (places(shape, lo, hi) >= 3) return shapeChoices(rand, answer, shape, { min: lo, max: hi });
+  return shapeChoices(rand, answer, whole(FAMILIES[family].fallback), { min, max });
+}
+
+/** Un calcul cu variantele din `calcChoices` (fără tipare și, cu `plausible`, fără variante absurde). */
+export function calcChoice(kind, rand, text, { min = 0, max, plausible = true }) {
+  return { kind, mode: 'choice', key: `${kind}:${text}`, text, answer: calc(text), choices: calcChoices(rand, text, { min, max, plausible }) };
 }
 
 /** Două laturi de comparat (numere sau calcule) și semnul dintre ele. */

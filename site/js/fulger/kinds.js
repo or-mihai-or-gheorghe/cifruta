@@ -13,13 +13,13 @@
 // lui în tests/fulger.test.js (cu figuri: în tests/fulger-forme.rules.js).
 
 import { trecere } from '../core/rules.js';
-import { choice, compare, sorting } from './intrebari.js';
+import { calcChoice, compare, sorting } from './intrebari.js';
 import { KINDS_1000 } from './kinds-1000.js';
 import { CALC_1000_KINDS } from './kinds-calcule-1000.js';
 import { CHART_KINDS } from './kinds-grafice.js';
 import { MAP_KINDS } from './kinds-grafuri.js';
 import { SHAPE_KINDS } from './kinds-forme.js';
-import { distinct, int, pickOne, shuffle } from './rand.js';
+import { distinct, int, pickOne } from './rand.js';
 
 const PLUS = ' + ';
 const MINUS = ' − ';
@@ -36,9 +36,6 @@ function twoDigits(rand) {
   const b = int(rand, 1, 8);
   return [a, b >= a ? b + 1 : b];
 }
-
-/** Numărul cu cifrele inversate (43 → 34), pentru greșeli tipice. */
-const reversed = (n) => (n >= 10 && n <= 99 && n % 10 !== 0 ? (n % 10) * 10 + Math.floor(n / 10) : null);
 
 /** Patru numere care se încurcă ușor: aceleași cifre (43, 34, 40, 30), aceleași zeci (52, 55, 57, 59) sau vecine. */
 function trickyFour(rand) {
@@ -64,8 +61,7 @@ export const KINDS = {
     concepts: [FARA, CU],
     generate(rand) {
       const [a, b] = [int(rand, 1, 9), int(rand, 1, 9)];
-      const r = a + b;
-      return choice('add-1c', rand, `${a}${PLUS}${b}`, [r - 1, r + 1, r - 10], 30);
+      return calcChoice('add-1c', rand, `${a}${PLUS}${b}`, { max: 30, plausible: false });
     },
   },
   'add-1c-2c': {
@@ -76,8 +72,7 @@ export const KINDS = {
     concepts: [FARA, CU],
     generate(rand) {
       const [a, b] = [int(rand, 1, 9), int(rand, 10, 20)];
-      const r = a + b;
-      return choice('add-1c-2c', rand, `${a}${PLUS}${b}`, [r - 10, r + 10, r - 1, r + 1], 40);
+      return calcChoice('add-1c-2c', rand, `${a}${PLUS}${b}`, { max: 40, plausible: false });
     },
   },
   'sub-20-fara': {
@@ -90,8 +85,7 @@ export const KINDS = {
       const u = int(rand, 1, 9);
       const b = int(rand, 1, u);
       const a = 10 + u;
-      const r = a - b;
-      return choice('sub-20-fara', rand, `${a}${MINUS}${b}`, [r - 1, r + 1, r - 10, a + b], 30);
+      return calcChoice('sub-20-fara', rand, `${a}${MINUS}${b}`, { max: 30, plausible: false });
     },
   },
   'cmp-20': {
@@ -130,9 +124,7 @@ export const KINDS = {
       const u = int(rand, 1, 8);
       const b = int(rand, u + 1, 9);
       const a = 10 + u;
-      const r = a - b;
-      // greșeala tipică: scade cifra mică din cea mare (13 − 7 → 14)
-      return choice('sub-20-cu', rand, `${a}${MINUS}${b}`, [10 + b - u, r + 1, r - 1, r + 10], 20);
+      return calcChoice('sub-20-cu', rand, `${a}${MINUS}${b}`, { max: 20, plausible: false });
     },
   },
   'add-100-fara': {
@@ -149,8 +141,10 @@ export const KINDS = {
       const u2 = int(rand, two ? 0 : 1, 9 - u1);
       let [a, b] = [10 * t1 + u1, 10 * t2 + u2];
       if (two && rand() < 0.3) [a, b] = [b, a];
-      const r = a + b;
-      return choice('add-100-fara', rand, `${a}${PLUS}${b}`, [r - 10, r + 10, r - 1, r + 1, reversed(r)], 100);
+      // cu un termen de zeci rotunde, variantele păstrează unitățile (patru zeci la rând); peste 70 n-ar mai încăpea sub 100
+      // în jurul răspunsului, care ar sta mereu sus
+      if ((u1 === 0 || u2 === 0) && a + b > 70) return this.generate(rand);
+      return calcChoice('add-100-fara', rand, `${a}${PLUS}${b}`, { max: 100 });
     },
   },
   'sub-100-fara': {
@@ -167,8 +161,7 @@ export const KINDS = {
       const ub = one ? int(rand, 1, ua) : int(rand, 0, ua);
       if (tb === ta && ub === ua) tb--; // fără rezultatul 0
       const [a, b] = [10 * ta + ua, 10 * tb + ub];
-      const r = a - b;
-      return choice('sub-100-fara', rand, `${a}${MINUS}${b}`, [r - 10, r + 10, r - 1, r + 1, a + b, reversed(r)], 100);
+      return calcChoice('sub-100-fara', rand, `${a}${MINUS}${b}`, { max: 100 });
     },
   },
   'add-3op-1c': {
@@ -179,8 +172,7 @@ export const KINDS = {
     concepts: [FARA, CU],
     generate(rand) {
       const [a, b, c] = [int(rand, 1, 9), int(rand, 1, 9), int(rand, 1, 9)];
-      const r = a + b + c;
-      return choice('add-3op-1c', rand, `${a}${PLUS}${b}${PLUS}${c}`, [a + b, r - 1, r + 1, r - 10, r + 10], 40);
+      return calcChoice('add-3op-1c', rand, `${a}${PLUS}${b}${PLUS}${c}`, { max: 40, plausible: false });
     },
   },
   'cmp-100': {
@@ -228,8 +220,8 @@ export const KINDS = {
         const b = rand() < 0.2 ? int(rand, 2, 9) : int(rand, 11, 89);
         const r = a + b;
         if (r > 100 || (a % 10) + (b % 10) < 10) continue;
-        // greșeala tipică: uită zecea trecută (38 + 47 → 75)
-        return choice('add-100-cu', rand, `${a}${PLUS}${b}`, [r - 10, r + 10, r - 1, r + 1, r - 2, r + 2], 100);
+        // variantele: unități și zeci (zecea trecută uitată sau dublată: 38 + 47 → 75, 95), fără tipare și fără sume absurde
+        return calcChoice('add-100-cu', rand, `${a}${PLUS}${b}`, { max: 100 });
       }
     },
   },
@@ -244,10 +236,8 @@ export const KINDS = {
         const a = rand() < 0.1 ? 100 : int(rand, 21, 99);
         const b = rand() < 0.2 ? int(rand, 2, 9) : int(rand, 11, a - 1);
         if (b >= a || !trecere('-', a, b)) continue;
-        const r = a - b;
-        // greșeala tipică: pe fiecare coloană scade cifra mică din cea mare (72 − 38 → 46)
-        const digits = a < 100 ? (Math.floor(a / 10) - Math.floor(b / 10)) * 10 + Math.abs((a % 10) - (b % 10)) : null;
-        return choice('sub-100-cu', rand, `${a}${MINUS}${b}`, [digits, r + 10, r - 10, r - 1, r + 1], 100);
+        // variantele: unități și zeci (împrumutul fără micșorare: 72 − 38 → 44), fără tipare și fără diferențe absurde
+        return calcChoice('sub-100-cu', rand, `${a}${MINUS}${b}`, { max: 100 });
       }
     },
   },
@@ -264,7 +254,7 @@ export const KINDS = {
         const c = rand() < 0.6 ? int(rand, 2, 9) : int(rand, 10, 29);
         const r = a + b + c;
         if (r > 100 || (a % 10) + (b % 10) + (c % 10) < 10) continue;
-        return choice('add-3op-100', rand, `${a}${PLUS}${b}${PLUS}${c}`, [a + b, r - 10, r + 10, r - 1, r + 1], 100);
+        return calcChoice('add-3op-100', rand, `${a}${PLUS}${b}${PLUS}${c}`, { max: 100 });
       }
     },
   },

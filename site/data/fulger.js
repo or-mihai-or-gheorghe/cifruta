@@ -1,7 +1,8 @@
 // Jocuri fulger: jocurile pe viteză (date, fără funcții). Generatoarele întrebărilor sunt în js/fulger/kinds.js (calcule) și
 // js/fulger/kinds-forme.js (figuri). Jocul e împărțit pe teme; fiecare temă are cele 3 niveluri, cu amestecul de tipuri și pragurile de stele.
-// Pragurile de stele sunt calibrate prin simulare (tests/fulger.test.js): un copil rapid ia 3 stele, unul bun 2,
-// unul încet dar sigur 1, iar atingerile la întâmplare niciuna.
+// Pragurile de stele sunt calibrate prin simulare (tests/fulger.test.js), la fel pe toate temele și nivelurile: un copil foarte pregătit
+// (95% corecte, la 0,8–1,4 din timpul „fulger”) ia 3 stele — deci medalia — în cam jumătate din runde, unul foarte rapid aproape mereu,
+// unul bun (90% corecte) ia 2 stele în majoritatea rundelor, unul încet dar sigur 1, iar atingerile la întâmplare niciuna.
 
 export default {
   durationMs: 120000,
@@ -52,7 +53,7 @@ export default {
             { kind: 'cmp-20', weight: 2 },
             { kind: 'sort-3-20', weight: 1 },
           ],
-          stars: [30, 80, 175],
+          stars: [30, 70, 145],
         },
         {
           id: 'intermediar',
@@ -68,7 +69,7 @@ export default {
             { kind: 'cmp-20', weight: 0.5 },
             { kind: 'sort-3-20', weight: 0.5 },
           ],
-          stars: [35, 95, 215],
+          stars: [35, 85, 185],
         },
         {
           id: 'avansat',
@@ -84,7 +85,7 @@ export default {
             { kind: 'cmp-100', weight: 0.5 },
             { kind: 'sort-4-100', weight: 0.5 },
           ],
-          stars: [35, 100, 235],
+          stars: [35, 90, 220],
         },
       ],
     },
@@ -118,7 +119,7 @@ export default {
             { kind: 'sort-3-sute', weight: 1.5 },
             { kind: 'nr-litere', weight: 1 },
           ],
-          stars: [28, 68, 160],
+          stars: [28, 60, 130],
         },
         {
           id: 'intermediar',
@@ -136,7 +137,7 @@ export default {
             { kind: 'op-sute', weight: 0.5 },
             { kind: 'cmp-sute', weight: 0.5 },
           ],
-          stars: [31, 82, 207],
+          stars: [31, 75, 170],
         },
         {
           id: 'avansat',
@@ -154,7 +155,7 @@ export default {
             { kind: 'cmp-1000', weight: 0.5 },
             { kind: 'op-zeci-sute', weight: 0.5 },
           ],
-          stars: [35, 90, 253],
+          stars: [35, 80, 200],
         },
       ],
     },
@@ -189,7 +190,7 @@ export default {
             { kind: 'add-1000-cu', weight: 1 },
             { kind: 'sub-1000-cu', weight: 1 },
           ],
-          stars: [30, 82, 205],
+          stars: [30, 80, 175],
         },
         {
           id: 'intermediar',
@@ -206,7 +207,7 @@ export default {
             { kind: 'add-1000-cu', weight: 0.5 },
             { kind: 'sub-1000-cu', weight: 0.5 },
           ],
-          stars: [33, 88, 240],
+          stars: [33, 80, 185],
         },
         {
           id: 'avansat',
@@ -224,7 +225,7 @@ export default {
             { kind: 'add-1000-o-trecere', weight: 0.5 },
             { kind: 'sub-1000-un-imprumut', weight: 0.5 },
           ],
-          stars: [31, 95, 245],
+          stars: [31, 85, 190],
         },
       ],
     },
@@ -246,7 +247,7 @@ export default {
             { kind: 'sir-lipsa', weight: 2 },
             { kind: 'sir-doua', weight: 1 },
           ],
-          stars: [27, 66, 160],
+          stars: [27, 60, 130],
         },
         {
           id: 'intermediar',
@@ -260,7 +261,7 @@ export default {
             { kind: 'sir-simplu', weight: 0.5 },
             { kind: 'intrus-forma', weight: 0.5 },
           ],
-          stars: [28, 76, 190],
+          stars: [28, 70, 160],
         },
         {
           id: 'avansat',
@@ -273,7 +274,7 @@ export default {
             { kind: 'sir-lipsa', weight: 1 },
             { kind: 'sir-doua', weight: 1 },
           ],
-          stars: [29, 77, 200],
+          stars: [29, 70, 170],
         },
       ],
     },
@@ -295,7 +296,7 @@ export default {
             { kind: 'simetrie-jumatate', weight: 1.5 },
             { kind: 'piesa-rotita', weight: 1 },
           ],
-          stars: [27, 74, 175],
+          stars: [27, 65, 155],
         },
         {
           id: 'intermediar',
@@ -308,7 +309,7 @@ export default {
             { kind: 'axe-cate', weight: 1 },
             { kind: 'rotita-oglinda', weight: 1 },
           ],
-          stars: [27, 75, 185],
+          stars: [27, 70, 165],
         },
         {
           id: 'avansat',
@@ -321,7 +322,7 @@ export default {
             { kind: 'piesa-lipsa', weight: 0.5 },
             { kind: 'simetrie-axa', weight: 0.5 },
           ],
-          stars: [28, 77, 205],
+          stars: [28, 70, 165],
         },
       ],
     },
@@ -343,7 +344,7 @@ export default {
             { kind: 'figura-capcana', weight: 1 },
             { kind: 'numara-figuri', weight: 1 },
           ],
-          stars: [28, 72, 170],
+          stars: [28, 65, 145],
         },
         {
           id: 'intermediar',
@@ -355,7 +356,7 @@ export default {
             { kind: 'desfasurare', weight: 1.5 },
             { kind: 'figura', weight: 1 },
           ],
-          stars: [29, 78, 195],
+          stars: [29, 70, 165],
         },
         {
           id: 'avansat',
@@ -367,7 +368,7 @@ export default {
             { kind: 'corpuri', weight: 1.5 },
             { kind: 'figura', weight: 0.5 },
           ],
-          stars: [29, 77, 205],
+          stars: [29, 70, 160],
         },
       ],
     },
@@ -389,7 +390,7 @@ export default {
             { kind: 'robot-scurt', weight: 1.5 },
             { kind: 'coordonate', weight: 1 },
           ],
-          stars: [27, 66, 160],
+          stars: [27, 60, 130],
         },
         {
           id: 'intermediar',
@@ -401,7 +402,7 @@ export default {
             { kind: 'pozitii', weight: 1.5 },
             { kind: 'robot-lung', weight: 1 },
           ],
-          stars: [27, 71, 175],
+          stars: [27, 65, 145],
         },
         {
           id: 'avansat',
@@ -413,7 +414,7 @@ export default {
             { kind: 'interior', weight: 1 },
             { kind: 'pozitii', weight: 1 },
           ],
-          stars: [27, 75, 200],
+          stars: [27, 65, 155],
         },
       ],
     },
@@ -440,7 +441,7 @@ export default {
             { kind: 'tabel', weight: 1.5 },
             { kind: 'grafic-ordine', weight: 1 },
           ],
-          stars: [20, 48, 120],
+          stars: [20, 45, 105],
         },
         {
           id: 'intermediar',
@@ -458,7 +459,7 @@ export default {
             { kind: 'bare-citire', weight: 0.5 },
             { kind: 'pictograma', weight: 0.5 },
           ],
-          stars: [22, 57, 155],
+          stars: [22, 55, 125],
         },
         {
           id: 'avansat',
@@ -475,7 +476,7 @@ export default {
             { kind: 'bare-diferenta', weight: 0.5 },
             { kind: 'timp-grafic', weight: 0.5 },
           ],
-          stars: [23, 62, 185],
+          stars: [23, 60, 140],
         },
       ],
     },
@@ -498,7 +499,7 @@ export default {
             { kind: 'veverita-drum', weight: 2 },
             { kind: 'arbore-alegeri', weight: 1 },
           ],
-          stars: [18, 48, 120],
+          stars: [18, 45, 100],
         },
         {
           id: 'intermediar',
@@ -516,7 +517,7 @@ export default {
             { kind: 'arbore-alegeri', weight: 0.5 },
             { kind: 'prieteni', weight: 0.5 },
           ],
-          stars: [24, 66, 175],
+          stars: [24, 60, 145],
         },
         {
           id: 'avansat',
@@ -532,7 +533,7 @@ export default {
             { kind: 'drum-minute', weight: 0.5 },
             { kind: 'arbore-sume', weight: 0.5 },
           ],
-          stars: [26, 67, 200],
+          stars: [26, 65, 145],
         },
       ],
     },

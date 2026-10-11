@@ -4,8 +4,11 @@
 // scurtăturile cu numere rotunde. Alunele sunt pe măsura timpului, iar calculele mai lungi de 9 s au pauza „Hopa” cât timpul lor.
 //
 // Variantele nu au tipare care să arate răspunsul fără calcul (măsurat cu un „ghicitor pe tipare”, în tests/fulger.test.js):
-// - la calcule, ele stau „în pătrat” ({x, x + 10, x + 100, x + 110}, `gridChoices`): celelalte colțuri sunt greșelile tipice
-//   (transportul uitat sau dublat, împrumutul fără micșorare), iar unitățile sunt aceleași la toate;
+// - la calcule (`calcChoice`), ele au o formă fixă a familiei calculului, cu răspunsul pe un loc la întâmplare: „în pătrat”
+//   ({x, x + 10, x + 100, x + 110}) când al doilea termen e mare, altfel unități și zeci ({x, x + 1, x + 10, x + 11}) sau, la un
+//   termen foarte mic, un rând de zeci; celelalte variante sunt greșelile tipice (transportul uitat sau dublat, împrumutul fără
+//   micșorare), nu sunt absurde când calculul lasă loc (o sumă mai mică decât un termen, o diferență mai mare decât descăzutul) și
+//   nu lasă unitățile singure să dea răspunsul;
 // - la estimare, la completarea până la sută și la cifra lipsă, întâi se alege fereastra de patru valori la rând, apoi locul
 //   răspunsului în ea, ca nici fereastra, nici marginile ei să nu-l arate;
 // - calculul greșit dintre patru are greșeala mai mică decât al doilea termen, deci nu se vede din ochi (o sumă mai mică decât un
@@ -13,7 +16,7 @@
 
 import { cantitate } from '../core/ro.js';
 import { treceri } from '../core/rules.js';
-import { choice, compare, gridChoice, numberQuestion } from './intrebari.js';
+import { calcChoice, choice, compare, numberQuestion } from './intrebari.js';
 import { figureQuestion } from './kinds-forme.js';
 import { gridChoices, int, pickOne } from './rand.js';
 
@@ -30,11 +33,11 @@ const EXPRESII = 'mat.op.comparare-expresii';
 const GRESEALA = 'mat.op.greseala';
 
 const MAX = 999;
-/** Rezultatul unui calcul cu variantele „în pătrat”: toate colțurile încap între 0 și 999. */
+/** Rezultatele calculelor temei, ca variantele să încapă de o parte și de alta a răspunsului (pătratul, între 0 și 999). */
 const inGrid = (r) => r >= 110 && r <= 889;
-/** Un calcul cu variantele „în pătrat”, dacă niciuna nu repetă un termen; altfel null (generatorul reîncearcă). */
+/** Un calcul cu variantele din `calcChoice`, dacă niciuna nu repetă un termen; altfel null (generatorul reîncearcă). */
 function gridCalc(kind, rand, terms, op) {
-  const q = gridChoice(kind, rand, terms.join(op === '+' ? PLUS : MINUS));
+  const q = calcChoice(kind, rand, terms.join(op === '+' ? PLUS : MINUS), { max: MAX });
   return q.choices.some((c) => terms.includes(c)) ? null : q;
 }
 

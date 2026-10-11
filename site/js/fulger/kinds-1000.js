@@ -1,12 +1,15 @@
 // Jocuri fulger: tipurile temei „Numere până la 1000”. Sute, zeci și unități: formarea numerelor (numărătoarea, forma desfășurată,
 // scrierea cu cifre), comparări, ordonări, șiruri, rotunjire la sute și calcule fără trecere peste ordin. La Avansat apare o
 // singură trecere simplă: la unități (345 + 27) sau cu un împrumut din zeci (452 − 28), niciodată două și niciodată la sute.
-// Variantele greșite vin din greșelile tipice: ordinul mutat, zeroul sărit, o zece sau o sută în plus, trecerea uitată.
+// Variantele au o formă fixă, cu răspunsul pe un loc la întâmplare, ca forma lor să nu-l arate: pe numărătoare, câte o greșeală pe
+// fiecare ordin; la numerele scrise cu litere și la forma desfășurată, o unitate și o zece în aceeași sută; la calcule (`calcChoice`),
+// forma potrivită calculului (sute la rând, zeci la rând, pătratul cu zeci și sute, unități și zeci), fără variante absurde (o sumă
+// mai mică decât un termen); la șiruri și rotunjire, variantele rămân din greșelile tipice.
 
 import { cantitate, numberToWords } from '../core/ro.js';
 import { trecere } from '../core/rules.js';
-import { choice, compare, gridChoice, numberQuestion, sorting } from './intrebari.js';
-import { distinct, int, pickOne } from './rand.js';
+import { calcChoice, compare, numberQuestion, sorting } from './intrebari.js';
+import { distinct, int, pickOne, shapeChoices, SHAPES } from './rand.js';
 
 const PLUS = ' + ';
 const MINUS = ' − ';
@@ -70,13 +73,9 @@ export const KINDS_1000 = {
         figure,
         key: `${s}${z}${u}`,
         answer,
-        // tijele citite în altă ordine (tot numere de trei cifre), zeroul sărit (407 → 47) și o mărgea în plus sau în minus
-        typical: [
-          ...[num(z, s, u), num(s, u, z), num(u, z, s), num(z, u, s)].filter((x) => x >= 100),
-          z === 0 ? 10 * s + u : null,
-          answer + 1, answer - 1, answer + 10, answer - 10, answer + 100, answer - 100,
-        ],
-        max: MAX,
+        // o mărgea în plus sau în minus pe fiecare tijă ({x, x + 1, x + 10, x + 100}), cu răspunsul pe un loc la întâmplare: toate
+        // tijele trebuie citite, iar forma variantelor nu-l arată (tijele citite în altă ordine lăsau răspunsul la mijloc)
+        fixed: shapeChoices(rand, answer, SHAPES.place, { min: 100, max: 999 }),
         ask: { op: 'abacus' },
       });
     },
@@ -91,15 +90,13 @@ export const KINDS_1000 = {
     generate(rand) {
       const [s, z, u] = [int(rand, 1, 9), int(rand, 0, 9), int(rand, 0, 9)];
       const answer = num(s, z, u);
-      // la numerele cu zero la zeci: bucățile scrise una după alta („patru sute șapte” → 4007) și zeroul sărit (47);
-      // la celelalte, cifrele în altă ordine și o zece sau o sută în plus (altfel variantele s-ar deosebi după lungime)
-      const zeroTens = z === 0 ? [1000 * s + u, 10 * s + u] : [];
+      // sutele se aud în cuvinte, deci variantele rămân în aceeași sută: o unitate și o zece în plus ori în minus, toate de trei cifre;
+      // nici lungimea (4007, 47), nici forma variantelor, nici unitățile singure nu arată răspunsul
       return numberQuestion('nr-litere', rand, {
         prompt: `Scrie cu cifre: ${numberToWords(answer)}`,
         key: `${answer}`,
         answer,
-        typical: [...zeroTens, num(s, u, z), num(z, s, u), num(u, z, s), answer + 10, answer - 10, answer + 100, answer - 100, answer + 1, answer - 1],
-        max: 9999,
+        fixed: shapeChoices(rand, answer, SHAPES.grid10, { min: 100 * s, max: 100 * s + 99 }),
         ask: { op: 'litere' },
       });
     },
@@ -112,19 +109,15 @@ export const KINDS_1000 = {
     mode: 'choice',
     concepts: [FARA],
     generate(rand) {
-      // rezultatul are între 4 și 7 sute: așa are trei sute întregi de fiecare parte, pentru variante (fără 0 și fără „402”)
+      // rezultatul are între 4 și 7 sute; variantele sunt patru sute la rând, cu răspunsul pe un loc la întâmplare (un calcul cu o
+      // cifră, pe sute: locul la întâmplare are întâietate față de plauzibilitate, ca la calculele cu o cifră)
       const h = int(rand, 4, 7);
-      const r = 100 * h;
-      const near = [r - 100, r + 100, r - 200, r + 200, r - 300, r + 300];
-      // termenii calculului ajung și ei printre variante; sunt greșeli slabe, dar un interval mai strâns al răspunsului
-      // (ca să-i putem scoate) ar face din „varianta din mijloc” o scurtătură și mai mare: 71% față de 49%, măsurat
       if (rand() < 0.55) {
         const a = int(rand, 1, h - 1);
-        // cealaltă operație; la termeni egali diferența e 0, care n-are ce căuta printre variante
-        return choice('op-sute', rand, `${100 * a}${PLUS}${100 * (h - a)}`, [...near, 100 * Math.abs(h - 2 * a)].filter((v) => v >= 100), MAX);
+        return calcChoice('op-sute', rand, `${100 * a}${PLUS}${100 * (h - a)}`, { min: 100, max: MAX, plausible: false });
       }
       const b = int(rand, 1, 9 - h);
-      return choice('op-sute', rand, `${100 * (h + b)}${MINUS}${100 * b}`, [...near, 100 * (h + 2 * b)], MAX);
+      return calcChoice('op-sute', rand, `${100 * (h + b)}${MINUS}${100 * b}`, { min: 100, max: MAX, plausible: false });
     },
   },
 
@@ -139,15 +132,12 @@ export const KINDS_1000 = {
         const [s, z, u] = [int(rand, 1, 9), int(rand, 0, 9), int(rand, 0, 9)];
         const parts = [100 * s, 10 * z, u].filter((x) => x > 0);
         if (parts.length < 2) continue;
+        // sutele sunt scrise în calcul, deci variantele rămân în aceeași sută: o unitate și o zece în plus ori în minus, cu răspunsul
+        // pe un loc la întâmplare (patru numere la rând l-ar arăta prin unități, iar la zeci 0 n-ar încăpea sub el)
+        const text = parts.join(PLUS);
         const answer = num(s, z, u);
-        return choice(
-          'nr-extins',
-          rand,
-          parts.join(PLUS),
-          // zeroul mutat (400 + 7 → 470), cifrele în altă ordine, o zece sau o sută în plus
-          [num(s, u, z), num(z, s, u), 10 * s + u, answer + 10, answer - 10, answer + 100, answer - 100],
-          MAX,
-        );
+        const choices = shapeChoices(rand, answer, SHAPES.grid10, { min: 100 * s, max: 100 * s + 99 });
+        return { kind: 'nr-extins', mode: 'choice', key: `nr-extins:${text}`, text, answer, choices };
       }
     },
   },
@@ -198,11 +188,11 @@ export const KINDS_1000 = {
       for (;;) {
         const a = int(rand, 101, 899);
         const roll = rand();
-        const b = roll < 0.3 ? int(rand, 1, 9) : roll < 0.6 ? int(rand, 10, 99) : int(rand, 100, 499);
+        // cu 1 sau 2, variantele plauzibile n-ar mai încăpea în jurul răspunsului
+        const b = roll < 0.3 ? int(rand, 3, 9) : roll < 0.6 ? int(rand, 10, 99) : int(rand, 100, 499);
         if (trecere('+', a, b) || a + b > 999) continue;
-        const r = a + b;
-        const moved = b < 100 ? a + b * 10 : null; // ordinul mutat: 342 + 25 socotit 342 + 250
-        return choice('add-1000-fara', rand, `${a}${PLUS}${b}`, [moved, r - 10, r + 10, r - 100, r + 100, r - 1, r + 1, a - b], MAX);
+        // variantele fără tipare și fără sume mai mici decât un termen (calcChoice)
+        return calcChoice('add-1000-fara', rand, `${a}${PLUS}${b}`, { max: 999 });
       }
     },
   },
@@ -217,11 +207,10 @@ export const KINDS_1000 = {
       for (;;) {
         const a = int(rand, 120, 999);
         const roll = rand();
-        const b = roll < 0.25 ? int(rand, 1, 9) : roll < 0.6 ? int(rand, 10, 99) : int(rand, 100, 499);
+        // cu 1 sau 2, variantele plauzibile n-ar mai încăpea în jurul răspunsului
+        const b = roll < 0.25 ? int(rand, 3, 9) : roll < 0.6 ? int(rand, 10, 99) : int(rand, 100, 499);
         if (b >= a || trecere('-', a, b) || a - b < 10) continue;
-        const r = a - b;
-        const moved = b < 100 && !trecere('-', a, b * 10) ? a - b * 10 : null;
-        return choice('sub-1000-fara', rand, `${a}${MINUS}${b}`, [a + b, r - 10, r + 10, r - 100, r + 100, moved, r - 1, r + 1], MAX);
+        return calcChoice('sub-1000-fara', rand, `${a}${MINUS}${b}`, { max: 999 });
       }
     },
   },
@@ -239,12 +228,8 @@ export const KINDS_1000 = {
         const b = tens ? 10 * int(rand, 1, 9) : 100 * int(rand, 1, 8);
         const add = rand() < 0.5;
         if (add ? trecere('+', a, b) || a + b > 999 : trecere('-', a, b) || a - b < 10) continue;
-        const r = add ? a + b : a - b;
-        // greșeala tipică: zecile adunate la unități (450 + 30 → 453) sau la sute (750)
-        const small = b / 10;
-        const big = b * 10;
-        const wrong = [add ? a + small : a - small, add ? a + big : a - big].filter((x) => x >= 0 && x <= 999);
-        return choice('op-zeci-sute', rand, `${a}${add ? PLUS : MINUS}${b}`, [...wrong, r - 10, r + 10, r - 100, r + 100, r - 1, r + 1], MAX);
+        // variantele cu aceleași unități (zeci sau sute în plus ori în minus), fără tipare
+        return calcChoice('op-zeci-sute', rand, `${a}${add ? PLUS : MINUS}${b}`, { max: 999 });
       }
     },
   },
@@ -382,7 +367,7 @@ export const KINDS_1000 = {
         const terms = [int(rand, 100, 500), int(rand, 10, 300), rand() < 0.5 ? int(rand, 1, 9) : int(rand, 10, 99)];
         const r = terms[0] + terms[1] + terms[2];
         if (r > 999 || anyCarry(terms)) continue;
-        return choice('add-3op-1000', rand, terms.join(PLUS), [terms[0] + terms[1], terms[1] + terms[2], r - 10, r + 10, r - 100, r + 100, r - 1, r + 1], MAX);
+        return calcChoice('add-3op-1000', rand, terms.join(PLUS), { max: 999 });
       }
     },
   },
@@ -431,9 +416,9 @@ export const KINDS_1000 = {
         const [, zb, ub] = szu(b);
         // o singură trecere: unitățile trec de 10, iar zecile (cu zecea trecută) rămân sub 10
         if (ua + ub < 10 || za + zb + 1 > 9 || a + b < 110 || a + b > 889) continue;
-        // variantele „în pătrat” (o zece și o sută în plus sau în minus): zecea trecută uitată (345 + 27 → 362) e un colț, iar
-        // unitățile, aceleași la toate, nu dau răspunsul; fără termenii calculului printre variante
-        const q = gridChoice('add-1000-cu', rand, `${a}${PLUS}${b}`);
+        // variantele fără tipare și fără sume mai mici decât primul termen (calcChoice): zecea trecută uitată (345 + 27 → 362) e
+        // una dintre ele; fără termenii calculului printre variante
+        const q = calcChoice('add-1000-cu', rand, `${a}${PLUS}${b}`, { max: 999 });
         if (!q.choices.includes(a) && !q.choices.includes(b)) return q;
       }
     },
@@ -453,9 +438,9 @@ export const KINDS_1000 = {
         const [, zb, ub] = szu(b);
         // se împrumută doar din zeci: unitățile nu ajung, dar zecile rămân destule
         if (ua >= ub || za - 1 < zb || a - b < 110 || a - b > 889) continue;
-        // variantele „în pătrat”: împrumutul fără micșorare (452 − 28 → 434) e un colț, iar unitățile, aceleași la toate, nu dau
-        // răspunsul (cu cifra mică scăzută din cea mare și ±1, ultima cifră îl arăta în jumătate din întrebări)
-        const q = gridChoice('sub-1000-cu', rand, `${a}${MINUS}${b}`);
+        // variantele fără tipare și fără diferențe mai mari decât descăzutul (calcChoice): împrumutul fără micșorare (452 − 28 → 434)
+        // e una dintre ele; fără termenii calculului printre variante
+        const q = calcChoice('sub-1000-cu', rand, `${a}${MINUS}${b}`, { max: 999 });
         if (!q.choices.includes(a) && !q.choices.includes(b)) return q;
       }
     },
