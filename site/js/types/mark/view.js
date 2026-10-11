@@ -4,7 +4,7 @@ import { h, pop } from '../../core/dom.js';
 import { play } from '../../core/sound.js';
 import { md, plain } from '../../core/markup.js';
 import { hasVisual, visualSVG } from '../../visuals/index.js';
-import { feedbackBox, isLocked, itemFace, setState } from '../_view.js';
+import { arrowRadios, feedbackBox, isLocked, itemFace, setState } from '../_view.js';
 
 const SHAPES = ['●', '▲', '■', '◆']; // fiecare culoare din paletă are și o formă, pentru cine nu deosebește culorile
 
@@ -40,6 +40,8 @@ export default {
             },
           }, h('span', { class: 'ex-palette__swatch', 'aria-hidden': 'true' }, shapeOf(p.id)), h('span', { html: md(p.label) }))))
       : null;
+
+    if (palette) arrowRadios(palette);
 
     const items = {};
     const grid = h('div', { class: `ex-mark${part.palette ? ' ex-mark--palette' : ''}` }, part.items.map((it) => {

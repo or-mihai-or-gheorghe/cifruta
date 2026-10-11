@@ -19,8 +19,8 @@ jobs:
   teste:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
       - name: Teste unitare și validarea conținutului
@@ -36,7 +36,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Cheia web Firebase, din secret
         env:
           FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
@@ -45,9 +45,9 @@ jobs:
           grep -q "apiKey: ''," site/js/cloud/config.js || { echo "::error::config.js nu mai are locul gol pentru cheie"; exit 1; }
           sed -i "0,/apiKey: '',/s//apiKey: '${FIREBASE_API_KEY}',/" site/js/cloud/config.js
           grep -q "apiKey: 'AIza" site/js/cloud/config.js
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

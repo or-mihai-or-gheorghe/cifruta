@@ -23,7 +23,7 @@ export default {
 
     const art = h('div', { class: 'ex-route__art' });
     const live = h('p', { class: 'u-visually-hidden', 'aria-live': 'polite' });
-    const stage = h('div', { class: 'ex-route__stage', style: { aspectRatio: `${w} / ${hgt}` } }, art);
+    const stage = h('div', { class: 'ex-route__stage', style: { aspectRatio: `${w} / ${hgt}`, '--map-w': String(w) } }, art);
     const buttons = {};
     for (const s of map.stops) {
       buttons[s.id] = h('button', {

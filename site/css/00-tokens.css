@@ -52,6 +52,10 @@
   --c-s: #2e9e44;
   --c-z: #e03131;
   --c-u: #1c7ed6;
+  /* aceleași culori, mai închise: fundalul etichetelor S / Z / U cu text alb (≥ 4,5:1) */
+  --c-s-ink: #237a36;
+  --c-z-ink: #c92a2a;
+  --c-u-ink: #1971c2;
 
   /* ——— Temele testelor (accent decorativ) ——— */
   --c-theme: var(--c-brand);

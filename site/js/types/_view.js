@@ -33,3 +33,21 @@ export function feedbackBox(text) {
 export const expectedTag = (text) => h('span', { class: 'ex-expected', 'aria-label': `corect: ${text}` }, text);
 
 export const isLocked = (m) => m !== 'solve';
+
+/**
+ * Săgețile mută alegerea într-un grup radio, ca la butoanele radio native: focusul trece pe vecin (circular), care se și alege;
+ * Home / End: primul și ultimul. Tab și Space merg ca înainte (fiecare variantă rămâne în ordinea Tab).
+ */
+export function arrowRadios(group) {
+  group.addEventListener('keydown', (e) => {
+    const radios = [...group.querySelectorAll('[role=radio]')].filter((b) => !b.disabled);
+    const i = radios.indexOf(document.activeElement);
+    const next = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: radios.length - 1 }[e.key];
+    if (i < 0 || next === undefined) return;
+    e.preventDefault();
+    const target = radios[(next + radios.length) % radios.length];
+    target.focus();
+    if (target.getAttribute('aria-checked') !== 'true') target.click();
+  });
+  return group;
+}

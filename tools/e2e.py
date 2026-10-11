@@ -7,11 +7,12 @@ Pornește un server local pe site/, apoi verifică:
   • gesturi reale pe fiecare tip de exercițiu în #/atelier/tipuri;
   • capturi de ecran în test-results/ (cu --shots).
 
-Rulează: python3 tools/e2e.py [--only demo] [--shots] [--base-url URL]
+Rulează: python3 tools/e2e.py [--only u2-t1,u2-t*,tipuri,fulger] [--shots] [--base-url URL]
 """
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import functools
 import json
 import re
@@ -207,6 +208,14 @@ def types_flow(run: Run, page: Page, vp: str):
     run.check(marks == ["1", "1", "3", "9", "10"], f"[{vp}] calcul în scris: soluția scrie deasupra coloanelor ce se ține minte ({marks})")
 
     typing("fill-pyramid", {"a": 265, "b": 226, "c": 491}); ok("fill-pyramid")
+    # o cărămidă greșită: la verificare, valoarea corectă stă în cărămida ei, fără să acopere vecina
+    typing("fill-pyramid", {"a": 255})
+    page.locator(tid("demo-check-fill-pyramid")).click()
+    pyramid = page.locator(tid("demo-fill-pyramid"))
+    tag = pyramid.locator(".ex-expected").first.bounding_box()
+    brick = pyramid.locator(".ex-brick", has=page.locator(tid("blank-a"))).bounding_box()
+    inside = bool(tag and brick) and tag["x"] >= brick["x"] - 1 and tag["x"] + tag["width"] <= brick["x"] + brick["width"] + 1
+    run.check(inside and pyramid.locator(".ex-expected").first.inner_text().strip() == "265", f"[{vp}] piramidă: valoarea corectă a cărămizii greșite stă în cărămida ei ({tag}, {brick})")
 
     watch_pops(page, tid("demo-categorize"))
     tap(tid("item-vaca")); tap(tid("bin-dom"))
@@ -254,6 +263,19 @@ def types_flow(run: Run, page: Page, vp: str):
     tap(tid("bar-banane-minus"))
     run.check(page.locator(tid("bar-banane")).get_attribute("aria-valuenow") == "4", f"[{vp}] grafic: + și − schimbă bara și aria-valuenow")
     ok("chart")
+    if not touch:
+        # ținut apăsat, + urcă singur (primul pas după 400 ms, apoi tot mai des), iar la ridicare nu se mai adaugă un pas
+        for _ in range(3):
+            tap(tid("bar-mere-minus"))
+        page.locator(tid("bar-mere-plus")).hover()
+        page.mouse.down()
+        page.wait_for_timeout(1000)
+        page.mouse.up()
+        page.wait_for_timeout(150)
+        held = (answer("chart") or {}).get("mere")
+        run.check(held in (3, 4), f"[{vp}] grafic: + ținut apăsat o secundă urcă bara singur ({held} pași)")
+        while (answer("chart") or {}).get("mere", 0) > 3:
+            tap(tid("bar-mere-minus"))
 
     for _ in range(4):
         tap(tid("abacus-i1-Z-plus"))
@@ -1048,6 +1070,29 @@ def keyboard_flow(run: Run, browser, base: str):
     key("[data-testid=bar-mere-plus]", "Enter")
     key("[data-testid=bar-mere-plus]", "Space")
     run.check((answer("chart") or {}).get("mere") == 2 and page.locator("[data-testid=bar-mere]").get_attribute("aria-valuenow") == "2", f"[tastatură] bara urcă cu Enter/Space ({answer('chart')})")
+    page.locator("[data-testid=bar-pere]").focus()
+    for name in ("ArrowUp", "ArrowUp", "ArrowUp", "ArrowDown"):
+        page.keyboard.press(name)
+    pere = (answer("chart") or {}).get("pere")
+    page.keyboard.press("End")
+    top = (answer("chart") or {}).get("pere")
+    page.keyboard.press("Home")
+    run.check(pere == 2 and top == 6 and (answer("chart") or {}).get("pere") == 0, f"[tastatură] valoarea barei se schimbă din săgeți, End și Home ({pere}, {top})")
+
+    # grupurile radio: săgețile mută alegerea, ca la butoanele radio native (caseta cu semn, variantele unei întrebări)
+    key("[data-testid='seg-c-<']", "Space")
+    page.keyboard.press("ArrowRight")
+    moved = ((answer("fill") or {}).get("c"), page.evaluate("document.activeElement?.dataset.value ?? null"))
+    page.keyboard.press("ArrowLeft")
+    back = (answer("fill") or {}).get("c")
+    radios = page.locator("[data-testid=demo-choice] [role=radiogroup]").first.locator("[role=radio]")
+    radios.nth(0).focus()
+    page.keyboard.press("Space")
+    page.keyboard.press("ArrowDown")
+    second = radios.nth(1).get_attribute("aria-checked") == "true" and radios.nth(1).evaluate("(el) => el === document.activeElement")
+    page.keyboard.press("End")
+    last = radios.nth(radios.count() - 1).get_attribute("aria-checked") == "true"
+    run.check(moved == ("=", "=") and back == "<" and second and last, f"[tastatură] săgețile mută alegerea în grupurile radio (semnul: {moved}, apoi {back}; variantele: {second}, {last})")
 
     # atelierul avatarului: săgețile mută între file și între variante, iar alegerea urmează focusul
     page.goto(f"{base}#/atelier/avatare")
@@ -1112,7 +1157,7 @@ def keyboard_flow(run: Run, browser, base: str):
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--only", help="rulează doar testul cu acest id (sau „fulger”: doar fluxurile Jocurilor fulger)")
+    parser.add_argument("--only", help="rulează doar testele cu aceste id-uri, despărțite prin virgulă, și cu * („u2-t*”); „tipuri”: tipurile din atelier și tastatura; „fulger”: Jocurile fulger")
     parser.add_argument("--shots", action="store_true", help="salvează capturi în test-results/")
     parser.add_argument("--base-url", help="testează un site publicat în loc de serverul local")
     parser.add_argument("--viewports", default="laptop,tableta,telefon")
@@ -1120,8 +1165,10 @@ def main() -> int:
 
     httpd, base = (None, args.base_url) if args.base_url else serve()
     run = Run(base if base.endswith("/") else base + "/", args.shots)
-    fulger_only = args.only == "fulger"
-    tests = [t for t in catalog_tests() if not args.only or t["id"] == args.only]
+    only = [p.strip() for p in (args.only or "").split(",") if p.strip()]
+    fulger_only = "fulger" in only
+    types_only = "tipuri" in only
+    tests = [t for t in catalog_tests() if not only or any(fnmatch.fnmatchcase(t["id"], p) for p in only)]
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
@@ -1130,11 +1177,13 @@ def main() -> int:
             context = browser.new_context(locale="ro-RO", **VIEWPORTS[vp])
             page = context.new_page()
             run.watch(page, vp)
-            if not args.only:
+            if not only:
                 smoke(run, page, vp)
+            if not only or types_only:
                 types_flow(run, page, vp)
+            if not only:
                 avatar_studio_flow(run, page, vp)
-            if not args.only or fulger_only:
+            if not only or fulger_only:
                 fulger_flow(run, page, vp)
                 fulger_topics_flow(run, page, vp)
             if tests:
@@ -1142,9 +1191,9 @@ def main() -> int:
             for test in tests:
                 test_flow(run, page, test, vp)
             context.close()
-        if not args.only:
+        if not only or types_only:
             keyboard_flow(run, browser, run.base)
-        if not args.only or fulger_only:
+        if not only or fulger_only:
             fulger_screens(run, browser, run.base)
         browser.close()
     if httpd:

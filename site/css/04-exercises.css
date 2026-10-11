@@ -324,8 +324,8 @@
 .ex-tree__lines svg { width: 100%; height: 100%; }
 .ex-tree__leaf { display: grid; justify-items: center; gap: 0.2rem; }
 .ex-tree__label { font-size: var(--fs-0); font-weight: 700; }
-.ex-tree__label--z { color: var(--c-z); }
-.ex-tree__label--u { color: var(--c-u); }
+.ex-tree__label--z { color: var(--c-z-ink); }
+.ex-tree__label--u { color: var(--c-u-ink); }
 
 .ex-chains { display: grid; gap: var(--sp-5); }
 .ex-chain { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2); }
@@ -396,6 +396,9 @@
 }
 .ex-brick__tpl { font-size: var(--fs-2); }
 .ex-brick .ex-blank { width: calc(var(--brick) - 0.5rem); min-width: 0; height: 2.9rem; font-size: var(--fs-2); }
+/* la rezultate, valoarea corectă stă în colțul cărămizii ei (alături ar acoperi cărămida vecină sau ar ieși din card) */
+.ex-brick .ex-expected { position: absolute; right: 0.1rem; bottom: -0.3rem; z-index: 1; min-width: 0; padding: 0 0.3rem; font-size: var(--fs-0); }
+.ex-brick .ex-expected::before { content: ''; }
 
 /* ——— Tragere / atingere (dnd) ——— */
 .ex-drag { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -560,9 +563,9 @@
 .ex-abacus__controls { display: flex; gap: var(--sp-2); }
 .ex-abacus__rod { display: grid; justify-items: center; gap: 0.25rem; }
 .ex-abacus__name { font-family: var(--font-title); font-weight: 700; color: var(--c-on-brand); padding: 0 0.6rem; border-radius: var(--r-1); }
-.ex-abacus__rod--s .ex-abacus__name { background: var(--c-s); }
-.ex-abacus__rod--z .ex-abacus__name { background: var(--c-z); }
-.ex-abacus__rod--u .ex-abacus__name { background: var(--c-u); }
+.ex-abacus__rod--s .ex-abacus__name { background: var(--c-s-ink); }
+.ex-abacus__rod--z .ex-abacus__name { background: var(--c-z-ink); }
+.ex-abacus__rod--u .ex-abacus__name { background: var(--c-u-ink); }
 .ex-abacus__btn { font-size: var(--fs-3); }
 .ex-abacus.is-correct, .ex-abacus.is-wrong { border-color: var(--state); background: var(--state-bg); }
 
@@ -617,6 +620,12 @@
 .ex-route__stop:focus-visible { outline: 3px solid var(--c-focus); outline-offset: 2px; }
 /* inelul de evidențiere e mai mic decât ținta de atingere, ca să nu taie numele locurilor */
 .ex-route__stop::after { content: ''; position: absolute; inset: 0.55rem; border-radius: 50%; pointer-events: none; }
+/* … și se măsoară în unitățile hărții (23 din lățimea ei, `--map-w`), cât stația plus o margine: pe telefon, harta se micșorează,
+   iar un inel de mărime fixă ajungea peste numele scrise deasupra și dedesubt */
+@supports (width: 1cqw) {
+  .ex-route__stage { container-type: inline-size; }
+  .ex-route__stop::after { inset: auto; top: 50%; left: 50%; width: calc(100cqw * 23 / var(--map-w, 320)); aspect-ratio: 1; transform: translate(-50%, -50%); }
+}
 .ex-route__stop.is-next::after { box-shadow: 0 0 0 3px var(--c-accent); }
 .ex-route__stop.is-marked::after { box-shadow: 0 0 0 3px var(--c-brand); }
 .ex-route__stop.is-last::after { box-shadow: 0 0 0 4px var(--c-brand-dark); }
@@ -636,5 +645,6 @@
 .ex-chart__name { display: inline-flex; align-items: center; gap: 0.3rem; font-family: var(--font-title); font-weight: 700; }
 .ex-chart__emoji .c-emoji { width: 1.4em; height: 1.4em; margin: 0; }
 .ex-chart__value { min-width: 2ch; text-align: center; font-family: var(--font-title); font-size: var(--fs-2); font-weight: 700; font-variant-numeric: tabular-nums; }
-.ex-chart__btn { font-size: var(--fs-3); }
+.ex-chart__btn { font-size: var(--fs-3); touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.ex-chart__value:focus-visible { outline: 3px solid var(--c-focus); outline-offset: 2px; border-radius: var(--r-1); }
 .ex-chart__cat .ex-expected { font-size: var(--fs-0); }

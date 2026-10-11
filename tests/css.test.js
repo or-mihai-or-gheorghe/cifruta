@@ -40,6 +40,13 @@ const PAIRS = [
   ['--c-ink-soft', '--c-bronz-bg'],
   ['--c-ink-soft', '--c-argint-bg'],
   ['--c-ink-soft', '--c-aur-bg'],
+  // etichetele S / Z / U / M (text alb, la calculul în scris și în texte)
+  ['--c-on-brand', '--c-s-ink'],
+  ['--c-on-brand', '--c-z-ink'],
+  ['--c-on-brand', '--c-u-ink'],
+  ['--c-on-brand', '--c-brand-dark'],
+  ['--c-z-ink', '--c-paper'],
+  ['--c-u-ink', '--c-paper'],
 ];
 
 test('css: textul are contrast de cel puțin 4,5:1 pe fundalul lui', () => {

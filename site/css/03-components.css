@@ -141,9 +141,9 @@
   font-weight: 700;
   line-height: 1.35;
 }
-.c-pv--s { background: var(--c-s); }
-.c-pv--z { background: var(--c-z); }
-.c-pv--u { background: var(--c-u); }
+.c-pv--s { background: var(--c-s-ink); }
+.c-pv--z { background: var(--c-z-ink); }
+.c-pv--u { background: var(--c-u-ink); }
 .c-pv--m { background: var(--c-brand-dark); }
 
 .c-emoji {

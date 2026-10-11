@@ -219,11 +219,18 @@ registerVisual('data-table', {
     const cols = Math.max(head?.length ?? 0, ...body.map((r) => r.length), 1);
     const cw = 304 / cols;
     const highlight = num(p.highlight, -1);
+    // pe fiecare coloană, textul cât de mare încape în celule (9–16; o literă îngroșată are cam 0,6 din mărime): pe telefon,
+    // un tabel cu două coloane se citea cu 12 unități (sub 10 px), iar etichetele lungi ieșeau din celulele înguste
+    const fit = (c) => (cw - 10) / (0.6 * Math.max(String(c).length, 1));
+    const sizes = Array.from({ length: cols }, (_, j) => {
+      const column = [head ?? [], ...body].map((r) => r[j]).filter((c) => c !== undefined && String(c) !== '');
+      return Math.max(9, Math.min(16, Math.floor(Math.min(...column.map(fit)))));
+    });
     let out = '';
     const row = (cellsIn, y, isHead, hi) => {
       cellsIn.forEach((c, j) => {
         out += `<rect x="${8 + j * cw}" y="${y}" width="${cw}" height="28" fill="${isHead ? C.yellow : hi ? C.cream : C.white}" ${st(1.5)}/>`;
-        out += txt(8 + j * cw + cw / 2, y + 14, c, { size: c.length > 14 ? 9 : 12, weight: isHead || j === 0 ? 700 : 500 });
+        out += txt(8 + j * cw + cw / 2, y + 14, c, { size: sizes[j], weight: isHead || j === 0 ? 700 : 500 });
       });
     };
     let y = 6;

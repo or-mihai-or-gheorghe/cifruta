@@ -30,6 +30,8 @@ const COMPUTED = ['column', 'pyramid']; // valorile casetelor se calculează din
 export const kindOf = (blank) => blank?.kind ?? 'number';
 export const blanksIn = (tpl) => [...String(tpl ?? '').matchAll(BLANK)].map((m) => m[1]);
 const normSign = (s) => String(s ?? '').replace(/[−–]/g, '-').trim();
+// la potrivirea mesajelor, un semn se compară ca „−”: butonul salvează „−”, iar autorul poate scrie „-” în `if`
+const signShown = (s) => normSign(s).replace(/-/g, '−');
 const rowOf = (r) => (typeof r === 'string' ? { t: r } : r);
 
 // ——— Calculul în scris (layout 'column') ———
@@ -109,6 +111,10 @@ function columnErrors(part) {
     if (row.op === '-' && row.terms.length !== 2) errors.push(`${where}: la scădere sunt exact doi termeni`);
     if (row.op === '+' && row.terms.length > 3) errors.push(`${where}: la adunare sunt cel mult trei termeni`);
     if (![...row.terms, row.result].flat().some((c) => c.id)) errors.push(`${where}: nicio casetă`);
+    if ([...row.terms, row.result].some((t) => t.length > LOCURI.length)) {
+      errors.push(`${where}: numerele au cel mult ${LOCURI.length} cifre`);
+      continue;
+    }
     if ([...row.terms, row.result].some((t) => t.length > 1 && t[0].d === 0)) errors.push(`${where}: un număr începe cu 0`);
     if (row.hidden > MAX_HIDDEN) errors.push(`${where}: cel mult ${MAX_HIDDEN} cifre ascunse în termeni`);
     else if (row.solutions.length !== 1) {
@@ -133,6 +139,7 @@ const LOC = {
   m: { pl: 'mii', one: 'o mie', gen: 'miilor' },
 };
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const remain = (n) => `${n === 1 ? 'rămâne' : 'rămân'} ${n}`;
 
 /** Mesajul pentru o greșeală tipică la o cifră a rezultatului (transport uitat, cifra mică din cea mare, împrumut). */
 function columnHint(part, id, given) {
@@ -154,7 +161,7 @@ function columnHint(part, id, given) {
       const before = cols[p - 1];
       const made = col.in === 1 ? `${here.one} nouă` : `${col.in} ${here.pl} noi`;
       const sumBefore = before.digits.reduce((s, d) => s + d, 0) + before.in;
-      const lead = `${[...before.digits, ...(before.in ? [before.in] : [])].join(' + ')} = ${sumBefore}: s-a format ${made}.`;
+      const lead = `${[...before.digits, ...(before.in ? [before.in] : [])].join(' + ')} = ${sumBefore}: ${col.in === 1 ? 's-a format' : 's-au format'} ${made}.`;
       if (LOCURI[p] === 'm') return `${lead} La mii scrii ${col.digit}.`;
       const sum = col.digits.reduce((s, d) => s + d, 0) + col.in;
       return `${lead} ${col.in === 1 ? 'Adaug-o' : 'Adaugă-le'} la ${here.pl}: ${[...col.digits, col.in].join(' + ')} = ${sum}.`;
@@ -165,11 +172,11 @@ function columnHint(part, id, given) {
     }
     const avail = top - col.in;
     if (col.out && next && (g === Math.abs(avail - bottom) || g === Math.abs(top - bottom))) {
-      const gave = col.in ? `${cap(here.one)} a plecat la ${prev.pl}, deci rămân ${avail}. ` : '';
+      const gave = col.in ? `${cap(here.one)} a plecat la ${prev.pl}, deci ${remain(avail)}. ` : '';
       return `${gave}La ${here.pl}, din ${avail} nu putem lua ${bottom}: desfacem ${next.one}. ${avail + 10} − ${bottom} = ${col.digit}.`;
     }
     if (col.in && !col.out && g === (col.digit + 1) % 10) {
-      return `La ${here.pl}, ${here.one} a plecat la ${prev.pl}: rămân ${avail}, deci ${avail} − ${bottom} = ${col.digit}.`;
+      return `La ${here.pl}, ${here.one} a plecat la ${prev.pl}: ${remain(avail)}, deci ${avail} − ${bottom} = ${col.digit}.`;
     }
     return null;
   }
@@ -211,7 +218,8 @@ function solvePyramid(rows, limit = 2) {
         changed = true;
       }
     }
-    return cells.every((k) => !v.has(k) || (Number.isInteger(v.get(k)) && v.get(k) >= 0 && v.get(k) <= PYRAMID_RANGE));
+    // fără plafonul de sus: o completare cu numere peste 1000 tot e o completare (plafonul se verifică la soluția unică)
+    return cells.every((k) => !v.has(k) || (Number.isInteger(v.get(k)) && v.get(k) >= 0));
   };
   const base = rows.length - 1;
   const first = new Map(start);
@@ -226,7 +234,8 @@ function solvePyramid(rows, limit = 2) {
       if (settle(w) && cells.every((k) => w.has(k))) solutions.push(w);
       return;
     }
-    for (let x = 0; x <= PYRAMID_RANGE; x++) tryAll(i + 1, new Map(v).set(open[i], x));
+    // până la 1001: dacă merg și x, și x + 1, piramida are mai multe completări
+    for (let x = 0; x <= PYRAMID_RANGE + 1; x++) tryAll(i + 1, new Map(v).set(open[i], x));
   };
   if (open.length) tryAll(0, first);
   else if (cells.every((k) => first.has(k))) solutions.push(first);
@@ -265,6 +274,7 @@ function pyramidErrors(part) {
     for (const c of p.rows.flat()) if (!blankCell(c) && !/^\s*\d+\s*$/.test(String(c))) errors.push(`${where}: „${c}” nu e număr sau casetă`);
     if (p.solutions === null) errors.push(`${where}: prea multe necunoscute la bază (cel mult una care nu se poate afla din celelalte)`);
     else if (p.solutions.length !== 1) errors.push(`${where} are ${p.solutions.length ? 'mai multe completări' : 'nicio completare'} (trebuie exact una, cu numere 0–1000)`);
+    else if ([...p.solutions[0].values()].some((v) => v > PYRAMID_RANGE)) errors.push(`${where}: are un număr peste ${PYRAMID_RANGE}`);
     for (const [id, v] of Object.entries(p.values)) {
       const b = part.blanks?.[id];
       if (b && (kindOf(b) !== 'number' || b.expr !== undefined || b.search)) errors.push(`fill.${id}: o cărămidă are doar \`answer\` (opțional)`);
@@ -357,8 +367,8 @@ export function blankLabel(part, id) {
         for (const [r, row] of rows.entries()) {
           const i = row.findIndex((c) => blankCell(c) === id);
           if (i < 0) continue;
-          if (r + 1 < rows.length) return `cărămida de deasupra lui ${dots(rows[r + 1][i])} și ${dots(rows[r + 1][i + 1])}`;
-          return `cărămida ${i + 1} din rândul de jos`;
+          if (r + 1 < rows.length) return `căsuța de deasupra lui ${dots(rows[r + 1][i])} și ${dots(rows[r + 1][i + 1])}`;
+          return `căsuța ${i + 1} din rândul de jos`;
         }
       }
       break;
@@ -574,7 +584,7 @@ export default {
         ok: ok[id],
         expected: key[id],
         given: given[id] ?? null,
-        feedback: ok[id] ? null : (feedbackFor(blanks[id].feedback, given[id]) ?? (column ? columnHint(part, id, given[id]) : null)),
+        feedback: ok[id] ? null : (feedbackFor(blanks[id].feedback, kindOf(blanks[id]) === 'sign' ? signShown(given[id]) : given[id], kindOf(blanks[id]) === 'sign' ? signShown : String) ?? (column ? columnHint(part, id, given[id]) : null)),
       })),
     );
   },

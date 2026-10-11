@@ -26,6 +26,6 @@ export const isBlank = (v) => v === null || v === undefined || v === '' || (Arra
 
 export const countAnswered = (ids, ans) => ids.filter((id) => !isBlank(ans?.[id])).length;
 
-/** Mesajul țintit pentru un răspuns greșit anume: feedback: [{ if: 74, text: '…' }] */
-export const feedbackFor = (list, given) =>
-  isBlank(given) ? null : ((list ?? []).find((f) => String(f.if) === String(given))?.text ?? null);
+/** Mesajul țintit pentru un răspuns greșit anume: feedback: [{ if: 74, text: '…' }]; `norm` aduce `if` la forma răspunsului. */
+export const feedbackFor = (list, given, norm = String) =>
+  isBlank(given) ? null : ((list ?? []).find((f) => norm(f.if) === String(given))?.text ?? null);

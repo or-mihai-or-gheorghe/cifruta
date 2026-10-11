@@ -3,8 +3,9 @@
 import { h, pop } from '../../core/dom.js';
 import { play } from '../../core/sound.js';
 import { md } from '../../core/markup.js';
+import { niceMinus } from '../../core/ro.js';
 import { LOCURI, marcajeTrecere } from '../../core/rules.js';
-import { expectedTag, feedbackBox, isLocked, setState } from '../_view.js';
+import { arrowRadios, expectedTag, feedbackBox, isLocked, setState } from '../_view.js';
 import { blankLabel, columnNumbers, columnRows, keyOf, kindOf } from './logic.js';
 
 const PLACE_LETTER = { u: 'U', z: 'Z', s: 'S', m: 'M' };
@@ -14,8 +15,6 @@ const capFirst = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const BLANK = /\[\[(\w+)\]\]/g;
 const SEGMENTS = { relation: ['<', '=', '>'], sign: ['+', '−'] };
 const SEGMENT_LABELS = { '<': 'mai mic decât', '=': 'egal cu', '>': 'mai mare decât', '+': 'plus', '−': 'minus' };
-// „-” devine „−” tipografic, dar nu în token-uri precum {{v:ten-frame}}
-const niceMinus = (s) => String(s).replace(/\{\{.*?\}\}|-/g, (m) => (m === '-' ? '−' : m));
 
 export default {
   howto: (part) => {
@@ -120,6 +119,7 @@ export default {
         ),
       );
       group.append(...buttons);
+      arrowRadios(group);
       const paint = (v) => {
         group.dataset.value = v;
         group.classList.toggle('has-value', v !== '');

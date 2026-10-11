@@ -315,6 +315,13 @@ test('fill pe coloane: cifrele se calculează, cifrele ascunse sunt unice, greș
   assert.match(hint({ b: '2' })[0], /^7 \+ 5 = 12: s-a format o zece nouă/);
   assert.match(hint({ e: '5' })[0], /^La zeci avem 0: desfacem o sută/);
   assert.match(hint({ d: '3' })[0], /a plecat la zeci: rămân 3/);
+  // acordul: „s-au format 2 sute noi”, „rămâne 1”
+  const three = part(['235 + 178 + 296 = [[a]][[b]][[c]]']);
+  assert.match(fill.evaluate(three, { ...fill.solution(three), a: '5' }).items[0].feedback, /= 20: s-au format 2 sute noi\. Adaugă-le la sute/);
+  const one = part(['523 − 118 = [[a]][[b]][[c]]']);
+  assert.match(fill.evaluate(one, { ...fill.solution(one), b: '1' }).items[1].feedback, /a plecat la unități: rămâne 1, deci 1 − 1 = 0/);
+  // cel mult 4 cifre pe un număr (unități, zeci, sute, mii)
+  assert.match(fill.validate(part(['56789 + 43211 = [[a]][[b]][[c]][[d]][[e]][[f]]'])).join(), /cel mult 4 cifre/);
   assert.deepEqual(fill.validate(part(['[[a]][[b]]7 + 2[[c]]5 = 632'])), ['fill: „[[a]][[b]]7 + 2[[c]]5 = 632” are mai multe completări (trebuie exact una)']);
   assert.match(fill.validate(part(['158 − 403 = [[a]][[b]][[c]]'])).join(), /nicio completare/);
   assert.match(fill.validate(part(['347 + 285 = 6[[a]]'])).join(), /nicio completare/);
@@ -326,9 +333,15 @@ test('fill piramidă: valorile se află prin propagare, iar o piramidă cu mai m
   const p = { type: 'fill', layout: 'pyramid', pyramids: [{ rows: [['848'], ['394', '[[x]]'], ['[[p]]', '221', '[[q]]'], ['48', '[[r]]', '96', '[[s]]']] }], blanks: { x: {}, p: {}, q: {}, r: {}, s: {} } };
   assert.deepEqual(fill.validate(p), []);
   assert.deepEqual(fill.solution(p), { x: 454, p: 173, q: 233, r: 125, s: 137 });
-  assert.match(blankLabel(p, 'r'), /^cărămida 2 din rândul de jos/);
+  assert.match(blankLabel(p, 'r'), /^căsuța 2 din rândul de jos/);
+  assert.match(blankLabel(p, 'x'), /^căsuța de deasupra lui 221 și …/);
   const loose = { type: 'fill', layout: 'pyramid', pyramids: [{ rows: [['[[t]]'], ['[[a]]', '[[b]]'], ['125', '[[c]]', '86']] }], blanks: { t: {}, a: {}, b: {}, c: {} } };
   assert.match(fill.validate(loose).join(), /prea multe necunoscute|mai multe completări/);
+  // plafonul 0–1000 nu face o piramidă unică: x = 0 și x = 5 (cu vârful 1005) sunt amândouă completări
+  const capped = { type: 'fill', layout: 'pyramid', pyramids: [{ rows: [['[[t]]'], ['[[p]]', '[[q]]'], ['[[x]]', '500', '0']] }], blanks: { t: {}, p: {}, q: {}, x: {} } };
+  assert.match(fill.validate(capped).join(), /mai multe completări/);
+  const big = { type: 'fill', layout: 'pyramid', pyramids: [{ rows: [['[[t]]'], ['700', '[[q]]'], ['400', '300', '450']] }], blanks: { t: {}, q: {} } };
+  assert.match(fill.validate(big).join(), /un număr peste 1000/);
 });
 
 test('build și order: ținta și valorile pot fi calcule, verificate pentru „cu / fără trecere”', () => {
@@ -342,4 +355,13 @@ test('build și order: ținta și valorile pot fi calcule, verificate pentru „
   const o = { type: 'order', direction: 'asc', items: [{ id: 'z', text: '146 + 38', calc: '146 + 38', tag: 'Z' }, { id: 'e', text: '512 − 27', calc: '512 - 27', tag: 'E' }], reveal: { word: 'ZE' } };
   assert.deepEqual(order.validate(o), []);
   assert.deepEqual(order.expressions(o), ['146 + 38', '512 - 27']);
+});
+
+test('fill: mesajul unei casete cu semn se potrivește și cu „-” scris de autor (butonul salvează „−”)', () => {
+  const fill = getLogic('fill');
+  const p = { type: 'fill', rows: ['45 [[s]] 15 = 60'], blanks: { s: { kind: 'sign', answer: '+', feedback: [{ if: '-', text: 'Aici adunăm.' }] } } };
+  assert.deepEqual(fill.validate(p), []);
+  assert.equal(fill.evaluate(p, { s: '−' }).items[0].feedback, 'Aici adunăm.');
+  assert.equal(fill.evaluate(p, { s: '-' }).items[0].feedback, 'Aici adunăm.');
+  assert.equal(fill.evaluate(p, { s: '+' }).items[0].feedback, null);
 });

@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import { calc, holds, relation, trace } from '../site/js/core/expr.js';
 import { lintText, walkTexts } from '../site/js/core/lint.js';
 import { md, markupErrors, plain } from '../site/js/core/markup.js';
-import { cantitate, fixCedilla, formatNumber, numberToWords, sameText, singularOf } from '../site/js/core/ro.js';
+import { cantitate, fixCedilla, formatNumber, niceMinus, numberToWords, sameText, singularOf } from '../site/js/core/ro.js';
 import { check, minPieces, moneyCombos, moneyKey, searchNumbers, trecere } from '../site/js/core/rules.js';
 import { evaluateExercise, gradeFor, scoreTest } from '../site/js/core/scoring.js';
 import { getLogic } from '../site/js/core/registry.js';
@@ -250,4 +250,23 @@ test('calculul în scris: coloane, treceri cu împrumutul propagat și ce se ți
       assert.deepEqual(treceri('-', a + b, a), treceri('+', a, b), `${a + b} − ${a}`);
     }
   }
+});
+
+test('package-lock.json are versiunea din package.json (npm version <x> --no-git-tag-version le schimbă pe amândouă)', async () => {
+  const { readFileSync } = await import('node:fs');
+  const read = (f) => JSON.parse(readFileSync(new URL(`../${f}`, import.meta.url), 'utf8'));
+  const pkg = read('package.json');
+  const lock = read('package-lock.json');
+  assert.equal(lock.version, pkg.version);
+  assert.equal(lock.packages[''].version, pkg.version);
+});
+
+test('niceMinus: semnul minus în calcule, cratima rămâne în cuvinte și în token-uri', () => {
+  assert.equal(niceMinus('45 - 15 = [[a]]'), '45 − 15 = [[a]]');
+  assert.equal(niceMinus('600-438'), '600−438');
+  assert.equal(niceMinus('[[a]] - 7'), '[[a]] − 7');
+  assert.equal(niceMinus('Apa s-a răcit cu: [[a]]'), 'Apa s-a răcit cu: [[a]]');
+  assert.equal(niceMinus('După-amiaza'), 'După-amiaza');
+  assert.equal(niceMinus('{{v:ten-frame n=7}} - 2'), '{{v:ten-frame n=7}} − 2');
+  assert.equal(niceMinus('-'), '−');
 });

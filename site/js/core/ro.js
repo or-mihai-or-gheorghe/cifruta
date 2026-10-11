@@ -6,6 +6,12 @@ export const nfc = (s) => String(s ?? '').normalize('NFC');
 export const fixCedilla = (s) =>
   nfc(s).replace(/ş/g, 'ș').replace(/ţ/g, 'ț').replace(/Ş/g, 'Ș').replace(/Ţ/g, 'Ț');
 
+/**
+ * „-” devine semnul minus tipografic „−” în calcule, dar nu în token-uri precum {{v:ten-frame}} și nici în cuvinte, unde e
+ * cratimă: „s-a”, „după-amiaza”, „într-o” (o cratimă între două litere rămâne).
+ */
+export const niceMinus = (s) => String(s).replace(/\{\{.*?\}\}|(?<!\p{L})-|-(?!\p{L})/gu, (m) => (m === '-' ? '−' : m));
+
 export const stripDiacritics = (s) =>
   fixCedilla(s)
     .replace(/[ăâ]/g, 'a').replace(/[ĂÂ]/g, 'A')

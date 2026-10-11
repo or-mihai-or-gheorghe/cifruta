@@ -4,7 +4,7 @@ import { h, pop } from '../../core/dom.js';
 import { play } from '../../core/sound.js';
 import { md } from '../../core/markup.js';
 import { shuffled } from '../../core/rng.js';
-import { feedbackBox, isLocked, itemFace, setState } from '../_view.js';
+import { arrowRadios, feedbackBox, isLocked, itemFace, setState } from '../_view.js';
 import { optionId } from './logic.js';
 
 const optionFace = (o) => (typeof o === 'object' ? itemFace(o) : itemFace({ text: o }));
@@ -42,6 +42,7 @@ export default {
           return btn;
         }),
       );
+      if (!item.multi) arrowRadios(list);
       feedback[item.id] = h('div', { class: 'ex-q__feedback' });
       return h('div', { class: 'ex-q' }, item.q ? h('div', { class: 'ex-q__text', html: md(item.q) }) : null, list, feedback[item.id]);
     });

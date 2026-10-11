@@ -151,11 +151,12 @@ export default {
       type: 'fill',
       layout: 'table',
       prompt: 'Completează totalurile din tabel.',
-      head: ['', 'Dimineața', 'După-amiaza', 'Împreună'],
+      // zilele pe coloane, iar etichetele lungi pe rânduri: tabelul încape pe telefonul de 360 px (aceleași casete și răspunsuri)
+      head: ['', 'luni', 'marți', 'Total'],
       rows: [
-        ['luni', '120', '210', '[[a]]'],
-        ['marți', '205', '130', '[[b]]'],
-        ['Împreună', '[[c]]', '[[d]]', '[[e]]'],
+        ['Dimineața', '120', '205', '[[c]]'],
+        ['După-amiaza', '210', '130', '[[d]]'],
+        ['Total', '[[a]]', '[[b]]', '[[e]]'],
       ],
       checks: ['120 + 210 = [[a]]', '205 + 130 = [[b]]', '120 + 205 = [[c]]', '210 + 130 = [[d]]', '[[a]] + [[b]] = [[e]]'],
       blanks: {
