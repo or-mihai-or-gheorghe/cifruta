@@ -50,16 +50,15 @@
     măsurat pe ecran, fiecare temă jucată tip cu tip, mascota care se mișcă doar unde trebuie);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.18.0 e gata și verificată local, după o a doua trecere de recenzie și rafinare, cu datoriile tehnice
-  mărunte (npm test 123/123, E2E 2567/2567, reguli 16/16, E2E cont 82/82), în nouă commit-uri locale, nepublicate (de
-  la `86f7a6b`, mediul de lucru, până la documentația celei de-a doua treceri). Publicarea (`npm run deploy`,
-  `gh run watch`, E2E pe site-ul live, tag `v0.18.0`) așteaptă confirmarea utilizatorului; regulile Firestore nu se schimbă.
+- **Următorul pas:** v0.18.0 e publicată (rularea 38120183318, tag `v0.18.0`; E2E pe site-ul live 2566/2567, iar verificarea
+  care a picat — un peisaj de pe cardurile secțiunii de recapitulare, încă neîncărcat la prima vizită după publicare — trece la
+  reluare, de trei ori din trei).
   - Copilul încearcă un test U2 pe dispozitivul lui: timpii reali, căsuțele „ține minte”, calculul pe coloane pe telefon.
   - Copilul joacă temele Jocurilor fulger și strânge medalii; din rundele reale se reglează `fastMs` și pragurile de stele.
   - Rămân: verificarea în Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
   - Apoi: tema U2 din Jocuri fulger, temele „în curând” și înmulțirea (după scanările noi).
 - **Publicat înainte:** v0.17.0 (rularea 36302230466, tag `v0.17.0`; regulile Firestore nu s-au schimbat), cu E2E pe site-ul
-  live 1957/1957.
+  live 1957/1957. Din v0.18.0, acțiunile din `pages.yml` rulează pe Node 24 (fără avertismentul de Node 20).
 
 ## Etape
 - [x] M0 Schelet: git, `_surse/`, `.gitignore`, `package.json`, `CLAUDE.md`, docs (curriculum, cercetare)
@@ -283,7 +282,10 @@
       desenate (`data-table`) au textul cât de mare încape; `tools/e2e.py --only` primește liste, `*`, `tipuri` și `fulger`.
     - **Verificare:** npm test 123/123 (fiecare commit trece și singur), E2E complet 2567/2567, reguli 16/16, E2E cont 82/82; toate cele 88 de exerciții U2 privite din
       nou pe telefon.
-  - **Publicare:** încă nu: așteaptă confirmarea utilizatorului (regulile Firestore nu se schimbă, deci fără `deploy:rules`).
+  - **Publicare (după confirmarea utilizatorului):** site-ul prin GitHub Actions (rularea 38120183318, prima cu acțiunile pe Node
+    24; regulile Firestore nu se schimbă), tag `v0.18.0`; E2E pe site-ul live 2566/2567 — singura verificare căzută (pe tabletă,
+    peisajul unui card din secțiunea de recapitulare, „lipsă” la prima încărcare după publicare) trece la reluare, de trei ori din
+    trei.
 - [x] M34 (v0.16.1): desenul mascotei, citit cu ochii altcuiva.
   - **Cererea utilizatorului:** în poziția cu mâna ridicată să rămână doar lăbuța, fără deget ridicat (se putea citi ca un gest
     ofensator); în poziția principală, lăbuțele și aluna să nu mai fie simetrice, oglindite — două cerculețe cu un oval la mijloc,
@@ -325,14 +327,14 @@
 | u1-t6 | Corpul meu în numere | 3 | publicat | npm test + E2E | 45 | – |
 | u1-t7 | Misiune în spațiu | 1 | publicat | npm test + E2E | 45 | – |
 | u1-t8 | Elevul de serviciu | 1 | publicat | npm test + E2E | 45 | – |
-| u2-t1 | Muzeul Planetei Albastre | 1 | gata (v0.18.0) | npm test + E2E | 45 | – |
-| u2-t2 | Cabana din munți | 1 | gata (v0.18.0) | npm test + E2E | 45 | – |
-| u2-t3 | Culesul de pe deal | 1 | gata (v0.18.0) | npm test + E2E | 45 | – |
-| u2-t4 | De la bob la pâine | 1 | gata (v0.18.0) | npm test + E2E | 45 | – |
-| u2-t5 | Pe Dunăre, până la mare | 1 | gata (v0.18.0) | npm test + E2E | 45 | – |
-| u2-t6 | Grădina zoologică | 1 | gata (v0.18.0) | npm test + E2E | 45 | – |
-| u2-t7 | Festivalul zmeelor | 1 | gata (v0.18.0) | npm test + E2E | 45 | – |
-| u2-t8 | Patrula verde de Ziua Pământului | 1 | gata (v0.18.0) | npm test + E2E | 45 | – |
+| u2-t1 | Muzeul Planetei Albastre | 1 | publicat | npm test + E2E | 45 | – |
+| u2-t2 | Cabana din munți | 1 | publicat | npm test + E2E | 45 | – |
+| u2-t3 | Culesul de pe deal | 1 | publicat | npm test + E2E | 45 | – |
+| u2-t4 | De la bob la pâine | 1 | publicat | npm test + E2E | 45 | – |
+| u2-t5 | Pe Dunăre, până la mare | 1 | publicat | npm test + E2E | 45 | – |
+| u2-t6 | Grădina zoologică | 1 | publicat | npm test + E2E | 45 | – |
+| u2-t7 | Festivalul zmeelor | 1 | publicat | npm test + E2E | 45 | – |
+| u2-t8 | Patrula verde de Ziua Pământului | 1 | publicat | npm test + E2E | 45 | – |
 
 ## Decizii
 | data | decizie | motiv |
@@ -502,6 +504,8 @@
 - Pe hărți, insigna cu numărul liniei atinge stația de la capăt (pe rândurile de sus și de jos nu are loc mai departe); cifrele rămân
   întregi.
 - Pinguinul are pene („Are pene?” → da), iar mulți copii cred altfel: întrebarea e corectă, dar poate surprinde.
+- GitHub Actions: eticheta `ubuntu-latest` trece pe Ubuntu 26 din 19 octombrie 2026 (anunț la publicarea v0.18.0). Fluxul folosește
+  doar Node și npm, deci nu ar trebui să se schimbe nimic; de privit prima publicare de după.
 
 ## Backlog
 - Scanările actuale acoperă manualul până la înmulțire; utilizatorul adaugă scanări noi după finalizarea etapei curente.
@@ -884,7 +888,9 @@
     - culorile barelor din `chart` vin din poziție: o echipă „roșie” desenată cu albastru încurcă un copil;
     - `match` amestecă doar coloana din dreapta, iar o piramidă părea unică doar din cauza plafonului de 1000;
     - „După-amiaza” se afișa cu semnul minus (`niceMinus` lua orice cratimă): de aceea tabelul din u1-t8 nu se putea rupe pe două rânduri.
-  - **Rezultate:** npm test 123/123, E2E complet 2567/2567, E2E cont 82/82.
+  - **Rezultate:** npm test 123/123, E2E complet 2567/2567, reguli 16/16, E2E cont 82/82.
+  - **Publicat:** rularea 38120183318, tag `v0.18.0`; E2E pe site-ul live 2566/2567 (un peisaj încă neîncărcat la prima vizită
+    după publicare; reluat, trece).
 
 - **2026-10-11 (secțiunea „Adunarea și scăderea până la 1000”, v0.18.0)**
   - **Cererea utilizatorului:** „următorul batch de 8 teste pentru 0-1000 cu operații și cu schimbări de ordin”, coerente cu cele
