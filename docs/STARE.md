@@ -39,19 +39,20 @@
   - Fără configurarea Firebase, site-ul arată ca în v0.8.1, plus legătura „Confidențialitate” din subsol.
 
   **Calitate:**
-  - 120 de teste Node, plus validarea conținutului (cu regula secțiunii U2: trecerile pe nivel, calculele în 0–1000, cifrele
+  - 123 de teste Node, plus validarea conținutului (cu regula secțiunii U2: trecerile pe nivel, calculele în 0–1000, cifrele
     calculate și unicitatea cifrelor ascunse), a tabelului de acoperire (fiecare concept are acum cel puțin un exercițiu) și a contrastului, calibrarea stelelor din Jocurile fulger
     pe fiecare temă și nivel, regulile independente ale celor 24 de tipuri cu figuri și ale celor 32 cu grafice și grafuri (numele din
     cerință, sensul și răspunsul, calculate din datele desenului, pe 3000 de semințe), mărimea textului din desenele jocurilor, avatarele (textul canonic, id-urile
     publicate, fiecare combinație desenată) și medaliile (catalogul, pragurile, medaliile unei runde, datele vechi);
   - 16 teste ale regulilor Firestore pe emulator, inclusiv 65 de intrări într-o tranzacție;
-  - E2E cu 2561 de verificări pe 3 ecrane și tastatură (și calculul în scris: scrierea de la dreapta la stânga, Backspace, căsuțele
-    „ține minte”, așezarea pe telefon), plus telefon ținut orizontal și telefon mic (cu seria pornită, textul desenelor
+  - E2E cu 2567 de verificări pe 3 ecrane și tastatură (și calculul în scris: scrierea de la dreapta la stânga, Backspace, căsuțele
+    „ține minte”, așezarea pe telefon; piramida cu o cărămidă greșită, graficul ținut apăsat, săgețile în grupurile radio), plus telefon ținut orizontal și telefon mic (cu seria pornită, textul desenelor
     măsurat pe ecran, fiecare temă jucată tip cu tip, mascota care se mișcă doar unde trebuie);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.18.0 e gata și verificată local (npm test 120/120, E2E 2561/2561, reguli 16/16, E2E cont 82/82), în
-  șase commit-uri locale, nepublicate (de la `86f7a6b`, mediul de lucru, până la versiunea 0.18.0). Publicarea (`npm run deploy`,
+- **Următorul pas:** v0.18.0 e gata și verificată local, după o a doua trecere de recenzie și rafinare, cu datoriile tehnice
+  mărunte (npm test 123/123, E2E 2567/2567, reguli 16/16, E2E cont 82/82), în nouă commit-uri locale, nepublicate (de
+  la `86f7a6b`, mediul de lucru, până la documentația celei de-a doua treceri). Publicarea (`npm run deploy`,
   `gh run watch`, E2E pe site-ul live, tag `v0.18.0`) așteaptă confirmarea utilizatorului; regulile Firestore nu se schimbă.
   - Copilul încearcă un test U2 pe dispozitivul lui: timpii reali, căsuțele „ține minte”, calculul pe coloane pe telefon.
   - Copilul joacă temele Jocurilor fulger și strânge medalii; din rundele reale se reglează `fastMs` și pragurile de stele.
@@ -258,6 +259,30 @@
     (557 la 1000 − 553), unul era legat de răspunsul corect, iar un răspuns se vedea în subpunctul următor.
   - **Verificare:** npm test 120/120 (fiecare din cele trei commit-uri ale etapei trece și singur), E2E complet 2561/2561,
     E2E pe testele U2 768/768 după ultimele reparații, reguli 16/16, E2E cont 82/82.
+  - **A doua trecere** (cererea: „o trecere de îmbunătățire, rafinare și verificare”, plus datoriile tehnice mărunte):
+    - **Recenzie independentă:** patru recenzenți pe câte două teste (matematica, ambiguitățile, răspunsurile la vedere, limba,
+      pedagogia, faptele) și unul pe codul nou; fiecare constatare verificată înainte de reparare.
+    - **Cod:** mesajele pentru semnul „−” nu se arătau când autorul scria „-” (nici în trei teste publicate); acordul din mesajele
+      automate („s-au format 2 sute noi”, „rămâne 1”); unicitatea piramidei nu mai depinde de plafonul 0–1000; cel mult 4 cifre pe
+      un rând pe coloane (altfel exercițiul nu se mai desena); valoarea corectă a unei cărămizi greșite stă în cărămida ei (acoperea
+      vecina); etichetele S/Z/U au contrast ≥ 4,5:1; pentru cititorul de ecran, „căsuța”, nu „cărămida”.
+    - **Conținut:** la „cu … mai mult / mai puțin” copilul alege semnul; tiparele problemelor în doi pași variază (totalul și o
+      parte, apoi comparația; problema „pe dos”, unde „mai mulți” cere o scădere; scăderi succesive); fiecare test are o probă sau o
+      estimare (probe noi în u2-t4, t5, t6, t7); cuvintele secrete nu mai apar în titlul testului (SPICE, VÂNT); u2-t1 e05 e acum o
+      problemă în doi pași; un răspuns din u2-t6 e05 se putea lua din e03; culorile echipelor din graficul u2-t7 urmează culorile
+      barelor; perechile din stânga, la u2-t8 e01, nu mai stau una lângă alta; desenul cu cofraje (24 de ouă) și balanța în
+      echilibru contraziceau datele; poteca spre lac avea altă lungime decât în exercițiul următor; șabloanele nu mai scriu „de”
+      după casetă; mesaje noi pentru greșelile tipice și explicații mai clare; litrul are o întrebare a lui (cât încape într-o
+      găleată), iar masa și bancnotele se etichetează doar unde se evaluează.
+    - **Datorii mărunte (cerute de utilizator în aceeași trecere):** acțiunile GitHub pe Node 24 (`checkout@v7`, `setup-node@v7`,
+      `configure-pages@v6`, `upload-pages-artifact@v5`, `deploy-pages@v5`); versiunea din `package-lock.json` (rămasă la 0.8.1), cu
+      un test; tabelul din u1-t8 e06 întors (încape la 360 px, fără versiune nouă: aceleași casete și răspunsuri); cratima din
+      cuvinte („s-a”, „după-amiaza”) nu mai devine semnul minus în șabloanele `fill`; inelul stației de pe hartă se măsoară în
+      unitățile hărții (nu mai acoperă numele); graficul `chart`: + și − ținute apăsat repetă pasul, iar valoarea barei se schimbă
+      din săgeți, Page Up/Down, Home/End; săgețile mută alegerea în grupurile radio (casetele cu semn, variantele, paleta); tabelele
+      desenate (`data-table`) au textul cât de mare încape; `tools/e2e.py --only` primește liste, `*`, `tipuri` și `fulger`.
+    - **Verificare:** npm test 123/123 (fiecare commit trece și singur), E2E complet 2567/2567, reguli 16/16, E2E cont 82/82; toate cele 88 de exerciții U2 privite din
+      nou pe telefon.
   - **Publicare:** încă nu: așteaptă confirmarea utilizatorului (regulile Firestore nu se schimbă, deci fără `deploy:rules`).
 - [x] M34 (v0.16.1): desenul mascotei, citit cu ochii altcuiva.
   - **Cererea utilizatorului:** în poziția cu mâna ridicată să rămână doar lăbuța, fără deget ridicat (se putea citi ca un gest
@@ -430,6 +455,10 @@
 | 2026-10-11 | Un singur grup U2, „Călătorie pe Planeta Albastră”, cu Pământul în fiecare test (1–2 exerciții); tema U2 din Jocuri fulger se amână | cererea utilizatorului |
 | 2026-10-11 | Desenele cu date din context au `size: 'lg'`, iar un mesaj de feedback se leagă doar de un răspuns greșit (ambele verificate de validator) | la 77 px un tabel sau o axă nu se citesc pe telefon; un mesaj legat de răspunsul corect nu s-ar arăta niciodată |
 | 2026-10-11 | Unitățile din textele generate se scriu cu litere („590 de metri”), simbolurile rămân în enunțuri („386 m”) | `cantitate` pune „de” după 19, iar „590 de m” e greșit în scris |
+| 2026-10-11 | La problemele „cu … mai mult / mai puțin” din U2, copilul alege și semnul calculului (casetă `sign`); problemele în doi pași nu repetă același tipar în fiecare test | recenzia: cu operația scrisă în șablon, conceptul se bifa din copiat; același tipar apărea în 5 din 8 teste |
+| 2026-10-11 | Cuvântul secret nu apare nici în titlul testului: SPICE (u2-t4) și VÂNT (u2-t7), în loc de PÂINE și ZMEU | literele sunt ascunse până la final, iar „De la bob la pâine” și „Festivalul zmeelor” stricau surpriza |
+| 2026-10-11 | u1-t8 e06 (publicat) se întoarce fără versiune nouă | aceleași casete și aceleași răspunsuri: ciornele și încercările vechi rămân valabile |
+| 2026-10-11 | Datoriile tehnice mărunte intră în v0.18.0 (Node 24 în GitHub Actions, versiunea din lockfile, tabelul din u1-t8, inelul de pe hartă, graficul ținut apăsat, săgețile la butoanele radio, cratima, tabelele desenate) | cererea utilizatorului: „include și low effort tech debts în acest batch” |
 | 2026-09-27 | În cele două teste noi din 0–1000, niciun calcul nu are trecere peste ordin — nici măcar sub 100, unde regula secțiunii ar fi permis-o | cererea utilizatorului era „fără trecere peste ordin”, iar o adunare cu trecere strecurată într-o explicație ar fi contrazis-o; celelalte 6 teste păstrează calculele cu trecere sub 100 |
 | 2026-09-25 | Mișcarea mascotei pornește prin `--mascot-play` (ca peisajele prin `--scene-play`), doar în containerele mari; keyframe-urile ei încep și se termină în poziția de repaus și n-au delay negativ | desenul oprit (sigla, alergătorul de pe pistă) și cel de la mișcare redusă trebuie să arate exact ca desenul, nu înghețat la mijlocul unei mișcări |
 | 2026-09-25 | Detaliile fine ale unui desen (mustăți, sprâncene, degete) stau într-un grup `__fine`, ascuns în containerele mici | la 2,2rem (alergătorul) o linie de 1,5 unități are 0,4 px: devine o pată, nu un detaliu |
@@ -473,11 +502,6 @@
 - Pe hărți, insigna cu numărul liniei atinge stația de la capăt (pe rândurile de sus și de jos nu are loc mai departe); cifrele rămân
   întregi.
 - Pinguinul are pene („Are pene?” → da), iar mulți copii cred altfel: întrebarea e corectă, dar poate surprinde.
-- u1-t8 e06: tabelul „Dimineața / După-amiaza / Împreună” se derulează în cadrul lui pe telefoanele de 360–390 px (îi lipsesc
-  16–44 px); la o versiune nouă a testului, „Total” în loc de „Împreună” (ca la u2-t3).
-- Pe hărțile `route`, inelul galben al stației la care poți merge atinge eticheta scrisă deasupra („Izvorul”, „Satul Pescarilor”);
-  textul se citește.
-- Graficul `chart` se construiește doar cu + și −: la sute, chiar cu pasul 20, o bară cere ~10 apăsări.
 
 ## Backlog
 - Scanările actuale acoperă manualul până la înmulțire; utilizatorul adaugă scanări noi după finalizarea etapei curente.
@@ -485,7 +509,6 @@
 - Tipuri noi: balanță interactivă, hotspot pe imagine, calendar, desen/simetrie (traseul și graficul cu bare există din v0.6.0).
 - Jocuri fulger: tema „Adunări și scăderi până la 1000” cu trecere peste ordin (din U2): cifra lipsă dintr-un calcul pe coloane,
   calculul greșit dintre patru, estimarea la sute.
-- `chart`: valoarea unei bare tastată sau o apăsare lungă care urcă repede (la sute, + și − cer multe apăsări).
 - Din auditul secțiunii 0–1000, neaplicate: condiția încălcată evidențiată la verificare, schimbările de linie marcate pe traseu,
   indicii treptate, pașii unei probleme afișați pe rând, animații legate de operație (gruparea din 5 în 5, simbolul care se desface,
   deplasarea pe axă).
@@ -499,15 +522,12 @@
 - Jocuri fulger cu figuri, mai departe: tangram cu triunghiuri, perechi de piese care formează o figură, vederi de sus ale corpurilor,
   emoji-urile unei teme încărcate înainte de start, `fastMs` și pragurile de stele ajustate după rundele reale.
 - Amânate la cerere: citire cu voce (TTS), tastatură numerică proprie pe ecran.
-- Din feedback-ul nr. 2, neaplicate: săgeți sus/jos la butoanele radio (Tab + Space merg); explicații vizuale interactive
+- Din feedback-ul nr. 2, neaplicate: explicații vizuale interactive
   (evidențieri pas cu pas în desen); ceas și termometru cu tragere directă; validator care leagă desenele cu date de răspunsuri.
 - Contul familiei, mai departe: App Check (reCAPTCHA) împotriva scorurilor trimise din afara site-ului; pagina cu istoricul clasamentelor pe
   săptămâni (intrările rămân din v0.10.2); schimbarea profilului care joacă cu un PIN al părintelui; Firebase Hosting cu login prin redirect, dacă popup-ul e blocat des.
 - Avatarul, mai departe: accesorii câștigate cu medalii sau cumpărate cu alune (împreună cu magazinul Cifruței), mai multe animale și
   accesorii, fundaluri cu model, avatarul copilului pe ecranul de rezultate și în Jocurile fulger.
-- GitHub Actions: acțiunile din `.github/workflows/pages.yml` (`checkout@v4`, `setup-node@v4`, `configure-pages@v5`, `deploy-pages@v4`,
-  `upload-artifact@v4`) țintesc Node.js 20, pe care GitHub îl rulează forțat pe Node.js 24 (avertisment văzut la publicarea v0.13.0);
-  de trecut la versiunile lor pentru Node.js 24.
 
 ## Jurnal de sesiuni
 - **2026-09-11** — Analiză scanări + documentare online (programă, EN II, exemple, aplicații). Plan aprobat.
@@ -849,6 +869,22 @@
   - **Publicat:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
+
+- **2026-10-11 (a doua trecere pe U2 și datoriile mărunte, tot v0.18.0)**
+  - **Cererea utilizatorului:** „mai fă o trecere de îmbunătățire, rafinare și verificare”, apoi „include și low effort tech debts
+    în acest batch, chiar dacă poate nu au fost în batchul inițial”.
+  - **Cum am lucrat:** cinci recenzenți independenți (câte două teste fiecare, plus codul nou), cu fiecare constatare verificată;
+    reparațiile din cod au teste noi (acordul mesajelor, piramida, semnele, cifrele pe coloane, contrastul, cratima); conținutul
+    revalidat cu scriptul secțiunii și cu auditul textelor; toate exercițiile privite din nou pe telefon.
+  - **Lecții:**
+    - un șablon care scrie operația („365 + 128”) face gratuit conceptul „cu … mai mult”: semnul e o casetă;
+    - un mesaj pentru semn scris cu „-” nu se potrivea niciodată cu „−”, salvat de buton: acum se compară normalizat;
+    - un desen „decorativ” cu date (cofrajele, balanța în echilibru) poate contrazice enunțul;
+    - un răspuns se poate lua și dintr-un exercițiu de mai înainte (u2-t6: 283 + 145 = 428 în e03, apoi a + 145 = 428 în e05);
+    - culorile barelor din `chart` vin din poziție: o echipă „roșie” desenată cu albastru încurcă un copil;
+    - `match` amestecă doar coloana din dreapta, iar o piramidă părea unică doar din cauza plafonului de 1000;
+    - „După-amiaza” se afișa cu semnul minus (`niceMinus` lua orice cratimă): de aceea tabelul din u1-t8 nu se putea rupe pe două rânduri.
+  - **Rezultate:** npm test 123/123, E2E complet 2567/2567, E2E cont 82/82.
 
 - **2026-10-11 (secțiunea „Adunarea și scăderea până la 1000”, v0.18.0)**
   - **Cererea utilizatorului:** „următorul batch de 8 teste pentru 0-1000 cu operații și cu schimbări de ordin”, coerente cu cele

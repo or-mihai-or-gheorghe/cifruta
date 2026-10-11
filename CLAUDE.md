@@ -66,12 +66,14 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   etichete „cu / fără trecere”) + verifică dacă tabelul de acoperire din `docs/curriculum.md` e la zi (`npm run acoperire` îl regenerează).
 - `npm run serve` — site local la http://localhost:8080 (`?debug=1` expune `window.__dbg`).
 - `npm run e2e` — Playwright (Chromium headless): fluxuri pe fiecare test, gesturi pe fiecare tip, tastatură, capturi în `test-results/`
-  (`python3 tools/e2e.py --only recap-c1-t2 --shots`, `--viewports laptop`, `--base-url https://…` pentru site-ul publicat).
+  (`python3 tools/e2e.py --only recap-c1-t2 --shots`, `--only 'u2-t*,tipuri'`, `--viewports laptop`, `--base-url https://…` pentru
+  site-ul publicat).
 - `python3 tools/fetch_assets.py` / `tools/fetch_fonts.py` — descarcă emoji Noto noi (după ce le adaugi în `emoji.js`; din folderul
   `2D/svg` al depozitului Noto) și fonturile.
 - `npm run deploy` — rulează `npm test` și împinge `main`; fluxul `.github/workflows/pages.yml` rulează testele și publică `site/` pe
   GitHub Pages → https://or-mihai-or-gheorghe.github.io/cifruta/, cu cheia web Firebase din secretul `FIREBASE_API_KEY` (~2 min, `gh run watch`;
   verifică apoi cu `python3 tools/e2e.py --base-url https://or-mihai-or-gheorghe.github.io/cifruta/`).
+- Versiunea nouă: `npm version <x.y.z> --no-git-tag-version` (schimbă `package.json` și `package-lock.json`; un test le compară).
 
 ## Rețete
 - **Test nou:** fișier în `site/data/tests/<grup>/`, intrare în `data/catalog.js` (id, file, version, estMin, exercises), concepte din
@@ -171,7 +173,12 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   `shuffle: true` la alegeri fără ordine naturală (`item.shuffle: false` o oprește pe un element). Vezi ghidul, secțiunea 6.
 - Contrast: textul colorat folosește tokenii `--c-*-ink` (≥ 4,5:1, verificat de `tests/css.test.js`); culorile vii rămân pe
   fundaluri, buline și linii. Casetele de completat se prezintă cititorului de ecran cu șablonul lor (`blankLabel` din `fill/logic.js`).
-- E2E: `--only <id>` sare fluxurile de atelier și de tastatură (`types_flow`, `keyboard_flow`) — rulează și fără `--only`.
+- Tastatura în exerciții: un grup `role=radiogroup` primește săgețile (și Home/End) prin `arrowRadios(group)` din `types/_view.js`,
+  ca butoanele radio native; o variantă nouă cu `role=radio` se leagă la fel. Bara din `chart` e un `spinbutton` (săgeți, Page Up/Down,
+  Home/End), iar + și − repetă pasul ținute apăsat. Șabloanele din `fill` trec prin `niceMinus` (`core/ro.js`): „-” devine „−” în
+  calcule, dar cratima dintre litere rămâne („s-a”, „După-amiaza”).
+- E2E: `--only` primește id-uri despărțite prin virgulă, cu `*` (`'u2-t*'`), plus `tipuri` (atelierul de tipuri și tastatura) și
+  `fulger`; fără ele, sare fluxurile de atelier și de tastatură (`types_flow`, `keyboard_flow`), care rulează și fără `--only`.
   Serverul local din `tools/e2e.py` are `request_queue_size = 128`: cu coada implicită (5), macOS resetează conexiunile când o
   pagină cere ~40 de module deodată (`ERR_CONNECTION_RESET` pe `127.0.0.1`).
 - Sarcini deschise (`mark.rules`, `route.rules`, `chart.rules`, `money.distinct`): orice răspuns care respectă regulile ia tot creditul;
@@ -192,9 +199,15 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
     (lungimea drumului ales stă într-o casetă cu `expr`, ascunsă);
   - unitățile din mesajele generate (`tag`, `slider.unit`, `map.unit`, `mark.rules.unit`) se scriu cu litere: `cantitate` pune „de”,
     deci „590 de m” e greșit, „590 de metri” e corect;
-  - graficul `chart` se construiește doar din + și −: pasul (20, 50) ține apăsările sub ~25; la `slider` pe 0–1000, răspunsul stă pe
+  - graficul `chart` se construiește din + și − (ținute apăsat, repetă pasul): pasul (20, 50) ține apăsările sub ~25; la `slider` pe 0–1000, răspunsul stă pe
     grila pasului și toleranța e de cel puțin 25 (pe telefon, 1 px ≈ 4 unități);
-  - literele unui cuvânt secret (`order.reveal`) sunt ascunse până la final, deci titlul nu spune cuvântul.
+  - literele unui cuvânt secret (`order.reveal`) sunt ascunse până la final, deci nici titlul exercițiului, nici cel al testului
+    nu spun cuvântul (de aceea SPICE și VÂNT, nu PÂINE și ZMEU);
+  - la „cu … mai mult / mai puțin”, semnul calculului e o casetă `sign` (operația scrisă în șablon face conceptul gratuit), iar
+    problemele în doi pași nu repetă același tipar în fiecare test;
+  - după o casetă nu se scrie „de” + unitate (101–119 n-au „de”): „Copii în total: [[d]]”, „[[d]] m”;
+  - `match` amestecă doar coloana din dreapta (perechile din stânga nu stau una lângă alta); culorile barelor din `chart` vin din
+    poziție (albastru, roșu, galben…), deci echipele cu nume de culori urmează ordinea asta.
 - Structura unui test tematic (secțiunea 0–1000): poveste comună, ≥ 6 tipuri, formare + comparare/ordonare + încă un concept
   `mat.nr1000.*` în fiecare test, 1–2 exerciții MEM, la intermediar două probleme în 2 pași, la avansat: problemă în 3+ pași
   (`fill` cu `layout: 'steps'`), sarcină deschisă cu reguli și un puzzle (`search`, cifre ascunse, mers invers, greșeala din bon/tabel).

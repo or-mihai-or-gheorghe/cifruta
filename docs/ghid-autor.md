@@ -197,7 +197,8 @@ schimbă doar rotația), bila nouă de pe numărătoare, confetti-ul mascotei (d
 - Cel puțin o **capcană de gândire** pe nivel: limbaj înșelător („mai puține decât” → adunăm), date în plus,
   mai multe soluții, verificarea rezultatului, „găsește greșeala”, mersul invers.
 - Diacritice corecte (ș, ț cu virgulă). Acordul cu numeralul: **1 leu**, 19 lei, **20 de lei**, 101 lei, **1 grad**,
-  **22 de grade** (în șabloane cu casete folosește formulări neutre: „Rest (lei): [[a]]”). În cod: `cantitate(n, 'leu', 'lei')`.
+  **22 de grade** (în șabloane cu casete folosește formulări neutre: „Rest (lei): [[a]]”, „Copii în total: [[d]]”, „[[d]] m”, fiindcă
+  după 101–119 nu se pune „de”, iar un „de” scris dinainte spune ceva despre răspuns). În cod: `cantitate(n, 'leu', 'lei')`.
 - **Fără concepte viitoare:** nu folosim înmulțirea, împărțirea sau fracțiile (jumătatea, sfertul). În secțiunea „Numerele de la 0
   la 1000” nici adunări și scăderi până la 1000 cu trecere peste ordin. În secțiunea „Adunarea și scăderea până la 1000” trecerile
   sunt progresive: la ușor și la intermediar cel mult **o trecere** pe calcul, la avansat cel mult **trei** (două treceri, împrumut
@@ -207,7 +208,9 @@ schimbă doar rotația), bila nouă de pe numărătoare, confetti-ul mascotei (d
 - **Sarcini deschise și pași mulți (gândirea creativă):** la nivelul avansat, cel puțin o sarcină cu **mai multe răspunsuri bune**
   verificate prin reguli (`mark.rules`, `route.rules`, `chart.rules`, `money.distinct`), o problemă în **3+ pași** (`fill` cu
   `layout: 'steps'`, plan → calcul → verificare) și un puzzle (ghicitoare cu `search`, cifre ascunse, mers invers, greșeala din
-  bon sau tabel). La intermediar, două probleme în 2 pași.
+  bon sau tabel). La intermediar, două probleme în 2 pași, cu tipare care variază de la un test la altul (cu … mai mult, apoi
+  totalul; totalul și o parte, apoi comparația; problema „pe dos”, unde „mai mulți” cere o scădere; scăderi succesive), iar
+  fiecare test are o probă sau o estimare.
 - **Limitele se spun exact:** „cel mult 400 de lei, iar 400 este voie”. Limita impusă de interfață (o bară până la 10) apare și în
   enunț, iar „cele mai puține” se scrie „mai puține decât fiecare dintre celelalte”, pentru că evaluatorul cere un minim strict.
 - **Explicațiile se confruntă cu evaluatorul:** fiecare exemplu și fiecare „nu se poate” din explicație trebuie să dea același verdict
@@ -219,14 +222,19 @@ schimbă doar rotația), bila nouă de pe numărătoare, confetti-ul mascotei (d
 - **Răspunsul nu stă la vedere:** variantele nu repetă pictograma sau textul din desen (țarcurile → doar numele animalelor),
   o variantă corectă nu spune rezultatul altui subpunct (T4-e10: a) estimează, b) calculează), contextul nu dă prima pereche
   din exercițiu, iar suma din portofel nu se vede în timpul rezolvării. Amestecă variantele (`shuffle: true`) când n-au o ordine
-  naturală; la mersul invers copilul alege și semnul (`kind: 'sign'`), nu doar numărul. Un subpunct de mai jos nu scrie răspunsul
+  naturală; la mersul invers și la problemele „cu … mai mult / mai puțin” copilul alege și semnul (`kind: 'sign'`), nu doar
+  numărul (cu operația scrisă în șablon, conceptul s-ar bifa din copiat). Un subpunct de mai jos nu scrie răspunsul
   unuia de mai sus: după „alege cel mai scurt drum”, lungimea drumului ales stă într-o casetă cu `expr` (ascunsă), nu în
-  „125 + 92 + 45”; un rezultat nu apare ca termen în calculul pe coloane de dedesubt; titlul nu spune cuvântul secret, iar
-  povestea spune că literele sunt ascunse („pe spatele fiecărui zmeu”).
+  „125 + 92 + 45”; un rezultat nu apare ca termen în calculul pe coloane de dedesubt; nici titlul exercițiului, nici titlul
+  testului nu spun cuvântul secret, iar povestea spune că literele sunt ascunse („pe spatele fiecărui zmeu”). Un răspuns nu se ia
+  nici dintr-un exercițiu de mai înainte (o sumă calculată în e03 nu devine termenul necunoscut din e05). La `match` se amestecă
+  doar coloana din dreapta: în stânga, perechile nu stau una lângă alta. Un desen „decorativ” nu are date care contrazic enunțul
+  (cofraje cu 24 de ouă lângă 148 + 136, o balanță în echilibru lângă „Andrei are mai mult”).
 - **Pe telefonul de 360 px:** un desen cu date pus în context (tabel, axă, grafic, model cu bare, pictogramă, hartă) are
   `size: 'lg'` (validatorul cere); un tabel cu casete de trei cifre are cel mult 4 coloane, cu etichetele lungi pe rânduri;
-  un grafic de construit are un pas care cere cel mult ~25 de apăsări (20 sau 50 la sute); pe axa 0–1000, toleranța unui
-  `slider` e de cel puțin 25.
+  un grafic de construit are un pas care cere cel mult ~25 de apăsări (20 sau 50 la sute; ținute apăsat, + și − repetă pasul);
+  pe axa 0–1000, toleranța unui `slider` e de cel puțin 25. Culorile barelor din `chart` vin din poziție (albastru, roșu,
+  galben, verde…): categoriile cu nume de culori urmează această ordine.
 - **Unitățile din mesajele generate se scriu cu litere** (`tag`, `slider.unit`, `map.unit`, `mark.rules.unit`): `cantitate`
   pune „de”, deci „590 de metri”, „1000 de grame”, nu „590 de m”. În enunțuri, simbolurile rămân: „386 m”, „245 kg”.
 
