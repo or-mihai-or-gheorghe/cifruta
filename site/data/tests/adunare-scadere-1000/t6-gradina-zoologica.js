@@ -1,7 +1,8 @@
 // U2-T6 — Grădina zoologică · Adunarea și scăderea până la 1000 · Pământul (medii de viață)
-// Date: hrana maimuțelor cu variante din greșeli tipice, compensarea pe axă (560 − 198), calcule pe coloane, unde trăiesc
-// animalele, tabelul a / b / a + b / a − b, vizitatorii, adaptările animalelor, graficul hranei cu două bare calculate, aleile
-// (sarcină deschisă: orice drum bun), ghicitoarea pinguinilor și pliantele socotite în două moduri.
+// Date: bananele și merele cu variante din greșeli tipice, compensarea pe axă (560 − 198), calcule pe coloane cu proba, unde
+// trăiesc animalele, tabelul a / b / a + b / a − b, vizitatorii (problema „pe dos”: marți cu 156 mai mulți decât luni), adaptările
+// animalelor, graficul hranei cu două bare calculate, aleile (sarcină deschisă: orice drum bun), ghicitoarea peștilor și pliantele
+// socotite în două moduri.
 
 // Aleile grădinii: fiecare alee are două capete, iar numerele sunt metri.
 const ALEI = {
@@ -41,7 +42,7 @@ export default {
       level: 'usor',
       estMin: 2,
       concepts: ['mat.op1000.cu-trecere'],
-      title: 'Hrana maimuțelor',
+      title: 'Banane și mere',
       context: { text: 'Daria are **125 de banane** pentru maimuțe și mai primește **48**. Din cele **300 de mere** ale grădinii, dă girafelor **40**.', visual: { v: 'tag', n: 125, unit: 'banane' } },
       type: 'choice',
       prompt: 'Alege rezultatul corect.',
@@ -58,11 +59,11 @@ export default {
     {
       id: 'e02',
       level: 'usor',
-      estMin: 3,
+      estMin: 2,
       concepts: ['mat.op1000.strategii', 'mat.op1000.fara-trecere'],
       title: 'Pași înapoi pe alee',
       context: {
-        text: 'De la intrare până la pinguini sunt **560 de pași**. Luca a făcut deja **198**. Ca să socotească ușor, scade **200**, apoi adaugă înapoi **2**.',
+        text: 'De la intrare până la girafe sunt **560 de pași**. Luca a făcut deja **198**. Ca să socotească ușor, scade **200**, apoi adaugă înapoi **2**.',
         visual: { v: 'number-line', hops: '560,?,?', jumps: '−200,+2' },
         size: 'lg',
       },
@@ -80,19 +81,23 @@ export default {
     {
       id: 'e03',
       level: 'usor',
-      estMin: 3,
-      concepts: ['mat.op1000.in-scris', 'mat.op1000.cu-trecere', 'mat.op1000.fara-trecere'],
+      estMin: 4,
+      concepts: ['mat.op1000.in-scris', 'mat.op1000.cu-trecere', 'mat.op1000.fara-trecere', 'mat.op.proba'],
       title: 'Calculul îngrijitoarei',
-      context: { text: 'Daria își verifică socotelile pe coloane: hrana adusă și hrana dată animalelor.', visual: { v: 'tag', n: 283, unit: 'kilograme' } },
+      context: { text: 'Daria își verifică socotelile pe coloane: hrana adusă și hrana rămasă.', visual: { v: 'tag', n: 274, unit: 'kilograme' } },
       type: 'fill',
       layout: 'column',
-      prompt: 'Calculează pe coloane, de la unități spre stânga.',
-      rows: ['283 + 145 = [[a]][[b]][[c]]', '395 − 172 = [[d]][[e]][[f]]'],
-      blanks: { a: {}, b: {}, c: {}, d: {}, e: {}, f: {} },
+      prompt: 'Calculează pe coloane, de la unități spre stânga, apoi fă proba scăderii.',
+      rows: [
+        { t: '274 + 153 = [[a]][[b]][[c]]', label: 'Hrana adusă' },
+        { t: '395 − 172 = [[d]][[e]][[f]]', label: 'Hrana rămasă' },
+        { t: '[[g]][[h]][[i]] + 172 = 395', label: 'Proba scăderii' },
+      ],
+      blanks: { a: {}, b: {}, c: {}, d: {}, e: {}, f: {}, g: {}, h: {}, i: {} },
       explain: {
-        idea: 'La adunare, când zecile fac 10 sau mai mult, **ținem minte 1** la sute.',
-        steps: ['283 + 145: 3 + 5 = 8; 8 + 4 = 12, scriem 2 și ținem minte 1; 2 + 1 + 1 = 4. Rezultatul: 428.', '395 − 172: 5 − 2 = 3; 9 − 7 = 2; 3 − 1 = 2. Rezultatul: 223.'],
-        check: '428 − 145 = 283 și 223 + 172 = 395',
+        idea: 'La adunare, când zecile fac 10 sau mai mult, **ținem minte 1** la sute. Proba scăderii: diferența plus scăzătorul dă descăzutul.',
+        steps: ['274 + 153: 4 + 3 = 7; 7 + 5 = 12, scriem 2 și ținem minte 1; 2 + 1 + 1 = 4. Rezultatul: 427.', '395 − 172: 5 − 2 = 3; 9 − 7 = 2; 3 − 1 = 2. Rezultatul: 223.', 'Proba: 223 + 172 = 395.'],
+        check: '427 − 153 = 274 și 223 + 172 = 395',
       },
     },
     {
@@ -101,7 +106,7 @@ export default {
       estMin: 2,
       concepts: ['med.medii-de-viata'],
       title: 'Unde trăiește?',
-      context: { text: 'Pe fiecare cușcă e o hartă mică: de unde vine animalul.', visual: { v: 'scene', theme: 'oras' } },
+      context: { text: 'Lângă fiecare animal, o tăbliță arată de unde vine.', visual: { v: 'scene', theme: 'oras' } },
       type: 'categorize',
       prompt: 'Pune fiecare animal în coșul mediului în care trăiește în natură.',
       bins: [
@@ -142,9 +147,9 @@ export default {
       blanks: {
         a: { answer: 492 },
         b: { answer: 238 },
-        c: { answer: 125, feedback: [{ if: 1025, text: 'b lipsește din sumă: îl aflăm prin scădere, 575 − 450.' }] },
+        c: { answer: 125, feedback: [{ if: 1025, text: '575 e totul, iar 450 e o parte. Partea lipsă, b, este 575 − 450.' }] },
         d: { answer: 325 },
-        e: { answer: 283, feedback: [{ if: 573, text: 'a lipsește din sumă: îl aflăm prin scădere, 428 − 145.' }] },
+        e: { answer: 283, feedback: [{ if: 573, text: '428 e totul, iar 145 e o parte. Partea lipsă, a, este 428 − 145.' }] },
         f: { answer: 138 },
       },
       explain: {
@@ -157,29 +162,37 @@ export default {
       id: 'e06',
       level: 'intermediar',
       estMin: 4,
-      concepts: ['mat.pb.doua-operatii', 'mat.pb.mai-mult-mai-putin', 'mat.op1000.cu-trecere'],
+      concepts: ['mat.pb.doua-operatii', 'mat.pb.mai-mult-mai-putin', 'mat.pb.capcana-limbaj', 'mat.op1000.cu-trecere'],
       title: 'Vizitatorii',
       context: {
-        text: 'Luni au venit la grădină **318 vizitatori**. Marți au venit **cu 156 mai mulți**.',
-        visual: { v: 'bar-model', parts: '318,156', total: '?' },
+        text: 'Marți au venit la grădină **474 de vizitatori**, **cu 156 mai mulți decât luni**. Desenul arată vizitatorii de marți: cât luni, plus încă 156.',
+        visual: { v: 'bar-model', parts: '?,156', total: '474' },
         size: 'lg',
       },
       type: 'fill',
       layout: 'steps',
-      prompt: 'Socotește pas cu pas.',
+      prompt: 'Socotește pas cu pas. Alege și semnul calculului.',
       rows: [
-        { label: 'Câți vizitatori au venit marți?', t: '318 + 156 = [[a]]' },
-        { label: 'Câți au venit în cele două zile?', t: '318 + [[b]] = [[c]]' },
+        { label: 'Câți vizitatori au venit luni?', t: '474 [[s]] 156 = [[a]]' },
+        { label: 'Câți au venit în cele două zile?', t: '474 + [[b]] = [[c]]' },
       ],
       blanks: {
-        a: { answer: 474, feedback: [{ if: 464, text: '8 + 6 = 14: o zece nouă. La zeci: 1 + 5 + 1 = 7.' }, { if: 162, text: '„Cu 156 mai mulți” înseamnă că adunăm.' }] },
-        b: { answer: 474 },
-        c: { answer: 792 },
+        s: { kind: 'sign', answer: '−', feedback: [{ if: '+', text: 'Marți au venit **mai mulți** decât luni. Ca să afli câți au venit luni, din vizitatorii de marți scazi cei 156 în plus.' }] },
+        a: {
+          answer: 318,
+          feedback: [
+            { if: 322, text: 'Din 4 nu putem lua 6: desfacem o zece, 14 − 6 = 8. La zeci rămân 6: 6 − 5 = 1.' },
+            { if: 328, text: 'Ai desfăcut o zece, dar la zeci n-ai micșorat: rămân 6 zeci, deci 6 − 5 = 1.' },
+          ],
+        },
+        b: { answer: 318 },
+        c: { answer: 792, feedback: [{ if: 782, text: '4 + 8 = 12: ții minte 1. La zeci: 7 + 1 + 1 = 9.' }] },
       },
       explain: {
-        idea: 'Întâi aflăm câți au venit marți, apoi adunăm cele două zile.',
-        steps: ['Marți: 318 + 156 = 474.', 'În două zile: 318 + 474 = 792.'],
-        check: '792 − 474 = 318',
+        idea: '„Cu 156 mai mulți **decât luni**” spune că marți au fost mai mulți. Luni au fost **mai puțini**, deci scădem: 474 − 156.',
+        steps: ['Luni: 474 − 156 = 318 vizitatori.', 'În două zile: 474 + 318 = 792.'],
+        check: '318 + 156 = 474',
+        trap: '„Mai mulți” nu înseamnă mereu adunare: aici aflăm ziua cu mai puțini vizitatori.',
       },
     },
     {
@@ -199,8 +212,8 @@ export default {
       ],
       right: [
         { id: 'blana', text: 'blană groasă și albă, care ține de cald' },
-        { id: 'cocoasa', text: 'cocoașe cu grăsime și picioare lungi, pentru nisip' },
-        { id: 'aripi', text: 'pene dese; înoată ajutându-se de aripi' },
+        { id: 'cocoasa', text: 'cocoașe cu grăsime și tălpi late, care nu se afundă în nisip' },
+        { id: 'aripi', text: 'pene dese și aripi cu care înoată' },
         { id: 'branhii', text: 'respiră în apă, prin branhii' },
         { id: 'zbor', text: 'aripi mari, cu care zboară peste ocean' },
       ],
@@ -227,7 +240,7 @@ export default {
       given: { luni: 240, joi: 180 },
       key: { luni: 240, marti: 160, miercuri: 220, joi: 180 },
       explain: {
-        idea: 'Aflăm întâi marțea din luni, apoi miercurea din marți.',
+        idea: 'Aflăm întâi cât au primit marți (pornim de la luni), apoi cât au primit miercuri (pornim de la marți).',
         steps: ['Marți: 240 − 80 = 160 kg.', 'Miercuri: 160 + 60 = 220 kg.'],
         trap: 'Miercuri se compară cu marți, nu cu luni.',
       },
@@ -238,7 +251,7 @@ export default {
       estMin: 7,
       concepts: ['mat.geo.trasee', 'mat.mas.lungime', 'mat.pb.decizie', 'mat.op1000.cu-trecere'],
       title: 'Aleile grădinii',
-      context: { text: 'Clasa vrea să vadă **pinguinii** și **girafele**, dar are timp de cel mult **700 de metri** de mers.' },
+      context: { text: 'Clasa vrea să vadă **pinguinii** și **girafele**, dar poate merge cel mult **700 de metri**.' },
       parts: [
         {
           id: 'a',
@@ -254,17 +267,24 @@ export default {
           id: 'b',
           concepts: ['mat.op1000.cu-trecere'],
           type: 'fill',
-          prompt: 'Care dintre drumurile bune e **cel mai scurt**? Câți metri are?',
-          rows: ['Cel mai scurt drum bun are [[a]] de metri.'],
+          prompt: 'Câți metri are **cel mai scurt** dintre drumurile bune?',
+          rows: ['Cel mai scurt drum bun: [[a]] m'],
           blanks: {
-            a: { expr: '120 + 180 + 250', feedback: [{ if: 590, text: 'Acesta e drumul pe la elefanți. Mai scurt e cel care merge de la girafe direct la ieșire.' }] },
+            a: {
+              expr: '120 + 180 + 250',
+              feedback: [
+                { if: 590, text: 'Acesta e drumul pe la elefanți. Mai scurt e cel care merge de la girafe direct la ieșire.' },
+                { if: 460, text: 'Drumul de 460 de metri trece pe la elefanți, dar nu pe la girafe: nu e bun.' },
+                { if: 540, text: 'Drumul de 540 de metri trece pe la lei, dar nu pe la pinguini: nu e bun.' },
+              ],
+            },
           },
         },
       ],
       explain: {
         idea: 'Verificăm două lucruri: drumul trece pe la pinguini și girafe, iar totalul metrilor e cel mult 700.',
         steps: ['Intrare – pinguini – girafe – ieșire: 120 + 180 + 250 = 550 m. Bun.', 'Intrare – pinguini – girafe – elefanți – ieșire: 120 + 180 + 160 + 130 = 590 m. Bun.', 'Intrare – pinguini – elefanți – girafe – ieșire: 120 + 210 + 160 + 250 = 740 m. Prea lung.'],
-        trap: '700 de metri sunt voie, dar 701 nu.',
+        trap: 'Cel mai scurt drum până la ieșire (460 m, pe la elefanți) nu trece pe la girafe, deci nu e bun.',
       },
     },
     {
@@ -273,21 +293,28 @@ export default {
       estMin: 7,
       concepts: ['mat.log.ghicitori', 'mat.nr1000.conditii', 'mat.op1000.cu-trecere'],
       title: 'Ghicitoarea îngrijitoarei',
-      context: { text: '{{e:pinguin}} Daria nu le spune copiilor câți pinguini are grădina. Le dă doar indicii.' },
+      context: { text: '{{e:peste}} Daria nu le spune copiilor câți pești are acvariul mare. Le dă doar indicii.' },
       type: 'fill',
       layout: 'steps',
-      prompt: 'Numărul pinguinilor are **trei cifre** și e **între 100 și 200**. Cifra zecilor e **cu 3 mai mare** decât cifra unităților. **Suma cifrelor** este **14**.',
+      prompt: 'Numărul peștilor are **trei cifre** și e **între 100 și 200**. Cifra zecilor e **cu 3 mai mare** decât cifra unităților. **Suma cifrelor** este **14**.',
       rows: [
-        { label: 'Câți pinguini are grădina?', t: 'Grădina are [[a]] de pinguini.' },
-        { label: 'Primăvara mai vin 125 de pinguini. Câți vor fi?', t: '[[b]] + 125 = [[c]]' },
+        { label: 'Câți pești are acvariul?', t: 'Peștii din acvariu: [[a]]' },
+        { label: 'Primăvara, Daria mai aduce 125 de pești. Câți vor fi?', t: '[[b]] + 125 = [[c]]' },
       ],
       blanks: {
-        a: { answer: 185, search: { from: 100, to: 199, rules: [{ rule: 'holds', expr: 'z = u + 3' }, { rule: 'digitSum', value: 14 }] }, feedback: [{ if: 194, text: '1 + 9 + 4 = 14, dar 9 e cu 5 mai mare decât 4, nu cu 3.' }] },
+        a: {
+          answer: 185,
+          search: { from: 100, to: 199, rules: [{ rule: 'holds', expr: 'z = u + 3' }, { rule: 'digitSum', value: 14 }] },
+          feedback: [
+            { if: 194, text: '1 + 9 + 4 = 14, dar 9 e cu 5 mai mare decât 4, nu cu 3.' },
+            { if: 158, text: '1 + 5 + 8 = 14, dar aici cifra unităților e cu 3 mai mare decât a zecilor. Enunțul cere invers.' },
+          ],
+        },
         b: { answer: 185 },
         c: { answer: 310, feedback: [{ if: 300, text: '5 + 5 = 10: scrii 0 și ții minte 1. La zeci: 8 + 2 + 1 = 11, scrii 1 și ții minte încă 1.' }] },
       },
       explain: {
-        idea: 'Sutele sunt 1. Zecile și unitățile fac împreună 14 − 1 = 13, iar zecile sunt cu 3 mai mari.',
+        idea: 'Cifra sutelor este 1. Cifra zecilor și cifra unităților fac împreună 14 − 1 = 13, iar cifra zecilor e cu 3 mai mare.',
         steps: ['Încercăm: unitățile 5 și zecile 8, pentru că 5 + 8 = 13 și 8 = 5 + 3.', 'Numărul: 185.', '185 + 125 = 310.'],
         check: '1 + 8 + 5 = 14',
       },
@@ -307,7 +334,7 @@ export default {
         { label: 'Luca: câte au rămas?', t: '432 − [[b]] = [[c]]' },
         { label: 'Ana: câte au rămas după luni?', t: '432 − 186 = [[d]]' },
         { label: 'Ana: câte au rămas după marți?', t: '[[e]] − 147 = [[f]]' },
-        { label: 'Ce observi?', t: 'Ambele moduri dau [[g]] de pliante.' },
+        { label: 'Ce observi?', t: 'Pliante rămase, în ambele moduri: [[g]]' },
       ],
       checks: ['[[c]] = [[g]]', '[[f]] = [[g]]'],
       blanks: {

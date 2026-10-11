@@ -1,5 +1,5 @@
 // U2-T3 — Culesul de pe deal · Adunarea și scăderea până la 1000 · Pământul (dealul)
-// Date: coșul cu mere pe numărătoare (245 + 38), cântarul cu variante din greșeli tipice, primul împrumut (352 − 128), dealul, tabelul
+// Date: merele culese, pe numărătoare (245 + 38), cântarul cu variante din greșeli tipice, primul împrumut (352 − 128), dealul, tabelul
 // descăzut / scăzător / diferență, prunele (cu 145 kg mai puțin), totalurile culesului pe două direcții, estimarea pe axă,
 // „Cine s-a grăbit și a greșit?”, egalizarea banilor și plata în două feluri.
 
@@ -18,15 +18,15 @@ export default {
       estMin: 2,
       concepts: ['mat.op1000.grupare', 'mat.op1000.cu-trecere'],
       title: 'Coșul cu mere',
-      context: { text: 'În coș erau **245 de mere**. Andrei mai pune **38**.', visual: { v: 'basket', n: 245 } },
+      context: { text: 'Andrei a cules **245 de mere**. Mai culege **38**.', visual: { v: 'basket', n: 245 } },
       type: 'build',
       tool: 'abacus',
       places: ['S', 'Z', 'U'],
-      prompt: 'Arată pe numărătoare câte mere sunt acum în coș.',
-      items: [{ id: 'i1', label: 'Câte mere sunt în coș?', calc: '245 + 38' }],
+      prompt: 'Arată pe numărătoare câte mere a cules Andrei.',
+      items: [{ id: 'i1', label: 'Câte mere a cules acum?', calc: '245 + 38' }],
       explain: {
         idea: 'Unitățile fac 5 + 8 = 13: **10 bile** de la unități se schimbă pe **o bilă** la zeci.',
-        steps: ['Unitățile: 5 + 8 = 13, adică 1 zece și 3 unități.', 'Zecile: 4 + 3 + 1 = 8.', 'Sutele: 2. Sunt 283 de mere.'],
+        steps: ['Unitățile: 5 + 8 = 13, adică 1 zece și 3 unități.', 'Zecile: 4 + 3 + 1 = 8.', 'Sutele: 2. Andrei a cules 283 de mere.'],
         check: '283 − 38 = 245',
       },
     },
@@ -40,13 +40,17 @@ export default {
       type: 'choice',
       prompt: 'Alege rezultatul corect.',
       items: [
-        { id: 'i1', q: '325 + 147', calc: '325 + 147', options: ['412', '462', '472', '572'], correct: '472', feedback: [{ if: '462', text: '5 + 7 = 12: s-a format o zece nouă. La zeci: 2 + 4 + 1 = 7.' }] },
-        { id: 'i2', q: '431 − 116', calc: '431 - 116', options: ['215', '305', '315', '325'], correct: '315', feedback: [{ if: '325', text: 'Din 1 nu putem lua 6: desfacem o zece, 11 − 6 = 5. La zeci rămân 2: 2 − 1 = 1.' }] },
+        { id: 'i1', q: '325 + 147', calc: '325 + 147', options: ['462', '472', '482', '562'], correct: '472', feedback: [{ if: '462', text: '5 + 7 = 12: s-a format o zece nouă. La zeci: 2 + 4 + 1 = 7.' }] },
+        { id: 'i2', q: '431 − 116', calc: '431 - 116', options: ['315', '325', '415', '547'], correct: '315', feedback: [{ if: '325', text: 'Din 1 nu putem lua 6: desfacem o zece, 11 − 6 = 5. La zeci rămân 2: 2 − 1 = 1.' }] },
         { id: 'i3', q: '260 + 70', calc: '260 + 70', options: ['230', '320', '330', '340'], correct: '330', feedback: [{ if: '230', text: '6 zeci + 7 zeci = 13 zeci: o sută nouă și 3 zeci.' }] },
       ],
       explain: {
         idea: 'Socotim pe ordine, de la unități. Când se formează o zece nouă (sau o sută nouă), o adăugăm la ordinul următor.',
-        steps: ['325 + 147 = 472.', '431 − 116 = 315.', '260 + 70 = 330.'],
+        steps: [
+          '325 + 147: 5 + 7 = 12, scriem 2 și ținem minte 1; 2 + 4 + 1 = 7; 3 + 1 = 4. Rezultatul: 472.',
+          '431 − 116: din 1 nu luăm 6, desfacem o zece: 11 − 6 = 5; 2 − 1 = 1; 4 − 1 = 3. Rezultatul: 315.',
+          '260 + 70: 6 zeci + 7 zeci = 13 zeci, adică o sută și 3 zeci; 2 + 1 = 3 sute. Rezultatul: 330.',
+        ],
         trap: 'La scădere nu scădem cifra mică din cea mare: 431 − 116 nu dă 325.',
       },
     },
@@ -62,7 +66,7 @@ export default {
           id: 'a',
           concepts: ['mat.op1000.grupare'],
           type: 'fill',
-          prompt: 'Desface o zece în 10 unități. Cum se scrie acum 352?',
+          prompt: 'Andrei desface o zece în 10 unități. Cum se scrie acum 352?',
           rows: ['352 = 3 sute + [[a]] zeci + [[b]] unități'],
           blanks: {
             a: { answer: 4, feedback: [{ if: 5, text: 'O zece s-a desfăcut, deci la zeci rămân 5 − 1 = 4.' }] },
@@ -100,7 +104,7 @@ export default {
         { id: 'i3', text: 'Dealurile sunt mai înalte decât câmpiile.', answer: true },
         { id: 'i4', text: 'Dealurile au vârfuri ascuțite, cu stânci și zăpadă tot anul.', answer: false, why: 'Așa arată vârfurile munților înalți. Dealurile sunt rotunjite și mai joase.' },
       ],
-      explain: { idea: '**Dealurile** sunt mai înalte decât câmpiile, dar mai joase decât munții, cu vârfuri rotunjite. Pe ele cresc des livezi și vii.' },
+      explain: { idea: '**Dealurile** sunt mai înalte decât câmpiile, dar mai joase decât munții, cu vârfuri rotunjite. Pe ele se întâlnesc des livezi și vii.' },
     },
     {
       id: 'e05',
@@ -108,7 +112,7 @@ export default {
       estMin: 3,
       concepts: ['mat.op.terminologie', 'mat.op.necunoscut', 'mat.op1000.cu-trecere'],
       title: 'Descăzut, scăzător, diferență',
-      context: { text: 'Bunica își notează vânzările într-un tabel. Unele numere s-au șters.', visual: { v: 'note-list', title: 'Vânzări', lines: 'mere,prune,nuci' } },
+      context: { text: 'Bunica a notat câte fructe avea, câte a vândut și câte i-au rămas. Unele numere s-au șters.', visual: { v: 'note-list', title: 'Vânzări', lines: 'mere,prune,nuci' } },
       type: 'fill',
       layout: 'table',
       prompt: 'Completează tabelul. Pe fiecare coloană, diferența este descăzutul minus scăzătorul.',
@@ -134,18 +138,19 @@ export default {
       id: 'e06',
       level: 'intermediar',
       estMin: 4,
-      concepts: ['mat.pb.doua-operatii', 'mat.pb.mai-mult-mai-putin', 'mat.op1000.cu-trecere', 'mat.mas.masa'],
+      concepts: ['mat.pb.doua-operatii', 'mat.pb.mai-mult-mai-putin', 'mat.op1000.cu-trecere'],
       title: 'Prunele',
       context: { text: 'Vineri au cules **318 kg** de prune. Sâmbătă au cules **cu 145 kg mai puțin**.', visual: { v: 'tag', n: 318, unit: 'kilograme' } },
       type: 'fill',
       layout: 'steps',
       prompt: 'Socotește pas cu pas.',
       rows: [
-        { label: 'Câte kilograme au cules sâmbătă?', t: '318 − 145 = [[a]]' },
+        { label: 'Câte kilograme au cules sâmbătă?', t: '318 [[s]] 145 = [[a]]' },
         { label: 'Câte kilograme au cules în cele două zile?', t: '318 + [[b]] = [[c]]' },
       ],
       blanks: {
-        a: { answer: 173, feedback: [{ if: 233, text: 'Din 1 zece nu putem lua 4 zeci: desfacem o sută. 11 − 4 = 7, iar la sute rămân 2: 2 − 1 = 1.' }, { if: 463, text: '„Cu 145 kg mai puțin” înseamnă că scădem.' }] },
+        s: { kind: 'sign', answer: '−', feedback: [{ if: '+', text: 'Sâmbătă au cules **cu 145 kg mai puțin**: din 318 scădem 145.' }] },
+        a: { answer: 173, feedback: [{ if: 233, text: 'Din 1 zece nu putem lua 4 zeci: desfacem o sută. 11 − 4 = 7, iar la sute rămân 2: 2 − 1 = 1.' }] },
         b: { answer: 173 },
         c: { answer: 491 },
       },
@@ -166,7 +171,7 @@ export default {
       type: 'fill',
       layout: 'table',
       prompt: 'Completează totalurile, pe rânduri și pe coloane.',
-      head: ['', 'Mere', 'Pere', 'Total'],
+      head: ['', 'Mere', 'Prune', 'Total'],
       rows: [
         ['Andrei', '126', '145', '[[a]]'],
         ['Bunica', '238', '117', '[[b]]'],
@@ -176,7 +181,7 @@ export default {
       blanks: { a: { answer: 271 }, b: { answer: 355 }, c: { answer: 364 }, d: { answer: 262 }, e: { answer: 626 } },
       explain: {
         idea: 'Pe rând adunăm ce a cules fiecare. Pe coloană adunăm același fel de fructe. Totalul se poate afla în **două feluri** și trebuie să iasă la fel.',
-        steps: ['Andrei: 126 + 145 = 271. Bunica: 238 + 117 = 355.', 'Mere: 126 + 238 = 364. Pere: 145 + 117 = 262.', 'Total: 271 + 355 = 626, iar 364 + 262 = 626.'],
+        steps: ['Andrei: 126 + 145 = 271. Bunica: 238 + 117 = 355.', 'Mere: 126 + 238 = 364. Prune: 145 + 117 = 262.', 'Total: 271 + 355 = 626, iar 364 + 262 = 626.'],
         check: '271 + 355 = 364 + 262 = 626',
       },
     },
@@ -194,7 +199,7 @@ export default {
       step: 10,
       ticks: { minor: 50, major: 100, labels: [0, 500, 1000] },
       unit: 'kilograme',
-      prompt: 'Rotunjește fiecare număr la sute și pune semnul cam unde ajunge totalul.',
+      prompt: 'Rotunjește fiecare număr la sute, apoi arată pe axă cam unde ajunge totalul.',
       items: [{ id: 'i1', label: 'Cam câte kilograme în trei zile?', answer: 800, tolerance: 30 }],
       explain: {
         idea: 'Rotunjim la **cea mai apropiată sută**: 312 ≈ 300, 289 ≈ 300, 196 ≈ 200.',
@@ -251,15 +256,15 @@ export default {
       estMin: 7,
       concepts: ['mat.pb.doua-operatii', 'mat.pb.mai-mult-mai-putin', 'mat.op1000.cu-trecere'],
       title: 'Aceeași sumă',
-      context: { text: 'După piață, Andrei are mai mulți bani decât bunica. Dacă îi dă bunicii **86 de lei**, vor avea **amândoi la fel**. Bunica are acum **248 de lei**.', visual: { v: 'balance', left: 'Andrei', right: 'bunica' } },
+      context: { text: '{{e:bani}} După piață, Andrei are mai mulți bani decât bunica. Dacă îi dă bunicii **86 de lei**, vor avea **amândoi la fel**. Bunica are acum **248 de lei**.' },
       type: 'fill',
       layout: 'steps',
       prompt: 'Rezolvă pas cu pas.',
       rows: [
-        { label: 'Cu câți lei are Andrei mai mult decât bunica?', t: 'Cu [[a]] de lei.' },
+        { label: 'Cu câți lei are Andrei mai mult decât bunica?', t: 'Diferența: [[a]]' },
         { label: 'Câți lei are Andrei?', t: '248 + [[b]] = [[c]]' },
         { label: 'Câți lei au împreună?', t: '248 + [[d]] = [[e]]' },
-        { label: 'Verificare: Andrei dă 86 de lei', t: 'Andrei rămâne cu [[f]] de lei, bunica ajunge la [[g]] de lei.' },
+        { label: 'Verificare: Andrei dă 86 de lei. Câți lei are acum fiecare?', t: 'Andrei: [[f]], bunica: [[g]]' },
       ],
       checks: ['86 + 86 = [[a]]', '[[c]] − 86 = [[f]]', '248 + 86 = [[g]]', '[[f]] = [[g]]'],
       blanks: {

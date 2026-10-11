@@ -1,6 +1,6 @@
 // U2-T1 — Muzeul Planetei Albastre · Adunarea și scăderea până la 1000 · Pământul
 // Date: cuburile înainte de schimb (2 sute, 4 zeci, 13 unități), zeci întregi, trei feluri de a aduna (156 + 128), uscat, apă și
-// atmosferă, sala de film (128 + 41, 375 − 169 și proba), vizitatorii din weekend, estimarea la sute, excursia clasei (două
+// atmosferă, globul, sala de film (375 − 169 și proba, apoi − 95), vizitatorii din weekend (semnul ales de copil), estimarea la sute, excursia clasei (două
 // treceri, decizie), magazinul muzeului (sarcină deschisă) și codul sălii secrete (cifre ascunse pe coloane).
 
 export default {
@@ -10,7 +10,7 @@ export default {
   theme: 'spatiu',
   title: 'Muzeul Planetei Albastre',
   subtitle: 'Uscat, apă și aer · pe ordine și pe coloane · estimări · codul sălii secrete',
-  story: 'Sara merge cu bunicul la Muzeul Pământului. Vede globul cel mare, sala oceanelor și un film despre aer. Peste tot sunt numere de trei cifre de adunat și de scăzut, cu trecere peste ordin.',
+  story: 'Sara merge cu bunicul la Muzeul Planetei Albastre. Vede globul cel mare, sala oceanelor și un film despre aer. Peste tot sunt numere de trei cifre de adunat și de scăzut, cu trecere peste ordin.',
   exercises: [
     {
       id: 'e01',
@@ -30,7 +30,13 @@ export default {
         a: { answer: 2 },
         b: { answer: 5, feedback: [{ if: 4, text: 'Cele 10 cuburi schimbate fac o bară nouă: 4 + 1 = 5 zeci.' }] },
         c: { answer: 3, feedback: [{ if: 13, text: 'O cifră nu poate fi mai mare decât 9: din 13 cuburi, 10 devin o bară și rămân 3.' }] },
-        d: { answer: 253, feedback: [{ if: 2413, text: 'Fiecare loc primește o singură cifră: întâi faci schimbul, apoi scrii numărul.' }] },
+        d: {
+          answer: 253,
+          feedback: [
+            { if: 2413, text: 'Fiecare loc primește o singură cifră: întâi faci schimbul, apoi scrii numărul.' },
+            { if: 243, text: 'Din cele 13 cuburi, 10 au devenit o bară nouă: zecile sunt 4 + 1 = 5, deci numărul este 253.' },
+          ],
+        },
       },
       explain: {
         idea: '**10 unități = 1 zece.** Zece cuburi se schimbă pe o bară.',
@@ -47,13 +53,14 @@ export default {
       title: 'Biletele de grup',
       context: {
         text: 'La casa muzeului, doamna socotește repede, cu zeci întregi: **6 zeci + 8 zeci = 14 zeci**, adică o sută și 4 zeci.',
-        visual: { v: 'tag', n: 10, unit: 'bilete' },
+        visual: { v: 'base-ten', z: 14, group: 'z' },
+        size: 'lg',
       },
       type: 'match',
       prompt: 'Unește fiecare calcul cu rezultatul lui.',
       left: [
         { id: 'a', text: '270 + 50', calc: '270 + 50', feedback: [{ if: 'r220', text: '7 zeci + 5 zeci = 12 zeci: o sută nouă și 2 zeci. 200 + 100 + 20 = 320.' }] },
-        { id: 'b', text: '340 + 80', calc: '340 + 80' },
+        { id: 'b', text: '340 + 80', calc: '340 + 80', feedback: [{ if: 'r320', text: '4 zeci + 8 zeci = 12 zeci: o sută nouă și 2 zeci. 300 + 100 + 20 = 420.' }] },
         { id: 'c', text: '420 − 60', calc: '420 - 60' },
         { id: 'd', text: '500 − 30', calc: '500 - 30' },
       ],
@@ -67,7 +74,7 @@ export default {
       key: { a: 'r320', b: 'r420', c: 'r360', d: 'r470' },
       explain: {
         idea: 'Socotim cu **zeci întregi**: 10 zeci fac o sută.',
-        steps: ['270 + 50: 27 zeci + 5 zeci = 32 de zeci, adică 320.', '340 + 80: 34 de zeci + 8 zeci = 42 de zeci, adică 420.', '420 − 60: desfacem o sută în 10 zeci; 42 de zeci − 6 zeci = 36 de zeci, adică 360.', '500 − 30: 50 de zeci − 3 zeci = 47 de zeci, adică 470.'],
+        steps: ['270 + 50: 27 de zeci + 5 zeci = 32 de zeci, adică 320.', '340 + 80: 34 de zeci + 8 zeci = 42 de zeci, adică 420.', '420 − 60: 42 de zeci − 6 zeci = 36 de zeci, adică 360.', '500 − 30: 50 de zeci − 3 zeci = 47 de zeci, adică 470.'],
         trap: 'La 270 + 50, cele 12 zeci nu rămân la zeci: 10 dintre ele fac o sută nouă.',
       },
     },
@@ -92,7 +99,7 @@ export default {
             { label: 'Sutele', t: '100 + 100 = [[a]]' },
             { label: 'Zecile', t: '50 + 20 = [[b]]' },
             { label: 'Unitățile', t: '6 + 8 = [[c]]' },
-            { label: 'Totul', t: 'Au intrat [[d]] de copii.' },
+            { label: 'Totul', t: 'Copii în total: [[d]]' },
           ],
           checks: ['[[a]] + [[b]] + [[c]] = [[d]]'],
           blanks: { a: { answer: 200 }, b: { answer: 70 }, c: { answer: 14 }, d: { answer: 284, feedback: [{ if: 274, text: 'Unitățile fac 14: o zece nouă și 4 unități. 200 + 70 + 14 = 284.' }] } },
@@ -124,12 +131,12 @@ export default {
       type: 'truefalse',
       prompt: 'Citește și alege **A** (adevărat) sau **F** (fals).',
       items: [
-        { id: 'i1', text: 'Pe Pământ, apa ocupă mai mult loc decât uscatul.', answer: true },
+        { id: 'i1', text: 'Pe suprafața Pământului, apa ocupă mai mult loc decât uscatul.', answer: true },
         { id: 'i2', text: 'Stratul de aer din jurul Pământului se numește atmosferă.', answer: true },
-        { id: 'i3', text: 'Munții, dealurile și câmpiile se află pe uscat.', answer: true },
-        { id: 'i4', text: 'Oceanele sunt forme de relief ale uscatului.', answer: false, why: 'Oceanele sunt ape. Formele de relief ale uscatului sunt munții, dealurile și câmpiile.' },
+        { id: 'i3', text: 'Globul arată cum este Pământul, dar mult mai mic.', answer: true },
+        { id: 'i4', text: 'Pe glob, uscatul este colorat cu albastru.', answer: false, why: 'Pe glob, apele sunt albastre. Uscatul e colorat cu verde, galben sau maro.' },
       ],
-      explain: { idea: 'Pământul are **uscat**, **apă** și **aer** (atmosfera). Apa ocupă mai mult loc, de aceea îi spunem Planeta Albastră.' },
+      explain: { idea: 'Pământul are **uscat**, **apă** și **aer** (atmosfera). Apa ocupă mai mult loc, de aceea îi spunem Planeta Albastră. **Globul** e un Pământ în miniatură: apele sunt albastre, uscatul verde, galben sau maro.' },
     },
     {
       id: 'e05',
@@ -137,18 +144,10 @@ export default {
       estMin: 4,
       concepts: ['mat.pb.doua-operatii', 'mat.op1000.in-scris', 'mat.op1000.cu-trecere', 'mat.op.proba'],
       title: 'Locurile din sala de film',
-      context: { text: 'Sala de film are **375 de locuri**. La filmul despre aer au venit **169 de spectatori**: **128 de copii**, iar ceilalți adulți.', visual: { v: 'tag', n: 375, unit: 'locuri' } },
+      context: { text: 'Sala de film are **375 de locuri**. La filmul despre aer au venit **169 de spectatori**.', visual: { v: 'tag', n: 375, unit: 'locuri' } },
       parts: [
         {
           id: 'a',
-          concepts: ['mat.pb.doua-operatii'],
-          type: 'fill',
-          prompt: 'Câți adulți au venit?',
-          rows: ['169 − 128 = [[a]]'],
-          blanks: { a: { expr: '169 - 128', feedback: [{ if: 297, text: 'Copiii sunt o parte din spectatori: îi scădem, nu îi adunăm.' }] } },
-        },
-        {
-          id: 'b',
           concepts: ['mat.op1000.in-scris', 'mat.op1000.cu-trecere', 'mat.op.proba'],
           type: 'fill',
           layout: 'column',
@@ -156,12 +155,26 @@ export default {
           rows: [{ t: '375 − 169 = [[b]][[c]][[d]]', label: 'Locurile libere' }, { t: '[[e]][[f]][[g]] + 169 = 375', label: 'Proba' }],
           blanks: { b: {}, c: {}, d: {}, e: {}, f: {}, g: {} },
         },
+        {
+          id: 'b',
+          concepts: ['mat.pb.doua-operatii', 'mat.op1000.cu-trecere'],
+          type: 'fill',
+          prompt: 'Înainte să înceapă filmul, mai intră **95 de elevi**. Câte locuri rămân libere acum?',
+          rows: ['[[h]] − 95 = [[i]]'],
+          blanks: {
+            h: { expr: '375 - 169' },
+            i: { expr: '375 - 169 - 95', feedback: [{ if: 211, text: 'La zeci ai desfăcut o sută în 10 zeci, deci la sute rămâne 1, nu 2: 206 − 95 = 111.' }] },
+          },
+        },
       ],
       explain: {
-        idea: 'Din toți spectatorii scădem copiii și aflăm câți adulți sunt. Pentru locurile libere, din toate locurile scădem toți spectatorii.',
-        steps: ['169 − 128 = 41 de adulți.', '375 − 169: din 5 nu putem lua 9, desfacem o zece: 15 − 9 = 6; la zeci rămân 6, 6 − 6 = 0; 3 − 1 = 2. Rămân 206 locuri.'],
-        check: '206 + 169 = 375',
-        trap: 'La zeci, după împrumut, rămân 6 zeci, nu 7.',
+        idea: 'Din toate locurile scădem spectatorii și aflăm câte locuri sunt libere. Apoi, din locurile libere scădem elevii care mai intră.',
+        steps: [
+          '375 − 169: din 5 nu putem lua 9, desfacem o zece: 15 − 9 = 6; la zeci rămân 6, 6 − 6 = 0; 3 − 1 = 2. Rămân 206 locuri.',
+          '206 − 95: 6 − 5 = 1; la zeci, din 0 nu putem lua 9: desfacem o sută, 10 − 9 = 1; la sute rămâne 1. Acum sunt libere 111 locuri.',
+        ],
+        check: '206 + 169 = 375 și 111 + 95 = 206',
+        trap: 'La 375 − 169, după împrumut, la zeci rămân 6 zeci, nu 7.',
       },
     },
     {
@@ -171,7 +184,7 @@ export default {
       concepts: ['mat.pb.doua-operatii', 'mat.pb.mai-mult-mai-putin', 'mat.op1000.cu-trecere'],
       title: 'Vizitatorii din weekend',
       context: {
-        text: 'Sâmbătă au venit la muzeu **365 de vizitatori**. Duminică au venit **cu 128 mai mulți** decât sâmbătă.',
+        text: 'Sâmbătă au venit la muzeu **365 de vizitatori**. Duminică au venit **cu 128 mai mulți** decât sâmbătă. Desenul arată vizitatorii de duminică.',
         visual: { v: 'bar-model', parts: '365,128', total: '?' },
         size: 'lg',
       },
@@ -179,11 +192,12 @@ export default {
       layout: 'steps',
       prompt: 'Socotește pas cu pas.',
       rows: [
-        { label: 'Câți vizitatori au venit duminică?', t: '365 + 128 = [[a]]' },
+        { label: 'Câți vizitatori au venit duminică?', t: '365 [[s]] 128 = [[a]]' },
         { label: 'Câți au venit în cele două zile?', t: '365 + [[b]] = [[c]]' },
       ],
       blanks: {
-        a: { answer: 493, feedback: [{ if: 483, text: '5 + 8 = 13: o zece nouă. La zeci: 6 + 2 + 1 = 9.' }, { if: 237, text: '„Cu 128 mai mulți” înseamnă că adunăm.' }] },
+        s: { kind: 'sign', answer: '+', feedback: [{ if: '−', text: 'Duminică au venit **cu 128 mai mulți**: la cei de sâmbătă adunăm 128.' }] },
+        a: { answer: 493, feedback: [{ if: 483, text: '5 + 8 = 13: o zece nouă. La zeci: 6 + 2 + 1 = 9.' }] },
         b: { answer: 493 },
         c: { answer: 858 },
       },
@@ -256,8 +270,8 @@ export default {
       rows: [
         { label: 'Câți lei au strâns cele două clase?', t: '236 + 189 = [[a]]' },
         { label: 'Ajung banii?', t: '[[b]], pentru că [[c]] [[d]] 512.', calc: '[[c]] [[d]] 512' },
-        { label: 'Câți lei mai trebuie?', t: '512 − [[e]] = [[f]]' },
-        { label: 'Proba: adună ce mai trebuie cu ce au strâns', t: '[[g]] + [[h]] = 512' },
+        { label: 'Care este diferența dintre preț și banii strânși?', t: '512 − [[e]] = [[f]]' },
+        { label: 'Proba: adună diferența cu banii strânși', t: '[[g]] + [[h]] = 512' },
       ],
       blanks: {
         a: { answer: 425, feedback: [{ if: 415, text: '6 + 9 = 15: ții minte 1. La zeci: 3 + 8 + 1 = 12, deci scrii 2 și ții minte încă 1.' }, { if: 315, text: 'Ai uitat ce ai ținut minte: 6 + 9 = 15, ții minte 1; la zeci 3 + 8 + 1 = 12, ții minte 1; la sute 2 + 1 + 1 = 4.' }] },
@@ -280,7 +294,7 @@ export default {
       id: 'e10',
       level: 'avansat',
       estMin: 7,
-      concepts: ['mat.mas.buget', 'mat.mas.bani-mari', 'mat.pb.decizie'],
+      concepts: ['mat.mas.buget', 'mat.pb.decizie'],
       title: 'Magazinul muzeului',
       context: { text: 'Bunicul îi dă Sarei voie să aleagă suveniruri pentru toată clasa.' },
       type: 'mark',
@@ -311,7 +325,7 @@ export default {
       parts: [
         {
           id: 'a',
-          concepts: ['mat.op1000.reconstituire', 'mat.op1000.in-scris'],
+          concepts: ['mat.op1000.reconstituire', 'mat.op1000.in-scris', 'mat.op1000.cu-trecere'],
           type: 'fill',
           layout: 'column',
           prompt: 'Prima ușă: găsește cifrele care lipsesc. Începe cu unitățile.',
@@ -320,7 +334,7 @@ export default {
         },
         {
           id: 'b',
-          concepts: ['mat.op1000.reconstituire', 'mat.op1000.cu-trecere'],
+          concepts: ['mat.op1000.reconstituire', 'mat.op1000.in-scris', 'mat.op1000.cu-trecere'],
           type: 'fill',
           layout: 'column',
           prompt: 'A doua ușă are o scădere. Găsește cifrele care lipsesc.',
@@ -329,11 +343,11 @@ export default {
         },
       ],
       explain: {
-        idea: 'Fiecare coloană are **o singură cifră** lipsă: o afli din coloana ei, ținând minte transportul sau împrumutul.',
+        idea: 'Fiecare coloană are **cel mult o cifră** lipsă: o afli din coloana ei, ținând minte transportul sau împrumutul.',
         steps: [
           'Prima ușă, la unități: 7 + □ se termină în 5, deci □ = 8 (7 + 8 = 15, ții minte 1).',
           'La zeci: □ + 6 + 1 se termină în 4, deci □ = 7 (7 + 6 + 1 = 14, ții minte 1). La sute: 4 + 2 + 1 = 7. Codul: 477 + 268 = 745.',
-          'A doua ușă: din 2 nu luăm 7, desfacem o zece: 12 − 7 = 5. La zeci a plecat o zece, iar □ − 1 − 5 trebuie să dea 6: din nou desfacem o sută, deci □ = 2 (12 − 1 − 5 = 6). La sute: 8 − 1 − 3 = 4. Codul: 822 − 357 = 465.',
+          'A doua ușă: din 2 nu luăm 7, desfacem o zece: 12 − 7 = 5. La zeci a plecat o zece: □ − 1 − 5 ar trebui să dea 6, deci □ ar fi 12, prea mult pentru o cifră. Înseamnă că am desfăcut și o sută: □ = 2, pentru că 12 − 1 − 5 = 6. La sute: 8 − 1 − 3 = 4. Codul: 822 − 357 = 465.',
         ],
         check: '477 + 268 = 745 și 465 + 357 = 822',
         trap: 'Nu uita ce ai ținut minte sau ce ai împrumutat: schimbă cifra de pe coloana următoare.',

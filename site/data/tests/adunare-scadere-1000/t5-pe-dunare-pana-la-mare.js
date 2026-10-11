@@ -1,10 +1,10 @@
 // U2-T5 — Pe Dunăre, până la mare · Adunarea și scăderea până la 1000 · Pământul (apele)
 // Date: 12 zeci schimbate pe o sută (425), perechi de calcule cu același rezultat, calcule pe coloane, drumul apei, pasageri
-// care urcă și coboară, brațele Deltei (cel mai scurt drum, în km), semnele pierdute, apă dulce sau sărată, vaporul cu 450 de
-// locuri, fișele căpitanului cu cifre șterse și biletul familiei plătit în două feluri.
+// care urcă și coboară, drumurile spre mare (cel mai scurt drum, în km), semnele pierdute, apă dulce sau sărată, vaporul cu 450 de
+// locuri, fișele căpitanului cu cifre șterse și biletul familiei plătit în trei feluri.
 
-// Canalele Deltei: fiecare canal are două capete, iar numerele sunt kilometri.
-const CANALE = {
+// Drumurile spre mare (pe Dunăre, pe brațele ei și pe canale): fiecare drum are două capete, iar numerele sunt kilometri.
+const DRUMURI = {
   w: 320,
   h: 220,
   unit: 'kilometri',
@@ -17,7 +17,7 @@ const CANALE = {
   ],
   lines: [
     ['port', 'sat'], ['sat', 'far'], ['port', 'ostrov'], ['ostrov', 'far'], ['far', 'mare'], ['ostrov', 'mare'],
-  ].map(([a, b]) => ({ id: `${a}-${b}`, label: 'canal', color: 'albastra', stops: [a, b] })),
+  ].map(([a, b]) => ({ id: `${a}-${b}`, label: 'drum', color: 'albastra', stops: [a, b] })),
   segments: [
     { a: 'port', b: 'sat', n: 125 }, { a: 'sat', b: 'far', n: 92 }, { a: 'port', b: 'ostrov', n: 87 },
     { a: 'ostrov', b: 'far', n: 152 }, { a: 'far', b: 'mare', n: 45 }, { a: 'ostrov', b: 'mare', n: 210 },
@@ -30,7 +30,7 @@ export default {
   version: 1,
   theme: 'dunare',
   title: 'Pe Dunăre, până la mare',
-  subtitle: 'Vaporul și porturile · canalele Deltei · apă dulce și sărată · fișele căpitanului',
+  subtitle: 'Vaporul și porturile · drumurile spre mare · apă dulce și sărată · fișele căpitanului',
   story: 'Eva și bunica ei călătoresc cu vaporul pe Dunăre, din port în port, până în Delta Dunării și la mare. Pasagerii urcă și coboară, kilometrii se adună, iar căpitanul Sorin le arată păsările din deltă.',
   exercises: [
     {
@@ -51,7 +51,13 @@ export default {
         a: { answer: 4, feedback: [{ if: 3, text: 'Cele 10 pachete schimbate fac un teanc nou: 3 + 1 = 4 sute.' }] },
         b: { answer: 2, feedback: [{ if: 12, text: 'Pe locul zecilor stă o singură cifră: din 12 zeci, 10 devin o sută și rămân 2.' }] },
         c: { answer: 5 },
-        d: { answer: 425 },
+        d: {
+          answer: 425,
+          feedback: [
+            { if: 3125, text: 'Pe locul zecilor stă o singură cifră: 12 zeci = 1 sută și 2 zeci. Numărul are 4 sute, 2 zeci și 5 unități.' },
+            { if: 325, text: 'Cele 10 pachete n-au dispărut: au devenit un teanc nou, deci sunt 4 sute.' },
+          ],
+        },
       },
       explain: {
         idea: '**10 zeci = 1 sută.** Zece pachete de zece se schimbă pe un teanc de o sută.',
@@ -62,7 +68,7 @@ export default {
     {
       id: 'e02',
       level: 'usor',
-      estMin: 3,
+      estMin: 4,
       concepts: ['mat.op1000.cu-trecere', 'mat.op.balanta'],
       title: 'Perechi cu același rezultat',
       context: { text: 'Pe tabla din port, fiecare calcul din stânga are o pereche în dreapta, cu **același rezultat**.', visual: { v: 'balance', left: '236 + 47', right: '?' } },
@@ -91,18 +97,22 @@ export default {
     {
       id: 'e03',
       level: 'usor',
-      estMin: 3,
-      concepts: ['mat.op1000.in-scris', 'mat.op1000.cu-trecere'],
+      estMin: 4,
+      concepts: ['mat.op1000.in-scris', 'mat.op1000.cu-trecere', 'mat.op.proba'],
       title: 'Calculul căpitanului',
       context: { text: 'Căpitanul Sorin își verifică socotelile pe coloane: pasagerii urcați și locurile rămase.', visual: { v: 'tag', n: 263, unit: 'pasageri' } },
       type: 'fill',
       layout: 'column',
-      prompt: 'Calculează pe coloane, de la unități spre stânga.',
-      rows: ['263 + 128 = [[a]][[b]][[c]]', '475 − 238 = [[d]][[e]][[f]]'],
-      blanks: { a: {}, b: {}, c: {}, d: {}, e: {}, f: {} },
+      prompt: 'Calculează pe coloane, de la unități spre stânga, apoi fă proba scăderii.',
+      rows: [
+        { t: '263 + 128 = [[a]][[b]][[c]]', label: 'Pasagerii' },
+        { t: '475 − 238 = [[d]][[e]][[f]]', label: 'Locurile' },
+        { t: '[[g]][[h]][[i]] + 238 = 475', label: 'Proba scăderii' },
+      ],
+      blanks: { a: {}, b: {}, c: {}, d: {}, e: {}, f: {}, g: {}, h: {}, i: {} },
       explain: {
         idea: 'La adunare **ținem minte 1** când o coloană face 10 sau mai mult; la scădere **desfacem o zece** când cifra de sus e mai mică.',
-        steps: ['263 + 128: 3 + 8 = 11, scriem 1, ținem minte 1; 6 + 2 + 1 = 9; 2 + 1 = 3. Rezultatul: 391.', '475 − 238: din 5 nu luăm 8, desfacem o zece: 15 − 8 = 7; 6 − 3 = 3; 4 − 2 = 2. Rezultatul: 237.'],
+        steps: ['263 + 128: 3 + 8 = 11, scriem 1, ținem minte 1; 6 + 2 + 1 = 9; 2 + 1 = 3. Rezultatul: 391.', '475 − 238: din 5 nu luăm 8, desfacem o zece: 15 − 8 = 7; 6 − 3 = 3; 4 − 2 = 2. Rezultatul: 237.', 'Proba: diferența plus scăzătorul dă descăzutul, 237 + 238 = 475.'],
         check: '391 − 128 = 263 și 237 + 238 = 475',
       },
     },
@@ -129,7 +139,7 @@ export default {
       estMin: 4,
       concepts: ['mat.op.lanturi', 'mat.op1000.cu-trecere'],
       title: 'Urcă și coboară',
-      context: { text: 'La plecare erau pe vapor **236 de pasageri**. În fiecare port, unii coboară, alții urcă.', visual: { v: 'tag', n: 236, unit: 'pasageri' } },
+      context: { text: 'La plecare erau pe vapor **236 de pasageri**. În unele porturi coboară pasageri, în altele urcă.', visual: { v: 'tag', n: 236, unit: 'pasageri' } },
       type: 'fill',
       layout: 'chain',
       prompt: 'Câți pasageri sunt pe vapor după fiecare port?',
@@ -151,15 +161,15 @@ export default {
       level: 'intermediar',
       estMin: 4,
       concepts: ['mat.geo.trasee', 'mat.mas.distanta', 'mat.pb.doua-operatii', 'mat.op1000.cu-trecere'],
-      title: 'Canalele Deltei',
-      context: { text: 'Barca de excursie poate merge pe mai multe canale. Pe hartă, lângă fiecare canal scrie câți kilometri are.' },
+      title: 'Drumurile spre mare',
+      context: { text: 'Vaporul poate ajunge la mare pe mai multe drumuri: pe Dunăre, pe brațele ei și pe canale. Pe hartă, lângă fiecare drum scrie câți kilometri are.' },
       parts: [
         {
           id: 'a',
           concepts: ['mat.geo.trasee'],
           type: 'route',
           prompt: 'Alege **cel mai scurt drum** de la port până la mare. Atinge locurile în ordine.',
-          map: CANALE,
+          map: DRUMURI,
           from: 'port',
           to: 'mare',
           key: ['port', 'sat', 'far', 'mare'],
@@ -169,9 +179,9 @@ export default {
           concepts: ['mat.mas.distanta', 'mat.pb.doua-operatii', 'mat.op1000.cu-trecere'],
           type: 'fill',
           layout: 'steps',
-          prompt: 'Câți kilometri are drumul ales? Cu câți e mai scurt decât drumul pe la Ostrovul Verde, direct spre mare?',
+          prompt: 'Câți kilometri are cel mai scurt drum? Cu câți kilometri e mai scurt decât drumul pe la Ostrovul Verde, direct spre mare?',
           rows: [
-            { label: 'Drumul ales', t: '[[a]] km' },
+            { label: 'Cel mai scurt drum', t: '[[a]] km' },
             { label: 'Pe la Ostrovul Verde', t: '87 + 210 = [[b]]' },
             { label: 'Diferența', t: '[[c]] − [[d]] = [[e]]' },
           ],
@@ -179,8 +189,8 @@ export default {
         },
       ],
       explain: {
-        idea: 'Comparăm drumurile adunând kilometrii canalelor de pe fiecare.',
-        steps: ['Pe la Satul Pescarilor și Far: 125 + 92 + 45 = 262 km.', 'Pe la Ostrovul Verde și Far: 87 + 152 + 45 = 284 km.', 'Pe la Ostrovul Verde, direct: 87 + 210 = 297 km. Diferența: 297 − 262 = 35 km.'],
+        idea: 'Comparăm drumurile adunând kilometrii de pe fiecare bucată.',
+        steps: ['Pe la Satul Pescarilor și Farul Vechi: 125 + 92 + 45 = 262 km.', 'Pe la Ostrovul Verde și Farul Vechi: 87 + 152 + 45 = 284 km.', 'Pe la Ostrovul Verde, direct: 87 + 210 = 297 km. Diferența: 297 − 262 = 35 km.'],
         check: '262 + 35 = 297',
       },
     },
@@ -236,7 +246,7 @@ export default {
       estMin: 7,
       concepts: ['mat.pb.doua-operatii', 'mat.pb.plan', 'mat.op1000.cu-trecere'],
       title: 'Vaporul cu 450 de locuri',
-      context: { text: 'Vaporul are **450 de locuri**. În primul port urcă **186 de pasageri**, iar în al doilea încă **197**.', visual: { v: 'tag', n: 450, unit: 'locuri' } },
+      context: { text: 'Vaporul are **450 de locuri** și pornește gol. În primul port urcă **186 de pasageri**, iar în al doilea încă **197**.', visual: { v: 'tag', n: 450, unit: 'locuri' } },
       type: 'fill',
       layout: 'steps',
       prompt: 'Urmează planul, pas cu pas.',
@@ -250,7 +260,7 @@ export default {
       blanks: {
         a: { answer: 383, feedback: [{ if: 273, text: 'Ai uitat transporturile: 6 + 7 = 13 și 8 + 9 + 1 = 18.' }] },
         b: { answer: 383 },
-        c: { answer: 67, feedback: [{ if: 133, text: 'Ai scăzut cifra mică din cea mare. Din 0 nu luăm 3: desfacem o zece.' }] },
+        c: { answer: 67, feedback: [{ if: 133, text: 'Ai scăzut cifra mică din cea mare. Din 0 nu luăm 3: desfacem o zece, 10 − 3 = 7. La zeci rămân 4, iar din 4 nu luăm 8: desfacem o sută, 14 − 8 = 6.' }] },
         d: { answer: 383 },
         e: { answer: 255 },
         f: { answer: 255 },
@@ -294,7 +304,7 @@ export default {
         idea: 'Lucrăm coloană cu coloană, de la unități, ținând minte transportul sau împrumutul.',
         steps: [
           'Prima fișă, la unități: 3 − □ dă 5 doar cu o zece desfăcută: 13 − 8 = 5, deci □ = 8.',
-          'La zeci a plecat o zece, iar □ − 1 − 5 trebuie să dea 4: și aici desfacem, din 10: 10 − 1 − 5 = 4, deci □ = 0. La sute: 6 − 1 − 2 = 3. Fișa: 603 − 258 = 345.',
+          'La zeci, o zece a plecat la unități. □ − 1 − 5 = 4 ar cere □ = 10, care nu e o cifră: desfacem o sută, iar 10 − 1 − 5 = 4, deci □ = 0. La sute rămân 6 − 1 = 5, iar 5 − 2 = 3. Fișa: 603 − 258 = 345.',
           'A doua fișă, la unități: 6 + □ se termină în 3, deci □ = 7 (13, ținem minte 1). La zeci: □ + 7 + 1 se termină în 0, deci □ = 2 (10, ținem minte 1). La sute: 2 + 3 + 1 = 6. Fișa: 226 + 377 = 603.',
         ],
         check: '345 + 258 = 603 și 603 − 377 = 226',
@@ -304,7 +314,7 @@ export default {
     {
       id: 'e11',
       level: 'avansat',
-      estMin: 7,
+      estMin: 5,
       concepts: ['mat.mas.bani-mari', 'mat.pb.decizie'],
       title: 'Biletul familiei',
       context: { text: 'Biletul pentru toată familia, cu vaporul până la mare, costă **640 de lei**.', visual: { v: 'banknote', value: 200 } },
@@ -312,14 +322,15 @@ export default {
       allowed: [500, 200, 100, 50, 20, 10],
       target: 640,
       distinct: true,
-      prompt: 'Plătește exact **640 de lei**, în **două feluri diferite**.',
+      prompt: 'Plătește exact **640 de lei**, în **trei feluri diferite**.',
       items: [
         { id: 'f1', label: 'Primul fel' },
         { id: 'f2', label: 'Al doilea fel' },
+        { id: 'f3', label: 'Al treilea fel' },
       ],
       explain: {
         idea: 'Sunt multe feluri bune. Socotește sutele, apoi zecile.',
-        steps: ['De exemplu: 500 + 100 + 20 + 20 = 640.', 'Sau: 200 + 200 + 200 + 20 + 20 = 640.'],
+        steps: ['De exemplu: 500 + 100 + 20 + 20 = 640.', 'Sau: 200 + 200 + 200 + 20 + 20 = 640.', 'Sau: 500 + 50 + 50 + 20 + 20 = 640.'],
         trap: 'Contează ce scrie pe bani, nu câte bancnote ai.',
       },
     },

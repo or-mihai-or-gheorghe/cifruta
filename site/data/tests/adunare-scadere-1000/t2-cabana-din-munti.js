@@ -1,6 +1,7 @@
 // U2-T2 — Cabana din munți · Adunarea și scăderea până la 1000 · Pământul (muntele)
 // Date: o sută desfăcută în 10 zeci (304), salturi pe axă (245 + 132), muntele, ouăle pe numărătoare (148 + 136), comparări fără
-// calcul, turiștii de la cabană, lemnele de foc (652 − 318 și proba), poteca pe axă (386 + 207, 763 − 593), traseele marcate
+// calcul, turiștii de la cabană (totalul și o parte, apoi comparația), lemnele de foc (652 − 318 și proba), poteca pe axă
+// (386 + 207, 763 − 593), traseele marcate
 // (cel mai scurt drum pe la izvor, trei lungimi pe coloane), piramida de pietre și rucsacul de cel mult 1 kg (sarcină deschisă).
 
 // Potecile dintre cabană și lac: fiecare potecă are două capete, iar numerele sunt metri.
@@ -36,11 +37,11 @@ export default {
     {
       id: 'e01',
       level: 'usor',
-      estMin: 3,
+      estMin: 2,
       concepts: ['mat.op1000.grupare', 'mat.nr1000.valoare-pozitionala'],
       title: 'Bețele pentru marcaje',
       context: {
-        text: 'Radu are **304 bețe** pentru marcaje: 3 pachete de o sută și 4 bețe singure. Ca să le împartă, desface **un pachet** în 10 legături de câte 10 bețe.',
+        text: 'Radu are **304 bețe** pentru marcaje: 3 pachete de o sută și 4 bețe singure. Ca să le împartă, desface **un pachet** în legături de câte 10 bețe.',
         visual: { v: 'base-ten', n: 304 },
         size: 'lg',
       },
@@ -51,7 +52,13 @@ export default {
         a: { answer: 2, feedback: [{ if: 3, text: 'Un pachet s-a desfăcut, deci au rămas 3 − 1 = 2 pachete.' }] },
         b: { answer: 10, feedback: [{ if: 1, text: 'O sută desfăcută face 10 zeci, nu una singură.' }, { if: 0, text: 'Pachetul desfăcut a devenit 10 legături de zece.' }] },
         c: { answer: 4 },
-        d: { answer: 304, feedback: [{ if: 294, text: 'Bețele nu s-au pierdut: le-ai doar desfăcut. Sunt tot 304.' }] },
+        d: {
+          answer: 304,
+          feedback: [
+            { if: 214, text: 'Bețele nu s-au pierdut: 10 legături de câte 10 bețe fac 100 de bețe. 200 + 100 + 4 = 304.' },
+            { if: 2104, text: 'Fiecare loc primește o singură cifră: 2 sute + 10 zeci + 4 unități = 304.' },
+          ],
+        },
       },
       explain: {
         idea: '**1 sută = 10 zeci.** Când desfacem o sută, numărul rămâne același, doar se scrie altfel.',
@@ -94,7 +101,7 @@ export default {
         { id: 'i1', text: 'Munții sunt cele mai înalte forme de relief.', answer: true },
         { id: 'i2', text: 'Sus, pe munte, este de obicei mai frig decât la poalele lui.', answer: true },
         { id: 'i3', text: 'Capra neagră trăiește pe stâncile munților.', answer: true },
-        { id: 'i4', text: 'Pe vârfurile munților înalți se întind lanuri de grâu.', answer: false, why: 'Lanurile de grâu sunt pe câmpii. Pe vârfurile munților înalți sunt stânci, iarbă scurtă și, iarna, zăpadă.' },
+        { id: 'i4', text: 'Pe vârfurile munților înalți se întind lanuri de grâu.', answer: false, why: 'Lanurile de grâu sunt mai ales pe câmpii. Pe vârfurile munților înalți sunt stânci, iarbă scurtă și, iarna, zăpadă.' },
       ],
       explain: { idea: 'Munții sunt **înalți** (de obicei peste 800 de metri), cu stânci și păduri de brad. Acolo trăiesc capra neagră, ursul și cocoșul de munte.' },
     },
@@ -104,15 +111,15 @@ export default {
       estMin: 2,
       concepts: ['mat.op1000.grupare', 'mat.op1000.cu-trecere'],
       title: 'Ouăle de la cabană',
-      context: { text: 'Luni au venit la cabană **148 de ouă**, iar joi încă **136**.', visual: { v: 'egg-carton', full: 2, loose: 4 } },
+      context: { text: '{{e:ou}} Luni au venit la cabană **148 de ouă**, iar joi încă **136**.' },
       type: 'build',
       tool: 'abacus',
       places: ['S', 'Z', 'U'],
-      prompt: 'Arată pe numărătoare câte ouă sunt acum.',
-      items: [{ id: 'i1', label: 'Câte ouă sunt în total?', calc: '148 + 136' }],
+      prompt: 'Arată pe numărătoare câte ouă au venit în total.',
+      items: [{ id: 'i1', label: 'Câte ouă au venit în total?', calc: '148 + 136' }],
       explain: {
         idea: 'Când pe tija unităților s-ar strânge **10 bile sau mai multe**, schimbăm 10 dintre ele pe o bilă la zeci.',
-        steps: ['Unitățile: 8 + 6 = 14, adică 1 zece și 4 unități.', 'Zecile: 4 + 3 + 1 = 8.', 'Sutele: 1 + 1 = 2. Sunt 284 de ouă: 2 bile la sute, 8 la zeci, 4 la unități.'],
+        steps: ['Unitățile: 8 + 6 = 14, adică 1 zece și 4 unități.', 'Zecile: 4 + 3 + 1 = 8.', 'Sutele: 1 + 1 = 2. Au venit 284 de ouă: 2 bile la sute, 8 la zeci, 4 la unități.'],
         check: '284 − 136 = 148',
       },
     },
@@ -121,15 +128,27 @@ export default {
       level: 'intermediar',
       estMin: 3,
       concepts: ['mat.op.comparare-expresii'],
-      title: 'Rucsacii',
-      context: { text: '{{e:rucsac}} Fără să calculezi totul: uită-te ce e la fel și ce e diferit în fiecare pereche.' },
+      title: 'Comparări pe potecă',
+      context: { text: '{{e:rucsac}} Pe potecă, Tudor și Mara se joacă: compară fără să calculezi totul. Uită-te ce e la fel și ce e diferit în fiecare pereche.' },
       type: 'fill',
       prompt: 'Pune semnul potrivit: <, = sau >.',
       rows: ['318 + 245 [[a]] 318 + 254', '650 − 128 [[b]] 650 − 118', '380 + 140 [[c]] 500'],
       blanks: {
-        a: { kind: 'relation', feedback: [{ if: '>', text: 'Ambele încep cu 318. Comparăm ce adunăm: 245 e mai mic decât 254.' }] },
+        a: {
+          kind: 'relation',
+          feedback: [
+            { if: '>', text: 'Ambele încep cu 318. Comparăm ce adunăm: 245 e mai mic decât 254.' },
+            { if: '=', text: '245 și 254 au aceleași cifre, dar nu pe aceleași locuri: 4 zeci < 5 zeci.' },
+          ],
+        },
         b: { kind: 'relation', feedback: [{ if: '>', text: 'Din același număr, cine scade **mai mult** rămâne cu **mai puțin**: 128 > 118, deci 650 − 128 < 650 − 118.' }] },
-        c: { kind: 'relation' },
+        c: {
+          kind: 'relation',
+          feedback: [
+            { if: '<', text: '8 zeci + 4 zeci = 12 zeci: o sută nouă. 380 + 140 = 520, iar 520 > 500.' },
+            { if: '=', text: '80 + 40 = 120, nu 100: 380 + 140 = 520, iar 520 > 500.' },
+          ],
+        },
       },
       explain: {
         idea: 'Când un număr e **la fel** în ambele părți, comparăm doar ce e diferit.',
@@ -144,27 +163,35 @@ export default {
       concepts: ['mat.pb.doua-operatii', 'mat.pb.mai-mult-mai-putin', 'mat.op1000.cu-trecere'],
       title: 'Turiștii de la cabană',
       context: {
-        text: 'Sâmbătă au dormit la cabană **245 de turiști**. Duminică au fost **cu 136 mai puțini**.',
-        visual: { v: 'data-table', head: 'Ziua|Turiști', rows: 'sâmbătă|245;duminică|?' },
+        text: 'În weekend au trecut pe la cabană **354 de turiști**. Sâmbătă au trecut **245**, iar ceilalți duminică.',
+        visual: { v: 'data-table', head: 'Ziua|Turiști', rows: 'sâmbătă|245;duminică|?;în total|354' },
         size: 'lg',
       },
       type: 'fill',
       layout: 'steps',
-      prompt: 'Socotește pas cu pas.',
+      prompt: 'Socotește pas cu pas. Alege și semnul fiecărui calcul.',
       rows: [
-        { label: 'Câți turiști au fost duminică?', t: '245 − 136 = [[a]]' },
-        { label: 'Câți turiști au fost în cele două zile?', t: '245 + [[b]] = [[c]]' },
+        { label: 'Câți turiști au trecut duminică?', t: '354 [[s]] 245 = [[a]]' },
+        { label: 'Cu câți turiști au fost mai puțini duminică decât sâmbătă?', t: '245 [[t]] [[b]] = [[c]]' },
       ],
       blanks: {
-        a: { answer: 109, feedback: [{ if: 111, text: 'Din 5 nu putem lua 6: desfacem o zece, 15 − 6 = 9. La zeci rămân 3: 3 − 3 = 0.' }, { if: 381, text: '„Cu 136 mai puțini” înseamnă că scădem.' }] },
+        s: { kind: 'sign', answer: '−', feedback: [{ if: '+', text: '354 sunt toți turiștii. Din total scădem partea de sâmbătă și aflăm partea de duminică.' }] },
+        a: { answer: 109, feedback: [{ if: 111, text: 'Din 4 nu putem lua 5: desfacem o zece, 14 − 5 = 9. La zeci rămân 4: 4 − 4 = 0.' }] },
+        t: { kind: 'sign', answer: '−', feedback: [{ if: '+', text: '„Cu câți mai puțini” se află prin scădere: din numărul mai mare îl scădem pe cel mai mic.' }] },
         b: { answer: 109 },
-        c: { answer: 354 },
+        c: {
+          answer: 136,
+          feedback: [
+            { if: 144, text: 'Din 5 nu putem lua 9: desfacem o zece, 15 − 9 = 6. La zeci rămân 3: 3 − 0 = 3.' },
+            { if: 146, text: 'Ai desfăcut o zece, dar la zeci n-ai micșorat: rămân 3 zeci, deci 136.' },
+          ],
+        },
       },
       explain: {
-        idea: '**Cu 136 mai puțini** decât 245 înseamnă 245 − 136. Apoi adunăm cele două zile.',
-        steps: ['Duminică: 245 − 136 = 109 turiști.', 'În două zile: 245 + 109 = 354.'],
-        check: '109 + 136 = 245',
-        trap: 'Rezultatul are 0 la zeci: 109, nu 19 și nici 190.',
+        idea: 'Întâi aflăm partea lipsă: din total scădem partea cunoscută. Apoi comparăm cele două zile **prin scădere**.',
+        steps: ['Duminică: 354 − 245 = 109 turiști.', 'Cu câți mai puțini: 245 − 109 = 136.'],
+        check: '245 + 109 = 354 și 109 + 136 = 245',
+        trap: '„Cu câți mai puțini” nu cere un total: scazi numărul mic din cel mare.',
       },
     },
     {
@@ -173,7 +200,7 @@ export default {
       estMin: 4,
       concepts: ['mat.op1000.in-scris', 'mat.op1000.cu-trecere', 'mat.op.proba'],
       title: 'Lemnele de foc',
-      context: { text: 'Lângă cabană erau **652 de lemne**. Într-o seară rece s-au ars **318**.', visual: { v: 'tag', n: 652, unit: 'lemne' } },
+      context: { text: 'Lângă cabană erau **652 de lemne**. Într-o săptămână rece s-au ars **318**.', visual: { v: 'tag', n: 652, unit: 'lemne' } },
       type: 'fill',
       layout: 'column',
       prompt: 'Câte lemne au rămas? Calculează pe coloane, apoi fă proba.',
@@ -189,10 +216,10 @@ export default {
     {
       id: 'e08',
       level: 'intermediar',
-      estMin: 3,
+      estMin: 4,
       concepts: ['mat.nr1000.axa', 'mat.pb.doua-operatii', 'mat.op1000.cu-trecere', 'mat.mas.lungime'],
       title: 'Poteca de 763 de metri',
-      context: { text: 'Poteca până la lac are **763 de metri**. Mara a mers **386 de metri**, apoi încă **207 metri**.' },
+      context: { text: 'Poteca până la cascadă are **763 de metri**. Mara a mers **386 de metri**, apoi încă **207 metri**.' },
       parts: [
         {
           id: 'a',
@@ -204,14 +231,14 @@ export default {
           step: 1,
           ticks: { minor: 50, major: 100, labels: [0, 500, 1000] },
           unit: 'metri',
-          prompt: 'Unde a ajuns Mara? Pune semnul pe axă.',
+          prompt: 'Unde a ajuns Mara? Arată pe axă.',
           items: [{ id: 'i1', label: 'Mara a mers 386 m și încă 207 m.', answer: 593, tolerance: 25 }],
         },
         {
           id: 'b',
           concepts: ['mat.pb.doua-operatii', 'mat.op1000.cu-trecere', 'mat.mas.lungime'],
           type: 'fill',
-          prompt: 'Câți metri mai are până la lac?',
+          prompt: 'Câți metri mai are până la cascadă?',
           rows: ['763 − [[a]] = [[b]]'],
           blanks: { a: { answer: 593 }, b: { answer: 170, feedback: [{ if: 270, text: 'La zeci: din 6 nu luăm 9, desfacem o sută. 16 − 9 = 7, iar la sute rămân 6: 6 − 5 = 1.' }] } },
         },
@@ -257,7 +284,7 @@ export default {
           layout: 'steps',
           prompt: 'Cu câți metri e mai scurt drumul Marei decât drumul lui Tudor?',
           rows: [
-            { label: 'Drumul Marei', t: '[[d]] metri' },
+            { label: 'Drumul Marei', t: '[[d]] m' },
             { label: 'Diferența', t: '[[e]] − [[f]] = [[g]]' },
           ],
           blanks: {
@@ -285,7 +312,7 @@ export default {
       estMin: 7,
       concepts: ['mat.op.necunoscut', 'mat.op1000.cu-trecere'],
       title: 'Piramida de pietre',
-      context: { text: 'Pe creastă, turiștii au clădit o piramidă de pietre. Pe fiecare piatră scrie un număr: el este **suma celor două pietre de sub el**.' },
+      context: { text: 'Pe creastă, turiștii au clădit o piramidă de pietre. Numărul de pe fiecare piatră este **suma numerelor de pe cele două pietre de sub ea**.' },
       type: 'fill',
       layout: 'pyramid',
       prompt: 'Completează pietrele goale. Unde știi suma și o parte, află partea lipsă prin scădere.',
@@ -293,7 +320,7 @@ export default {
       blanks: { m: {}, b: {}, c: {} },
       explain: {
         idea: 'O piatră de sus e **suma** celor două de sub ea. Dacă știm suma și o parte, aflăm cealaltă parte prin **scădere**.',
-        steps: ['Sub 452 sunt 185 și o piatră goală: 452 − 185 = 267.', 'Lângă 452, sub 868: 868 − 452 = 416.', 'Sub 416 sunt 267 și o piatră goală: 416 − 267 = 149.'],
+        steps: ['Sub 452 sunt 185 și o piatră goală: 452 − 185 = 267.', 'Piatra de lângă 452, sub 868: 868 − 452 = 416.', 'Sub 416 sunt 267 și o piatră goală: 416 − 267 = 149.'],
         check: '185 + 267 = 452, 267 + 149 = 416, 452 + 416 = 868',
         trap: 'La 452 − 185 sunt două împrumuturi: la unități și la zeci.',
       },
@@ -304,9 +331,9 @@ export default {
       estMin: 7,
       concepts: ['mat.mas.masa', 'mat.pb.decizie'],
       title: 'Rucsacul Marei',
-      context: { text: 'Radu spune: în rucsacul Marei pot intra lucruri de **cel mult 1 kilogram**, adică 1000 de grame. Apa trebuie să fie în rucsac.', visual: { v: 'tag', n: 1000, unit: 'grame' } },
+      context: { text: 'Radu spune: lucrurile din rucsacul Marei pot cântări împreună **cel mult 1 kilogram**, adică 1000 de grame. Apa trebuie să fie în rucsac.', visual: { v: 'tag', n: 1000, unit: 'grame' } },
       type: 'mark',
-      prompt: 'Alege lucrurile pentru rucsac: **apa** și altele, ca împreună să aibă **cel puțin 850 g și cel mult 1000 g**.',
+      prompt: 'Alege lucrurile pentru rucsac: **apa** și altele, ca împreună să cântărească **cel puțin 850 g și cel mult 1000 g**.',
       items: [
         { id: 'apa', text: 'apă, 500 g', emoji: 'apa', n: 500 },
         { id: 'sandvis', text: 'sandviș, 180 g', emoji: 'sandvis', n: 180 },

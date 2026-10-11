@@ -1,6 +1,7 @@
 // U2-T4 — De la bob la pâine · Adunarea și scăderea până la 1000 · Pământul (câmpia și formele de relief)
-// Date: salturi înapoi pe axă (465 − 132), codul secret PÂINE (rezultate ordonate), câmpia, primul calcul cu pâini (147 + 136),
-// înălțimi sortate pe forme de relief, moara (520 + 385, apoi − 125), cuptorul și durata, schimbarea întrebării, mersul invers,
+// Date: salturi înapoi pe axă (465 − 132), codul secret SPICE (rezultate ordonate), câmpia, primul calcul cu pâini (147 + 136 și
+// proba), înălțimi sortate pe forme de relief, moara (520 + 385, apoi − 125), cuptorul și durata, schimbarea întrebării (semnele
+// alese de copil), mersul invers,
 // comanda de covrigi (două treceri, decizie) și graficul cornurilor după reguli (sarcină deschisă).
 
 export default {
@@ -15,7 +16,7 @@ export default {
     {
       id: 'e01',
       level: 'usor',
-      estMin: 3,
+      estMin: 2,
       concepts: ['mat.op1000.strategii', 'mat.op1000.fara-trecere'],
       title: 'Sacii din hambar',
       context: {
@@ -40,21 +41,21 @@ export default {
       estMin: 3,
       concepts: ['mat.op1000.cu-trecere', 'mat.nr1000.ordonare'],
       title: 'Cod secret la moară',
-      context: { text: '{{e:paine}} Pe ușa morii sunt cinci calcule. Sub fiecare se ascunde o literă.' },
+      context: { text: '{{e:lacat}} Pe ușa morii sunt cinci calcule. Sub fiecare se ascunde o literă.' },
       type: 'order',
       direction: 'asc',
       prompt: 'Calculează, apoi așază calculele de la **cel mai mic rezultat** la **cel mai mare**. Ce cuvânt apare?',
       items: [
-        { id: 'p', text: '128 + 45', calc: '128 + 45', tag: 'P' },
-        { id: 'a', text: '260 + 50', calc: '260 + 50', tag: 'Â' },
+        { id: 's', text: '128 + 45', calc: '128 + 45', tag: 'S' },
+        { id: 'p', text: '260 + 50', calc: '260 + 50', tag: 'P' },
         { id: 'i', text: '405 − 30', calc: '405 - 30', tag: 'I' },
-        { id: 'n', text: '452 − 28', calc: '452 - 28', tag: 'N' },
+        { id: 'c', text: '452 − 28', calc: '452 - 28', tag: 'C' },
         { id: 'e', text: '386 + 106', calc: '386 + 106', tag: 'E' },
       ],
-      reveal: { word: 'PÂINE' },
+      reveal: { word: 'SPICE' },
       explain: {
         idea: 'Calculăm fiecare rezultat, apoi le comparăm: întâi sutele, apoi zecile.',
-        steps: ['128 + 45 = 173; 260 + 50 = 310; 405 − 30 = 375; 452 − 28 = 424; 386 + 106 = 492.', '173 < 310 < 375 < 424 < 492: P, Â, I, N, E.'],
+        steps: ['128 + 45 = 173; 260 + 50 = 310; 405 − 30 = 375; 452 − 28 = 424; 386 + 106 = 492.', '173 < 310 < 375 < 424 < 492: S, P, I, C, E. Din spicele de grâu ies boabele duse la moară.'],
       },
     },
     {
@@ -77,18 +78,18 @@ export default {
     {
       id: 'e04',
       level: 'usor',
-      estMin: 2,
-      concepts: ['mat.op1000.in-scris', 'mat.op1000.cu-trecere'],
+      estMin: 3,
+      concepts: ['mat.op1000.in-scris', 'mat.op1000.cu-trecere', 'mat.op.proba'],
       title: 'Primul calcul cu pâini',
       context: { text: 'Dimineața, brutăria a copt **147 de pâini**, iar la prânz încă **136**.', visual: { v: 'tag', n: 147, unit: 'pâini' } },
       type: 'fill',
       layout: 'column',
-      prompt: 'Câte pâini s-au copt? Adună pe coloane.',
-      rows: ['147 + 136 = [[a]][[b]][[c]]'],
-      blanks: { a: {}, b: {}, c: {} },
+      prompt: 'Câte pâini s-au copt? Adună pe coloane, apoi fă proba prin scădere.',
+      rows: [{ t: '147 + 136 = [[a]][[b]][[c]]', label: 'Pâinile' }, { t: '[[d]][[e]][[f]] − 136 = 147', label: 'Proba' }],
+      blanks: { a: {}, b: {}, c: {}, d: {}, e: {}, f: {} },
       explain: {
-        idea: 'Adunăm pe coloane, de la unități. Când unitățile fac 10 sau mai mult, **ținem minte 1** la zeci.',
-        steps: ['7 + 6 = 13: scriem 3 și ținem minte 1.', '4 + 3 + 1 = 8.', '1 + 1 = 2. S-au copt 283 de pâini.'],
+        idea: 'Adunăm pe coloane, de la unități. Când unitățile fac 10 sau mai mult, **ținem minte 1** la zeci. La probă, din sumă scădem un termen și trebuie să iasă celălalt.',
+        steps: ['7 + 6 = 13: scriem 3 și ținem minte 1.', '4 + 3 + 1 = 8.', '1 + 1 = 2. S-au copt 283 de pâini.', 'Proba: 283 − 136: 13 − 6 = 7; la zeci rămân 7: 7 − 3 = 4; 2 − 1 = 1. Iese 147, primul termen.'],
         check: '283 − 136 = 147',
       },
     },
@@ -112,7 +113,7 @@ export default {
         { id: 'livada', text: 'livada, la 450 m', emoji: 'mar', bin: 'deal' },
         { id: 'via', text: 'via, la 650 m', emoji: 'strugure', bin: 'deal' },
         { id: 'cabana', text: 'cabana, la 900 m', bin: 'munte' },
-        { id: 'varf', text: 'vârful, la 980 m', emoji: 'munte', bin: 'munte' },
+        { id: 'varf', text: 'izvorul, la 980 m', emoji: 'apa', bin: 'munte' },
       ],
       explain: { idea: 'Comparăm fiecare înălțime cu 300 și cu 800: sub 300 e câmpie, între 300 și 800 e deal, peste 800 e munte.' },
     },
@@ -120,9 +121,9 @@ export default {
       id: 'e06',
       level: 'intermediar',
       estMin: 4,
-      concepts: ['mat.pb.doua-operatii', 'mat.op1000.cu-trecere', 'mat.mas.masa'],
+      concepts: ['mat.pb.doua-operatii', 'mat.op1000.cu-trecere'],
       title: 'Moara',
-      context: { text: 'Luni, la moară erau **520 kg** de făină. Marți s-au mai măcinat **385 kg**. Apoi brutăria a cumpărat **125 kg**.', visual: { v: 'tag', n: 520, unit: 'kilograme' } },
+      context: { text: 'Luni, la moară erau **520 kg** de făină. Marți, moara a mai făcut **385 kg** de făină. Apoi brutăria a cumpărat **125 kg**.', visual: { v: 'tag', n: 520, unit: 'kilograme' } },
       type: 'fill',
       layout: 'steps',
       prompt: 'Socotește pas cu pas.',
@@ -136,7 +137,7 @@ export default {
         c: { answer: 780 },
       },
       explain: {
-        idea: 'Adunăm ce era cu ce s-a măcinat, apoi scădem ce a cumpărat brutăria.',
+        idea: 'Adunăm făina care era cu cea făcută marți, apoi scădem ce a cumpărat brutăria.',
         steps: ['520 + 385 = 905 kg.', '905 − 125 = 780 kg.'],
         check: '780 + 125 = 905',
         trap: 'La 905 − 125, zecile sunt 0: desfacem o sută ca să putem lua 2 zeci.',
@@ -163,7 +164,7 @@ export default {
           concepts: ['mat.mas.minute', 'mat.mas.durata'],
           type: 'fill',
           prompt: 'Cornurile intră în cuptor la 8:10 și ies la 8:35.',
-          rows: ['Cornurile stau în cuptor [[a]] de minute.', 'O oră are [[b]] de minute.'],
+          rows: ['Minute în cuptor: [[a]]', 'Minute într-o oră: [[b]]'],
           blanks: { a: { answer: 25 }, b: { answer: 60 } },
         },
       ],
@@ -179,7 +180,7 @@ export default {
       concepts: ['mat.pb.doua-operatii', 'mat.pb.mai-mult-mai-putin', 'mat.op1000.cu-trecere', 'mat.pb.compunere'],
       title: 'Schimbă întrebarea',
       context: {
-        text: 'Luni s-au vândut **245 de pâini**. Marți s-au vândut **cu 38 mai multe**, iar miercuri **cu 56 mai puține decât marți**.',
+        text: 'Luni s-au vândut **245 de pâini**. Marți s-au vândut **cu 47 mai multe**, iar miercuri **cu 56 mai puține decât marți**.',
         visual: { v: 'data-table', head: 'Ziua|Pâini', rows: 'luni|245;marți|?;miercuri|?' },
         size: 'lg',
       },
@@ -189,12 +190,18 @@ export default {
           concepts: ['mat.pb.doua-operatii', 'mat.pb.mai-mult-mai-putin', 'mat.op1000.cu-trecere'],
           type: 'fill',
           layout: 'steps',
-          prompt: 'Câte pâini s-au vândut marți și miercuri?',
+          prompt: 'Câte pâini s-au vândut marți și miercuri? Alege și semnul fiecărui calcul.',
           rows: [
-            { label: 'Marți', t: '245 + 38 = [[a]]' },
-            { label: 'Miercuri', t: '[[b]] − 56 = [[c]]' },
+            { label: 'Marți', t: '245 [[s]] 47 = [[a]]' },
+            { label: 'Miercuri', t: '[[b]] [[t]] 56 = [[c]]' },
           ],
-          blanks: { a: { answer: 283 }, b: { answer: 283 }, c: { answer: 227 } },
+          blanks: {
+            s: { kind: 'sign', answer: '+', feedback: [{ if: '−', text: 'Marți s-au vândut **cu 47 mai multe**: la 245 adunăm 47.' }] },
+            a: { answer: 292 },
+            b: { answer: 292 },
+            t: { kind: 'sign', answer: '−', feedback: [{ if: '+', text: 'Miercuri s-au vândut **cu 56 mai puține decât marți**: din pâinile de marți scădem 56.' }] },
+            c: { answer: 236 },
+          },
         },
         {
           id: 'b',
@@ -206,7 +213,7 @@ export default {
               id: 'i1',
               options: [
                 { id: 'q1', text: 'Câte pâini s-au vândut luni și marți împreună?' },
-                { id: 'q2', text: 'Cu câte pâini s-au vândut mai multe marți decât miercuri?' },
+                { id: 'q2', text: 'Cu câte pâini s-au vândut mai multe luni decât miercuri?' },
                 { id: 'q3', text: 'Câte pâini s-au vândut în cele trei zile?' },
               ],
               correct: 'q2',
@@ -218,7 +225,7 @@ export default {
       ],
       explain: {
         idea: '„Cu … mai multe” și „cu … mai puține” ne spun ce operație facem. Întrebarea „cu câte mai multe?” se rezolvă prin scădere.',
-        steps: ['Marți: 245 + 38 = 283.', 'Miercuri: 283 − 56 = 227.', 'Cu câte mai multe marți decât miercuri: 283 − 227 = 56.'],
+        steps: ['Marți: 245 + 47 = 292.', 'Miercuri: 292 − 56 = 236.', 'Întrebarea nouă: cu câte mai multe luni decât miercuri? 245 − 236 = 9.'],
       },
     },
     {
@@ -235,10 +242,10 @@ export default {
         { label: 'Anulăm „a vândut 247”. Alege semnul.', t: '64 [[s]] 247 = [[a]]' },
         { label: 'Anulăm „a mai copt 150”.', t: '[[b]] [[t]] 150 = [[c]]' },
         { label: 'Anulăm „a vândut 186”.', t: '[[d]] [[u]] 186 = [[e]]' },
-        { label: 'Răspuns', t: 'Dimineața avea [[f]] de pâini.' },
+        { label: 'Răspuns', t: 'Pâinile de dimineață: [[f]]' },
       ],
       blanks: {
-        s: { kind: 'sign', answer: '+', feedback: [{ if: '-', text: 'Mergând înapoi, „a vândut” se anulează cu **+**: pâinile vândute se întorc.' }] },
+        s: { kind: 'sign', answer: '+', feedback: [{ if: '−', text: 'Mergând înapoi, „a vândut” se anulează cu **+**: pâinile vândute se întorc.' }] },
         a: { answer: 311 },
         b: { answer: 311 },
         t: { kind: 'sign', answer: '−', feedback: [{ if: '+', text: 'Pâinile coapte se scot înapoi: „a mai copt 150” se anulează cu **− 150**.' }] },
@@ -274,7 +281,7 @@ export default {
       blanks: {
         a: { answer: 583, feedback: [{ if: 473, text: 'Ai uitat transporturile: 6 + 7 = 13 și 8 + 9 + 1 = 18.' }] },
         b: { answer: 583 },
-        c: { answer: 167, feedback: [{ if: 233, text: 'Ai scăzut cifra mică din cea mare. Din 0 nu luăm 3: desfacem o zece.' }] },
+        c: { answer: 167, feedback: [{ if: 233, text: 'Ai scăzut cifra mică din cea mare. Din 0 nu luăm 3: desfacem o zece, 10 − 3 = 7. La zeci rămân 4, iar din 4 nu luăm 8: desfacem o sută, 14 − 8 = 6. La sute: 6 − 5 = 1.' }] },
         d: { kind: 'select', options: ['Da', 'Nu'], answer: 'Da' },
         e: { answer: 167 },
         f: { kind: 'relation' },
@@ -296,7 +303,7 @@ export default {
       title: 'Graficul cornurilor',
       context: { text: 'Brutarul a pierdut caietul cu vânzările de cornuri, dar își amintește câteva lucruri.' },
       type: 'chart',
-      prompt: 'Desenează un grafic posibil al cornurilor vândute de luni până joi: **în total 500**; **joi** s-au vândut **mai multe decât în fiecare dintre celelalte zile**; **luni și marți la fel**; **miercuri cel puțin 100**. O bară urcă până la 200.',
+      prompt: 'Desenează un grafic posibil al cornurilor vândute de luni până joi: **în total 500**; **joi** s-au vândut **mai multe decât în fiecare dintre celelalte zile**; **luni și marți la fel**; **miercuri cel puțin 100**.\nFiecare bară poate urca cel mult până la 200.',
       categories: [
         { id: 'luni', label: 'luni' },
         { id: 'marti', label: 'marți' },

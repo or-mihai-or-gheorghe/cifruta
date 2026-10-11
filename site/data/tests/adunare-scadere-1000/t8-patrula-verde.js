@@ -1,7 +1,8 @@
 // U2-T8 — Patrula verde de Ziua Pământului · Adunarea și scăderea până la 1000 · Pământul (reciclarea)
-// Date: opt calcule cu patru rezultate, gruparea care dă un număr rotund, un calcul pe coloane, coșurile de reciclare, estimarea,
-// planul unei probleme cu litri de apă, proba pe coloane, graficul reciclării, puieții (trei termeni, împrumut peste zero,
-// decizie), zidul de cutii (piramida cu 4 rânduri) și puieții pentru grădină (sarcină deschisă).
+// Date: șase calcule cu trei rezultate, gruparea care dă un număr rotund, un calcul pe coloane, coșurile de reciclare, estimarea
+// și litrul (cât încape într-o găleată), planul unei probleme cu litri de apă, proba pe coloane, graficul reciclării (și ținta
+// depășită), puieții (trei termeni, împrumut peste zero, decizie), zidul de cutii (piramida cu 4 rânduri) și plantele pentru
+// grădină (sarcină deschisă).
 
 export default {
   schema: 1,
@@ -15,33 +16,31 @@ export default {
     {
       id: 'e01',
       level: 'usor',
-      estMin: 3,
+      estMin: 4,
       concepts: ['mat.op1000.cu-trecere'],
-      title: 'Opt calcule, patru rezultate',
-      context: { text: '{{e:reciclare}} Echipele și-au scris socotelile pe 8 cartonașe. Fiecare rezultat apare de două ori: o dată la o adunare și o dată la o scădere.' },
+      title: 'Șase calcule, trei rezultate',
+      context: { text: '{{e:reciclare}} Echipele și-au scris socotelile pe 6 cartonașe. Fiecare rezultat apare de două ori: o dată la o adunare și o dată la o scădere.' },
       type: 'match',
       prompt: 'Unește fiecare calcul cu rezultatul lui. La un rezultat ajung două calcule.',
+      // perechile nu stau una lângă alta: fiecare cartonaș se calculează
       left: [
         { id: 'l1', text: '238 + 36', calc: '238 + 36' },
-        { id: 'l2', text: '292 − 18', calc: '292 - 18' },
-        { id: 'l3', text: '328 + 37', calc: '328 + 37' },
-        { id: 'l4', text: '391 − 26', calc: '391 - 26' },
-        { id: 'l5', text: '360 + 58', calc: '360 + 58' },
         { id: 'l6', text: '445 − 27', calc: '445 - 27' },
-        { id: 'l7', text: '490 + 40', calc: '490 + 40' },
-        { id: 'l8', text: '612 − 82', calc: '612 - 82' },
+        { id: 'l3', text: '328 + 37', calc: '328 + 37' },
+        { id: 'l2', text: '292 − 18', calc: '292 - 18' },
+        { id: 'l5', text: '360 + 58', calc: '360 + 58' },
+        { id: 'l4', text: '391 − 26', calc: '391 - 26' },
       ],
       right: [
         { id: 'r274', text: '274', calc: '274' },
         { id: 'r365', text: '365', calc: '365' },
         { id: 'r418', text: '418', calc: '418' },
-        { id: 'r530', text: '530', calc: '530' },
       ],
-      key: { l1: 'r274', l2: 'r274', l3: 'r365', l4: 'r365', l5: 'r418', l6: 'r418', l7: 'r530', l8: 'r530' },
+      key: { l1: 'r274', l2: 'r274', l3: 'r365', l4: 'r365', l5: 'r418', l6: 'r418' },
       explain: {
         idea: 'Calculăm fiecare cartonaș. Câte două dau același rezultat.',
-        steps: ['238 + 36 = 274 și 292 − 18 = 274.', '328 + 37 = 365 și 391 − 26 = 365.', '360 + 58 = 418 și 445 − 27 = 418.', '490 + 40 = 530 și 612 − 82 = 530.'],
-        trap: 'La 612 − 82: din 1 zece nu luăm 8 zeci, desfacem o sută: 11 − 8 = 3, iar la sute rămân 5.',
+        steps: ['238 + 36 = 274 și 292 − 18 = 274.', '328 + 37 = 365 și 391 − 26 = 365.', '360 + 58 = 418 și 445 − 27 = 418.'],
+        trap: 'La 445 − 27: din 5 nu luăm 7, desfacem o zece: 15 − 7 = 8, iar la zeci rămân 3: 3 − 2 = 1.',
       },
     },
     {
@@ -50,15 +49,21 @@ export default {
       estMin: 3,
       concepts: ['mat.op.proprietati', 'mat.op1000.strategii', 'mat.op1000.cu-trecere'],
       title: 'Adună în ordinea ușoară',
-      context: { text: 'Trei echipe au strâns **136**, **208** și **254** de doze. Bianca observă că 136 și 254 fac împreună un număr rotund.', visual: { v: 'tag', n: 136, unit: 'doze' } },
+      context: { text: 'Trei echipe au strâns **136**, **208** și **254** de doze. Bianca observă că două dintre numere fac împreună un număr rotund.', visual: { v: 'tag', n: 208, unit: 'doze' } },
       type: 'fill',
       layout: 'steps',
       prompt: 'Adună întâi numerele care fac un număr rotund.',
       rows: [
-        { label: 'Întâi cele două care fac un număr rotund', t: '136 + 254 = [[a]]' },
-        { label: 'Apoi a treia echipă', t: '[[b]] + 208 = [[c]]' },
+        { label: 'Întâi cele două care fac un număr rotund', t: '[[a]] + [[b]] = [[c]]' },
+        { label: 'Apoi a treia echipă', t: '[[d]] + 208 = [[e]]' },
       ],
-      blanks: { a: { answer: 390 }, b: { answer: 390 }, c: { answer: 598 } },
+      blanks: {
+        a: { answer: 136 },
+        b: { answer: 254 },
+        c: { answer: 390 },
+        d: { answer: 390 },
+        e: { answer: 598 },
+      },
       explain: {
         idea: 'Putem aduna termenii **în orice ordine**: alegem ordinea în care socoteala e mai ușoară.',
         steps: ['136 + 254 = 390: 6 + 4 = 10, deci zeci întregi.', '390 + 208 = 598.'],
@@ -105,40 +110,67 @@ export default {
         { id: 'borcan', text: 'borcanul', emoji: 'borcan', bin: 'sticla' },
         { id: 'sticla', text: 'sticla de suc din sticlă', bin: 'sticla' },
       ],
-      explain: { idea: 'Strânse separat, hârtia, plasticul, metalul și sticla se pot **recicla**: din ele se fac lucruri noi, iar Pământul rămâne mai curat.' },
+      explain: {
+        idea: 'Strânse separat, hârtia, plasticul, metalul și sticla se pot **recicla**: din ele se fac lucruri noi, iar Pământul rămâne mai curat.',
+        trap: '„Sticla de plastic” e din plastic, deci merge la galben; la verde merg doar sticlele și borcanele din sticlă.',
+      },
     },
     {
       id: 'e05',
       level: 'intermediar',
       estMin: 3,
-      concepts: ['mat.op1000.estimare', 'mat.nr1000.rotunjire'],
-      title: 'Cam câte kilograme?',
+      concepts: ['mat.op1000.estimare', 'mat.nr1000.rotunjire', 'mat.mas.capacitate'],
+      title: 'Cam cât?',
       context: {
         text: 'Doamna învățătoare cere doar o estimare. Rotunjește numerele la **sute** și socotește în minte.',
         visual: { v: 'number-line', min: 0, max: 1000, minor: 100, labels: '0,500,1000' },
         size: 'lg',
       },
-      type: 'choice',
-      prompt: 'Alege rezultatul aproximativ.',
-      items: [
-        { id: 'i1', q: 'Clasele au strâns **289 kg**, **312 kg** și **198 kg** de hârtie. Cam câte kilograme în total?', options: ['600', '700', '800', '900'], correct: '800', shuffle: false, feedback: [{ if: '700', text: '289 e mai aproape de 300, iar 198 de 200: 300 + 300 + 200 = 800.' }] },
-        { id: 'i2', q: 'Erau **612 sticle** și s-au predat **289**. Cam câte au rămas?', options: ['200', '300', '400', '500'], correct: '300', feedback: [{ if: '400', text: '612 e aproape de 600, iar 289 de 300: 600 − 300 = 300.' }], shuffle: false },
+      parts: [
+        {
+          id: 'a',
+          concepts: ['mat.op1000.estimare', 'mat.nr1000.rotunjire'],
+          type: 'choice',
+          prompt: 'Alege rezultatul aproximativ.',
+          items: [
+            { id: 'i1', q: 'Clasele au strâns **347 kg**, **152 kg** și **426 kg** de hârtie. Cam câte kilograme în total?', options: ['600', '700', '800', '900'], correct: '900', shuffle: false, feedback: [{ if: '800', text: '152 e mai aproape de 200 decât de 100: 300 + 200 + 400 = 900.' }] },
+            { id: 'i2', q: 'Erau **723 de sticle** și s-au predat **386**. Cam câte au rămas?', options: ['200', '300', '400', '500'], correct: '300', shuffle: false, feedback: [{ if: '400', text: '386 e mai aproape de 400 decât de 300: 700 − 400 = 300.' }] },
+          ],
+        },
+        {
+          id: 'b',
+          concepts: ['mat.mas.capacitate'],
+          type: 'choice',
+          prompt: 'Patrula udă puieții cu găleata. Cam câți litri de apă încap într-o găleată obișnuită?',
+          items: [
+            {
+              id: 'i1',
+              options: ['1 litru', '10 litri', '100 de litri', '1000 de litri'],
+              correct: '10 litri',
+              shuffle: false,
+              feedback: [
+                { if: '1 litru', text: 'Un litru încape într-o sticlă de apă. Într-o găleată încap cam 10 asemenea sticle.' },
+                { if: '100 de litri', text: '100 de litri încap cam într-o cadă mică. O găleată se poate căra cu o mână.' },
+              ],
+            },
+          ],
+        },
       ],
       explain: {
-        idea: 'Rotunjim fiecare număr la **cea mai apropiată sută**, apoi socotim cu sute întregi.',
-        steps: ['289 ≈ 300, 312 ≈ 300, 198 ≈ 200: cam 800.', '612 ≈ 600, 289 ≈ 300: cam 300.'],
-        trap: 'Estimarea arată dacă un rezultat exact are sens: 799 e aproape de 800, dar 499 n-ar fi.',
+        idea: 'Rotunjim fiecare număr la **cea mai apropiată sută**, apoi socotim cu sute întregi. La capacitate ne gândim la vase cunoscute: o sticlă de apă are cam 1 litru.',
+        steps: ['347 ≈ 300, 152 ≈ 200, 426 ≈ 400: cam 900.', '723 ≈ 700, 386 ≈ 400: cam 300.', 'Într-o găleată obișnuită încap cam 10 litri.'],
+        trap: 'Nu tăiem zecile: 152 se rotunjește la 200, nu la 100.',
       },
     },
     {
       id: 'e06',
       level: 'intermediar',
       estMin: 4,
-      concepts: ['mat.pb.plan', 'mat.pb.doua-operatii', 'mat.pb.mai-mult-mai-putin', 'mat.op1000.cu-trecere', 'mat.mas.capacitate'],
+      concepts: ['mat.pb.plan', 'mat.pb.doua-operatii', 'mat.pb.mai-mult-mai-putin', 'mat.op1000.cu-trecere'],
       title: 'Planul patrulei',
       context: {
         text: 'Luni, patrula a economisit **245 de litri** de apă, închizând robinetele lăsate deschise. Marți a economisit **cu 136 de litri mai mult**.',
-        visual: { v: 'bar-model', parts: '245,136', total: '?' },
+        visual: { v: 'data-table', head: 'Ziua|Litri', rows: 'luni|245;marți|?' },
         size: 'lg',
       },
       parts: [
@@ -157,15 +189,20 @@ export default {
         },
         {
           id: 'b',
-          concepts: ['mat.pb.doua-operatii', 'mat.pb.mai-mult-mai-putin', 'mat.op1000.cu-trecere', 'mat.mas.capacitate'],
+          concepts: ['mat.pb.doua-operatii', 'mat.pb.mai-mult-mai-putin', 'mat.op1000.cu-trecere'],
           type: 'fill',
           layout: 'steps',
-          prompt: 'Acum rezolvă după plan.',
+          prompt: 'Acum rezolvă după plan. Alege și semnul primului calcul.',
           rows: [
-            { label: 'Prima întrebare a planului', t: '245 + 136 = [[a]]' },
+            { label: 'Prima întrebare a planului', t: '245 [[s]] 136 = [[a]]' },
             { label: 'A doua întrebare a planului', t: '245 + [[b]] = [[c]]' },
           ],
-          blanks: { a: { answer: 381 }, b: { answer: 381 }, c: { answer: 626 } },
+          blanks: {
+            s: { kind: 'sign', answer: '+', feedback: [{ if: '−', text: 'Marți au economisit **cu 136 de litri mai mult**: la 245 adunăm 136.' }] },
+            a: { answer: 381, feedback: [{ if: 371, text: '5 + 6 = 11: s-a format o zece nouă. La zeci: 4 + 3 + 1 = 8.' }] },
+            b: { answer: 381 },
+            c: { answer: 626, feedback: [{ if: 381, text: '381 sunt litrii de marți. În cele două zile: 245 + 381.' }] },
+          },
         },
       ],
       explain: {
@@ -196,8 +233,8 @@ export default {
     {
       id: 'e08',
       level: 'intermediar',
-      estMin: 3,
-      concepts: ['mat.log.grafic-bare', 'mat.pb.mai-mult-mai-putin', 'mat.op1000.cu-trecere'],
+      estMin: 4,
+      concepts: ['mat.log.grafic-bare', 'mat.pb.mai-mult-mai-putin', 'mat.pb.doua-operatii', 'mat.op1000.cu-trecere'],
       title: 'Graficul reciclării',
       context: {
         text: 'Graficul arată câte kilograme de hârtie au strâns clasele a II-a A, B, C și D.',
@@ -214,20 +251,30 @@ export default {
         },
         {
           id: 'b',
-          concepts: ['mat.pb.mai-mult-mai-putin', 'mat.op1000.cu-trecere'],
+          concepts: ['mat.pb.mai-mult-mai-putin', 'mat.pb.doua-operatii', 'mat.op1000.cu-trecere'],
           type: 'fill',
           layout: 'steps',
           prompt: 'Socotește cu numerele din grafic.',
           rows: [
             { label: 'Cu câte kilograme a strâns clasa B mai mult decât clasa A?', t: '[[a]] − [[b]] = [[c]]' },
             { label: 'Câte kilograme au strâns clasele A și B împreună?', t: '[[d]] + [[e]] = [[f]]' },
+            { label: 'Ținta claselor A și B era 500 kg. Cu câte kilograme au depășit-o?', t: '[[g]] − 500 = [[h]]' },
           ],
-          blanks: { a: { answer: 318 }, b: { answer: 245 }, c: { answer: 73 }, d: { answer: 245 }, e: { answer: 318 }, f: { answer: 563 } },
+          blanks: {
+            a: { answer: 318 },
+            b: { answer: 245 },
+            c: { answer: 73 },
+            d: { answer: 245 },
+            e: { answer: 318 },
+            f: { answer: 563 },
+            g: { answer: 563 },
+            h: { answer: 63 },
+          },
         },
       ],
       explain: {
         idea: 'Citim valorile de pe bare, apoi alegem operația: „cu câte mai mult” cere o scădere, „împreună” o adunare.',
-        steps: ['Cea mai înaltă bară e la clasa B: 318 kg.', '318 − 245 = 73 kg.', '245 + 318 = 563 kg.'],
+        steps: ['Cea mai înaltă bară e la clasa B: 318 kg.', '318 − 245 = 73 kg.', '245 + 318 = 563 kg.', 'Ținta: 563 − 500 = 63 kg peste ținta de 500 kg.'],
         check: '73 + 245 = 318',
       },
     },
@@ -237,7 +284,7 @@ export default {
       estMin: 7,
       concepts: ['mat.pb.doua-operatii', 'mat.pb.decizie', 'mat.op1000.cu-trecere'],
       title: 'Puieții',
-      context: { text: 'Școala a primit **500 de puieți**. Clasele au plantat **186**, **147** și **98**. Pentru parcul de lângă școală mai trebuie **75**.', visual: { v: 'tag', n: 500, unit: 'puieți' } },
+      context: { text: 'Școala a primit **500 de puieți**. Clasele au plantat **186**, **147** și **98**. Parcul de lângă școală are nevoie de **75** de puieți.', visual: { v: 'tag', n: 500, unit: 'puieți' } },
       type: 'fill',
       layout: 'steps',
       prompt: 'Ajung puieții rămași pentru parc? Rezolvă pas cu pas.',
@@ -245,12 +292,24 @@ export default {
         { label: 'Câți puieți s-au plantat?', t: '186 + 147 + 98 = [[a]]' },
         { label: 'Câți puieți au rămas?', t: '500 − [[b]] = [[c]]' },
         { label: 'Ajung pentru parc?', t: '[[d]], pentru că [[e]] [[f]] 75.', calc: '[[e]] [[f]] 75' },
-        { label: 'Câți puieți mai trebuie?', t: '75 − [[g]] = [[h]]' },
+        { label: 'Câți puieți lipsesc pentru parc?', t: '75 − [[g]] = [[h]]' },
       ],
       blanks: {
-        a: { answer: 431, feedback: [{ if: 411, text: 'La unități, 6 + 7 + 8 = 21: scrii 1 și ții minte 2. La zeci: 8 + 4 + 9 + 2 = 23.' }] },
+        a: {
+          answer: 431,
+          feedback: [
+            { if: 411, text: 'La unități, 6 + 7 + 8 = 21: scrii 1 și ții minte 2. La zeci: 8 + 4 + 9 + 2 = 23.' },
+            { if: 321, text: '6 + 7 + 8 = 21: ții minte 2, nu 1. La zeci, 8 + 4 + 9 + 2 = 23: ții minte tot 2.' },
+          ],
+        },
         b: { answer: 431 },
-        c: { answer: 69, feedback: [{ if: 131, text: 'Ai scăzut cifra mică din cea mare. 500 are 0 la zeci și la unități: desfacem întâi o sută, apoi o zece.' }] },
+        c: {
+          answer: 69,
+          feedback: [
+            { if: 131, text: 'Ai scăzut cifra mică din cea mare. 500 are 0 la zeci și la unități: desfacem întâi o sută, apoi o zece.' },
+            { if: 79, text: 'Desfacem o sută în 10 zeci, apoi o zece în 10 unități: la zeci rămân 9, nu 10. 9 − 3 = 6, deci 69.' },
+          ],
+        },
         d: { kind: 'select', options: ['Da', 'Nu'], answer: 'Nu' },
         e: { answer: 69 },
         f: { kind: 'relation' },
@@ -259,7 +318,7 @@ export default {
       },
       explain: {
         idea: 'Adunăm ce s-a plantat, scădem din ce s-a primit, apoi comparăm cu ce trebuie la parc.',
-        steps: ['186 + 147 + 98 = 431 de puieți plantați.', '500 − 431 = 69 au rămas.', '69 < 75, deci nu ajung.', '75 − 69 = 6 puieți mai trebuie.'],
+        steps: ['186 + 147 + 98 = 431 de puieți plantați.', '500 − 431 = 69 au rămas.', '69 < 75, deci nu ajung.', '75 − 69 = 6 puieți lipsesc.'],
         check: '431 + 69 = 500',
         trap: 'La 500 − 431 împrumutăm de două ori, iar zeroul de la zeci devine 9.',
       },
@@ -270,26 +329,26 @@ export default {
       estMin: 7,
       concepts: ['mat.op.necunoscut', 'mat.op1000.cu-trecere'],
       title: 'Zidul reciclării',
-      context: { text: 'Patrula a clădit un zid din cutii de carton. Pe fiecare cutie scrie un număr: el este **suma celor două cutii de sub ea**.', visual: { v: 'scene', theme: 'scoala' } },
+      context: { text: 'Patrula a clădit un zid din cutii de carton. Numărul de pe fiecare cutie este **suma numerelor de pe cele două cutii de sub ea**.', visual: { v: 'scene', theme: 'scoala' } },
       type: 'fill',
       layout: 'pyramid',
       prompt: 'Completează cutiile goale. Unde știi suma și o parte, află partea lipsă prin scădere.',
       pyramids: [{ rows: [['848'], ['394', '[[x]]'], ['[[p]]', '221', '[[q]]'], ['48', '[[r]]', '96', '[[s]]']] }],
-      blanks: { x: {}, p: {}, q: {}, r: {}, s: {} },
+      blanks: { x: {}, p: { feedback: [{ if: 615, text: '394 e suma celor două cutii de sub el: 394 − 221 = 173.' }] }, q: {}, r: {}, s: {} },
       explain: {
         idea: 'Începe de sus: unde o cutie are suma și o parte cunoscute, partea lipsă iese prin scădere.',
         steps: ['Lângă 394: 848 − 394 = 454.', 'Sub 394: 394 − 221 = 173. Sub 454: 454 − 221 = 233.', 'Jos: 173 − 48 = 125 și 233 − 96 = 137.'],
         check: '125 + 96 = 221 și 173 + 221 = 394',
-        trap: 'Verifică la sfârșit fiecare cutie: suma celor două de dedesubt.',
+        trap: 'Cutia de sub 394 nu e 394 + 221 = 615 (mai mare decât 394!): când știi suma și o parte, scazi, 394 − 221 = 173.',
       },
     },
     {
       id: 'e11',
       level: 'avansat',
-      estMin: 7,
-      concepts: ['mat.mas.buget', 'mat.mas.bani-mari', 'mat.pb.decizie'],
+      estMin: 5,
+      concepts: ['mat.mas.buget', 'mat.pb.decizie'],
       title: 'Plante pentru grădină',
-      context: { text: 'Cu banii din reciclare, clasa poate cumpăra copăcei și flori pentru grădina școlii.', visual: { v: 'banknote', value: 200 } },
+      context: { text: 'Cu cei **400 de lei** din reciclare, clasa poate cumpăra copăcei și flori pentru grădina școlii.', visual: { v: 'tag', n: 400, unit: 'lei' } },
       type: 'mark',
       prompt: 'Alege **cel puțin 4** plante care costă împreună **cel mult 400 de lei** (400 e voie).',
       items: [

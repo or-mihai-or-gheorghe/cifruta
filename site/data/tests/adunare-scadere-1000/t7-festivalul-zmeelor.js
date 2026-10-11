@@ -1,7 +1,8 @@
 // U2-T7 — Festivalul zmeelor · Adunarea și scăderea până la 1000 · Pământul (aerul)
-// Date: panglici pe numărătoare (237 + 54), ce știm despre aer, sfoara pe coloane, codul secret ZMEU, compensarea (398 + 145 și
-// totalul), punctele echipelor, comparări fără calcul, experimentul cu paharul întors în apă, baloanele cu aer cald (până la
-// 1000 m), pătratul magic cu suma 600 și graficul sforii pe echipe după reguli (sarcină deschisă).
+// Date: panglici pe numărătoare (237 + 54), ce știm despre aer, sfoara pe coloane cu proba, codul secret VÂNT, compensarea
+// (398 + 145 și totalul), punctele echipelor (semnul ales de copil), comparări fără calcul, experimentul cu paharul întors în apă,
+// baloanele cu aer cald (până la 1000 m), pătratul magic cu suma 600 și graficul sforii pe echipe după reguli (sarcină deschisă).
+// Culorile echipelor din grafic urmează culorile barelor (albastru, roșu, galben).
 
 export default {
   schema: 1,
@@ -18,7 +19,7 @@ export default {
       estMin: 2,
       concepts: ['mat.op1000.grupare', 'mat.op1000.cu-trecere'],
       title: 'Numărătoarea cu zmee',
-      context: { text: 'Echipa avea **237 de panglici** pentru cozile zmeelor și mai primește **54**.', visual: { v: 'tag', n: 237, unit: 'panglici' } },
+      context: { text: 'Echipa are **237 de panglici** pentru cozile zmeelor și mai primește **54**.', visual: { v: 'tag', n: 237, unit: 'panglici' } },
       type: 'build',
       tool: 'abacus',
       places: ['S', 'Z', 'U'],
@@ -50,18 +51,22 @@ export default {
     {
       id: 'e03',
       level: 'usor',
-      estMin: 3,
-      concepts: ['mat.op1000.in-scris', 'mat.op1000.cu-trecere'],
+      estMin: 4,
+      concepts: ['mat.op1000.in-scris', 'mat.op1000.cu-trecere', 'mat.op.proba'],
       title: 'Sfoara zmeelor',
       context: { text: 'Ilie leagă două bucăți de sfoară: **256 m** și **137 m**. Alesia avea **425 m** de sfoară și a tăiat **162 m** pentru un zmeu mic.', visual: { v: 'tag', n: 256, unit: 'metri' } },
       type: 'fill',
       layout: 'column',
-      prompt: 'Calculează pe coloane.',
-      rows: [{ t: '256 + 137 = [[a]][[b]][[c]]', label: 'Sfoara lui Ilie' }, { t: '425 − 162 = [[d]][[e]][[f]]', label: 'Sfoara rămasă la Alesia' }],
-      blanks: { a: {}, b: {}, c: {}, d: {}, e: {}, f: {} },
+      prompt: 'Calculează pe coloane, apoi fă proba scăderii.',
+      rows: [
+        { t: '256 + 137 = [[a]][[b]][[c]]', label: 'Sfoara lui Ilie' },
+        { t: '425 − 162 = [[d]][[e]][[f]]', label: 'Sfoara rămasă la Alesia' },
+        { t: '[[g]][[h]][[i]] + 162 = 425', label: 'Proba scăderii' },
+      ],
+      blanks: { a: {}, b: {}, c: {}, d: {}, e: {}, f: {}, g: {}, h: {}, i: {} },
       explain: {
         idea: 'Pe coloane, de la unități: la adunare ținem minte 1, la scădere desfacem o sută când zecile de sus sunt prea puține.',
-        steps: ['256 + 137: 6 + 7 = 13, scriem 3, ținem minte 1; 5 + 3 + 1 = 9; 2 + 1 = 3. Rezultatul: 393.', '425 − 162: 5 − 2 = 3; din 2 zeci nu luăm 6, desfacem o sută: 12 − 6 = 6; 3 − 1 = 2. Rezultatul: 263.'],
+        steps: ['256 + 137: 6 + 7 = 13, scriem 3, ținem minte 1; 5 + 3 + 1 = 9; 2 + 1 = 3. Rezultatul: 393.', '425 − 162: 5 − 2 = 3; din 2 zeci nu luăm 6, desfacem o sută: 12 − 6 = 6; la sute au rămas 3: 3 − 1 = 2. Rezultatul: 263.', 'Proba: 263 + 162 = 425, descăzutul.'],
         check: '393 − 137 = 256 și 263 + 162 = 425',
       },
     },
@@ -70,21 +75,21 @@ export default {
       level: 'usor',
       estMin: 3,
       concepts: ['mat.op1000.cu-trecere', 'mat.nr1000.ordonare'],
-      title: 'Ce zboară azi?',
-      context: { text: 'Pe fiecare zmeu e un calcul, iar pe spate e ascunsă o literă. Ordonate bine, literele spun ce zboară azi.' },
+      title: 'De ce au nevoie zmeele?',
+      context: { text: '{{e:zmeu}} Pe fiecare zmeu e un calcul, iar pe spate e ascunsă o literă. Ordonate bine, literele spun de ce au nevoie zmeele ca să zboare.' },
       type: 'order',
       direction: 'asc',
       prompt: 'Calculează, apoi așază zmeele de la **cel mai mic rezultat** la **cel mai mare**.',
       items: [
-        { id: 'z', text: '146 + 38', calc: '146 + 38', tag: 'Z' },
-        { id: 'm', text: '270 + 60', calc: '270 + 60', tag: 'M' },
-        { id: 'e', text: '518 − 33', calc: '518 - 33', tag: 'E' },
-        { id: 'u', text: '640 − 90', calc: '640 - 90', tag: 'U' },
+        { id: 'v', text: '146 + 38', calc: '146 + 38', tag: 'V' },
+        { id: 'a', text: '270 + 60', calc: '270 + 60', tag: 'Â' },
+        { id: 'n', text: '665 − 180', calc: '665 - 180', tag: 'N' },
+        { id: 't', text: '640 − 90', calc: '640 - 90', tag: 'T' },
       ],
-      reveal: { word: 'ZMEU' },
+      reveal: { word: 'VÂNT' },
       explain: {
-        idea: 'Calculăm fiecare rezultat, apoi le comparăm: întâi sutele, apoi zecile.',
-        steps: ['146 + 38 = 184; 270 + 60 = 330; 518 − 33 = 485; 640 − 90 = 550.', '184 < 330 < 485 < 550: Z, M, E, U.'],
+        idea: 'Calculăm fiecare rezultat, apoi le comparăm: întâi sutele, apoi zecile. Primul număr din calcul nu spune ordinea.',
+        steps: ['146 + 38 = 184; 270 + 60 = 330; 665 − 180 = 485; 640 − 90 = 550.', '184 < 330 < 485 < 550: V, Â, N, T. Zmeele au nevoie de vânt.'],
       },
     },
     {
@@ -92,7 +97,7 @@ export default {
       level: 'intermediar',
       estMin: 4,
       concepts: ['mat.op1000.strategii', 'mat.pb.doua-operatii', 'mat.pb.mai-mult-mai-putin', 'mat.op1000.fara-trecere'],
-      title: 'Sfoara lui Ilie',
+      title: 'Socoteala lui Ilie',
       context: {
         text: 'Alesia are **398 m** de sfoară. Ilie are **cu 145 m mai mult**. Ca să socotească ușor, Ilie adună **400** în loc de 398, apoi scade **2**.',
         visual: { v: 'number-line', hops: '145,?,?', jumps: '+400,−2' },
@@ -115,13 +120,13 @@ export default {
           layout: 'chain',
           prompt: 'Câtă sfoară au împreună? Pornește de la sfoara lui Ilie și adună 398 tot așa.',
           chains: [{ start: '[[c]]', steps: [{ op: '+400', out: '[[d]]' }, { op: '−2', out: '[[e]]' }] }],
-          blanks: { c: { answer: 543 }, d: { answer: 943 }, e: { answer: 941 } },
+          blanks: { c: { answer: 543 }, d: { answer: 943 }, e: { answer: 941, feedback: [{ if: 945, text: 'Am adunat 400, adică cu 2 mai mult decât 398: cei 2 se scad, nu se adaugă.' }] } },
         },
       ],
       explain: {
         idea: '398 e aproape de 400. Adunăm 400, care e ușor, apoi **scădem cei 2** adunați în plus.',
         steps: ['Ilie: 145 + 400 = 545, apoi 545 − 2 = 543 m.', 'Împreună: 543 + 400 = 943, apoi 943 − 2 = 941 m.'],
-        check: '398 + 543 = 941',
+        check: '941 − 400 = 541, apoi 541 + 2 = 543: sfoara lui Ilie.',
       },
     },
     {
@@ -137,13 +142,14 @@ export default {
       },
       type: 'fill',
       layout: 'steps',
-      prompt: 'Socotește pas cu pas.',
+      prompt: 'Socotește pas cu pas. Alege și semnul calculului.',
       rows: [
-        { label: 'Câte puncte are echipa Verde?', t: '365 − 148 = [[a]]' },
+        { label: 'Câte puncte are echipa Verde?', t: '365 [[s]] 148 = [[a]]' },
         { label: 'Câte puncte au cele două echipe împreună?', t: '365 + [[b]] = [[c]]' },
       ],
       blanks: {
-        a: { answer: 217, feedback: [{ if: 223, text: 'Din 5 nu putem lua 8: desfacem o zece, 15 − 8 = 7. La zeci rămân 5: 5 − 4 = 1.' }, { if: 513, text: '„Cu 148 mai puține” înseamnă că scădem.' }] },
+        s: { kind: 'sign', answer: '−', feedback: [{ if: '+', text: 'Echipa Verde are **cu 148 mai puține**: din 365 scădem 148.' }] },
+        a: { answer: 217, feedback: [{ if: 223, text: 'Din 5 nu putem lua 8: desfacem o zece, 15 − 8 = 7. La zeci rămân 5: 5 − 4 = 1.' }] },
         b: { answer: 217 },
         c: { answer: 582 },
       },
@@ -162,15 +168,33 @@ export default {
       context: { text: 'Arbitrul vrea răspunsuri repede. Uită-te ce e la fel și ce e diferit, fără să faci tot calculul.' },
       type: 'fill',
       prompt: 'Pune semnul potrivit: <, = sau >.',
-      rows: ['425 + 238 [[a]] 238 + 425', '650 − 125 [[b]] 650 − 115', '500 + 199 [[c]] 700'],
+      rows: ['425 + 238 [[a]] 238 + 425', '650 − 125 [[b]] 660 − 135', '500 + 199 [[c]] 700'],
       blanks: {
-        a: { kind: 'relation', feedback: [{ if: '>', text: 'Aceiași termeni, în altă ordine: suma rămâne aceeași.' }] },
-        b: { kind: 'relation', feedback: [{ if: '>', text: 'Din același număr, cine scade mai mult rămâne cu mai puțin: 125 > 115.' }] },
-        c: { kind: 'relation' },
+        a: {
+          kind: 'relation',
+          feedback: [
+            { if: '>', text: 'Aceiași termeni, în altă ordine: suma rămâne aceeași.' },
+            { if: '<', text: 'Aceiași termeni, în altă ordine: suma rămâne aceeași.' },
+          ],
+        },
+        b: {
+          kind: 'relation',
+          feedback: [
+            { if: '<', text: 'Am adăugat 10 și la descăzut, și la scăzător: diferența rămâne aceeași. Verifică: 650 − 125 = 525 și 660 − 135 = 525.' },
+            { if: '>', text: 'Am adăugat 10 și la descăzut, și la scăzător: diferența rămâne aceeași. Verifică: 650 − 125 = 525 și 660 − 135 = 525.' },
+          ],
+        },
+        c: {
+          kind: 'relation',
+          feedback: [
+            { if: '=', text: '199 e cu 1 mai puțin decât 200, deci 500 + 199 e cu 1 mai puțin decât 700.' },
+            { if: '>', text: '199 e cu 1 mai puțin decât 200, deci 500 + 199 e cu 1 mai puțin decât 700.' },
+          ],
+        },
       },
       explain: {
-        idea: 'Când schimbăm ordinea termenilor, suma nu se schimbă. La scădere, cu cât scădem mai mult, cu atât rămâne mai puțin.',
-        steps: ['425 + 238 = 238 + 425.', '650 − 125 < 650 − 115.', '500 + 199 = 699, iar 699 < 700.'],
+        idea: 'Când schimbăm ordinea termenilor, suma nu se schimbă. Când adăugăm același număr și la descăzut, și la scăzător, diferența nu se schimbă.',
+        steps: ['425 + 238 = 238 + 425.', '650 − 125 = 660 − 135: am adăugat 10 la amândouă numerele, iar diferența rămâne 525.', '199 < 200, deci 500 + 199 < 500 + 200 = 700.'],
       },
     },
     {
@@ -201,7 +225,7 @@ export default {
             {
               id: 'i1',
               options: [
-                { id: 'uscat', text: 'Rămâne uscat: aerul din pahar nu lasă apa să intre.' },
+                { id: 'uscat', text: 'Rămâne uscat: aerul din pahar nu lasă apa să ajungă la el.' },
                 { id: 'ud', text: 'Se udă: apa intră peste tot.' },
                 { id: 'pluteste', text: 'Se desprinde și plutește pe apă.' },
               ],
@@ -288,28 +312,28 @@ export default {
     {
       id: 'e11',
       level: 'avansat',
-      estMin: 7,
+      estMin: 6,
       concepts: ['mat.log.grafic-bare', 'mat.pb.decizie'],
       title: 'Sfoara echipelor',
       context: { text: 'Trei echipe au folosit împreună **600 de metri** de sfoară. Organizatorii își amintesc doar câteva lucruri.' },
       type: 'chart',
-      prompt: 'Desenează un grafic posibil: **în total 600 m**; echipa **roșie** a folosit **mai mult** decât cea **verde**; echipa **albastră** între **150 și 250 m** (150 și 250 sunt voie). O bară urcă până la 300.',
+      prompt: 'Desenează un grafic posibil: **în total 600 m**; echipa **roșie** a folosit **mai mult** decât cea **galbenă**; echipa **albastră** între **150 și 250 m** (150 și 250 sunt voie).\nFiecare bară poate urca cel mult până la 300.',
       categories: [
-        { id: 'rosie', label: 'roșie' },
-        { id: 'verde', label: 'verde' },
         { id: 'albastra', label: 'albastră' },
+        { id: 'rosie', label: 'roșie' },
+        { id: 'galbena', label: 'galbenă' },
       ],
       max: 300,
       step: 50,
       rules: [
         { rule: 'total', value: 600 },
-        { rule: 'more', a: 'rosie', b: 'verde' },
+        { rule: 'more', a: 'rosie', b: 'galbena' },
         { rule: 'range', a: 'albastra', min: 150, max: 250 },
       ],
       explain: {
-        idea: 'Sunt mai multe grafice bune. Alege întâi bara albastră, apoi împarte ce rămâne până la 600 între roșie și verde, cu roșia mai mare.',
-        steps: ['De exemplu: albastră 200, roșie 250, verde 150 → 600.', 'Sau: albastră 150, roșie 300, verde 150 → 600.'],
-        trap: 'Roșia trebuie să fie strict mai mare decât verdea: la egalitate nu e bine.',
+        idea: 'Sunt mai multe grafice bune. Alege întâi bara albastră, apoi împarte ce rămâne până la 600 între echipa roșie și cea galbenă, cu bara roșie mai înaltă.',
+        steps: ['De exemplu: albastră 200, roșie 250, galbenă 150 → 600.', 'Sau: albastră 150, roșie 300, galbenă 150 → 600.'],
+        trap: 'Bara roșie trebuie să fie mai înaltă decât cea galbenă: la egalitate nu e bine.',
       },
     },
   ],
