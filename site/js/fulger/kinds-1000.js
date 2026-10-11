@@ -5,7 +5,7 @@
 
 import { cantitate, numberToWords } from '../core/ro.js';
 import { trecere } from '../core/rules.js';
-import { choice, compare, numberQuestion, sorting } from './intrebari.js';
+import { choice, compare, gridChoice, numberQuestion, sorting } from './intrebari.js';
 import { distinct, int, pickOne } from './rand.js';
 
 const PLUS = ' + ';
@@ -409,7 +409,7 @@ export const KINDS_1000 = {
   },
 
   'sort-4-1000-dir': {
-    label: 'Ordonări crescătoare și descrescătoare',
+    label: 'Ordonări până la 1000, crescătoare și descrescătoare',
     points: 4,
     fastMs: 9000,
     mode: 'sort',
@@ -425,15 +425,16 @@ export const KINDS_1000 = {
     concepts: [CU],
     generate(rand) {
       for (;;) {
-        const a = int(rand, 105, 889);
+        const a = int(rand, 105, 879);
         const b = rand() < 0.35 ? int(rand, 2, 9) : int(rand, 11, 99);
         const [, za, ua] = szu(a);
         const [, zb, ub] = szu(b);
         // o singură trecere: unitățile trec de 10, iar zecile (cu zecea trecută) rămân sub 10
-        if (ua + ub < 10 || za + zb + 1 > 9 || a + b > 999) continue;
-        const r = a + b;
-        // greșeala tipică: zecea trecută uitată (345 + 27 → 362)
-        return choice('add-1000-cu', rand, `${a}${PLUS}${b}`, [r - 10, r + 10, r - 1, r + 1, r - 100, r + 100], MAX);
+        if (ua + ub < 10 || za + zb + 1 > 9 || a + b < 110 || a + b > 889) continue;
+        // variantele „în pătrat” (o zece și o sută în plus sau în minus): zecea trecută uitată (345 + 27 → 362) e un colț, iar
+        // unitățile, aceleași la toate, nu dau răspunsul; fără termenii calculului printre variante
+        const q = gridChoice('add-1000-cu', rand, `${a}${PLUS}${b}`);
+        if (!q.choices.includes(a) && !q.choices.includes(b)) return q;
       }
     },
   },
@@ -448,14 +449,14 @@ export const KINDS_1000 = {
       for (;;) {
         const a = int(rand, 120, 999);
         const b = rand() < 0.35 ? int(rand, 2, 9) : int(rand, 11, 99);
-        const [sa, za, ua] = szu(a);
+        const [, za, ua] = szu(a);
         const [, zb, ub] = szu(b);
         // se împrumută doar din zeci: unitățile nu ajung, dar zecile rămân destule
-        if (ua >= ub || za - 1 < zb || a - b < 100) continue;
-        const r = a - b;
-        // greșeala clasică: pe fiecare coloană, cifra mică din cea mare (452 − 28 → 436)
-        const columns = num(sa, Math.abs(za - zb), Math.abs(ua - ub));
-        return choice('sub-1000-cu', rand, `${a}${MINUS}${b}`, [columns, r - 10, r + 10, r - 1, r + 1], MAX);
+        if (ua >= ub || za - 1 < zb || a - b < 110 || a - b > 889) continue;
+        // variantele „în pătrat”: împrumutul fără micșorare (452 − 28 → 434) e un colț, iar unitățile, aceleași la toate, nu dau
+        // răspunsul (cu cifra mică scăzută din cea mare și ±1, ultima cifră îl arăta în jumătate din întrebări)
+        const q = gridChoice('sub-1000-cu', rand, `${a}${MINUS}${b}`);
+        if (!q.choices.includes(a) && !q.choices.includes(b)) return q;
       }
     },
   },

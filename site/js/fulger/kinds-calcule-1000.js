@@ -1,15 +1,21 @@
 // Jocuri fulger: tipurile temei „Adunări și scăderi până la 1000”, cu trecere peste ordin (secțiunea U2). La Ușor trecerea are
 // sprijin (zeci rotunde peste sută, regrupări, completarea până la sută), la Intermediar e una oriunde într-un calcul de trei cifre
 // (și cifra lipsă din calculul în scris, calculul greșit, estimarea), la Avansat sunt două (cu împrumutul peste zero), trei termeni și
-// scurtăturile cu numere rotunde. Variantele greșite vin din greșelile tipice (transportul uitat sau dublat, cifra mică scăzută din
-// cea mare, împrumutul fără micșorare, oprit la zero) și păstrează, cât se poate, cifra unităților, ca unitățile singure să nu dea
-// răspunsul. Alunele sunt pe măsura timpului, iar calculele mai lungi de 9 s au pauza „Hopa” cât timpul lor (`pauseMaxMs`).
+// scurtăturile cu numere rotunde. Alunele sunt pe măsura timpului, iar calculele mai lungi de 9 s au pauza „Hopa” cât timpul lor.
+//
+// Variantele nu au tipare care să arate răspunsul fără calcul (măsurat cu un „ghicitor pe tipare”, în tests/fulger.test.js):
+// - la calcule, ele stau „în pătrat” ({x, x + 10, x + 100, x + 110}, `gridChoices`): celelalte colțuri sunt greșelile tipice
+//   (transportul uitat sau dublat, împrumutul fără micșorare), iar unitățile sunt aceleași la toate;
+// - la estimare, la completarea până la sută și la cifra lipsă, întâi se alege fereastra de patru valori la rând, apoi locul
+//   răspunsului în ea, ca nici fereastra, nici marginile ei să nu-l arate;
+// - calculul greșit dintre patru are greșeala mai mică decât al doilea termen, deci nu se vede din ochi (o sumă mai mică decât un
+//   termen); nicio variantă nu repetă un număr din calcul.
 
 import { cantitate } from '../core/ro.js';
 import { treceri } from '../core/rules.js';
-import { choice, compare, numberQuestion } from './intrebari.js';
+import { choice, compare, gridChoice, numberQuestion } from './intrebari.js';
 import { figureQuestion } from './kinds-forme.js';
-import { int, pickOne } from './rand.js';
+import { gridChoices, int, pickOne } from './rand.js';
 
 const PLUS = ' + ';
 const MINUS = ' − ';
@@ -23,22 +29,13 @@ const ESTIMARE = 'mat.op1000.estimare';
 const EXPRESII = 'mat.op.comparare-expresii';
 const GRESEALA = 'mat.op.greseala';
 
-// rezultatele și variantele rămân sub 1000: o sumă de 1000 ar sta mereu pe ultimul loc dintre variante
 const MAX = 999;
-
-/** Cifrele unui număr de cel mult trei cifre: unități, zeci, sute. */
-const digits = (n) => [n % 10, Math.floor(n / 10) % 10, Math.floor(n / 100) % 10];
-const fromDigits = ([u, z, s]) => u + 10 * z + 100 * s;
-
-/** Pe fiecare coloană, cifra mică scăzută din cea mare: 306 − 187 → 281. */
-const smallFromLarge = (a, b) => fromDigits(digits(a).map((d, i) => Math.abs(d - digits(b)[i])));
-/** Împrumutul luat fără să micșoreze coloana din stânga: 306 − 187 → 229. */
-const noDecrease = (a, b) => fromDigits(digits(a).map((d, i) => (d < digits(b)[i] ? d + 10 - digits(b)[i] : d - digits(b)[i])));
-/** Peste zero: zecile devin 10, dar nu mai scad la 9 când dau unităților: 306 − 187 → 129. */
-function stopAtZero(a, b) {
-  const [ua, za, sa] = digits(a);
-  const [ub, zb, sb] = digits(b);
-  return za === 0 && ua < ub ? ua + 10 - ub + 10 * (10 - zb) + 100 * (sa - 1 - sb) : null;
+/** Rezultatul unui calcul cu variantele „în pătrat”: toate colțurile încap între 0 și 999. */
+const inGrid = (r) => r >= 110 && r <= 889;
+/** Un calcul cu variantele „în pătrat”, dacă niciuna nu repetă un termen; altfel null (generatorul reîncearcă). */
+function gridCalc(kind, rand, terms, op) {
+  const q = gridChoice(kind, rand, terms.join(op === '+' ? PLUS : MINUS));
+  return q.choices.some((c) => terms.includes(c)) ? null : q;
 }
 
 export const CALC_1000_KINDS = {
@@ -58,8 +55,10 @@ export const CALC_1000_KINDS = {
         const r = add ? a + b : a - b;
         // rezultatul are zeci rotunde de ambele părți (110–890), ca toate variantele să fie rotunde
         if (r < 110 || r > 890 || treceri(add ? '+' : '-', a, b).length !== 1) continue;
-        // suta uitată sau pusă de două ori, zecile greșite cu una sau două
-        return choice('zeci-peste-suta', rand, `${a}${add ? PLUS : MINUS}${b}`, [r - 100, r + 100, r - 10, r + 10, r - 20, r + 20, r - 200, r + 200], MAX);
+        // suta uitată sau pusă de două ori, zecile greșite cu una, două sau trei; toate rotunde, fără termenii calculului
+        const typical = [r - 100, r + 100, r - 10, r + 10, r - 20, r + 20, r - 30, r + 30, r - 200, r + 200].filter((x) => x !== a && x !== b);
+        const q = choice('zeci-peste-suta', rand, `${a}${add ? PLUS : MINUS}${b}`, typical, MAX);
+        if (!q.choices.includes(a)) return q;
       }
     },
   },
@@ -84,16 +83,14 @@ export const CALC_1000_KINDS = {
           [z, 'zece', 'zeci'],
           [u, 'unitate', 'unități'],
         ].filter(([n]) => n > 0);
-        if (answer > 999 || parts.length < 2) continue;
+        if (!inGrid(answer) || parts.length < 2) continue;
         const words = parts.map(([n, one, many]) => cantitate(n, one, many));
-        // greșelile tipice: numerele scrise unul după altul (4 sute, 13 zeci, 5 unități → 4135), suta sau zecea formată, uitată
-        const glued = Number(parts.map(([n]) => n).join(''));
+        // variantele „în pătrat”: suta sau zecea formată și uitată (o sută, o zece în minus) sunt colțuri ale lui
         return numberQuestion('nr-regrupat', rand, {
           prompt: `Cât fac ${words.slice(0, -1).join(', ')} și ${words.at(-1)}?`,
           key: `${s}:${z}:${u}`,
           answer,
-          typical: [glued, z >= 10 ? answer - 100 : null, u >= 10 ? answer - 10 : null, answer + 100, answer - 110, answer + 10].filter((x) => x !== null),
-          max: 9999,
+          fixed: gridChoices(rand, answer),
           ask: { op: 'regrupare' },
         });
       }
@@ -108,19 +105,18 @@ export const CALC_1000_KINDS = {
     concepts: [STRATEGII],
     generate(rand) {
       for (;;) {
-        const n = int(rand, 101, 989);
-        const target = Math.ceil(n / 100) * 100;
-        const answer = target - n;
-        // zecile rotunde mai rar (370 → 30); răspunsul are cel puțin 10, ca să poată sta pe orice poziție
-        if (n % 100 === 0 || answer < 10 || (n % 10 === 0 && rand() < 0.6)) continue;
-        const [u, z] = digits(n);
+        // întâi fereastra de patru numere din 10 în 10 (cu aceleași unități), apoi locul răspunsului în ea
+        const start = int(rand, 10, 69);
+        const answer = start + 10 * int(rand, 0, 3);
+        const target = 100 * int(rand, 2, 9);
+        const n = target - answer;
+        // zecile rotunde mai rar (370 → 30)
+        if (n % 10 === 0 && rand() < 0.6) continue;
         return numberQuestion('pana-la-suta', rand, {
           prompt: `Cât adaugi la ${n} ca să ajungi la ${target}?`,
           key: `${n}`,
           answer,
-          // fiecare cifră completată până la 10 (367 → 43) sau până la 9 (32), și o sută în plus (133)
-          typical: [((10 - u) % 10) + 10 * ((10 - z) % 10), 9 - u + 10 * (9 - z), answer + 100, answer - 10, answer + 10],
-          max: 200,
+          fixed: [0, 1, 2, 3].map((i) => start + 10 * i),
           ask: { op: 'pana-la-suta' },
         });
       }
@@ -180,12 +176,11 @@ export const CALC_1000_KINDS = {
     concepts: [CU],
     generate(rand) {
       for (;;) {
-        const a = int(rand, 101, 899);
-        const b = rand() < 0.7 ? int(rand, 101, 899) : int(rand, 11, 99);
-        const r = a + b;
-        if (r > MAX || treceri('+', a, b).length !== 1) continue;
-        // transportul uitat sau pus de două ori, la zeci sau la sute
-        return choice('add-1000-o-trecere', rand, `${a}${PLUS}${b}`, [r - 10, r + 10, r - 100, r + 100, r - 110, r + 110], MAX);
+        const a = int(rand, 101, 799);
+        const b = rand() < 0.7 ? int(rand, 101, 799) : int(rand, 11, 99);
+        if (!inGrid(a + b) || treceri('+', a, b).length !== 1) continue;
+        const q = gridCalc('add-1000-o-trecere', rand, [a, b], '+');
+        if (q) return q;
       }
     },
   },
@@ -201,9 +196,9 @@ export const CALC_1000_KINDS = {
       for (;;) {
         const a = int(rand, 201, 999);
         const b = rand() < 0.7 ? int(rand, 101, a - 10) : int(rand, 11, 99);
-        const r = a - b;
-        if (r < 10 || treceri('-', a, b).length !== 1) continue;
-        return choice('sub-1000-un-imprumut', rand, `${a}${MINUS}${b}`, [smallFromLarge(a, b), noDecrease(a, b), r + 10, r - 10, r + 100, r - 100], MAX);
+        if (!inGrid(a - b) || treceri('-', a, b).length !== 1) continue;
+        const q = gridCalc('sub-1000-un-imprumut', rand, [a, b], '-');
+        if (q) return q;
       }
     },
   },
@@ -215,18 +210,23 @@ export const CALC_1000_KINDS = {
     mode: 'figure',
     concepts: [RECONSTITUIRE, IN_SCRIS],
     generate(rand) {
+      // întâi fereastra de patru cifre la rând și cifra căutată, apoi un calcul în care ea lipsește
+      const start = int(rand, 0, 6);
+      const target = start + int(rand, 0, 3);
       for (;;) {
         const add = rand() < 0.55;
         const a = add ? int(rand, 101, 899) : int(rand, 201, 999);
         const b = add ? int(rand, 101, 899) : int(rand, 101, a - 100);
         const r = add ? a + b : a - b;
-        if (r < 100 || r > MAX || treceri(add ? '+' : '-', a, b).length !== 1) continue;
-        // o cifră ascunsă dintr-un termen sau din rezultat; rezolvarea o arată, cu coloana ei evidențiată
+        const cross = treceri(add ? '+' : '-', a, b);
+        if (r < 100 || r > MAX || cross.length !== 1) continue;
+        // cifra lipsă stă în coloana trecerii sau în cea din stânga ei (care primește transportul sau dă împrumutul): fără trecere,
+        // ar fi doar o adunare sau o scădere de cifre
+        const place = 'uz'.indexOf(cross[0]) + int(rand, 0, 1); // 0 = unități, 1 = zeci, 2 = sute
         const rows = [String(a), String(b), String(r)];
         const row = int(rand, 0, 2);
-        const place = int(rand, 0, 2); // 0 = unități, 1 = zeci, 2 = sute
         const at = rows[row].length - 1 - place;
-        const digit = Number(rows[row][at]);
+        if (Number(rows[row][at]) !== target) continue;
         const shown = rows.map((t, i) => (i === row ? `${t.slice(0, at)}?${t.slice(at + 1)}` : t));
         const op = add ? '+' : '-';
         return numberQuestion('cifra-lipsa-1000', rand, {
@@ -234,11 +234,8 @@ export const CALC_1000_KINDS = {
           figure: { v: 'column-op', op, terms: `${shown[0]},${shown[1]}`, result: shown[2] },
           solved: { v: 'column-op', op, terms: `${a},${b}`, result: String(r), mark: 'UZS'[place] },
           key: `${a}${op}${b}:${row}${place}`,
-          answer: digit,
-          // transportul sau împrumutul uitat dă cifra vecină; 10 − cifra vine din completarea până la 10
-          typical: [digit - 1, digit + 1, (10 - digit) % 10],
-          min: 0,
-          max: 9,
+          answer: target,
+          fixed: [0, 1, 2, 3].map((i) => start + i),
           ask: { op: 'cifra-lipsa' },
         });
       }
@@ -253,21 +250,23 @@ export const CALC_1000_KINDS = {
     mode: 'figure',
     concepts: [GRESEALA, CU],
     generate(rand) {
-      // un calcul scurt, cu o trecere: zeci rotunde peste sută, trei cifre ± o cifră, trei cifre ± două cifre
-      const short = () => {
+      // un calcul cu o trecere: trei cifre ± două cifre (trecerea la unități) sau ± trei cifre (la unități sau la zeci)
+      const one = () => {
         for (;;) {
           const add = rand() < 0.5;
-          const family = int(rand, 0, 2);
-          const a = family === 0 ? 100 * int(rand, 1, 8) + 10 * int(rand, add ? 1 : 0, 9) : int(rand, 101, 989);
-          const b = family === 0 ? 10 * int(rand, 1, 9) : family === 1 ? int(rand, 2, 9) : int(rand, 11, 99);
+          const a = int(rand, 101, 989);
+          const b = rand() < 0.4 ? int(rand, 101, 899) : int(rand, 11, 99);
           const r = add ? a + b : a - b;
           const cross = treceri(add ? '+' : '-', a, b);
-          if (r < 100 || r > MAX || cross.length !== 1) continue;
-          return { text: `${a}${add ? PLUS : MINUS}${b}`, r, add, step: cross[0] === 'u' ? 10 : 100 };
+          const step = cross[0] === 'u' ? 10 : 100;
+          // greșeala (o zece sau o sută) e mai mică decât al doilea termen: suma greșită rămâne peste primul termen, diferența
+          // greșită sub descăzut, deci nu se vede din ochi
+          if (r < 100 || r > MAX || cross.length !== 1 || b <= step) continue;
+          return { text: `${a}${add ? PLUS : MINUS}${b}`, r, add, step };
         }
       };
       for (;;) {
-        const calcs = [short(), short(), short(), short()];
+        const calcs = [one(), one(), one(), one()];
         if (new Set(calcs.map((c) => c.text)).size < 4) continue;
         // greșeala tipică a coloanei unde trece: transportul uitat (o zece sau o sută în minus) sau împrumutul fără micșorare
         const [bad, ...good] = calcs;
@@ -278,7 +277,8 @@ export const CALC_1000_KINDS = {
           answer: { text: `${bad.text} = ${wrong}` },
           distractors: good.map((c) => ({ text: `${c.text} = ${c.r}` })),
         });
-        if (q) return q;
+        // calculul corect, pentru „Greșelile tale” (răspunsul e chiar calculul greșit)
+        if (q) return { ...q, fix: `${bad.text} = ${bad.r}` };
       }
     },
   },
@@ -294,22 +294,24 @@ export const CALC_1000_KINDS = {
       const cut = (n) => Math.floor(n / 100) * 100;
       // departe de jumătatea sutei (și nu sute întregi), ca rotunjirea să nu fie la mustață
       const far = (n) => n % 100 !== 0 && Math.abs((n % 100) - 50) >= 15;
+      // întâi fereastra de patru sute la rând (100–400 … 600–900) și estimarea, apoi un calcul care dă acea estimare
+      const start = 100 * int(rand, 1, 6);
+      const below = int(rand, 0, 3);
+      const target = start + 100 * below;
       for (;;) {
-        const add = rand() < 0.6;
+        const add = target >= 900 || (target > 200 && rand() < 0.6);
         const a = int(rand, 101, 899);
         const b = add ? int(rand, 101, 899) : int(rand, 101, Math.max(101, a - 100));
         const r = add ? a + b : a - b;
         const estimate = add ? round(a) + round(b) : round(a) - round(b);
-        if (!far(a) || !far(b) || r < 100 || Math.abs((r % 100) - 50) < 15) continue;
+        if (estimate !== target || !far(a) || !far(b) || r < 100 || r > MAX || Math.abs((r % 100) - 50) < 15) continue;
         // estimarea dă chiar suta rezultatului, iar trunchierea (doar sutele) dă altceva
-        if (estimate !== round(r) || estimate < 400 || estimate > 700) continue;
-        if ((add ? cut(a) + cut(b) : cut(a) - cut(b)) === estimate) continue;
-        const below = int(rand, 0, 3);
+        if (round(r) !== estimate || (add ? cut(a) + cut(b) : cut(a) - cut(b)) === estimate) continue;
         return numberQuestion('estimare-sute', rand, {
           prompt: `Cam cât face ${a}${add ? PLUS : MINUS}${b}?`,
           key: `${a}${add ? '+' : '-'}${b}`,
           answer: estimate,
-          fixed: [0, 1, 2, 3].map((i) => estimate + (i - below) * 100),
+          fixed: [0, 1, 2, 3].map((i) => start + 100 * i),
           ask: { op: 'estimare' },
         });
       }
@@ -326,17 +328,17 @@ export const CALC_1000_KINDS = {
     concepts: [CU],
     generate(rand) {
       for (;;) {
-        const a = int(rand, 101, 899);
-        const b = rand() < 0.8 ? int(rand, 101, 899) : int(rand, 11, 99);
-        const r = a + b;
-        if (r > MAX || treceri('+', a, b).length !== 2) continue;
-        return choice('add-1000-doua-treceri', rand, `${a}${PLUS}${b}`, [r - 10, r - 100, r - 110, r + 10, r + 100, r + 110], MAX);
+        const a = int(rand, 101, 799);
+        const b = rand() < 0.8 ? int(rand, 101, 799) : int(rand, 11, 99);
+        if (!inGrid(a + b) || treceri('+', a, b).length !== 2) continue;
+        const q = gridCalc('add-1000-doua-treceri', rand, [a, b], '+');
+        if (q) return q;
       }
     },
   },
 
   'sub-1000-doua-imprumuturi': {
-    label: 'Scăderi cu două împrumuturi (și peste zero)',
+    label: 'Scăderi cu două împrumuturi (și împrumutul peste zero)',
     points: 8,
     fastMs: 13000,
     pauseMaxMs: 13000,
@@ -349,16 +351,15 @@ export const CALC_1000_KINDS = {
         let a = int(rand, 201, 999);
         if (rand() < 0.12) a = 100 * Math.floor(a / 100) + (rand() < 0.35 ? 0 : int(rand, 1, 9));
         const b = int(rand, 101, Math.max(101, a - 100));
-        const r = a - b;
-        if (r < 100 || treceri('-', a, b).length !== 2) continue;
-        const typical = [smallFromLarge(a, b), noDecrease(a, b), stopAtZero(a, b), r + 10, r - 10, r + 100, r - 100].filter((x) => x !== null);
-        return choice('sub-1000-doua-imprumuturi', rand, `${a}${MINUS}${b}`, typical, MAX);
+        if (!inGrid(a - b) || treceri('-', a, b).length !== 2) continue;
+        const q = gridCalc('sub-1000-doua-imprumuturi', rand, [a, b], '-');
+        if (q) return q;
       }
     },
   },
 
   'add-3op-1000-cu': {
-    label: 'Adunări cu trei termeni, cu trecere',
+    label: 'Adunări cu trei termeni până la 1000, cu trecere',
     points: 7,
     fastMs: 13000,
     pauseMaxMs: 13000,
@@ -366,13 +367,13 @@ export const CALC_1000_KINDS = {
     concepts: [CU],
     generate(rand) {
       for (;;) {
-        const terms = [int(rand, 101, 599), int(rand, 101, 399), rand() < 0.5 ? int(rand, 11, 99) : int(rand, 101, 299)];
+        const terms = [int(rand, 101, 499), int(rand, 101, 299), rand() < 0.5 ? int(rand, 11, 99) : int(rand, 101, 199)];
         const r = terms[0] + terms[1] + terms[2];
         // cel puțin o coloană trece de 9 (la unități, transportul poate fi și 2)
         const sums = [1, 10, 100].map((p) => terms.reduce((s, t) => s + (Math.floor(t / p) % 10), 0));
-        if (r > MAX || !sums.some((s) => s >= 10)) continue;
-        // transportul uitat (1 sau 2 zeci, o sută) și al treilea termen uitat
-        return choice('add-3op-1000-cu', rand, terms.join(PLUS), [terms[0] + terms[1], r - 10, r - 20, r - 100, r + 10, r + 100], MAX);
+        if (!inGrid(r) || !sums.some((s) => s >= 10)) continue;
+        const q = gridCalc('add-3op-1000-cu', rand, terms, '+');
+        if (q) return q;
       }
     },
   },
@@ -390,21 +391,20 @@ export const CALC_1000_KINDS = {
         const roll = rand();
         if (roll < 0.55) {
           // + 198: adun 200, apoi scad 2
-          const a = int(rand, 101, 899);
+          const a = int(rand, 101, 799);
           const b = 100 * k - d;
-          const r = a + b;
-          if (r > MAX || !treceri('+', a, b).length) continue;
-          // compensarea în sens greșit (+2 în loc de −2) sau uitată
-          return choice('compensare-1000', rand, `${a}${PLUS}${b}`, [r + 2 * d, r + d, r - 10, r + 10, r - 100, r + 100], MAX);
+          if (!inGrid(a + b) || !treceri('+', a, b).length) continue;
+          const q = gridCalc('compensare-1000', rand, [a, b], '+');
+          if (q) return q;
+          continue;
         }
-        // − 297: scad 300, apoi adun 3; − 302: scad 300, apoi încă 2
+        // − 297: scad 300, apoi adun 3; − 302: scad 300, apoi încă 2 (unitățile descăzutului mai mici decât 2, ca să fie împrumut)
         const over = roll >= 0.85;
-        const a = int(rand, 201, 999);
+        const a = over ? 10 * int(rand, 21, 99) + int(rand, 0, d - 1) : int(rand, 201, 999);
         const b = 100 * k + (over ? d : -d);
-        const r = a - b;
-        if (r < 100 || !treceri('-', a, b).length) continue;
-        const typical = over ? [r + 2 * d, r + d, r - 10, r + 10, r - 100, r + 100] : [r - 2 * d, r - d, r - 10, r + 10, r - 100, r + 100];
-        return choice('compensare-1000', rand, `${a}${MINUS}${b}`, typical, MAX);
+        if (!inGrid(a - b) || !treceri('-', a, b).length) continue;
+        const q = gridCalc('compensare-1000', rand, [a, b], '-');
+        if (q) return q;
       }
     },
   },
@@ -418,16 +418,18 @@ export const CALC_1000_KINDS = {
     generate(rand) {
       for (;;) {
         // zeci rotunde (650) sau orice număr de trei cifre (375)
-        const n = rand() < 0.4 ? 10 * int(rand, 11, 98) : int(rand, 101, 989);
-        if (n % 100 === 0) continue;
+        const n = rand() < 0.4 ? 10 * int(rand, 12, 89) : int(rand, 111, 890);
         const answer = 1000 - n;
+        if (n % 100 === 0 || !inGrid(answer)) continue;
+        // variantele „în pătrat”: cifrele completate până la 10 în loc de 9 (375 → 735, cu o sută și o zece în plus) e un colț al lui;
+        // fără numărul din cerință printre ele (450 → 550 ar avea colțul 450)
+        const fixed = gridChoices(rand, answer);
+        if (fixed.includes(n)) continue;
         return numberQuestion('pana-la-1000', rand, {
           prompt: `Cât adaugi la ${n} ca să ajungi la 1000?`,
           key: `${n}`,
           answer,
-          // fiecare cifră completată până la 10 (375 → 735) sau până la 9 (624)
-          typical: [fromDigits(digits(n).map((x) => (10 - x) % 10)), fromDigits(digits(n).map((x) => 9 - x)), answer + 100, answer - 100, answer + 10, answer - 10],
-          max: MAX,
+          fixed,
           ask: { op: 'pana-la-1000' },
         });
       }

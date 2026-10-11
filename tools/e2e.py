@@ -602,7 +602,10 @@ def test_flow(run: Run, page: Page, test: dict, vp: str):
 
 
 FULGER_TOPIC = "adunari-scaderi-100"  # tema în care au intrat rezultatele de dinainte de teme
+CALC_1000_TOPIC = "adunari-scaderi-1000"  # începe cu FULGER_TOPIC: adresele se compară întregi sau urmate de „/”
 FULGER_READY = "window.__dbg && window.__dbg.fulger.state().enabled"
+# sare peste pauza de după un răspuns în pași mici, până se deblochează variantele: o pauză lungă fixă ar consuma runda de 2 minute
+FULGER_SKIP_PAUSE = "(() => { const f = window.__dbg.fulger; for (let i = 0; i < 80 && f.state().phase === 'playing' && !f.state().enabled; i++) f.elapse(250); })()"
 # `bolt`: cât loc rămâne între pastila fulgerului (pe marginea de sus a cardului, doar în serie) și ce e sub ea în card
 FULGER_FIT = """(() => { const a = document.querySelector('[data-testid=fg-answers]').getBoundingClientRect();
   const bolt = document.querySelector('.fg-card > [data-testid=fg-bolt]');
@@ -766,7 +769,7 @@ def fulger_flow(run: Run, page: Page, vp: str):
     target = page.get_by_test_id("fg-next-star")
     run.check(mistakes == 2 and (lit == 3 or (target.is_visible() and "stea" in target.inner_text())), f"[{vp}] fulger: „Greșelile tale” arată cele 2 greșeli, iar ținta spune cât mai trebuie până la steaua următoare ({mistakes})")
     links = [page.get_by_test_id(t).get_attribute("href") for t in ("fg-levels", "fg-suggest") if page.get_by_test_id(t).count()]
-    run.check(bool(links) and all(href.startswith(f"#/fulger/{FULGER_TOPIC}") for href in links), f"[{vp}] fulger: legăturile de la rezultate rămân în temă ({links})")
+    run.check(bool(links) and all(href == f"#/fulger/{FULGER_TOPIC}" or href.startswith(f"#/fulger/{FULGER_TOPIC}/") for href in links), f"[{vp}] fulger: legăturile de la rezultate rămân în temă ({links})")
     run.layout_ok(page, f"[{vp}] fulger rezultate")
     run.shot(page, f"{vp}-fulger-rezultate")
     page.get_by_test_id("fg-again").click()
@@ -823,9 +826,9 @@ def fulger_flow(run: Run, page: Page, vp: str):
 TOPIC_KINDS = f"""Promise.all([import('./data/fulger.js'), import('./js/fulger/kinds.js')]).then(([{{ default: c }}, {{ isDrawn }}]) => c.topics
   .filter((t) => !t.soon && t.id !== '{FULGER_TOPIC}')
   .map((t) => ({{ id: t.id, drawn: t.levels.every((l) => l.mix.every((m) => isDrawn(m.kind))), kinds: [...new Set(t.levels.flatMap((l) => l.mix.map((m) => m.kind)))] }})))"""
-# cel mai mic text dintr-un grafic sau o hartă, în pixeli pe ecran (null la desenele care nu sunt grafice)
+# cel mai mic text dintr-un grafic, o hartă sau un calcul în scris, în pixeli pe ecran (null la celelalte desene)
 FULGER_TEXT = """(() => { const svg = document.querySelector('[data-testid=fg-figure] svg');
-  if (!svg || !/v-(chart-|metro|network|bracket|tree|venn|abacus)/.test(svg.getAttribute('class'))) return null;
+  if (!svg || !/v-(chart-|metro|network|bracket|tree|venn|abacus|column-op)/.test(svg.getAttribute('class'))) return null;
   const scale = svg.getScreenCTM().a; let min = Infinity;
   for (const t of svg.querySelectorAll('text')) min = Math.min(min, parseFloat(t.getAttribute('font-size')) * scale);
   return Math.round(min * 10) / 10; })()"""
@@ -889,7 +892,7 @@ def fulger_topics_flow(run: Run, page: Page, vp: str):
                 # la variante se încadrează cea bună, la ordonări se completează casetele în ordinea bună
                 shown = page.locator(".fg-slot.is-shown").count() == len(s["order"]) if s["mode"] == "sort" else page.locator(".fg-opt.is-answer").count() == 1
                 run.check(page.locator(".fg-opt.is-wrong").count() == 1 and shown, f"[{vp}] {tid}: {kind} — la greșeală se vede răspunsul bun")
-                page.evaluate("window.__dbg.fulger.elapse(9500)")  # peste pauza „Hopa”
+                page.evaluate(FULGER_SKIP_PAUSE)  # exact peste pauza „Hopa” (până la 13 s la calculele lungi), ca runda să ajungă la toate tipurile
         page.evaluate("window.__dbg.fulger.elapse(window.__dbg.fulger.state().remainingMs + 50)")
         page.wait_for_selector("[data-testid=fg-results]")
         page.get_by_test_id("fg-results").click()  # sare peste numărătoare
@@ -927,6 +930,7 @@ def fulger_screens(run: Run, browser, base: str):
         ("grafice-tabele", ("timp-doua-serii", "grafic-compara", "grafic-ordine", "venn", "tabel", "cerc-felii", "pictograma")),
         ("harti-arbori", ("drum-compara", "linie-ordine", "arbore-clasificare", "turneu", "drum-scurt", "veverita-drum", "veverita-bogat", "arbore-alegeri")),
         ("numere-1000", ("sort-4-1000-dir", "cmp-expr-1000", "add-3op-1000", "nr-litere", "nr-numaratoare", "sir-1000")),
+        (CALC_1000_TOPIC, ("add-3op-1000-cu", "cmp-fara-calcul-1000", "cifra-lipsa-1000", "calcul-gresit-1000", "nr-regrupat", "estimare-sute", "pana-la-1000")),
     ]
     for name, opts, min_text in screens:
         context = browser.new_context(locale="ro-RO", **opts)

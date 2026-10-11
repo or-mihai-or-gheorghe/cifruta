@@ -13,7 +13,7 @@ import {
   topicConfig, topicStars, topicTotal,
 } from '../site/js/fulger/engine.js';
 import { artName, promptLength, promptSpoken } from '../site/js/fulger/art.js';
-import { isDrawn, KINDS } from '../site/js/fulger/kinds.js';
+import { KINDS } from '../site/js/fulger/kinds.js';
 import { LEGACY_TOPIC, LEVEL_IDS, normalizeFulger, recordKey, splitKey } from '../site/js/fulger/records.js';
 import '../site/js/visuals/all.js';
 import { EMOJI } from '../site/js/visuals/emoji.js';
@@ -106,9 +106,10 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
     if (kind.pauseMaxMs !== undefined) {
       assert.ok(Number.isInteger(kind.pauseMaxMs) && kind.pauseMaxMs > config.guard.pauseMaxMs && kind.pauseMaxMs <= kind.fastMs, `${id}: pauseMaxMs`);
     }
-    // și trebuie să și-l ridice: cu pauza plafonată sub timpul calculului, ghicitul ar costa mai puțin decât socotitul; la desene
-    // (grafice, hărți) pauza rămâne plafonată la 9 s, ca să nu fie prea lungă (decizia din 19 septembrie)
-    if (!isDrawn(id) && kind.fastMs > config.guard.pauseMaxMs) assert.equal(kind.pauseMaxMs, kind.fastMs, `${id}: pauseMaxMs = fastMs`);
+    // și trebuie să și-l ridice: cu pauza plafonată sub timpul calculului, ghicitul ar costa mai puțin decât socotitul; la întrebările
+    // cu desen (grafice, hărți) pauza rămâne plafonată la 9 s, ca să nu fie prea lungă (decizia din 19 septembrie)
+    const drawing = Boolean(kind.generate(seededRandom(1)).figure);
+    if (!drawing && kind.fastMs > config.guard.pauseMaxMs) assert.equal(kind.pauseMaxMs, kind.fastMs, `${id}: pauseMaxMs = fastMs`);
     const positions = [0, 0, 0, 0];
     const relations = { '<': 0, '=': 0, '>': 0 };
     const dirs = new Set();
@@ -198,6 +199,43 @@ test('fulger: regulile graficelor, ale grafurilor și ale calculelor cu trecere 
       const q = KINDS[id].generate(seededRandom(seed));
       assert.ok(RULES[id](q), `${id} (sămânța ${seed}) încalcă regulile tipului: ${JSON.stringify(q)}`);
     }
+  }
+});
+
+/**
+ * Ce alege un copil care nu socotește, dar se uită la forma variantelor: mijlocul a trei numere egal depărtate, apoi cel mai mare din
+ * două numere vecine, apoi calculul absurd (o sumă mai mică decât un termen, o diferență mai mare decât descăzutul); null fără tipar.
+ */
+function patternPick(q) {
+  const texts = q.mode === 'figure' ? q.choices.map((c) => String(q.options[c].text ?? '')) : null;
+  const numeric = q.mode === 'choice' ? q.choices : texts?.every((t) => /^\d+$/.test(t)) ? texts.map(Number) : null;
+  if (numeric) {
+    const s = [...numeric].sort((a, b) => a - b);
+    for (let i = 1; i + 1 < s.length; i++) {
+      for (let j = 0; j < i; j++) for (let k = i + 1; k < s.length; k++) if (s[i] - s[j] === s[k] - s[i]) return q.choices[numeric.indexOf(s[i])];
+    }
+    for (let i = 0; i + 1 < s.length; i++) if (s[i + 1] - s[i] === 1) return q.choices[numeric.indexOf(s[i + 1])];
+    return null;
+  }
+  const absurd = (t) => {
+    const m = /^(\d+) ([+−]) (\d+) = (\d+)$/.exec(t);
+    return Boolean(m) && (m[2] === '+' ? Number(m[4]) < Math.max(Number(m[1]), Number(m[3])) : Number(m[4]) > Number(m[1]));
+  };
+  return texts ? (q.choices.find((c, i) => absurd(texts[i])) ?? null) : null;
+}
+
+test('fulger: la tema cu trecere până la 1000, forma variantelor nu arată răspunsul (ghicitorul pe tipare, 1000 de semințe)', () => {
+  // temele mai vechi cu calcule au încă astfel de tipare (variantele ±1, ±10 puse simetric lasă răspunsul la mijloc): backlog
+  const topic = topicConfig('adunari-scaderi-1000');
+  const kinds = [...new Set(topic.levels.flatMap((l) => l.mix.map((m) => m.kind)))].filter((k) => KINDS[k].mode !== 'compare');
+  for (const id of kinds) {
+    let hits = 0;
+    for (let seed = 1; seed <= 1000; seed++) {
+      const q = KINDS[id].generate(seededRandom(seed));
+      const pick = patternPick(q);
+      hits += pick === null ? 1 / q.choices.length : pick === q.answer ? 1 : 0;
+    }
+    assert.ok(hits / 1000 <= 0.32, `${id}: tiparele variantelor nimeresc răspunsul în ${Math.round(hits / 10)}% din întrebări (la întâmplare 25%)`);
   }
 });
 
@@ -334,6 +372,9 @@ test('fulger: temele și nivelurile trimit doar la tipuri, concepte și iconițe
     assert.deepEqual(fromKinds, [...topic.concepts].sort(), `${topic.id}: conceptele temei sunt conceptele tipurilor ei`);
   }
   assert.ok(topicConfig(LEGACY_TOPIC) && !topicConfig(LEGACY_TOPIC).soon, 'tema rezultatelor de dinainte de teme se poate juca');
+  // „De exersat” (la părinți) adună tipurile din toate temele și arată doar eticheta: două tipuri cu aceeași etichetă s-ar confunda
+  const labels = Object.values(KINDS).map((k) => k.label);
+  assert.deepEqual(labels.filter((l, i) => labels.indexOf(l) !== i), [], 'etichetele tipurilor sunt unice');
   assert.deepEqual(Object.keys(KINDS).filter((k) => !used.has(k)), [], 'fiecare tip e folosit într-o temă');
 });
 

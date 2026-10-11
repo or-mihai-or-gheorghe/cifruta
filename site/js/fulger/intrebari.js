@@ -5,7 +5,7 @@
 
 import { calc, relation } from '../core/expr.js';
 import { artId, figureQuestion } from './kinds-forme.js';
-import { shuffle, withChoices } from './rand.js';
+import { gridChoices, shuffle, withChoices } from './rand.js';
 
 export const REL = (a, b) => (a < b ? '<' : a > b ? '>' : '=');
 
@@ -15,6 +15,12 @@ export const REL = (a, b) => (a < b ? '<' : a > b ? '>' : '=');
 export function choice(kind, rand, text, typical, max) {
   const answer = calc(text);
   return { kind, mode: 'choice', key: `${kind}:${text}`, text, answer, choices: withChoices(rand, answer, typical, { max }) };
+}
+
+/** Un calcul cu variantele „în pătrat” (`gridChoices`): fără tipare care să arate răspunsul; rezultatul stă între 110 și 889. */
+export function gridChoice(kind, rand, text) {
+  const answer = calc(text);
+  return { kind, mode: 'choice', key: `${kind}:${text}`, text, answer, choices: gridChoices(rand, answer) };
 }
 
 /** Două laturi de comparat (numere sau calcule) și semnul dintre ele. */

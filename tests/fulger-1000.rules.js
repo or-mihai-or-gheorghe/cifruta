@@ -22,6 +22,24 @@ export function numberAnswer(q, expected) {
   );
 }
 
+/**
+ * Variantele „în pătrat” ale unui calcul: {x, x + 10, x + 100, x + 110}, cu răspunsul printre ele, toate între 0 și 999 și niciuna
+ * egală cu un termen (forma nu arată răspunsul, iar unitățile sunt aceleași la toate).
+ */
+export function isGrid(values, answer, terms = []) {
+  const v = [...values].sort((a, b) => a - b);
+  return (
+    v.length === 4 &&
+    v[1] - v[0] === 10 &&
+    v[2] - v[0] === 100 &&
+    v[3] - v[0] === 110 &&
+    v[0] >= 0 &&
+    v[3] <= 999 &&
+    v.includes(answer) &&
+    !v.some((x) => terms.includes(x))
+  );
+}
+
 /** Câte treceri peste ordin are calculul: la adunare, coloanele care trec de 9; la scădere, împrumuturile. */
 export function crossings(op, a, b) {
   let count = 0;
@@ -158,19 +176,19 @@ export const RULES_1000 = {
 
   'sort-4-1000-dir': ({ numbers }) => numbers.length === 4 && numbers.every((x) => inRange(x, 100, 999)),
 
-  'add-1000-cu': ({ text, answer }) => {
+  'add-1000-cu': ({ text, answer, choices }) => {
     const [a, b] = terms(text);
     const [, , ua] = szu(a);
     const [, , ub] = szu(b);
-    // o singură trecere, la unități
-    return !text.includes('−') && inRange(answer, 100, 999) && crossings('+', a, b) === 1 && ua + ub >= 10;
+    // o singură trecere, la unități; variantele „în pătrat”
+    return !text.includes('−') && inRange(answer, 110, 889) && crossings('+', a, b) === 1 && ua + ub >= 10 && isGrid(choices, answer, [a, b]);
   },
 
-  'sub-1000-cu': ({ text, answer }) => {
+  'sub-1000-cu': ({ text, answer, choices }) => {
     const [a, b] = terms(text);
     const [, , ua] = szu(a);
     const [, , ub] = szu(b);
-    // un singur împrumut, luat din zeci
-    return text.includes('−') && inRange(answer, 100, 999) && crossings('-', a, b) === 1 && ua < ub;
+    // un singur împrumut, luat din zeci; variantele „în pătrat”
+    return text.includes('−') && inRange(answer, 110, 889) && crossings('-', a, b) === 1 && ua < ub && isGrid(choices, answer, [a, b]);
   },
 };

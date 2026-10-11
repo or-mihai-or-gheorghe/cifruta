@@ -36,3 +36,14 @@ export function withChoices(rand, answer, typical = [], { min = 0, max = 100 } =
   }
   throw new Error(`fulger: nu găsesc variante pentru ${answer}`);
 }
+
+/**
+ * Patru variante „în pătrat”: răspunsul și vecinii lui cu o zece și cu o sută ({x, x + 10, x + 100, x + 110}), cu răspunsul într-un
+ * colț la întâmplare. Forma nu depinde de locul răspunsului, deci nici mijlocul a trei numere egal depărtate, nici două numere vecine
+ * nu-l arată, iar unitățile sunt aceleași la toate; o zece sau o sută în plus ori în minus sunt chiar greșelile tipice (transportul
+ * uitat sau dublat). Răspunsul trebuie să stea între 110 și 889, ca toate colțurile să încapă între 0 și 999.
+ */
+export function gridChoices(rand, answer) {
+  const x = answer - 10 * int(rand, 0, 1) - 100 * int(rand, 0, 1);
+  return [x, x + 10, x + 100, x + 110];
+}

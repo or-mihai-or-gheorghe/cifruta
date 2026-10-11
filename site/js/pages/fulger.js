@@ -165,7 +165,8 @@ function levelCard(topic, lvl, data, medals) {
     'article',
     { class: 'c-card fg-level', 'data-level': lvl.id, 'data-testid': `fg-card-${lvl.id}` },
     h('div', { class: 'fg-level__head' }, levelPill(lvl.id), stars(best === null ? 0 : starsFor(lvl, best))),
-    h('ul', { class: 'fg-samples', 'aria-label': 'Exemple de întrebări' }, examples.map((kind, i) => sample(kind, 11 + i))),
+    // semințele țin seama și de nivel: un tip din amestecul mai multor niveluri arată pe fiecare card alt exemplu
+    h('ul', { class: 'fg-samples', 'aria-label': 'Exemple de întrebări' }, examples.map((kind, i) => sample(kind, 11 + i + 10 * topic.levels.indexOf(lvl)))),
     h('p', { class: 'fg-level__best', 'data-testid': `fg-best-${lvl.id}` }, best === null ? chip('Nou!', 'c-chip--soon') : chip(`Record: ${alune(best)}`, '', 'trofeu')),
     levelMedal(topic, lvl, medals),
     h('a', { class: 'c-btn c-btn--primary c-btn--lg fg-level__play', href: `#/fulger/${topic.id}/${lvl.id}`, 'data-testid': `fg-level-${lvl.id}` }, 'Joacă'),
@@ -315,12 +316,15 @@ function roundPage(container, topic, lvl) {
 
 const STAR_WORDS = ['prima', 'a doua', 'a treia'];
 
-/** De ce lipsește bonusul de precizie (null când s-a câștigat); pragul răspunsurilor e al nivelului. */
+/**
+ * De ce lipsește bonusul de precizie (null când s-a câștigat); pragul răspunsurilor e al nivelului. Sub 10 răspunsuri, „9 din 10
+ * corecte” înseamnă toate corecte (o greșeală din 8 e sub 90%), așa că indiciul o spune direct.
+ */
 function precisionHint(summary) {
   const { high } = config.precision;
   const minAnswers = summary.precisionMin ?? config.precision.minAnswers;
   if (summary.precisionBonus) return null;
-  const ratio = `${Math.round(high.from * 10)} din 10 corecte`;
+  const ratio = Math.max(summary.answered, minAnswers) < 10 ? 'toate corecte' : `${Math.round(high.from * 10)} din 10 corecte`;
   return summary.answered < minAnswers ? `de la ${minAnswers} răspunsuri, cu ${ratio}` : `cu ${ratio}`;
 }
 
@@ -391,6 +395,8 @@ function mistake({ question: q, given }) {
         q.solved || q.figure ? mistakeFigure(q.solved ?? q.figure) : null,
         ok([mistakeArt(right), h('span', { class: 'u-visually-hidden' }, ` Răspunsul corect: ${artName(right)}.`)]),
       ),
+      // la „Care calcul e greșit?”, răspunsul e chiar calculul greșit: alături stă calculul corect
+      q.fix ? h('span', { class: 'fg-mistake__note' }, `corect: ${q.fix}`) : null,
       chosen ? h('span', { class: 'fg-mistake__note' }, 'ai ales ', mistakeArt(chosen), h('span', { class: 'u-visually-hidden' }, artName(chosen))) : null,
     );
   }
