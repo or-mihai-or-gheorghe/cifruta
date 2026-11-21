@@ -44,8 +44,8 @@ site/                      ← publicat
   js/fulger/               Jocuri fulger (jocuri pe viteză, pe teme, #/fulger): kinds (calcule până la 100), kinds-1000 (numerele până
                            la 1000), kinds-calcule-1000 (adunări și scăderi până la 1000, cu trecere), kinds-inmultire (tabla,
                            o cifră × două cifre, × 10, × 11, zeci rotunde), kinds-impartire (tabla împărțirii, căsuța, câturi
-                           de două cifre), kinds-ecuatii (termenul necunoscut, balanța, doi pași), kinds-forme (figuri),
-                           kinds-grafice și kinds-grafuri
+                           de două cifre), kinds-ecuatii (termenul necunoscut, balanța, doi pași), kinds-fractii (fracțiile:
+                           desene, variante etajate, fracția dintr-un număr), kinds-forme (figuri), kinds-grafice și kinds-grafuri
                            (grafice, hărți, arbori), generate cu sămânță, cu concepte · intrebari (formele întrebărilor: calcule și
                            desene) · contexte (unități, nume, zile, date, obiectele grupelor) · rand · art (desenul și numele unei
                            variante, cerința cu emoji) · engine (temele, runda și punctajul, pur) · records (chei „temă:nivel”,

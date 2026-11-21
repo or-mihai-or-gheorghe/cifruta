@@ -388,6 +388,49 @@ export default {
       ],
     },
     {
+      id: 'fractii',
+      title: 'Fracțiile',
+      short: 'Fracții',
+      text: 'Jumătatea și sfertul pe desen, fracții până la zecimi, fracția dintr-un număr, fracții egale și cea mai mare fracție.',
+      icon: 'prajitura',
+      grade: 2,
+      concepts: ['mat.fractii.jumatate-sfert', 'mat.fractii.din-multime', 'mat.fractii.numarator-numitor', 'mat.fractii.egale', 'mat.fractii.comparare'],
+      levels: [
+        {
+          id: 'usor',
+          warmup: ['fr-parte', 'fr-unde'],
+          mix: [
+            { kind: 'fr-parte', weight: 3 },
+            { kind: 'fr-unde', weight: 2.5 },
+            { kind: 'fr-jumatate-din', weight: 2.5 },
+          ],
+          stars: [25, 70, 145],
+        },
+        {
+          id: 'intermediar',
+          warmup: ['fr-ce-fractie', 'fr-arata'],
+          mix: [
+            { kind: 'fr-ce-fractie', weight: 3 },
+            { kind: 'fr-arata', weight: 2.5 },
+            { kind: 'fr-din-numar', weight: 2.5 },
+            { kind: 'fr-parte', weight: 0.5 },
+          ],
+          stars: [30, 75, 170],
+        },
+        {
+          id: 'avansat',
+          warmup: ['fr-egale', 'fr-din-numar-n'],
+          mix: [
+            { kind: 'fr-egale', weight: 2.5 },
+            { kind: 'fr-din-numar-n', weight: 2.5 },
+            { kind: 'fr-compara', weight: 2.5 },
+            { kind: 'fr-ce-fractie', weight: 0.5 },
+          ],
+          stars: [25, 70, 160],
+        },
+      ],
+    },
+    {
       id: 'siruri-intrusi',
       title: 'Șiruri și intruși',
       short: 'Șiruri și intruși',

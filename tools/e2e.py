@@ -964,6 +964,7 @@ def fulger_screens(run: Run, browser, base: str):
         ("inmultirea", ("cmp-inm-1000", "inm-factor-lipsa-mare", "inm-adunare-repetata", "inm-grupe", "inm-1x2-500", "inm-11")),
         ("impartirea", ("imp-lipsa-2c", "cmp-imp-2c", "imp-scadere-repetata", "imp-problema", "imp-2c")),
         ("ecuatii", ("ec-doi-pasi", "ec-balanta", "ec-termen-1000", "cmp-balanta-x", "cmp-balanta-100")),
+        ("fractii", ("fr-arata", "fr-unde", "fr-egale", "fr-din-numar-n", "fr-compara")),
     ]
     for name, opts, min_text in screens:
         context = browser.new_context(locale="ro-RO", **opts)

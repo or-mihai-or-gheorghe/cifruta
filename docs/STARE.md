@@ -1,8 +1,9 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-11-21 · **Versiune:** 0.24.0 (termenul necunoscut: în Învață, capitolul cu balanța, barele și mașina de numere, iar în
-  Jocuri fulger, tema „Termenul necunoscut”, cu 10 tipuri noi; în 0.23.0, împărțirea: în Învață, capitolul „Împărțirea”, cu 4 lecții,
+- **Data:** 2026-11-21 · **Versiune:** 0.25.0 (fracțiile în Jocuri fulger: tema „Fracțiile”, cu 9 tipuri; în 0.24.0, termenul
+  necunoscut: în Învață, capitolul cu balanța, barele și mașina de numere, iar în Jocuri fulger, tema „Termenul necunoscut”, cu 10 tipuri
+  noi; în 0.23.0, împărțirea: în Învață, capitolul „Împărțirea”, cu 4 lecții,
   iar în Jocuri fulger, tema „Împărțirea”, cu 11 tipuri; ecuațiile cu căsuța în joc; secțiunea **Învață**: în 0.21.0 cinci lecții interactive de înmulțire și
   antetul refăcut, în 0.22.0 cinci lecții de fracții, în 0.22.1 scopul fiecărei lecții, scara de tăiere și versiunea în adresele
   modulelor; în 0.20.0, tema fulger „Înmulțirea”, cu 13 tipuri noi și grupele desenate)
@@ -25,12 +26,13 @@
   trasee”, și două teme cu grafice și grafuri, „Grafice și tabele” și „Hărți și arbori”; „Împărțirea” (v0.23.0: tabla împărțirii,
   scăderea repetată, probleme cu părți egale și grupe, deîmpărțitul și împărțitorul lipsă ca ecuații cu căsuța, câturi de două cifre);
   „Termenul necunoscut” (v0.24.0: ecuații cu căsuța până la 20, 100 și 1000, balanța cu sume, cu înmulțiri și cu căsuța, ecuații în doi
-  pași); runde de 2 minute,
-  138 de tipuri de întrebări generate (16 cu calcule până la 100, 18 cu numerele până la 1000, 14 cu trecere până la 1000, 13 cu
-  înmulțiri, 11 cu împărțiri, 10 cu ecuații, 24 cu figuri, 32 cu grafice, hărți și arbori), fiecare cu conceptele ei („Ce exersăm”), alune cu bonus de viteză și
+  pași), „Fracțiile” (v0.25.0: jumătatea și sfertul pe desen, fracții până la zecimi, fracția dintr-un număr, fracții egale,
+  comparări); runde de 2 minute,
+  147 de tipuri de întrebări generate (16 cu calcule până la 100, 18 cu numerele până la 1000, 14 cu trecere până la 1000, 13 cu
+  înmulțiri, 11 cu împărțiri, 10 cu ecuații, 9 cu fracții, 24 cu figuri, 32 cu grafice, hărți și arbori), fiecare cu conceptele ei („Ce exersăm”), alune cu bonus de viteză și
   de serie, Turbo, pistă spre stele și record, medalii pe niveluri, „Greșelile tale” și ținta următoarei stele la rezultate: 3 stele la
   un nivel al unei teme aduc medalia de bronz, argint sau aur, iar aceeași medalie la 2, 3 și 5 teme aduce „dublul”, colecția și cupa;
-  acum 45 de medalii, pe raftul de pe pagina jocului, pe cardurile nivelurilor și pe prima pagină). **Învață** (`#/invata`, din
+  acum 48 de medalii, pe raftul de pe pagina jocului, pe cardurile nivelurilor și pe prima pagină). **Învață** (`#/invata`, din
   v0.21.0): lecții interactive pe capitole, fiecare în jurul unui desen pe care copilul îl mișcă, cu Cifruța care dă indicația și
   provocările, verificate automat, și cu „Ce am aflat” la final; bifele rămân pe profil, doar în browser. Capitolul „Înmulțirea” are 5
   lecții: grupe egale (farfurii), rânduri și coloane (careul de 10 × 10 cu glisoare pe orizontală și pe verticală, „Întoarce”,
@@ -67,7 +69,7 @@
     variantelor: „în pătrat”, ferestre, nicio variantă egală cu un termen) și ale celor 13 cu înmulțiri, ghicitorii pe tipare, pe mărimi
     și pe unități la toate cele 4 teme cu calcule (la înmulțire, cifra de deasupra zerourilor comune), mărimea textului din desenele jocurilor, avatarele (textul canonic, id-urile
     publicate, fiecare combinație desenată) și medaliile (catalogul, pragurile, medaliile unei runde, datele vechi);
-  - 16 teste ale regulilor Firestore pe emulator, inclusiv 81 de intrări într-o tranzacție;
+  - 16 teste ale regulilor Firestore pe emulator, inclusiv 105 intrări într-o tranzacție;
   - E2E cu 2802 verificări pe 3 ecrane și tastatură (și calculul în scris: scrierea de la dreapta la stânga, Backspace, căsuțele
     „ține minte”, așezarea pe telefon; piramida cu o cărămidă greșită, graficul ținut apăsat, săgețile în grupurile radio), plus telefon ținut orizontal și telefon mic (cu seria pornită, textul desenelor
     măsurat pe ecran, fiecare temă jucată tip cu tip, mascota care se mișcă doar unde trebuie);
@@ -629,6 +631,10 @@
 | 2026-11-21 | Antetul: linkurile nu se strâng și nu se rup, treptele stau într-un singur loc, antetul e mai lat decât conținutul (72rem), iar un baleiaj 320–1280 (`header_ok`) le verifică, cu și fără cont | măsurat: cu un al cincilea link, depășiri la 360, 481 și 673 px, iar deja înainte „Jocuri fulger” trecea pe două rânduri cu contul deschis |
 | 2026-11-21 | Fiecare lecție din Învață spune întâi ce învățăm și ce înseamnă desenul (caseta „Ce învățăm”, `goal`), iar indicația spune ce face fiecare glisor și buton; sub calcul, o legendă în culorile glisoarelor; pe hartă, fiecare buton își spune trucul; la „Jumătatea și sfertul”, o scară desenată (întreg ✂ jumătăți ✂ sferturi ✂ optimi) în locul butoanelor „Taie fiecare bucată în două” și „Lipește la loc”, cu Cifruța care povestește ce s-a schimbat | utilizatorul: „explică pe undeva scopul? care este rolul farfuriilor?” și „«taie fiecare bucată în două» nu pare intuitiv” |
 | 2026-11-21 | La publicare, adresele modulelor și ale foilor de stil primesc versiunea commit-ului (`tools/versiune.mjs`, în GitHub Actions; codul din git rămâne fără) | după v0.22.0, un browser a amestecat module vechi din cache (`max-age=600`) cu module noi și a arătat „Ceva nu a mers”; propunerea, aprobată de utilizator |
+| 2026-11-21 | Împărțirea, termenul necunoscut și fracțiile: în Învață, capitolele „Împărțirea” (4 lecții) și „Termenul necunoscut” (3 lecții); în Jocuri fulger, temele „Împărțirea” (Avansatul și cu câturi de două cifre, 84 : 4), „Termenul necunoscut” (Avansatul și până la 1000, plus ecuații în doi pași) și „Fracțiile” (în pașii lecțiilor) | alegerile utilizatorului, după un plan verificat de două ori (machete, simulări, o recenzie a planului în cod) |
+| 2026-11-21 | Ecuațiile din joc sunt întrebări „choice” cu căsuța (`boxChoice`): răspunsul apare chiar în căsuță, iar variantele vin din calculul care rezolvă ecuația; căsuța se verifică cu `solveBox` doar în teste (căutarea e prea lentă pentru generatoare) | același aspect ca în manual (□ + 7 = 15); formele variantelor (și ghicitorii) rămân cele ale calculelor |
+| 2026-11-21 | În Învață, o provocare își poate aduce punctul de plecare (`start`): altă ecuație pe balanță, alt număr de nuci | un glisor are cel mult ~11 gradații pe telefon (măsurat), deci numerele mari nu se aleg cu glisorul |
+| 2026-11-21 | Zecile se împart cu pachete de câte 10 bețișoare și bețișoare libere, nu cu batoane și cuburi | ca la clasă; pe machetă, batoanele și cuburile nu încăpeau pe telefonul ținut orizontal (84 : 10 = 401 px), bețișoarele da (242 px) |
 | 2026-11-21 | Fracțiile, în Învață: întâi jumătatea și sfertul (programa clasei a II-a), apoi până la zecimi (numărătorul și numitorul, fracția dintr-o mulțime, fracțiile egale, compararea; clasa a III-a); 1/4 se numește „sfert”, iar fracțiile se scriu etajat (`{{f:n/d}}`); testele de recapitulare rămân fără fracții | alegerea utilizatorului; termenii clasei a II-a sunt „jumătate” și „sfert” |
 
 ## Probleme cunoscute
@@ -655,7 +661,7 @@
   reîncărcare; o salvare din ea trimite textul neschimbat, pe care regulile îl acceptă.
 - Săptămânile trecute păstrează avatarul de atunci (încă nu se afișează). La scor egal, ordinea din clasament se poate schimba după o
   salvare de avatar, pentru că se schimbă `updatedAt`.
-- O salvare de avatar rescrie într-o tranzacție până la 81 de intrări (10 teme), fiecare verificată cu `getAfter` pe profil: pe emulator trece,
+- O salvare de avatar rescrie într-o tranzacție până la 105 intrări (13 teme), fiecare verificată cu `getAfter` pe profil: pe emulator trece,
   dar documentația Firestore nu spune limpede dacă citirile repetate ale aceluiași document intră o singură dată în limita de accesări.
 - Medaliile pentru recordurile de dinainte de v0.13.0 apar pe raft fără sărbătorire (nu sunt „noi”) și se salvează la prima rundă
   terminată, din orice temă. Un prag de stele ridicat mai târziu ascunde o medalie doar dacă era dedusă și încă nesalvată.
@@ -1061,6 +1067,21 @@
   - **Publicat:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
+
+- **2026-11-21 (Fracțiile în Jocuri fulger, v0.25.0)**
+  - **Tema nouă `fractii`**, cu 9 tipuri, toate desenate (cardurile arată desene):
+    - jumătatea și sfertul pe desen (cerc, bară, pătrat), desenul jumătății sau al sfertului și jumătatea sau sfertul unui număr;
+    - fracția colorată până la zecimi, desenul unei fracții și o fracție unitară dintr-un număr;
+    - fracții egale (în ambele sensuri: 1/2 = 2/4 și 2/4 = 1/2), fracția dintr-un număr (2/3 din 12) și cea mai mare sau cea mai mică
+      fracție (același numărător sau același numitor).
+  - **Variantele:** fracțiile scrise etajat (`{ frac }`) sau desenele `fraction` cu bucăți egale (pe două coloane pe telefoanele înalte).
+    Printre variante nu stau două fracții egale. La răspunsurile-număr, patru numere la rând, cu răspunsul pe un loc ales întâi.
+  - **Grupele desenate** (`groups`) poartă un nume care nu spune câtul.
+  - **„Ce parte e colorată?” și fracțiile egale** aveau doar 12 și 14 întrebări diferite: s-a adăugat locul bucăților colorate și
+    sensul invers (simplificarea).
+  - **Legătura cu Învață:** capitolul „Fracțiile” din Învață are acum linkul spre temă (`practice: 'fractii'`).
+  - **Rezultate:** npm test 160/160, reguli 16/16; în arena reală, pe 360 × 640 și pe 844 × 390, variantele încap fără depășire; E2E
+    jocurile 1212/1212 pe toate ecranele.
 
 - **2026-11-21 (Termenul necunoscut: capitolul din Învață și tema din Jocuri fulger, v0.24.0)**
   - **Învață, 3 lecții**, cu trei widgeturi noi, fiecare cu ecuația adusă de `start`:

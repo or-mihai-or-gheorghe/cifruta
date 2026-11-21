@@ -19,6 +19,7 @@ import { CALC_1000_KINDS } from './kinds-calcule-1000.js';
 import { INMULTIRE_KINDS } from './kinds-inmultire.js';
 import { IMPARTIRE_KINDS } from './kinds-impartire.js';
 import { ECUATII_KINDS } from './kinds-ecuatii.js';
+import { FRACTII_KINDS } from './kinds-fractii.js';
 import { CHART_KINDS } from './kinds-grafice.js';
 import { MAP_KINDS } from './kinds-grafuri.js';
 import { SHAPE_KINDS } from './kinds-forme.js';
@@ -304,6 +305,7 @@ export const KINDS = {
   ...INMULTIRE_KINDS,
   ...IMPARTIRE_KINDS,
   ...ECUATII_KINDS,
+  ...FRACTII_KINDS,
   ...SHAPE_KINDS,
   ...CHART_KINDS,
   ...MAP_KINDS,

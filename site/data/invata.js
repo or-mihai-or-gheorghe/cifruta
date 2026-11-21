@@ -120,6 +120,7 @@ export default {
       short: 'Fracțiile',
       icon: 'prajitura',
       grade: 2,
+      practice: 'fractii',
       text: 'Jumătatea și sfertul, apoi fracții până la zecimi: numărătorul și numitorul, fracția dintr-o mulțime, fracții egale și compararea lor.',
       lessons: [
         {

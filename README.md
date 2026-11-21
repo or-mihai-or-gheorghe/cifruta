@@ -20,9 +20,9 @@ explicații pe înțelesul copiilor. Mascota site-ului este **Veverița Cifruța
   plan, calcul în scris pe coloane, piramidă), axa numerelor și termometrul, unire cu săgeți, ordonare cu cuvânt secret, sortare în coșuri, colorare (și cu reguli
   de buget), numărătoare, ceas, bani, traseu pe harta liniilor, grafic cu bare construit de copil.
 - La final: scor, calificativ, stele pe niveluri, explicații pas cu pas, rezolvarea completă și „Mai încerc o dată”.
-- **Jocuri fulger** — runde de 2 minute pe 12 teme (adunări și scăderi până la 100, numerele până la 1000, adunări și scăderi până
-  la 1000 cu trecere, înmulțirea, împărțirea, termenul necunoscut, șiruri și intruși, puzzle cu forme, figuri și corpuri, poziții și
-  trasee, grafice și tabele, hărți și arbori), fiecare cu trei niveluri, stele, recorduri și medalii.
+- **Jocuri fulger** — runde de 2 minute pe 13 teme (adunări și scăderi până la 100, numerele până la 1000, adunări și scăderi până
+  la 1000 cu trecere, înmulțirea, împărțirea, termenul necunoscut, fracțiile, șiruri și intruși, puzzle cu forme, figuri și corpuri,
+  poziții și trasee, grafice și tabele, hărți și arbori), fiecare cu trei niveluri, stele, recorduri și medalii.
 - **Învață** — lecții interactive, cu desene pe care copilul le mișcă: la înmulțire, grupe egale, un dreptunghi de rânduri și coloane
   întins cu glisoare pe orizontală și pe verticală (și întors, ca să se vadă că 4 × 6 = 6 × 4), sărituri pe axă, dreptunghiul spart
   în două bucăți ușoare și harta tablei înmulțirii; la fracții, părți egale, jumătatea și sfertul, numărătorul și numitorul, fracția
