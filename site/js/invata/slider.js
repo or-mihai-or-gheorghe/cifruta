@@ -16,12 +16,13 @@ const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
  * @param {string} o.label        numele pentru cititorul de ecran („Rânduri”)
  * @param {number} o.min, o.max   intervalul care se poate alege
  * @param {number} [o.count]      câte gradații are rigla (implicit `max`; cele din afara intervalului apar stinse)
+ * @param {number} [o.origin]     valoarea primei gradații (1; 0 la „Câte colorăm?”)
  * @param {boolean} [o.vertical]  valorile cresc în jos, iar săgețile merg după direcția de pe ecran
  * @param {(v: number) => string} [o.valueText]  textul citit („3 rânduri”)
  * @param {[string, string]} [o.steppers]        butoane − și + la capete, cu numele lor
  * @param {string} [o.tone]       culoarea: `rows`, `cols` sau `cut`
  */
-export function slider({ id, label, min, max, count = max, value, vertical = false, valueText = String, steppers = null, tone = 'cols', onInput, onCommit }) {
+export function slider({ id, label, min, max, count = max, origin = 1, value, vertical = false, valueText = String, steppers = null, tone = 'cols', onInput, onCommit }) {
   let lo = min;
   let hi = max;
   let current = value;
@@ -30,12 +31,18 @@ export function slider({ id, label, min, max, count = max, value, vertical = fal
 
   const input = h('input', { type: 'range', class: 'u-visually-hidden', min: lo, max: hi, step: 1, value: current, 'aria-label': label });
   const num = h('span', { class: 'iv-slider__num' }, String(current));
-  const ticks = Array.from({ length: count }, (_, i) => h('li', {}, String(i + 1)));
+  const tickList = h('ol', { class: 'iv-slider__ticks' });
+  let ticks = [];
+  const makeTicks = () => {
+    ticks = Array.from({ length: count }, (_, i) => h('li', {}, String(i + origin)));
+    tickList.replaceChildren(...ticks);
+  };
+  makeTicks();
   const track = h(
     'div',
     { class: 'iv-slider__track', 'aria-hidden': 'true' },
     h('span', { class: 'iv-slider__fill' }),
-    h('ol', { class: 'iv-slider__ticks' }, ticks),
+    tickList,
     h('span', { class: 'iv-slider__thumb' }, num),
   );
   const step = (delta, sign) =>
@@ -55,9 +62,9 @@ export function slider({ id, label, min, max, count = max, value, vertical = fal
     input.value = current;
     input.setAttribute('aria-valuetext', valueText(current));
     num.textContent = String(current);
-    el.style.setProperty('--value', current);
+    el.style.setProperty('--value', current - origin + 1); // poziția pe riglă (CSS socotește de la prima gradație)
     el.style.setProperty('--count', count);
-    ticks.forEach((li, i) => li.classList.toggle('is-off', i + 1 < lo || i + 1 > hi));
+    ticks.forEach((li, i) => li.classList.toggle('is-off', i + origin < lo || i + origin > hi));
     for (const b of el.querySelectorAll('.iv-slider__step')) b.disabled = b.textContent === '−' ? current <= lo : current >= hi;
   }
 
@@ -65,7 +72,7 @@ export function slider({ id, label, min, max, count = max, value, vertical = fal
     const now = performance.now();
     if (now - lastSound < 60) return;
     lastSound = now;
-    play('tap', { step: Math.round(((current - 1) / Math.max(1, count - 1)) * 5) });
+    play('tap', { step: Math.round(((current - origin) / Math.max(1, count - 1)) * 5) });
   }
 
   /** Schimbă valoarea; `commit` = gest încheiat (tastă, atingere, deget ridicat). */
@@ -83,7 +90,7 @@ export function slider({ id, label, min, max, count = max, value, vertical = fal
   function follow(e) {
     const r = track.getBoundingClientRect();
     const offset = vertical ? e.clientY - r.top : e.clientX - r.left;
-    change(valueAt(offset, vertical ? r.height : r.width, count, lo, hi), false);
+    change(valueAt(offset, vertical ? r.height : r.width, count, lo, hi, origin), false);
   }
 
   track.addEventListener('pointerdown', (e) => {
@@ -138,6 +145,13 @@ export function slider({ id, label, min, max, count = max, value, vertical = fal
     setRange(newMin, newMax) {
       [lo, hi] = [newMin, newMax];
       current = clamp(current, lo, hi);
+      paint();
+    },
+    /** Alt număr de gradații (zidul: câte bucăți are rândul ales). */
+    setCount(n) {
+      if (n === count) return;
+      count = n;
+      makeTicks();
       paint();
     },
   };

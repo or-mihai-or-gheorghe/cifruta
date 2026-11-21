@@ -1196,7 +1196,7 @@ IV_TASK = "window.__dbg.invata.task()"
 # mărimile de pe ecran: scena (desenul cu glisoarele) încape sub antet, pistele glisoarelor au cel puțin 44 px, căsuțele cel puțin
 # 20 px, iar textul HTML și cel din desene are cel puțin `min_text` px
 IV_FIT = """(() => {
-  const stage = document.querySelector('.iv-array__stage, .iv-jumps__art');
+  const stage = document.querySelector('.iv-array__stage, .iv-jumps__art, .iv-parts__art');
   const r = stage.getBoundingClientRect();
   const tracks = [...document.querySelectorAll('.iv-slider__track')].map((t) => { const b = t.getBoundingClientRect(); return t.closest('.iv-slider--v') ? b.width : b.height; });
   const board = document.querySelector('.iv-array__board');
@@ -1230,14 +1230,28 @@ def iv_slide(page: Page, sid: str, value: int):
 
 
 def iv_reach(page: Page, target: dict):
-    """Starea-țintă dată de __dbg.invata.solution(): întâi glisoarele, apoi strategiile hărții."""
+    """Starea-țintă dată de __dbg.invata.solution(): forma, glisoarele, tăiatul în două, strategiile hărții, apoi bucățile colorate."""
+    state = page.evaluate(IV_STATE)
+    if "shape" in target and target["shape"] != state.get("shape"):
+        page.get_by_test_id(f"iv-shape-{target['shape']}").click()
     for cid in page.evaluate("window.__dbg.invata.controls()"):
         if cid in target:
             iv_slide(page, cid, target[cid])
+    state = page.evaluate(IV_STATE)
+    if "on" in target and target["parts"] != state["parts"]:  # fără glisor de părți: lipește la loc, apoi taie în două
+        if state["parts"] != 1:
+            page.get_by_test_id("iv-glue").click()
+        while page.evaluate(IV_STATE)["parts"] < target["parts"]:
+            page.get_by_test_id("iv-cut").click()
     lit = page.evaluate(IV_STATE).get("lit")
     if lit is not None:
         for sid in sorted(set(target.get("lit", [])) ^ set(lit)):
             page.get_by_test_id(f"iv-toggle-{sid}").click()
+    if "on" in target:
+        # bucățile: un clic pe fiecare bucată care trebuie schimbată (pe cerc, mijlocul dreptunghiului unei felii poate cădea
+        # pe felia vecină, deci clicul se trimite chiar bucății)
+        for i in sorted(set(target["on"]) ^ set(page.evaluate(IV_STATE)["on"])):
+            page.locator(f"[data-testid=iv-parts-art] [data-piece='{i}']").dispatch_event("click")
 
 
 def iv_solve(run: Run, page: Page, label: str, wrong_pick: bool = True) -> int:
@@ -1300,7 +1314,8 @@ def invata_flow(run: Run, page: Page, vp: str):
     run.check(all(("Gata" in states[x["lesson"]]) == (x in chosen) for x in lessons), f"[{vp}] învață: bifele lecțiilor terminate rămân după reîncărcare ({states})")
     run.goto(page, "")
     chips = page.get_by_test_id("invata-card").inner_text()
-    run.check(f"{len(chosen)} din" in chips, f"[{vp}] prima pagină: cardul „Învață” arată lecțiile terminate ({chips!r})")
+    done = sum(int(n) for n in re.findall(r"(\d+) din \d+ lec", chips))
+    run.check(done == len(chosen), f"[{vp}] prima pagină: cardul „Învață” arată lecțiile terminate, pe capitole ({done}; {chips!r})")
     run.goto(page, "invata/inmultirea")
     page.wait_for_selector("[data-testid=iv-chapter-inmultirea]")
     page.wait_for_timeout(200)
@@ -1368,6 +1383,38 @@ def invata_gestures(run: Run, page: Page, vp: str):
     page.wait_for_timeout(300)
     run.layout_ok(page, f"[{vp}] învață, după gesturi")
     run.shot(page, f"{vp}-invata-gesturi")
+
+    def press(locator):
+        locator.scroll_into_view_if_needed()
+        box = locator.bounding_box()
+        x, y = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
+        if touch:
+            page.touchscreen.tap(x, y)
+        else:
+            page.mouse.click(x, y)
+
+    # fracțiile: o bucată a ciocolatei, o cărămidă a zidului, o farfurie
+    run.goto(page, "invata/fractiile/numarator-numitor", debug=True)
+    page.wait_for_selector("[data-testid=iv-parts-art] [data-piece]")
+    iv_slide(page, "parts", 5)
+    press(page.locator("[data-testid=iv-parts-art] [data-piece='3']"))
+    st = page.evaluate(IV_STATE)
+    count = page.get_by_test_id("iv-slider-count").locator("input").input_value()
+    run.check(st["on"] == [3] and count == "1", f"[{vp}] învață: o atingere colorează bucata atinsă, iar glisorul arată câte sunt ({st['on']}, {count})")
+    run.goto(page, "invata/fractiile/zidul-fractiilor", debug=True)
+    page.wait_for_selector(".iv-brick")
+    press(page.locator(".iv-brick[data-row='5'][data-i='2']"))
+    st = page.evaluate(IV_STATE)
+    eq = page.get_by_test_id("iv-eq").inner_text().replace("\n", " ")
+    ends = page.locator(".iv-brick.is-end").count()
+    run.check((st["den"], st["num"]) == (6, 3) and ends == 4, f"[{vp}] învață: o cărămidă alege 3/6, iar zidul arată cele 4 fracții egale ({st}, {ends}; „{eq}”)")
+    run.goto(page, "invata/fractiile/din-multime", debug=True)
+    page.wait_for_selector(".iv-tray.is-on")
+    iv_slide(page, "rows", 3)
+    press(page.locator(".iv-item.is-on[style*='--r: 2']").first)
+    st = page.evaluate(IV_STATE)
+    marked = page.locator(".iv-tray.is-marked").count()
+    run.check(st["marked"] == 3 and marked == 3, f"[{vp}] învață: atingerea unei farfurii le colorează până la ea ({st['marked']}, {marked})")
 
 
 def invata_screens(run: Run, browser, base: str):

@@ -7,7 +7,7 @@ import { md } from '../core/markup.js';
 import { play } from '../core/sound.js';
 import { backLink, confetti } from '../components/ui.js';
 import { emojiHTML } from '../visuals/emoji.js';
-import { visualSVG } from '../visuals/index.js';
+import { visualLabel, visualSVG } from '../visuals/index.js';
 import { matches, paramsOf, pickCorrect, search, solutionKey, widgetOf } from './logic.js';
 import { markTask } from './progress.js';
 import { VIEWS } from './registry.js';
@@ -15,7 +15,8 @@ import { keepMath } from './text.js';
 
 /** O variantă a unei alegeri: un desen din bancă, o fracție („2/3”) sau un număr. */
 function optionHTML(option) {
-  if (option && typeof option === 'object' && option.v) return visualSVG(option);
+  // desenul se dimensionează prin container (.v-svg are width: 100% în stratul visuals, care câștigă)
+  if (option && typeof option === 'object' && option.v) return `<span class="iv-option__art">${visualSVG(option)}</span>`;
   if (typeof option === 'string' && /^\d+\/\d+$/.test(option)) return md(`{{f:${option}}}`);
   return md(String(option));
 }
@@ -155,12 +156,14 @@ export async function mountLesson(host, { chapter, lesson, index }) {
       parts.push(h('ul', { class: 'iv-founds', 'data-testid': 'iv-founds', 'aria-label': `Găsite: ${found.size} din ${t.need}` }, chips));
       if (popLast && found.size) requestAnimationFrame(() => pop(bubble.querySelectorAll('.iv-found.is-found')[found.size - 1]));
     }
+    // desenul despre care întreabă o alegere („Ce fracție e colorată?”)
+    if (t.show) parts.push(h('div', { class: 'iv-show', 'aria-hidden': 'true', html: visualSVG(t.show) }), h('p', { class: 'u-visually-hidden' }, visualLabel(t.show)));
     if (t.pick) {
       const options = h(
         'div',
         { class: 'iv-options', role: 'group', 'aria-label': 'Variantele' },
         t.pick.map((option, i) => {
-          const b = h('button', { type: 'button', class: 'c-btn iv-option', 'data-testid': `iv-option-${i}`, html: optionHTML(option) });
+          const b = h('button', { type: 'button', class: `c-btn iv-option${option?.v ? ' iv-option--art' : ''}`, 'data-testid': `iv-option-${i}`, html: optionHTML(option) });
           b.addEventListener('click', () => choose(i, b));
           return b;
         }),
@@ -183,7 +186,8 @@ export async function mountLesson(host, { chapter, lesson, index }) {
     const t = W.texts(params, state);
     fill(
       h('p', { class: 'iv-bravo', 'data-testid': 'iv-bravo' }, 'Bravo!'),
-      h('p', { class: 'iv-ask' }, t.reading ? `${t.reading}: ${t.equation}` : t.equation),
+      // calculul de pe ecran: text simplu sau mini-markup (fracțiile)
+      h('p', { class: 'iv-ask', html: md(keepMath(t.reading ? `${t.reading}: ${t.equation}` : t.equation)) }),
       t.extra ? h('p', { class: 'iv-ask' }, t.extra) : null,
       h('button', { type: 'button', class: 'c-btn c-btn--primary', 'data-testid': 'iv-continue', 'data-focus': '', onClick: nextTask }, 'Mai departe →'),
     );

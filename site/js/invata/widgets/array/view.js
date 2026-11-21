@@ -3,11 +3,12 @@
 // obiectele alunecă prin `transform` (instant la mișcare redusă). Vederea nu socotește: totul vine din logic.derive / logic.texts.
 
 import { h, pop } from '../../../core/dom.js';
+import { md } from '../../../core/markup.js';
 import { cantitate } from '../../../core/ro.js';
 import { play } from '../../../core/sound.js';
 import { emojiHTML } from '../../../visuals/emoji.js';
 import { slider } from '../../slider.js';
-import { factorsOf } from '../../text.js';
+import { factorsOf, keepMath } from '../../text.js';
 import { ITEMS, SPLIT_ITEMS, STRATEGIES, litCells } from './logic.js';
 
 const ITEM_ICONS = { mar: emojiHTML('mar'), stea: emojiHTML('stea'), punct: '<span class="iv-bead"></span>', patrat: '<span class="iv-tile"></span>' };
@@ -40,6 +41,9 @@ export function mount(host, params, { logic, dispatch }) {
     rows: slider({ id: 'rows', label: names.rows[0], valueText: names.rows[1], min: ctl.rows.min, max: R, value: first.rows, vertical: true, tone: 'rows', onInput: send('rows', false), onCommit: send('rows', true) }),
     cols: slider({ id: 'cols', label: names.cols[0], valueText: names.cols[1], min: 1, max: C, value: first.cols, tone: 'cols', onInput: send('cols', false), onCommit: send('cols', true) }),
   };
+  if (p.mark) {
+    sliders.marked = slider({ id: 'marked', label: 'Farfurii colorate', valueText: (v) => cantitate(v, 'farfurie colorată', 'farfurii colorate'), min: 1, max: first.rows, count: R, value: first.marked, vertical: true, tone: 'mark', onInput: send('marked', false), onCommit: send('marked', true) });
+  }
   if (p.skin === 'split') {
     sliders.cut = slider({ id: 'cut', label: 'Tăietura', valueText: (v) => `taie după rândul ${v}`, min: 1, max: first.rows - 1, count: R, value: first.cut, vertical: true, tone: 'cut', onInput: send('cut', false), onCommit: send('cut', true) });
   }
@@ -62,8 +66,8 @@ export function mount(host, params, { logic, dispatch }) {
   }
   const cutLine = p.skin === 'split' ? board.appendChild(h('span', { class: 'iv-cutline' })) : null;
   const side =
-    p.skin === 'split'
-      ? sliders.cut.el
+    p.skin === 'split' || p.mark
+      ? (sliders.cut ?? sliders.marked).el
       : p.skin === 'table'
         ? null
         : h('ol', { class: 'iv-array__totals', 'aria-hidden': 'true' }, Array.from({ length: R }, (_, r) => (totals[r] = h('li', { style: { '--r': r } }))));
@@ -120,7 +124,8 @@ export function mount(host, params, { logic, dispatch }) {
     const r = board.getBoundingClientRect();
     const col = Math.floor(((e.clientX - r.left) / r.width) * C);
     const row = Math.floor(((e.clientY - r.top) / r.height) * R);
-    if (row >= 0 && col >= 0 && row < R && col < C) dispatch({ tap: [row, col] });
+    // la fracția dintr-o mulțime, atingerea colorează farfuriile până la cea atinsă; altfel întinde dreptunghiul
+    if (row >= 0 && col >= 0 && row < R && col < C) dispatch(p.mark ? { mark: row } : { tap: [row, col] });
   }
 
   /** „Numără”: rândurile se aprind pe rând, cu numărătoarea de la capăt și un ton care urcă. */
@@ -153,6 +158,10 @@ export function mount(host, params, { logic, dispatch }) {
       sliders.cut.setRange(1, state.rows - 1);
       sliders.cut.set(state.cut);
     }
+    if (sliders.marked) {
+      sliders.marked.setRange(1, state.rows);
+      sliders.marked.set(state.marked);
+    }
     root.style.setProperty('--rows', state.rows);
     root.style.setProperty('--cols', state.cols);
     if (state.cut) root.style.setProperty('--cut', state.cut);
@@ -181,7 +190,10 @@ export function mount(host, params, { logic, dispatch }) {
         if (p.skin === 'split') s.el.classList.toggle('is-bottom', s.r >= state.cut);
       }
     }
-    trays.forEach((tray, r) => tray.classList.toggle('is-on', r < state.rows));
+    trays.forEach((tray, r) => {
+      tray.classList.toggle('is-on', r < state.rows);
+      tray.classList.toggle('is-marked', Boolean(p.mark) && r < state.marked);
+    });
     totals.forEach((li, r) => {
       li.classList.toggle('is-on', r < state.rows);
       li.textContent = r < state.rows ? String(t.totals[r]) : '';
@@ -190,7 +202,8 @@ export function mount(host, params, { logic, dispatch }) {
     for (const [id, b] of Object.entries(toggles)) b.setAttribute('aria-pressed', String(state.lit.includes(id)));
 
     // calculul: factorii în culorile glisoarelor (rândurile / grupele, apoi câte în fiecare)
-    if (p.skin === 'split') eq.textContent = t.equation;
+    if (t.markup) eq.innerHTML = md(keepMath(t.equation));
+    else if (p.skin === 'split') eq.textContent = t.equation;
     else {
       const [a, b] = factorsOf(state.rows, state.cols);
       const [ta, tb] = factorsOf('rows', 'cols');

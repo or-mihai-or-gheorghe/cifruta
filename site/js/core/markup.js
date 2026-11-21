@@ -3,8 +3,10 @@
 //   {{e:mar}}               emoji din visuals/emoji.js
 //   {{v:flower n=47}}       vizual din banca vizuală
 //   {{s:3}} {{z:4}} {{u:7}} jetoane colorate pentru sute / zeci / unități
+//   {{f:2/3}}               fracție etajată (numărătorul peste numitor), citită „două treimi”; numitorul 1–10
 
 import { escapeHTML } from './dom.js';
+import { fractionWords } from './ro.js';
 import { EMOJI, emojiHTML, hasEmoji } from '../visuals/emoji.js';
 import { hasVisual, visualLabel, visualSVG } from '../visuals/index.js';
 
@@ -30,7 +32,18 @@ function renderToken(kind, body) {
   if (kind === 's' || kind === 'z' || kind === 'u') {
     return `<span class="c-pv c-pv--${kind}">${escapeHTML(body)}</span>`;
   }
+  if (kind === 'f') {
+    const f = fraction(body);
+    return f && `<span class="c-frac" role="img" aria-label="${fractionWords(...f)}"><span class="c-frac__n">${f[0]}</span><span class="c-frac__d">${f[1]}</span></span>`;
+  }
   return null;
+}
+
+/** „2/3” → [2, 3], cu numitorul 1–10 și numărătorul cel mult cât numitorul; altfel null. */
+function fraction(body) {
+  const m = /^(\d+)\/(\d+)$/.exec(body);
+  const [n, d] = m ? [Number(m[1]), Number(m[2])] : [];
+  return m && d >= 1 && d <= 10 && n <= d ? [n, d] : null;
 }
 
 export function md(src) {
@@ -46,6 +59,7 @@ export function plain(src) {
   return String(src ?? '')
     .replace(TOKEN, (match, kind, body) => {
       if (kind === 'e') return EMOJI[body]?.char ?? body;
+      if (kind === 'f') return fraction(body) ? fractionWords(...fraction(body)) : body;
       if (kind === 'v') {
         const { name, params } = parseParams(body);
         return hasVisual(name) ? visualLabel({ v: name, ...params }) : body;

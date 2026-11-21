@@ -127,6 +127,21 @@
 }
 .c-level__icon { width: 1.7em; height: 1.7em; }
 
+/* fracția etajată din mini-markup ({{f:2/3}}): numărătorul peste numitor, cu linia de fracție */
+.c-frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin-inline: 0.12em;
+  vertical-align: middle;
+  font-size: 0.82em;
+  font-weight: 700;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+.c-frac__n { padding-inline: 0.15em; border-bottom: 0.12em solid currentColor; }
+.c-frac__d { padding-inline: 0.15em; }
+
 .c-pv {
   display: inline-grid;
   place-items: center;

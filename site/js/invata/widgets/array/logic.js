@@ -5,7 +5,7 @@
 //   table  — harta tablei înmulțirii, cu strategiile care aprind căsuțele știute.
 // Starea se schimbă doar prin apply(); vederea (view.js) desenează starea și trimite acțiunile.
 
-import { cantitate } from '../../../core/ro.js';
+import { cantitate, fractionWords } from '../../../core/ro.js';
 import { NBSP, equation, factorsOf, repeatedSum, spokenMath, times } from '../../text.js';
 
 export const SKINS = ['plates', 'grid', 'split', 'table'];
@@ -31,7 +31,7 @@ export const STRATEGIES = [
   { id: 'intoarse', label: 'Întoarse' },
 ];
 
-export const QUANTITIES = ['rows', 'cols', 'product', 'cut', 'top', 'bottom', 'known', 'left', 'pairs', ...STRATEGIES.map((s) => s.id)];
+export const QUANTITIES = ['rows', 'cols', 'product', 'cut', 'top', 'bottom', 'known', 'left', 'pairs', 'marked', 'part', ...STRATEGIES.map((s) => s.id)];
 /** Ce poate ascunde o provocare („Cât face 7 × 8?” nu arată produsul). */
 export const HIDEABLE = ['product'];
 
@@ -77,6 +77,7 @@ export default {
     if (p.skin === 'split' && !(Number.isInteger(p.cut) && p.cut >= 1 && p.cut < p.rows)) errors.push('„cut” între 1 și rows − 1');
     if (['plates', 'grid'].includes(p.skin) && !ITEMS[p.item]) errors.push(`obiect necunoscut „${p.item}”`);
     if (p.flip !== undefined && (typeof p.flip !== 'boolean' || p.skin !== 'grid')) errors.push('„flip” e doar pentru aspectul grid');
+    if (p.mark !== undefined && (typeof p.mark !== 'boolean' || p.skin !== 'plates')) errors.push('„mark” (farfuriile colorate) e doar pentru aspectul plates');
     return errors;
   },
 
@@ -88,6 +89,7 @@ export default {
       { id: 'cols', min: 1, max, axis: 'cols' },
     ];
     if (p.skin === 'split') list.push({ id: 'cut', min: 1, max: s.rows - 1, axis: 'rows' });
+    if (p.mark) list.push({ id: 'marked', min: 1, max: s.rows, axis: 'rows' });
     return list;
   },
 
@@ -97,6 +99,7 @@ export default {
     if (p.skin === 'grid' && p.flip) s.flipped = false;
     if (p.skin === 'split') s.cut = p.cut;
     if (p.skin === 'table') s.lit = [];
+    if (p.mark) s.marked = 1; // fracția dintr-o mulțime: câte farfurii sunt colorate
     return s;
   },
 
@@ -113,7 +116,7 @@ export default {
   apply(p, s, a) {
     const max = limit(p);
     const next = { ...s };
-    if (a.set === 'rows' || a.set === 'cols' || a.set === 'cut') {
+    if (a.set === 'rows' || a.set === 'cols' || a.set === 'cut' || a.set === 'marked') {
       const c = this.controls(p, s).find((x) => x.id === a.set);
       next[a.set] = clamp(a.value, c.min, c.max);
     } else if (a.set === 'item') {
@@ -124,16 +127,20 @@ export default {
     } else if (a.do === 'flip') {
       [next.rows, next.cols] = [s.cols, s.rows];
       next.flipped = !s.flipped;
+    } else if (Number.isInteger(a.mark) && p.mark) {
+      next.marked = clamp(a.mark + 1, 1, s.rows); // atingerea unei farfurii colorează farfuriile până la ea
     } else if (a.toggle) {
       next.lit = s.lit.includes(a.toggle) ? s.lit.filter((x) => x !== a.toggle) : [...s.lit, a.toggle];
     }
     if (p.skin === 'split') next.cut = clamp(next.cut, 1, next.rows - 1);
+    if (p.mark) next.marked = clamp(next.marked, 1, next.rows);
     return next;
   },
 
   derive(p, s) {
     const d = { rows: s.rows, cols: s.cols, product: s.rows * s.cols };
     if (p.skin === 'split') Object.assign(d, { cut: s.cut, top: s.cut * s.cols, bottom: (s.rows - s.cut) * s.cols });
+    if (p.mark) Object.assign(d, { marked: s.marked, part: s.marked * s.cols });
     if (p.skin === 'table') {
       const on = litCells(s.lit);
       Object.assign(d, { known: on.size, left: 100 - on.size, pairs: pairsLeft(on) });
@@ -153,6 +160,16 @@ export default {
     const [a, b] = factorsOf(s.rows, s.cols);
     const product = show('product', d.product);
     const out = { equation: equation(a, b, product) };
+    if (p.mark) {
+      // fracția dintr-o mulțime: „2/3 din 12 mere = 8 mere” (mini-markup, cu fracția etajată)
+      const [sg, pl] = ITEMS[p.item].unit;
+      out.markup = true;
+      out.equation = `{{f:${s.marked}/${s.rows}}} din ${cantitate(d.product, sg, pl)} = ${cantitate(d.part, sg, pl)}`;
+      out.reading = `${cantitate(d.product, sg, pl)} pe ${cantitate(s.rows, 'farfurie', 'farfurii')} egale, câte ${s.cols} pe farfurie`;
+      out.sum = `${fractionWords(s.marked, s.rows)} din ${d.product} înseamnă ${cantitate(s.marked, 'farfurie', 'farfurii')}: ${d.part}`;
+      out.spoken = `${fractionWords(s.marked, s.rows)} din ${cantitate(d.product, sg, pl)} înseamnă ${cantitate(d.part, sg, pl)}`;
+      return out;
+    }
     if (p.skin === 'plates' || p.skin === 'grid') {
       const [sg, pl] = ITEMS[s.item ?? p.item].unit;
       const groups = p.skin === 'plates' ? cantitate(s.rows, 'farfurie', 'farfurii') : cantitate(s.rows, 'rând', 'rânduri');

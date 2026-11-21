@@ -72,6 +72,30 @@ export function numberToWords(n) {
   return r ? `${HUNDREDS[h]} ${below100(r)}` : HUNDREDS[h];
 }
 
+// Fracțiile până la zecimi: numele părții (singular, plural) și genul, pentru „o treime”, „un sfert”, „două sferturi”.
+const FRACTION_PARTS = {
+  1: ['întreg', 'întregi', 'n'],
+  2: ['jumătate', 'jumătăți', 'f'],
+  3: ['treime', 'treimi', 'f'],
+  4: ['sfert', 'sferturi', 'n'],
+  5: ['cincime', 'cincimi', 'f'],
+  6: ['șesime', 'șesimi', 'f'],
+  7: ['șeptime', 'șeptimi', 'f'],
+  8: ['optime', 'optimi', 'f'],
+  9: ['noime', 'noimi', 'f'],
+  10: ['zecime', 'zecimi', 'f'],
+};
+
+/** O fracție n/d (d între 1 și 10) cu litere: 1/2 → „o jumătate”, 3/4 → „trei sferturi”, 2/3 → „două treimi”, 1/1 → „un întreg”. */
+export function fractionWords(n, d) {
+  const part = FRACTION_PARTS[d];
+  if (!part || !Number.isInteger(n) || n < 0) throw new Error(`fractionWords: ${n}/${d}`);
+  const [singular, plural, gender] = part;
+  if (n === 1) return `${gender === 'f' ? 'o' : 'un'} ${singular}`;
+  if (n === 2) return `două ${plural}`;
+  return `${numberToWords(n)} ${plural}`;
+}
+
 /** Data și ora, scurt, românește: „12 sept. 2026, 14:05”. */
 export function formatDateTime(iso) {
   const d = new Date(iso);

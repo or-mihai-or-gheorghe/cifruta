@@ -2,10 +2,14 @@
 
 import array from './widgets/array/logic.js';
 import jumps from './widgets/jumps/logic.js';
+import parts from './widgets/parts/logic.js';
+import wall from './widgets/wall/logic.js';
 
-export const WIDGETS = { array, jumps };
+export const WIDGETS = { array, jumps, parts, wall };
 
 export const VIEWS = {
   array: () => import('./widgets/array/view.js'),
   jumps: () => import('./widgets/jumps/view.js'),
+  parts: () => import('./widgets/parts/view.js'),
+  wall: () => import('./widgets/wall/view.js'),
 };

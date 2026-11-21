@@ -191,6 +191,7 @@
 }
 .iv-slider[data-tone='rows'] { --tone: var(--c-rows); }
 .iv-slider[data-tone='cut'] { --tone: var(--c-ink); }
+.iv-slider[data-tone='mark'] { --tone: var(--c-ok-ink); }
 .iv-slider--h { width: 100%; height: 100%; }
 .iv-slider--v { flex-direction: column; width: 100%; height: 100%; }
 .iv-slider__track {
@@ -325,6 +326,26 @@
   transition: opacity var(--dur-2) var(--ease-out);
 }
 .iv-tray.is-on { opacity: 1; }
+.iv-tray.is-marked {
+  border-color: var(--c-ok-ink);
+  background: repeating-linear-gradient(45deg, var(--c-ok-bg) 0 6px, #bfe9d6 6px 10px);
+}
+.iv-tray.is-marked::after {
+  content: '✓';
+  position: absolute;
+  right: -0.55rem;
+  top: -0.55rem;
+  display: grid;
+  place-items: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  background: var(--c-ok-ink);
+  color: var(--c-on-brand);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.iv-array--plates:has(.iv-tray.is-marked) .iv-array__board { cursor: pointer; }
 
 /* numărătoarea de la capătul rândurilor: 4, 8, 12… */
 .iv-array__totals { position: relative; height: 100%; margin: 0; padding: 0; list-style: none; }
@@ -393,6 +414,97 @@
   from { opacity: 0; transform: scale(0.6); }
 }
 
+/* ——— Fracțiile: întregul tăiat (iv-parts), fracția mare, zidul (iv-wall) ——— */
+.iv-parts { display: grid; justify-items: center; gap: var(--sp-3); }
+.iv-parts__art { width: min(100%, 17rem); }
+.iv-parts__art .v-fraction__piece { cursor: pointer; }
+.iv-parts__art svg { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.iv-parts__controls { display: grid; gap: var(--sp-3); width: 100%; max-width: 32rem; }
+.iv-shapes { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem; }
+.iv-shape {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.75rem;
+  padding: 0.25rem 0.7rem 0.25rem 0.35rem;
+  border: 2px solid var(--c-line-strong);
+  border-radius: var(--r-pill);
+  background: var(--c-surface);
+  font-family: var(--font-title);
+  font-weight: 700;
+  cursor: pointer;
+}
+.iv-shape[aria-checked='true'] { border: 3px solid var(--c-ink); background: var(--c-accent); }
+.iv-shape__art { display: block; width: 1.9rem; }
+.iv-frac-eq { font-size: var(--fs-5); }
+.iv-frac-eq .c-frac { font-size: 0.9em; }
+.iv-frac-big {
+  display: grid;
+  grid-template-columns: minmax(3.5rem, auto) auto;
+  grid-template-areas: 'n ln' 'line .' 'd ld';
+  align-items: center;
+  column-gap: var(--sp-3);
+  font-family: var(--font-title);
+}
+.iv-frac-big__n, .iv-frac-big__d { justify-self: center; font-size: var(--fs-5); line-height: 1.05; font-weight: 700; }
+.iv-frac-big__n { grid-area: n; }
+.iv-frac-big__d { grid-area: d; }
+.iv-frac-big__line { grid-area: line; height: 0.3rem; border-radius: var(--r-pill); background: var(--c-ink); }
+.iv-frac-big__label { max-width: 13rem; font-size: var(--fs-0); font-weight: 700; text-align: left; }
+.iv-frac-big__n + .iv-frac-big__label { grid-area: ln; }
+.iv-frac-big__d + .iv-frac-big__label { grid-area: ld; }
+.iv-show { width: 6.5rem; }
+.iv-option--art { padding: 0.35rem; border-radius: var(--r-3); }
+.iv-option__art { display: block; width: 5rem; }
+
+/* zidul fracțiilor: aceeași scenă ca dreptunghiul (glisorul de sus, cel din stânga, desenul) */
+.iv-array--wall { --side: 0rem; }
+.iv-wall { display: grid; grid-template-rows: repeat(10, var(--cell)); cursor: pointer; }
+.iv-wall__row { display: flex; }
+.iv-brick {
+  position: relative;
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  border: 1px solid var(--c-line-strong);
+  background: var(--c-paper-2);
+  color: var(--c-ink-soft);
+  font-size: 0.75rem;
+  line-height: 1;
+}
+.iv-brick .c-frac { font-size: 0.75rem; }
+.iv-wall__row:first-child .iv-brick { font-family: var(--font-title); font-weight: 700; }
+.iv-brick.is-on { background: repeating-linear-gradient(45deg, var(--v-orange, #f9a03f) 0 7px, #f5b56c 7px 11px); color: var(--c-ink); font-weight: 700; }
+.iv-brick.is-eq { background: var(--c-cols-bg); color: var(--c-cols-ink); }
+.iv-brick.is-end { box-shadow: inset -3px 0 0 var(--c-cols-ink); }
+.iv-brick.is-end::after {
+  content: '=';
+  position: absolute;
+  right: -0.45rem;
+  top: 50%;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 0.9rem;
+  height: 0.9rem;
+  translate: 0 -50%;
+  border-radius: 50%;
+  background: var(--c-cols-ink);
+  color: var(--c-on-brand);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.iv-wall__line {
+  position: absolute;
+  top: -0.3rem;
+  bottom: -0.3rem;
+  left: calc(var(--frac) * 100%);
+  width: 0;
+  border-left: 3px solid var(--c-ink);
+  pointer-events: none;
+}
+
 /* ——— Ecranele joase (telefonul ținut orizontal): desenul în stânga; Cifruța, calculul și butoanele în dreapta ———
    Scena și widgetul devin `display: contents`, ca bucățile widgetului să se așeze direct în grila lecției; căsuța se socotește
    atunci după înălțime (fără container, unitățile cq trec la ecran). */
@@ -411,11 +523,14 @@
     row-gap: var(--sp-2);
   }
   .iv-lesson__guide { grid-area: guide; }
-  .iv-stage, .iv-array, .iv-jumps { display: contents; }
-  .iv-array__stage, .iv-jumps__art { grid-area: stage; }
+  .iv-stage, .iv-array, .iv-jumps, .iv-parts { display: contents; }
+  .iv-array__stage, .iv-jumps__art, .iv-parts__art { grid-area: stage; }
+  .iv-parts__art { width: min(14rem, 40vw); align-self: center; }
+  .iv-parts__controls { grid-area: ctrl; justify-self: stretch; }
   .iv-jumps__art { width: min(26rem, 52vw); align-self: center; }
   .iv-eq { grid-area: eq; justify-self: start; font-size: var(--fs-3); }
   .iv-jumps__controls { grid-area: ctrl; justify-self: stretch; }
+  .iv-frac-eq { font-size: var(--fs-4); }
   .iv-tools { grid-area: tools; justify-self: start; justify-content: flex-start; }
   .iv-text { grid-area: text; justify-items: start; text-align: left; }
   .iv-array { --chrome: 7.5rem; }
@@ -426,6 +541,8 @@
 /* pe telefoanele înguste: Cifruța și textele balonului mai mici, ca desenul să încapă sub provocare */
 @media (max-width: 30rem) {
   body.is-lesson .l-main { padding-top: var(--sp-3); }
+  .iv-parts__art { width: min(100%, 12.5rem); }
+  .iv-frac-eq { font-size: var(--fs-4); }
   .iv-lesson { gap: var(--sp-3); }
   .iv-guide .c-mascot__art { width: 2.75rem; }
   .iv-intro { font-size: var(--fs-0); }

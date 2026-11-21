@@ -2,6 +2,7 @@
 // căutarea în lățime prin acțiunile lui (aceleași ca în interfață) arată că fiecare provocare se poate rezolva atingând ecranul.
 
 import { WIDGETS } from './registry.js';
+import { compareFractions, equalParts, parseFraction } from './fractions.js';
 
 export const widgetOf = (lesson) => WIDGETS[lesson?.widget?.w] ?? null;
 
@@ -60,6 +61,17 @@ export function collectKeys(W, params, task, states) {
 export const PICK_RULES = {
   /** „Cât face 7 × 8?”: varianta egală cu produsul factorilor din `of`. */
   produs: (task, option) => option === task.of[0] * task.of[1],
+  /** „Care desen arată două jumătăți?”: desenul tăiat în 2 părți egale. */
+  jumatati: (task, option) => option?.v === 'fraction' && equalParts(option) && Number(option.parts) === 2,
+  /** „Care desen arată sferturi?”: desenul tăiat în 4 părți egale. */
+  sferturi: (task, option) => option?.v === 'fraction' && equalParts(option) && Number(option.parts) === 4,
+  /** „Care e mai mare?”: fracția mai mare decât toate celelalte. */
+  'mai-mare': (task, option) => {
+    const f = parseFraction(option);
+    return Boolean(f) && task.pick.every((other) => other === option || (parseFraction(other) && compareFractions(f, parseFraction(other)) > 0));
+  },
+  /** „Ce fracție e colorată?”: exact fracția din `of` (3/5, nu și 6/10). */
+  valoare: (task, option) => option === `${task.of[0]}/${task.of[1]}`,
 };
 
 /** Locurile variantelor corecte ale unei alegeri. */

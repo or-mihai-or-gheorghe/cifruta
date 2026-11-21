@@ -3,8 +3,9 @@
 // „Ce am aflat” (`notes`). Provocările:
 //   want    — o stare a widgetului („Arată 4 × 6.” → { rows: 4, cols: 6 });
 //   collect — mai multe soluții diferite, după `by`, cel puțin `need`;
-//   pick    — o alegere, cu răspunsul calculat de regula `rule` (js/invata/logic.js, PICK_RULES), și un indiciu (`hint`) după o
-//             variantă greșită; `hide` ascunde o mărime cât e activă provocarea, ca răspunsul să nu stea scris pe ecran.
+//   pick    — o alegere (numere, fracții „n/d” sau desene din bancă), cu răspunsul calculat de regula `rule` (js/invata/logic.js,
+//             PICK_RULES), un indiciu (`hint`) după o variantă greșită și, la nevoie, desenul despre care se întreabă (`show`);
+//             `hide` ascunde o mărime cât e activă provocarea, ca răspunsul să nu stea scris pe ecran.
 // tests/invata.test.js verifică totul: provocările se pot rezolva din interfață, în ordine, iar textele sunt corecte.
 // Id-urile capitolelor, ale lecțiilor și ale provocărilor sunt permanente: stau în progresul salvat (`cifruta:invata`).
 
@@ -111,9 +112,129 @@ export default {
     {
       id: 'fractiile',
       title: 'Fracțiile',
+      short: 'Fracțiile',
       icon: 'prajitura',
-      soon: true,
-      text: 'Jumătatea și sfertul, apoi fracții până la zecimi, fracții egale și compararea lor.',
+      grade: 2,
+      text: 'Jumătatea și sfertul, apoi fracții până la zecimi: numărătorul și numitorul, fracția dintr-o mulțime, fracții egale și compararea lor.',
+      lessons: [
+        {
+          id: 'parti-egale',
+          title: 'Părți egale',
+          icon: 'prajitura',
+          intro: 'Taie în părți egale cu glisorul, apoi atinge o bucată ca s-o colorezi.',
+          concepts: ['mat.fractii.jumatate-sfert'],
+          widget: { w: 'parts', shape: 'circle', parts: 1, min: 1, max: 4, shapes: ['circle', 'bar', 'square'] },
+          tasks: [
+            { id: 'pizza-doi', ask: 'Taie pizza în 2 părți egale.', want: { shape: 'circle', parts: 2 } },
+            {
+              id: 'care-jumatati',
+              ask: 'Care desen arată două jumătăți?',
+              pick: [
+                { v: 'fraction', shape: 'circle', parts: 2, sizes: [1, 2] },
+                { v: 'fraction', shape: 'square', parts: 2, cut: 'diagonal' },
+                { v: 'fraction', shape: 'bar', parts: 3 },
+              ],
+              rule: 'jumatati',
+              hint: 'Încă nu. Jumătățile sunt două bucăți la fel de mari.',
+            },
+            { id: 'un-sfert', ask: 'Taie ciocolata în 4 părți egale și colorează una.', want: { shape: 'bar', parts: 4, on: 1 } },
+            {
+              id: 'care-sferturi',
+              ask: 'Care desen arată sferturi?',
+              pick: [
+                { v: 'fraction', shape: 'square', parts: 4, cut: 'grid' },
+                { v: 'fraction', shape: 'bar', parts: 4, sizes: [1, 1, 2, 2] },
+                { v: 'fraction', shape: 'circle', parts: 3 },
+              ],
+              rule: 'sferturi',
+              hint: 'Încă nu. Sferturile sunt patru bucăți la fel de mari.',
+            },
+          ],
+          notes: [
+            'O **jumătate** e o parte din 2 părți egale; un **sfert** e o parte din 4 părți egale.',
+            'Părțile trebuie să fie la fel de mari, dar pot avea forme diferite: și două triunghiuri fac jumătăți.',
+          ],
+        },
+        {
+          id: 'jumatate-sfert',
+          title: 'Jumătatea și sfertul',
+          icon: 'ciocolata',
+          intro: 'Taie fiecare bucată în două, apoi colorează. Bucățile colorate se taie și ele.',
+          concepts: ['mat.fractii.jumatate-sfert', 'mat.fractii.egale'],
+          widget: { w: 'parts', shape: 'square', parts: 1, cut: true, shapes: ['square', 'circle'] },
+          tasks: [
+            { id: 'o-jumatate', ask: 'Colorează o jumătate.', want: { value: '1/2' } },
+            { id: 'un-sfert', ask: 'Colorează un sfert.', want: { value: '1/4' } },
+            { id: 'trei-sferturi', ask: 'Colorează trei sferturi.', want: { value: '3/4' } },
+            { id: 'doua-sferturi', ask: 'Arată că două sferturi fac o jumătate.', want: { parts: 4, on: 2 } },
+          ],
+          notes: [
+            'Un **sfert** e jumătate dintr-o jumătate: tai jumătatea încă o dată în două.',
+            'Două sferturi fac o jumătate, iar patru sferturi fac un întreg.',
+          ],
+        },
+        {
+          id: 'numarator-numitor',
+          title: 'Numărătorul și numitorul',
+          icon: 'biscuit',
+          intro: 'Alege în câte părți egale tai și câte bucăți colorezi.',
+          concepts: ['mat.fractii.numarator-numitor'],
+          widget: { w: 'parts', shape: 'bar', parts: 2, min: 1, max: 10, shapes: ['bar', 'circle', 'square'], labels: true },
+          tasks: [
+            { id: 'doua-treimi', ask: 'Colorează {{f:2/3}}.', want: { parts: 3, on: 2 } },
+            { id: 'cinci-optimi', ask: 'Colorează {{f:5/8}}.', want: { parts: 8, on: 5 } },
+            { id: 'un-intreg', ask: 'Taie în 6 părți și colorează tot întregul.', want: { parts: 6, on: 6 } },
+            {
+              id: 'ce-fractie',
+              ask: 'Ce fracție e colorată?',
+              show: { v: 'fraction', shape: 'circle', parts: 5, on: [0, 1, 2] },
+              pick: ['2/5', '3/5', '3/8'],
+              rule: 'valoare',
+              of: [3, 5],
+              hint: 'Încă nu. Numără bucățile colorate, apoi toate bucățile.',
+            },
+          ],
+          notes: [
+            'În {{f:3/5}}, **numitorul** 5 spune în câte părți egale tai, iar **numărătorul** 3, câte părți iei.',
+            'Când iei toate părțile, ai un întreg: {{f:6/6}}.',
+          ],
+        },
+        {
+          id: 'din-multime',
+          title: 'Fracția dintr-o mulțime',
+          icon: 'mar',
+          intro: 'Împarte merele pe farfurii egale, apoi atinge farfuriile pe care le iei.',
+          concepts: ['mat.fractii.din-multime'],
+          widget: { w: 'array', skin: 'plates', mark: true, rows: 2, cols: 2, item: 'mar' },
+          tasks: [
+            { id: 'jumatate-opt', ask: 'Arată jumătate din 8 mere.', want: { rows: 2, product: 8, marked: 1 } },
+            { id: 'sfert-doisprezece', ask: 'Arată un sfert din 12 mere.', want: { rows: 4, product: 12, marked: 1 } },
+            { id: 'doua-treimi-noua', ask: 'Arată {{f:2/3}} din 9 mere.', want: { rows: 3, product: 9, marked: 2 } },
+          ],
+          notes: [
+            'Ca să afli {{f:2/3}} din 9, împarți cele 9 mere pe 3 farfurii egale (câte 3) și iei 2 farfurii: 6 mere.',
+            'Jumătate din 8 înseamnă 8 mere pe 2 farfurii egale: 4 pe fiecare.',
+          ],
+        },
+        {
+          id: 'zidul-fractiilor',
+          title: 'Zidul fracțiilor',
+          icon: 'cuburi',
+          intro: 'Alege un rând și câte bucăți. Linia arată ce fracții sunt egale.',
+          concepts: ['mat.fractii.egale', 'mat.fractii.comparare'],
+          widget: { w: 'wall', den: 3, num: 1 },
+          tasks: [
+            { id: 'o-doime', ask: 'Arată {{f:1/2}} pe zid.', want: { den: 2, num: 1 } },
+            { id: 'zecimi', ask: 'Găsește, la zecimi, fracția egală cu {{f:1/2}}.', want: { den: 10, num: 5 } },
+            { id: 'sesimi', ask: 'Găsește, la șesimi, fracția egală cu {{f:2/3}}.', want: { den: 6, num: 4 } },
+            { id: 'mai-mare', ask: 'Care e mai mare?', pick: ['1/5', '1/3'], rule: 'mai-mare', hint: 'Încă nu. Uită-te pe zid: care bucată e mai lungă?' },
+          ],
+          notes: [
+            '{{f:1/2}} = {{f:2/4}} = {{f:3/6}} = {{f:4/8}} = {{f:5/10}}: aceeași lungime pe zid.',
+            'Cu cât tai întregul în mai multe bucăți, cu atât bucățile sunt mai mici: {{f:1/3}} e mai mare decât {{f:1/5}}.',
+          ],
+        },
+      ],
     },
     {
       id: 'impartirea',

@@ -16,3 +16,4 @@ import './awards.js';
 import './grafice.js';
 import './grafuri.js';
 import './inmultire.js';
+import './fractii.js';

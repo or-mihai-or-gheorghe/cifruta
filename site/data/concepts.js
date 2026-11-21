@@ -51,6 +51,10 @@ export default {
   'mat.nr1000.conditii': { domain: 'mat', title: 'Numere care îndeplinesc condiții (cifre, intervale)', grade: 2, competencies: ['1.2', '4.1'], source: ['manual', 'auxiliar'] },
   'mat.nr1000.valoare-pozitionala': { domain: 'mat', title: 'Valoarea cifrei după loc (403: zecile sunt 0)', grade: 2, competencies: ['1.1'], source: ['manual', 'imbogatire'] },
   'mat.fractii.jumatate-sfert': { domain: 'mat', title: 'Jumătatea și sfertul (felii egale)', grade: 2, competencies: ['1.1'], source: ['programa'] },
+  'mat.fractii.numarator-numitor': { domain: 'mat', title: 'Fracții până la zecimi: numărătorul și numitorul', grade: 2, competencies: ['1.1'], source: ['imbogatire'] },
+  'mat.fractii.din-multime': { domain: 'mat', title: 'Fracția dintr-o mulțime (jumătate din 8, 2/3 din 9)', grade: 2, competencies: ['1.1', '1.5'], source: ['imbogatire'] },
+  'mat.fractii.egale': { domain: 'mat', title: 'Fracții egale (1/2 = 2/4 = 5/10)', grade: 2, competencies: ['1.2'], source: ['imbogatire'] },
+  'mat.fractii.comparare': { domain: 'mat', title: 'Compararea fracțiilor (1/3 e mai mare decât 1/5)', grade: 2, competencies: ['1.2'], source: ['imbogatire'] },
 
   // ——— 2. Adunare și scădere ———
   'mat.op.fara-trecere': { domain: 'mat', title: 'Adunări și scăderi până la 100, fără trecere peste ordin', grade: 1, competencies: ['1.4'], source: ['manual', 'auxiliar', 'programa', 'standarde'] },

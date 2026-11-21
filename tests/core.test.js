@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import { calc, holds, relation, trace } from '../site/js/core/expr.js';
 import { lintText, walkTexts } from '../site/js/core/lint.js';
 import { md, markupErrors, plain } from '../site/js/core/markup.js';
-import { cantitate, fixCedilla, formatNumber, niceMinus, numberToWords, sameText, singularOf } from '../site/js/core/ro.js';
+import { cantitate, fixCedilla, formatNumber, fractionWords, niceMinus, numberToWords, sameText, singularOf } from '../site/js/core/ro.js';
 import { check, minPieces, moneyCombos, moneyKey, searchNumbers, trecere } from '../site/js/core/rules.js';
 import { evaluateExercise, gradeFor, scoreTest } from '../site/js/core/scoring.js';
 import { getLogic } from '../site/js/core/registry.js';
@@ -111,6 +111,32 @@ test('trecerea peste ordin: pe coloane; validatorul prinde etichetele greșite',
   const short = withRow(['mat.nr100.comparare'], '45 - 15 = [[a]]');
   short.exercises[0].estMin = 44;
   assert.match(validateTest(short).errors.join(), /exact 45 min/);
+});
+
+test('ro: fracțiile cu litere, cu genul și acordul potrivit', () => {
+  const words = (n, d) => fractionWords(n, d);
+  assert.equal(words(1, 2), 'o jumătate');
+  assert.equal(words(2, 2), 'două jumătăți');
+  assert.equal(words(1, 4), 'un sfert');
+  assert.equal(words(2, 4), 'două sferturi');
+  assert.equal(words(3, 4), 'trei sferturi');
+  assert.equal(words(1, 3), 'o treime');
+  assert.equal(words(2, 3), 'două treimi');
+  assert.equal(words(5, 8), 'cinci optimi');
+  assert.equal(words(6, 6), 'șase șesimi');
+  assert.equal(words(10, 10), 'zece zecimi');
+  assert.equal(words(1, 1), 'un întreg');
+  assert.equal(words(0, 5), 'zero cincimi');
+  assert.throws(() => words(1, 11));
+  for (let d = 1; d <= 10; d++) for (let n = 0; n <= d; n++) assert.deepEqual(lintText(words(n, d)), [], `${n}/${d}`);
+});
+
+test('markup: fracția etajată {{f:n/d}}, citită cu litere', () => {
+  const html = md('Colorează {{f:2/3}}.');
+  assert.match(html, /<span class="c-frac" role="img" aria-label="două treimi"><span class="c-frac__n">2<\/span><span class="c-frac__d">3<\/span><\/span>/);
+  assert.equal(plain('Colorează {{f:3/4}}.'), 'Colorează trei sferturi.');
+  assert.deepEqual(markupErrors('{{f:1/2}} {{f:10/10}} {{f:0/3}}'), []);
+  assert.equal(markupErrors('{{f:5/4}} {{f:1/11}} {{f:a/b}} {{f:1/0}}').length, 4);
 });
 
 test('markup: escapare, formatare, tokenuri', () => {

@@ -1,14 +1,17 @@
 // Învață: glisorul ca riglă (pur). Gradațiile 1…count stau la mijlocul căsuțelor desenului, deci mânerul valorii v stă la
 // (v − 0,5) / count din lungimea pistei, iar o apăsare la distanța `offset` de începutul pistei alege căsuța de sub deget.
 
-/** Valoarea de sub deget, între `min` și `max` (gradațiile din afara intervalului se văd, dar nu se pot alege). */
-export function valueAt(offset, length, count, min, max) {
-  const v = Math.floor((offset / length) * count) + 1;
+/**
+ * Valoarea de sub deget, între `min` și `max` (gradațiile din afara intervalului se văd, dar nu se pot alege). Prima gradație are
+ * valoarea `origin` (1 la rânduri și coloane, 0 la „Câte colorăm?”).
+ */
+export function valueAt(offset, length, count, min, max, origin = 1) {
+  const v = Math.floor((offset / length) * count) + origin;
   return Math.min(max, Math.max(min, Number.isFinite(v) ? v : min));
 }
 
 /** Poziția mânerului, în procente din lungimea pistei. */
-export const percentOf = (value, count) => ((value - 0.5) / count) * 100;
+export const percentOf = (value, count, origin = 1) => ((value - origin + 0.5) / count) * 100;
 
 /** Pasul tastelor: săgețile merg după direcția de pe ecran (la glisorul vertical, valorile cresc în jos). */
 export function keyStep(key, vertical) {
