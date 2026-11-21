@@ -342,6 +342,8 @@ rezolvată chiar de punctul ei de plecare.
   dinainte nu trebuie s-o rezolve deja pe următoarea, iar o alegere are exact un răspuns corect.
 - Textele urmează regulile din § 6 și § 7, iar mini-markup-ul din § 4 merge și aici. Calculele („6 × 7”) se scriu cu spații
   obișnuite: lecția le ține pe un rând.
+- Pe tablete și laptopuri, „Ce învățăm”, indicația și provocarea stau în coloana Cifruței, lângă widget. Pe laptopul de 1366 × 768
+  încap toate trei, fără derulare, cât timp rămân în limitele de mai sus (170 de caractere, 60 la provocare): E2E verifică.
 - Id-urile capitolelor, ale lecțiilor și ale provocărilor sunt permanente: stau în bifele salvate (`cifruta:invata`).
 - Convenția factorilor (`js/invata/text.js`): „3 × 4” = „de 3 ori câte 4” = 4 + 4 + 4, adică rânduri × câte pe rând, farfurii ×
   câte pe farfurie, sărituri × lungimea săriturii.

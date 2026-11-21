@@ -212,7 +212,10 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
     - o alegere are exact un răspuns.
   - **Widget nou:** `js/invata/widgets/<w>/logic.js`, pur, cu `QUANTITIES`, `HIDEABLE`, `check`, `controls`, `initial`, `actions`,
     `apply`, `derive`, `texts`. Starea se schimbă doar prin `apply`. Lângă el, `view.js`: `mount(el, params, { logic, dispatch })` →
-    `{ render(state, { hidden }), destroy }`, iar vederea nu socotește. Amândouă intră în `js/invata/registry.js`.
+    `{ render(state, { hidden }), destroy }`, iar vederea nu socotește. Amândouă intră în `js/invata/registry.js`. Rădăcina vederii
+    (`iv-widget`) are trei grupuri: `iv-head` (calculul `iv-eq`, legenda), `iv-main` (desenul `iv-art`, apoi glisoarele) și `iv-foot`
+    (`iv-tools`, `iv-text`). Desenul se dimensionează după `--iv-h` și după lățimea coloanei lui; un text care se schimbă cât tragi
+    și stă deasupra desenului își rezervă rândurile (`min-height: 2lh`).
   - **Gesturile:** în timpul tragerii, `dispatch(…, { commit: false })` doar previzualizează; provocările se verifică la gestul
     încheiat.
 - **Animal sau accesoriu nou pentru avatar:**
@@ -406,9 +409,20 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   - **Dreptunghiul** își construiește locurile o dată. Obiectele stau la `translate(var(--c)…, var(--r)…)`, iar „Întoarce” comută doar
     `.is-flipped`; o animație pe obiecte folosește proprietatea `scale` (`is-bump`), nu `anim-pop`, care ar înlocui `transform`.
   - **Ecranele:**
-    - mărimea căsuței vine din `cqw` (scena e container) și din `dvh`;
-    - pe telefonul ținut orizontal, scena și widgetul devin `display: contents`, ca desenul să stea în stânga și restul în dreapta;
-    - `invata_screens` măsoară desenul, pistele (≥ 44 px), căsuțele (≥ 20 px) și textul.
+    - de la 48rem, lecția are două coloane: Cifruța în stânga („Ce învățăm”, Cifruța cu bulinele provocărilor, balonul) și scena în
+      dreapta; pe ecranele mari, lecția și antetul au 80rem;
+    - fiecare widget își grupează bucățile în `iv-head` (calculul, legenda), `iv-main` (desenul cu glisoarele lui) și `iv-foot`
+      (butoanele, textele); pe o scenă de la 40rem (containerul `iv-stage`), desenul stă în stânga, iar calculul și textele în dreapta;
+    - desenele se socotesc din lățimea scenei (`cqw`) și din `--iv-h`, înălțimea rămasă sub titlul lecției (sub 48rem, ecranul de sub
+      antet). Totul încape fără derulare pe laptopul de 1366 × 768 și pe cel de 1920 × 1080 la 150% (1280 × 600 cu bara browserului);
+    - împărțirea are o masă de mărime fixă (10 farfurii sau 12 pungi) și un coș fix: farfuriile au toate aceeași mărime, iar obiectele
+      care nu încap la mărimea obișnuită se strâng (`--fit`, `--gfit`). Calculul și legenda au loc pentru câte două rânduri, ca nimic
+      să nu sară cât tragi. Tăvile înmulțirii au toate lungimea rândului cel mai lung;
+    - pe telefonul ținut orizontal, scena, widgetul și grupurile lui devin `display: contents`, ca desenul să stea sus, în stânga, iar
+      restul în dreapta; „Ce învățăm” trece deasupra ambelor coloane;
+    - `invata_screens` măsoară desenul, pistele (≥ 44 px grosime), căsuțele (≥ 20 px) și textul. Pe 4 ecrane de tabletă și laptop cere
+      în plus ca widgetul și provocarea să încapă fără derulare, căsuțe ≥ 30 px și piste ≥ 240 px. `iv_drag_steady` trage de glisor
+      fără să ridice degetul: nimic din afara desenului nu se mișcă, iar farfuriile au o singură mărime.
   - **Progresul** (`cifruta:invata`, `getLessons`/`saveLessons`) stă doar în browser, pe profil. `moveAnonymousInto` îl mută înaintea
     lui `clearScopeData(null)`. La ieșirea din cont pleacă odată cu copiile profilului.
   - **Legenda** de sub calcul (`texts().legend`, `invata/legend.js`) scrie ce schimbă fiecare glisor, în culoarea lui („3 farfurii”

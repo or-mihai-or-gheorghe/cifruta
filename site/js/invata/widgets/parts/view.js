@@ -75,18 +75,21 @@ export function mount(host, params, { logic, dispatch }) {
   const root = h(
     'div',
     { class: 'iv-parts', 'data-testid': 'iv-parts' },
-    eq,
-    art,
-    // întâi tai (scara, chiar sub desen), apoi colorezi
-    ladder ? h('div', { class: 'iv-ladder-box' }, h('span', { class: 'iv-control__label' }, 'Taie în:'), ladder, story) : null,
+    h('div', { class: 'iv-head' }, eq),
     h(
       'div',
-      { class: 'iv-parts__controls' },
-      sliders.parts ? h('div', { class: 'iv-control' }, h('span', { class: 'iv-control__label iv-f--rows' }, 'În câte părți egale tai?'), sliders.parts.el) : null,
-      h('div', { class: 'iv-control' }, h('span', { class: 'iv-control__label iv-f--cols' }, 'Câte bucăți colorezi?'), sliders.count.el),
+      { class: 'iv-main' },
+      art,
+      // întâi tai (scara, chiar sub desen), apoi colorezi
+      ladder ? h('div', { class: 'iv-ladder-box' }, h('span', { class: 'iv-control__label' }, 'Taie în:'), ladder, story) : null,
+      h(
+        'div',
+        { class: 'iv-parts__controls' },
+        sliders.parts ? h('div', { class: 'iv-control' }, h('span', { class: 'iv-control__label iv-f--rows' }, 'În câte părți egale tai?'), sliders.parts.el) : null,
+        h('div', { class: 'iv-control' }, h('span', { class: 'iv-control__label iv-f--cols' }, 'Câte bucăți colorezi?'), sliders.count.el),
+      ),
     ),
-    picker ? h('div', { class: 'iv-tools' }, picker) : null,
-    h('div', { class: 'iv-text' }, reading, sum),
+    h('div', { class: 'iv-foot' }, picker ? h('div', { class: 'iv-tools' }, picker) : null, h('div', { class: 'iv-text' }, reading, sum)),
   );
   host.append(root);
 
@@ -115,6 +118,7 @@ export function mount(host, params, { logic, dispatch }) {
     const reshaped = next.shape !== state.shape || !ladder?.querySelector('.iv-ladder__art svg');
     state = next;
     art.innerHTML = drawing(state.shape, state.parts, state.on);
+    art.dataset.shape = state.shape; // bara (ciocolata) e lată și joasă: pe scena lată primește mai multă lățime
     sliders.parts?.set(state.parts);
     sliders.count.setRange(0, state.parts);
     sliders.count.set(state.on.length);

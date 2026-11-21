@@ -49,16 +49,19 @@ export function mount(host, params, { logic, dispatch }) {
   const root = h(
     'div',
     { class: 'iv-array iv-array--wall', 'data-testid': 'iv-wall', style: { '--rows-max': ROWS, '--cols-max': ROWS } },
-    eq,
-    legend,
+    h('div', { class: 'iv-head' }, eq, legend),
     h(
       'div',
-      { class: 'iv-array__stage' },
-      h('div', { class: 'iv-array__top' }, sliders.num.el),
-      h('div', { class: 'iv-array__left' }, sliders.den.el),
-      board,
+      { class: 'iv-main' },
+      h(
+        'div',
+        { class: 'iv-array__stage' },
+        h('div', { class: 'iv-array__top' }, sliders.num.el),
+        h('div', { class: 'iv-array__left' }, sliders.den.el),
+        board,
+      ),
     ),
-    h('div', { class: 'iv-text' }, reading, sum),
+    h('div', { class: 'iv-foot' }, h('div', { class: 'iv-text' }, reading, sum)),
   );
   host.append(root);
 

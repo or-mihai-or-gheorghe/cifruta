@@ -1210,6 +1210,23 @@ IV_FIT = """(() => {
   return { w: r.width, h: r.height, vw: innerWidth, vh: innerHeight, header: document.querySelector('.l-header').getBoundingClientRect().height,
            track: Math.min(...tracks), cell, text: Math.min(...texts.map((e) => parseFloat(getComputedStyle(e).fontSize)), ...svgText) };
 })()"""
+# pe tablete și laptopuri, la încărcare (fără derulare): unde se termină widgetul (calculul, desenul cu glisoarele, butoanele, textele)
+# și provocarea din balon, cât de lungi sunt pistele glisoarelor și dacă desenul stă lângă calcul (scena lată)
+IV_VIEW = """(() => {
+  const shown = (sel) => [...document.querySelectorAll(sel)].filter((e) => e.getClientRects().length);
+  const bottom = (els) => Math.max(...els.map((e) => e.getBoundingClientRect().bottom));
+  const tracks = shown('.iv-slider__track').map((t) => { const b = t.getBoundingClientRect(); return Math.max(b.width, b.height); });
+  const head = shown('.iv-head')[0], main = shown('.iv-main')[0];
+  return { widget: bottom(shown('.iv-head, .iv-main, .iv-foot')), ask: bottom(shown('[data-testid=iv-ask]')), vh: innerHeight, scrollY,
+           length: Math.min(...tracks), side: Boolean(head && main && head.getBoundingClientRect().left > main.getBoundingClientRect().left + 10) };
+})()"""
+# în timp ce tragi de glisor: unde stau pista, masa cu farfurii, coșul, careul și textele de sub desen (în pagină), ce mărimi au farfuriile
+IV_STEADY = """(() => {
+  const box = (e) => { const b = e.getBoundingClientRect(); return [b.left, b.top + scrollY, b.width, b.height]; };
+  const one = (sel) => { const e = document.querySelector(sel); return e ? box(e) : []; };
+  return { places: [...document.querySelectorAll('.iv-slider__track')].map(box).flat().concat(one('.iv-share__groups'), one('.iv-share__basket'), one('.iv-array__board')),
+           plates: [...new Set([...document.querySelectorAll('[data-testid=iv-group], .iv-tray.is-on')].map((e) => box(e).slice(2).map((v) => Math.round(v)).join('×')))] };
+})()"""
 
 
 def iv_lessons(run: Run, page: Page) -> list[dict]:
@@ -1373,6 +1390,36 @@ def invata_new_widgets(run: Run, page: Page, vp: str):
     page.get_by_test_id("iv-toggle-back").click()
     back = page.get_by_test_id("iv-machine-back")
     run.check(back.is_visible() and "24" in back.inner_text() and "6" in back.inner_text(), f"[{vp}] mașina: pe dos, „{back.inner_text().strip()}”")
+    # farfuriile: toate au aceeași mărime, iar cât tragi de glisor (degetul încă jos) nu se mișcă nimic din afara desenului
+    for lid, sid in (("impartirea/impartim-egal", "by"), ("impartirea/cate-pungi", "by"), ("impartirea/zeci-unitati", "by"), ("inmultirea/grupe-egale", "cols")):
+        iv_drag_steady(run, page, vp, lid, sid)
+
+
+def iv_drag_steady(run: Run, page: Page, vp: str, lid: str, sid: str):
+    """Trage glisorul `sid` de la capăt la capăt și înapoi, fără să ridice degetul: pista, masa, coșul și careul stau pe loc, iar
+    farfuriile (sau pungile, tăvile) au toate aceeași mărime, oricâte ar fi."""
+    run.goto(page, f"invata/{lid}", debug=True)
+    slider = page.get_by_test_id(f"iv-slider-{sid}")
+    slider.wait_for()
+    track = slider.locator(".iv-slider__track")
+    track.scroll_into_view_if_needed()
+    page.wait_for_timeout(150)
+    box = track.bounding_box()
+    count = int(slider.locator("input").get_attribute("max"))
+    vertical = box["height"] > box["width"]
+    at = lambda v: (box["x"] + box["width"] / 2, box["y"] + (v - 0.5) / count * box["height"]) if vertical else (box["x"] + (v - 0.5) / count * box["width"], box["y"] + box["height"] * 0.62)
+    page.mouse.move(*at(1))
+    page.mouse.down()
+    snaps, values = [], set()
+    for v in list(range(1, count + 1)) + list(range(count - 1, 0, -1)):
+        page.mouse.move(*at(v), steps=2)
+        snaps.append(page.evaluate(IV_STEADY))
+        values.add(page.evaluate(IV_STATE)[sid])
+    page.mouse.up()
+    first = snaps[0]["places"]
+    moved = max(max((abs(a - b) for a, b in zip(s["places"], first)), default=0) for s in snaps)
+    sizes = sorted({p for s in snaps for p in s["plates"]})
+    run.check(len(values) == count and moved <= 1 and len(sizes) == 1, f"[{vp}] {lid}: tras prin {len(values)} valori, nimic nu se mișcă ({moved:.1f} px), farfuriile au o singură mărime ({sizes})")
 
 
 def invata_gestures(run: Run, page: Page, vp: str):
@@ -1483,6 +1530,12 @@ def invata_screens(run: Run, browser, base: str):
     screens = [
         ("telefon culcat", {"viewport": {"width": 844, "height": 390}, "has_touch": True, "is_mobile": True}, 11),
         ("telefon mic", {"viewport": {"width": 360, "height": 640}, "has_touch": True, "is_mobile": True}, 12),
+        # tablete și laptopuri, cu bara browserului scăzută: laptopul de 1366 × 768, cel de 1920 × 1080 la 150%, iPad-ul culcat și
+        # ținut vertical; aici widgetul întreg și provocarea încap fără derulare
+        ("laptop jos", {"viewport": {"width": 1366, "height": 650}}, 14),
+        ("laptop mic", {"viewport": {"width": 1280, "height": 600}}, 14),
+        ("tabletă culcată", {"viewport": {"width": 1024, "height": 690}, "has_touch": True}, 14),
+        ("tabletă verticală", {"viewport": {"width": 768, "height": 950}, "has_touch": True}, 14),
     ]
     for name, opts, min_text in screens:
         context = browser.new_context(locale="ro-RO", **opts)
@@ -1499,7 +1552,13 @@ def invata_screens(run: Run, browser, base: str):
             run.check(m["track"] >= 43.5, f"{label}: glisoarele au cel puțin 44 px de atins ({m['track']:.0f})")
             run.check(m["cell"] is None or m["cell"] >= 20, f"{label}: căsuțele au cel puțin 20 px ({m['cell']})")
             run.check(m["text"] >= min_text, f"{label}: textul are cel puțin {min_text} px ({m['text']:.1f})")
-            run.shot(page, f"invata-{name.replace(' ', '-')}-{lesson['lesson']}")
+            if not name.startswith("telefon"):
+                v = page.evaluate(IV_VIEW)
+                run.check(v["scrollY"] == 0 and v["widget"] <= v["vh"] and v["ask"] <= v["vh"], f"{label}: widgetul și provocarea încap fără derulare (până la {v['widget']:.0f} și {v['ask']:.0f} din {v['vh']})")
+                run.check(m["cell"] is None or m["cell"] >= 30, f"{label}: căsuțele au cel puțin 30 px ({m['cell']})")
+                run.check(v["length"] >= 240, f"{label}: pistele glisoarelor au cel puțin 240 px ({v['length']:.0f})")
+                run.check(v["side"] == (opts["viewport"]["width"] >= 1024), f"{label}: desenul stă {'lângă' if v['side'] else 'deasupra'} calculului")
+            run.shot(page, f"invata-{name.replace(' ', '-').replace('ă', 'a')}-{lesson['lesson']}")
         context.close()
 
 

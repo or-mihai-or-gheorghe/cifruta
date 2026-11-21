@@ -41,11 +41,9 @@ export function mount(host, params, { logic, dispatch }) {
   const root = h(
     'div',
     { class: 'iv-widget iv-balanta', 'data-testid': 'iv-balanta' },
-    eq,
-    legend,
-    art,
-    controls,
-    h('div', { class: 'iv-text' }, reading, extra),
+    h('div', { class: 'iv-head' }, eq, legend),
+    h('div', { class: 'iv-main' }, art, controls),
+    h('div', { class: 'iv-foot' }, h('div', { class: 'iv-text' }, reading, extra)),
   );
   host.append(root);
 

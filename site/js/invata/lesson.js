@@ -45,14 +45,27 @@ export async function mountLesson(host, { chapter, lesson, index }) {
   const prev = chapter.lessons[index - 1];
   const next = chapter.lessons[index + 1];
   const link = (l, dir) => h('a', { class: `iv-lesson__link iv-lesson__link--${dir}`, href: `#/invata/${chapter.id}/${l.id}`, 'data-testid': `iv-${dir}` }, dir === 'prev' ? `← ${l.title}` : `${l.title} →`);
+  // antetul lecției: înapoi la capitol, titlul și „Lecția 2 din 5” (pe ecranele late, pe un singur rând)
+  const head = h(
+    'div',
+    { class: 'iv-lesson__head' },
+    backLink(`#/invata/${chapter.id}`, chapter.title),
+    h('h1', { class: 'iv-lesson__title' }, h('span', { class: 'iv-lesson__icon', 'aria-hidden': 'true', html: emojiHTML(lesson.icon) }), lesson.title),
+    h('span', { class: 'iv-lesson__count' }, `Lecția ${index + 1} din ${chapter.lessons.length}`),
+  );
+  // coloana Cifruței: „Ce învățăm” (scopul lecției și ce înseamnă desenul, înainte de orice glisor), apoi Cifruța cu bulinele
+  // provocărilor și balonul ei, cu toată lățimea coloanei
+  const guide = h(
+    'div',
+    { class: 'iv-lesson__guide' },
+    h('p', { class: 'iv-goal', 'data-testid': 'iv-goal' }, h('strong', { class: 'iv-goal__label' }, 'Ce învățăm: '), h('span', { html: md(keepMath(lesson.goal)) })),
+    h('div', { class: 'iv-guide' }, h('div', { class: 'iv-guide__top' }, mascotArt, dots), bubble),
+  );
   const root = h(
     'div',
     { class: 'l-container iv-lesson', 'data-testid': `iv-lesson-${lesson.id}` },
-    h('div', { class: 'iv-lesson__head' }, backLink(`#/invata/${chapter.id}`, chapter.title), h('span', { class: 'iv-lesson__count' }, `Lecția ${index + 1} din ${chapter.lessons.length}`)),
-    h('h1', { class: 'iv-lesson__title' }, h('span', { class: 'iv-lesson__icon', 'aria-hidden': 'true', html: emojiHTML(lesson.icon) }), lesson.title),
-    // „Ce învățăm”: scopul lecției și ce înseamnă desenul, înainte de orice glisor
-    h('p', { class: 'iv-goal', 'data-testid': 'iv-goal' }, h('strong', { class: 'iv-goal__label' }, 'Ce învățăm: '), h('span', { html: md(keepMath(lesson.goal)) })),
-    h('div', { class: 'iv-lesson__body' }, h('div', { class: 'iv-lesson__guide' }, h('div', { class: 'c-mascot iv-guide' }, mascotArt, bubble)), stage),
+    head,
+    h('div', { class: 'iv-lesson__body' }, guide, stage),
     status,
     h('nav', { class: 'iv-lesson__nav', 'aria-label': 'Lecțiile capitolului' }, prev ? link(prev, 'prev') : h('span'), next ? link(next, 'next') : h('span')),
   );
@@ -183,7 +196,6 @@ export async function mountLesson(host, { chapter, lesson, index }) {
     const parts = [
       // indicația Cifruței (cum se folosește desenul) stă deasupra primei provocări
       current === 0 ? h('p', { class: 'iv-intro', 'data-testid': 'iv-intro', html: md(keepMath(lesson.intro)) }) : null,
-      dots,
       h('p', { class: 'iv-ask', 'data-testid': 'iv-ask', tabindex: '-1', html: md(keepMath(t.ask)) }),
     ];
     if (t.collect) {

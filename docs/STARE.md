@@ -1,7 +1,8 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-11-21 · **Versiune:** 0.25.0 (fracțiile în Jocuri fulger: tema „Fracțiile”, cu 9 tipuri; în 0.24.0, termenul
+- **Data:** 2026-11-22 · **Versiune:** 0.26.0 (Învață pe tablete și laptopuri: lecția pe două coloane, cu widgetul întreg pe ecran,
+  fără derulare, și farfuriile de mărime fixă; în 0.25.0, fracțiile în Jocuri fulger: tema „Fracțiile”, cu 9 tipuri; în 0.24.0, termenul
   necunoscut: în Învață, capitolul cu balanța, barele și mașina de numere, iar în Jocuri fulger, tema „Termenul necunoscut”, cu 10 tipuri
   noi; în 0.23.0, împărțirea: în Învață, capitolul „Împărțirea”, cu 4 lecții,
   iar în Jocuri fulger, tema „Împărțirea”, cu 11 tipuri; ecuațiile cu căsuța în joc; secțiunea **Învață**: în 0.21.0 cinci lecții interactive de înmulțire și
@@ -44,7 +45,10 @@
   repetată), tabla înmulțirii citită pe dos (rândul împărțitorului, cu proba) și pachete de câte 10 bețișoare (84 : 4; pachetele care nu
   ajung pe toate farfuriile se desfac). Capitolul „Termenul necunoscut” (v0.24.0) are 3 lecții: balanța (ghicești câte nuci are sacul
   sau iei aceleași nuci din ambele talere; 8 + 4 = □ + 5 dă 7, nu 12), partea care lipsește (barele: termenul, scăzătorul și
-  descăzutul) și mașina de numere (□ × 4 = 24, □ : 3 = 6, doi pași, cu drumul înapoi). Conținut: **4 teste
+  descăzutul) și mașina de numere (□ × 4 = 24, □ : 3 = 6, doi pași, cu drumul înapoi). Așezarea (v0.26.0): de la 48rem, Cifruța
+  stă în stânga („Ce învățăm”, bulinele, balonul) și widgetul în dreapta, cu desenul lângă calcul; widgetul și provocarea încap fără
+  derulare pe tablete și laptopuri (și pe laptopul de 1366 × 768), iar la împărțire farfuriile stau pe o masă de mărime fixă, deci
+  nimic nu se mișcă cât tragi de glisor. Conținut: **4 teste
   de recapitulare a clasei I** (T1–T4 v2),
   **8 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc, spațiu,
   școală) și **8 teste „Călătorie pe Planeta Albastră”** (adunarea și scăderea până la 1000 cu trecere peste ordin, cu Pământul:
@@ -75,10 +79,9 @@
     măsurat pe ecran, fiecare temă jucată tip cu tip, mascota care se mișcă doar unde trebuie);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.22.1 e publicată (rularea 44931822006, tag `v0.22.1`; regulile Firestore nu s-au schimbat). Urmează planul
-  aprobat pe 21 noiembrie: în Învață, capitolele „Împărțirea” (4 lecții) și „Termenul necunoscut” (3 lecții); în Jocuri fulger, temele
-  „Împărțirea”, „Termenul necunoscut” și „Fracțiile”, pe etape (v0.23.0, v0.24.0, v0.25.0), publicate doar la cererea utilizatorului
-  (cu `npm run deploy:rules` înaintea lui `npm run deploy`, pentru că temele noi intră în `fulgerTopics()`).
+- **Următorul pas:** v0.25.0 e publicată (regulile Firestore `e605bb44`, rularea 44952418317, tag `v0.25.0`), plus reparația
+  butoanelor din Jocuri fulger care tremurau sub cursor (rularea 44954525149). v0.26.0 (așezarea lecțiilor pe tablete și laptopuri)
+  e gata local și se publică la cererea utilizatorului (doar site-ul: regulile Firestore nu se schimbă).
   - Copilul parcurge lecțiile de înmulțire și de fracții: ce provocări sunt prea ușoare sau prea grele, ce gesturi merg pe telefonul
     lui.
   - Copilul joacă temele pe fiecare nivel, și înmulțirea: din tabelul „Pentru părinți” (timpul mediu pe tip) se reglează `fastMs` și
@@ -1067,6 +1070,63 @@
   - **Publicat:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
+
+- **2026-11-22 (Învață pe tablete și laptopuri: lecția pe două coloane și farfuriile de mărime fixă, v0.26.0)**
+  - **Cererea:**
+    - farfuriile să aibă aceeași mărime (cât trăgeai de glisor, își schimbau mărimea și mutau ce era sub ele);
+    - caseta Cifruței ocupa mult din lățime;
+    - slider-ele și restul widgetului să fie destul de mari și să încapă pe verticală pe tablete și laptopuri (prioritatea, înaintea
+      telefonului);
+    - așezări mai late, unde ecranul permite.
+  - **Ce era (măsurat pe site-ul publicat):**
+    - scena începea la 322 px de sus, iar coloana Cifruței avea 384 px din 928 (41%), cu widgetul pe 528 px;
+    - fără derulare încăpeau 0/17 lecții pe laptopurile de 1366 × 650 și 1280 × 600, 2/17 pe tableta culcată (1024 × 690) și 6/17 pe
+      cea ținută vertical (768 × 950);
+    - la împărțire, farfuriile își luau mărimea după nucile lor, deci desenul își schimba înălțimea și glisorul de sub el sărea.
+  - **Lecția:**
+    - de la 48rem, două coloane: Cifruța (16–22rem: „Ce învățăm”, apoi Cifruța lângă bulinele provocărilor, deasupra balonului, care
+      ia toată lățimea coloanei) și scena;
+    - titlul stă pe un rând cu „înapoi” și „Lecția 2 din 5”;
+    - pe ecranele mari, lecția și antetul au 80rem.
+  - **Widgetul:**
+    - trei grupuri: `iv-head` (calculul, legenda), `iv-main` (desenul cu glisoarele lui), `iv-foot` (butoanele, textele);
+    - pe o scenă de la 40rem, desenul stă în stânga, iar calculul cu textele în dreapta;
+    - desenele se socotesc din lățime și din `--iv-h` (înălțimea de sub titlu): careul până la 3,5rem pe căsuță, farfuriile înmulțirii
+      până la 3,75rem, balanța în em (până la 1,45×), barele și mașina mai mari, iar întregul tăiat cât lasă scara de tăiere;
+    - pe tablete și laptopuri, cifrele gradațiilor, bulinele și cărămizile zidului au cel puțin 14 px.
+  - **Împărțirea:**
+    - masa are mărime fixă, cu fundal: 10 farfurii (5 pe rând) sau 12 pungi (4 pe rând), plus un coș fix;
+    - toate farfuriile au aceeași mărime; ce nu încape la mărimea obișnuită (o farfurie cu 18 nuci, 9 pachete, peste 12 pungi) se
+      strânge (`--fit`, `--gfit`);
+    - calculul și legenda au loc pentru câte două rânduri („84 : 8 = 10 și rămân 4” se rupe pe telefon și împingea desenul cu 26 px);
+    - tăvile înmulțirii au toate lungimea rândului cel mai lung.
+  - **Telefonul ținut orizontal:** desenul stă sus (centrat pe verticală, era aproape tot sub marginea ecranului), iar „Ce învățăm”
+    trece deasupra ambelor coloane, ca provocarea să rămână pe ecran.
+  - **Rezultate (măsurate):**
+    - fără derulare încap 17/17 lecții, cu provocarea pe ecran, pe 10 ecrane de tabletă și laptop: 1366 × 650, 1280 × 600, 1280 × 720,
+      1440 × 790, 1536 × 730, 1920 × 950, 1024 × 690, 1180 × 750, 768 × 950, 820 × 1100;
+    - căsuțele careului au 35–51 px, iar pistele glisoarelor 240–512 px;
+    - trăgând fără să ridici degetul prin toate valorile, pe 5 ecrane, nimic din afara desenului nu se mișcă, iar farfuriile au o
+      singură mărime.
+  - **E2E nou:**
+    - `invata_screens` pe 4 ecrane de tabletă și laptop (widgetul și provocarea fără derulare, căsuțe ≥ 30 px, piste ≥ 240 px, text
+      ≥ 14 px, desenul lângă calcul de la 1024 px);
+    - `iv_drag_steady` (tragerea, pe fiecare ecran).
+  - **Teste:** npm test 161/161, E2E lecții 1179/1179, E2E complet 4258/4258.
+  - **Backlog:**
+    - pe telefonul ținut vertical, provocarea rămâne deasupra widgetului: o bară cu provocarea, lipită sus, ar ajuta;
+    - pungile sunt mici pe telefon (12 px pe nucă).
+- **2026-11-21 (Publicarea v0.25.0 și butoanele care tremurau)**
+  - **Publicarea:**
+    - regulile Firestore `e605bb44`, înaintea site-ului;
+    - `npm run deploy` (161/161), rularea 44952418317, tag `v0.25.0`;
+    - adresele cu `?v=615115b`, iar temele și capitolele noi sunt pe site.
+  - **E2E pe site-ul publicat s-a oprit:** o variantă din Jocuri fulger a fost „nestabilă” 30 s (`inm-adunare-repetata`).
+  - **Cauza, reprodusă local:** ridicat de hover cu 2 px, butonul urca de sub cursorul așezat pe marginea lui de jos. Hover-ul se
+    stingea, butonul cobora și hover-ul se aprindea din nou, la nesfârșit.
+  - **Reparația:** butonul ridicat își lasă dedesubt o fâșie din aria lui (`::before`): commit e965184, rularea 44954525149,
+    `?v=e965184`.
+  - **E2E pe site-ul publicat, după reparație:** 3566/3566.
 
 - **2026-11-21 (Recenzia împărțirii, a termenului necunoscut și a fracțiilor, înainte de publicare)**
   - **Cine:** un agent fără istoricul conversației, la cererea utilizatorului, după verificări (npm test 160/160, reguli 16/16, E2E complet

@@ -28,12 +28,9 @@ export function mount(host, params, { logic, dispatch }) {
   const root = h(
     'div',
     { class: 'iv-widget iv-masina', 'data-testid': 'iv-masina' },
-    eq,
-    legend,
-    art,
-    h('div', { class: 'iv-control' }, h('span', { class: 'iv-control__label iv-f--cols' }, 'Ce număr intră?'), input.el),
-    h('div', { class: 'iv-tools' }, backButton),
-    h('div', { class: 'iv-text' }, reading, extra),
+    h('div', { class: 'iv-head' }, eq, legend),
+    h('div', { class: 'iv-main' }, art, h('div', { class: 'iv-control' }, h('span', { class: 'iv-control__label iv-f--cols' }, 'Ce număr intră?'), input.el)),
+    h('div', { class: 'iv-foot' }, h('div', { class: 'iv-tools' }, backButton), h('div', { class: 'iv-text' }, reading, extra)),
   );
   host.append(root);
 

@@ -117,7 +117,13 @@ export function mount(host, params, { logic, dispatch }) {
     board,
     side ? h('div', { class: 'iv-array__side' }, side) : null,
   );
-  const root = h('div', { class: `iv-array iv-array--${p.skin}`, 'data-testid': 'iv-array', style: { '--rows-max': R, '--cols-max': C } }, eq, legend, stage, tools.childElementCount ? tools : null, text);
+  const root = h(
+    'div',
+    { class: `iv-array iv-array--${p.skin}`, 'data-testid': 'iv-array', style: { '--rows-max': R, '--cols-max': C } },
+    h('div', { class: 'iv-head' }, eq, legend),
+    h('div', { class: 'iv-main' }, stage),
+    h('div', { class: 'iv-foot' }, tools.childElementCount ? tools : null, text),
+  );
   host.append(root);
   paintItems(first.item ?? p.item);
 

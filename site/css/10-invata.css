@@ -84,24 +84,35 @@
 .iv-card__text { grid-column: 2; font-size: var(--fs-0); color: var(--c-ink-soft); }
 .iv-card__foot { grid-column: 1 / -1; }
 
-/* ——— Cadrul lecției ——— */
-.iv-lesson { display: grid; gap: var(--sp-4); }
-.iv-lesson__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2) var(--sp-3); }
-.iv-lesson__count { font-size: var(--fs-0); color: var(--c-ink-soft); }
-.iv-lesson__title { display: flex; align-items: center; gap: 0.5rem; font-size: clamp(1.45rem, 1.1rem + 1.6vw, 2.6rem); }
+/* ——— Cadrul lecției ———
+   De la 48rem (tableta ținută vertical, tableta culcată, laptopul): două coloane, Cifruța în stânga (scopul lecției, bulinele
+   provocărilor, balonul) și widgetul în dreapta, iar widgetul încape sub titlul lecției fără derulare: desenele se socotesc după
+   `--iv-h`, înălțimea ecranului rămasă sub titlu. Mai îngust (telefonul ținut vertical), coloanele trec una sub alta, iar `--iv-h` e
+   ecranul de sub antet: widgetul încape după ce derulezi până la el. Pe ecranele mari, lecția e mai lată decât restul site-ului
+   (80rem, cu antetul aliniat la ea), ca desenul să fie mare. */
+.iv-lesson { --iv-h: calc(100dvh - 5.5rem); display: grid; gap: var(--sp-4); }
+.iv-lesson__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: 'back count' 'title title';
+  align-items: center;
+  gap: var(--sp-2) var(--sp-3);
+}
+.iv-lesson__head .c-back { grid-area: back; justify-self: start; }
+.iv-lesson__count { grid-area: count; font-size: var(--fs-0); color: var(--c-ink-soft); white-space: nowrap; }
+.iv-lesson__title { grid-area: title; display: flex; align-items: center; gap: 0.5rem; margin: 0; font-size: clamp(1.45rem, 1.1rem + 1.6vw, 2.6rem); }
 .iv-lesson__icon .c-emoji { width: 1.15em; height: 1.15em; margin: 0; }
 .iv-lesson__body { display: grid; gap: var(--sp-4); align-items: start; }
-@media (min-width: 62rem) {
-  .iv-lesson__body { grid-template-columns: minmax(17rem, 24rem) 1fr; }
-}
-.iv-lesson__guide { display: grid; gap: var(--sp-2); }
-.iv-guide { align-items: flex-start; }
-.iv-guide .c-mascot__art { width: clamp(3.25rem, 2.5rem + 3vw, 5rem); }
-.iv-guide .c-bubble { flex: 1; min-width: 0; }
+.iv-lesson__guide { display: grid; gap: var(--sp-3); align-content: start; min-width: 0; }
+/* Cifruța stă deasupra balonului, lângă bulinele provocărilor: balonul ia toată lățimea coloanei, iar codița lui arată spre ea */
+.iv-guide { --mascot: clamp(2.75rem, 2.3rem + 1.2vw, 3.5rem); display: grid; gap: 0.7rem; }
+.iv-guide__top { display: flex; align-items: center; gap: var(--sp-3); }
+.iv-guide .c-mascot__art { flex: none; width: var(--mascot); }
+.iv-guide .c-bubble::before { left: calc(var(--mascot) / 2 - 9px); top: -10px; bottom: auto; transform: rotate(135deg); }
 .iv-lesson__nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sp-3); }
 .iv-lesson__link { font-family: var(--font-title); font-weight: 700; }
 
-/* „Ce învățăm”: scopul lecției și ce înseamnă desenul, sub titlu */
+/* „Ce învățăm”: scopul lecției și ce înseamnă desenul, deasupra Cifruței */
 .iv-goal {
   margin: 0;
   max-width: 70ch;
@@ -113,6 +124,23 @@
   line-height: 1.45;
 }
 .iv-goal__label { font-family: var(--font-title); }
+
+@media (min-width: 48rem) {
+  body.is-lesson .l-main { padding-top: var(--sp-4); }
+  /* sub antet (4rem), marginea paginii, titlul lecției și spațiul de sub el; plus o margine jos */
+  .iv-lesson { --iv-h: calc(100dvh - 10rem); }
+  .iv-lesson__head { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: 'back title count'; column-gap: var(--sp-4); }
+  .iv-lesson__title { font-size: clamp(1.4rem, 0.9rem + 1.1vw, 2.1rem); }
+  .iv-lesson__body { grid-template-columns: clamp(16rem, 24vw, 22rem) minmax(0, 1fr); gap: var(--sp-5); }
+  .iv-goal { padding: var(--sp-2) var(--sp-3); font-size: var(--fs-0); }
+  .iv-intro { font-size: var(--fs-0); }
+  /* pe tablete și laptopuri, pistele sunt lungi: cifrele gradațiilor și bulinele provocărilor cresc la cel puțin 14 px */
+  .iv-lesson .iv-dot { width: 1.95rem; height: 1.95rem; font-size: 0.95rem; }
+  .iv-lesson .iv-slider__ticks li { font-size: 0.875rem; }
+}
+@media (min-width: 62rem) {
+  .iv-lesson.l-container, body.is-lesson .l-header__inner { max-width: 80rem; }
+}
 
 /* balonul: indicația, provocarea, soluțiile găsite, variantele, „Bravo!” și „Ce am aflat” */
 .iv-bubble { display: grid; gap: 0.5rem; }
@@ -158,8 +186,30 @@
 .iv-dot.is-current { border-color: var(--c-brand); border-width: 3px; color: var(--c-brand-dark); }
 .iv-dot.is-done { border-color: var(--c-ok-ink); background: var(--c-ok-bg); color: var(--c-ok-ink); }
 
-/* scena widgetului: containerul după care se socotește mărimea căsuțelor */
-.iv-stage { container-type: inline-size; display: grid; gap: var(--sp-3); min-width: 0; }
+/* ——— Scena widgetului: containerul după care se socotesc desenele ———
+   Fiecare widget are trei bucăți: calculul (iv-head), desenul cu glisoarele lui (iv-main), butoanele și textele (iv-foot). Pe o scenă
+   îngustă stau una sub alta; de la 40rem, desenul stă în stânga și calculul cu textele în dreapta (o coloană de `--iv-side-w`), ca
+   desenul să ia toată înălțimea `--iv-h`. */
+.iv-stage { container: iv-stage / inline-size; display: grid; gap: var(--sp-3); min-width: 0; }
+.iv-head, .iv-main, .iv-foot { display: grid; justify-items: center; gap: var(--sp-3); width: 100%; min-width: 0; }
+@container iv-stage (min-width: 40rem) {
+  .iv-stage > * {
+    --iv-side-w: clamp(13rem, 32cqw, 18rem);
+    grid-template-columns: minmax(0, 1fr) var(--iv-side-w);
+    grid-template-rows: auto 1fr;
+    grid-template-areas: 'main head' 'main foot';
+    column-gap: var(--sp-5);
+    align-items: start;
+  }
+  .iv-head { grid-area: head; justify-items: start; text-align: left; }
+  .iv-head .iv-eq { font-size: var(--fs-3); }
+  .iv-head .iv-legend { text-align: left; }
+  .iv-main { grid-area: main; }
+  .iv-foot { grid-area: foot; justify-items: start; align-content: start; }
+  .iv-foot .iv-text { justify-items: start; text-align: left; }
+  .iv-foot .iv-tools { justify-content: flex-start; }
+  .iv-head .iv-frac-eq { font-size: var(--fs-4); }
+}
 
 /* ——— Calculul de sub desen ——— */
 .iv-text { display: grid; justify-items: center; gap: 0.35rem; text-align: center; }
@@ -260,22 +310,30 @@
 .iv-control__label { font-family: var(--font-title); font-weight: 700; }
 
 /* ——— Dreptunghiul înmulțirii ——— */
+/* căsuța: cât încape în lățimea desenului (`--avail-w`) și în înălțimea lui (`--avail-h`): una sub alta, înălțimea e `--iv-h` fără
+   calcul, glisorul de sus, butoane și texte (`--chrome`); alături, doar fără glisorul de sus, iar căsuța poate crește până la 3,5rem */
 .iv-array {
   --track: 2.75rem;
   --side: 2.25rem;
   --gap: 0.25rem;
   --chrome: 13rem;
-  --cell: clamp(1.25rem, min((100cqw - var(--track) - var(--side) - 2 * var(--gap)) / var(--cols-max), (100dvh - var(--chrome)) / var(--rows-max)), 2.75rem);
+  --avail-w: 100cqw;
+  --avail-h: calc(var(--iv-h, 100dvh) - var(--chrome));
+  --cell-max: 2.75rem;
+  --cell: clamp(1.25rem, min((var(--avail-w) - var(--track) - var(--side) - 2 * var(--gap)) / var(--cols-max), var(--avail-h) / var(--rows-max)), var(--cell-max));
   --pitch: var(--cell);
   display: grid;
   justify-items: center;
   gap: var(--sp-3);
 }
+@container iv-stage (min-width: 40rem) {
+  .iv-array { --avail-w: calc(100cqw - var(--iv-side-w) - var(--sp-5)); --avail-h: calc(var(--iv-h, 100dvh) - var(--track) - var(--gap)); --cell-max: 3.5rem; }
+}
 .iv-array--split { --side: var(--track); }
 .iv-array--table { --side: 0rem; }
 /* farfuriile: cel mult 6 × 6, deci căsuțe mai mari, iar între tăvi rămâne loc */
 .iv-array--plates {
-  --cell: clamp(1.75rem, min((100cqw - var(--track) - var(--side) - 2 * var(--gap)) / var(--cols-max), (100dvh - var(--chrome)) / var(--rows-max) - 0.5rem), 3.25rem);
+  --cell: clamp(1.75rem, min((var(--avail-w) - var(--track) - var(--side) - 2 * var(--gap)) / var(--cols-max), var(--avail-h) / var(--rows-max) - 0.5rem), 3.25rem);
   --pitch: calc(var(--cell) + 0.5rem);
 }
 .iv-array__stage {
@@ -329,12 +387,13 @@
   50% { scale: 1.3; }
 }
 
-/* farfuriile: câte o tavă sub fiecare rând, cât rândul */
+/* farfuriile: câte o tavă sub fiecare rând, toate cât rândul cel mai lung (nu cât merele de pe ele: o farfurie nu-și schimbă mărimea
+   când tragi de glisor) */
 .iv-tray {
   position: absolute;
   top: calc(var(--r) * var(--pitch) + 0.1rem);
   left: calc(var(--cell) * -0.1);
-  width: calc(var(--cols) * var(--cell) + var(--cell) * 0.2);
+  width: calc(var(--cols-max) * var(--cell) + var(--cell) * 0.2);
   height: calc(var(--pitch) - 0.2rem);
   border: 2px solid var(--c-line-strong);
   border-radius: var(--r-pill);
@@ -514,7 +573,8 @@
   font-size: 0.75rem;
   line-height: 1;
 }
-.iv-brick .c-frac { font-size: 0.75rem; }
+/* cărămizile: litera crește cu căsuța (14 px pe tablete și laptopuri), dar nu sub 12 px */
+.iv-brick, .iv-brick .c-frac { font-size: clamp(0.75rem, calc(var(--cell) * 0.37), 1rem); }
 .iv-wall__row:first-child .iv-brick { font-family: var(--font-title); font-weight: 700; }
 .iv-brick.is-on { background: repeating-linear-gradient(45deg, var(--v-orange, #f9a03f) 0 7px, #f5b56c 7px 11px); color: var(--c-ink); font-weight: 700; }
 .iv-brick.is-eq { background: var(--c-cols-bg); color: var(--c-cols-ink); }
@@ -546,39 +606,96 @@
   pointer-events: none;
 }
 
-/* ——— Împărțirea (imparte): coșul, apoi farfuriile sau pungile, cu nucile ori bețișoarele lor ———
-   Farfuriile trec pe rândul următor, fiecare cu un careu mic (nucile de 22 px; măsurat: cel mult 162 px de desen cu 24 de nuci, pe
-   326 px de lățime). Bețișoarele: un pachet de 10 (zecea) și bețișoarele libere (unitățile), cel mult 242 px la 84 : 10. Obiectele
-   apar în ordinea împărțirii (`--k`), doar prin transform și opacity. */
+/* ——— Împărțirea (imparte): coșul, apoi farfuriile (sau pungile) pe o masă de mărime fixă ———
+   Toate farfuriile au aceeași mărime, oricâte ar fi și oricâte nuci ar primi, iar masa are locuri pentru toate cele 10 farfurii
+   (5 pe rând; 4 pe scenele înguste) sau pentru 12 pungi (4 pe rând); coșul ține cele cel mult 9 nuci rămase. Așa, glisorul și
+   textele nu se mișcă în timp ce tragi. Totul se măsoară în `--s` (o nucă): cât încape în lățimea scenei și în înălțimea `--iv-h`
+   rămasă după calcul, glisor și texte (`--chrome`), între 11 și 22 px. O farfurie ține 12 nuci (4 × 3) la mărimea lor; mai multe
+   (doar pe o singură farfurie) se strâng în ea, cu `--fit` din view.js. La bețișoare, farfuria are pachetele (zecile) pe un rând și
+   bețișoarele (unitățile) dedesubt: 4 pachete și 9 bețișoare. Obiectele apar în ordinea împărțirii (`--k`), doar prin transform și
+   opacity. */
 .iv-imparte { display: grid; justify-items: center; gap: var(--sp-3); }
 .iv-imparte__control { width: 100%; max-width: 32rem; }
-.iv-share { display: flex; flex-direction: column; align-items: center; gap: 0.45rem; width: 100%; }
-.iv-share__basket {
-  --cols: 4;
+/* calculul și legenda au loc pentru câte două rânduri („84 : 8 = 10 și rămân 4” se rupe pe telefon): altfel, desenul și glisorul
+   de sub ele ar sări în timp ce tragi */
+.iv-imparte .iv-eq { display: grid; place-content: center; min-height: 2lh; }
+.iv-imparte .iv-legend { min-height: 2lh; }
+@container iv-stage (min-width: 40rem) {
+  .iv-imparte .iv-head .iv-eq { place-content: start; }
+}
+.iv-share {
+  /* farfuria (`--pw` × `--ph`), masa (`--per` locuri pe rând, `--lines` rânduri) și coșul (`--bw` × `--bh`), în nuci */
+  --pw: 5.25;
+  --ph: 4.1;
+  --per: 5;
+  --lines: 2;
+  --bw: 6.6;
+  --bh: 2.75;
+  --mw: calc(var(--per) * (var(--pw) + 0.4) - 0.4);
+  --mh: calc(var(--lines) * (var(--ph) + 0.4) - 0.4);
+  --aw: 100cqw;
+  --chrome: 18rem;
+  --s: clamp(11px, min((var(--aw) - 2.5rem) / (var(--mw) + 0.6), (var(--iv-h, 100dvh) - var(--chrome)) / (var(--mh) + var(--bh) + 1.2)), 22px);
   display: grid;
-  grid-template-columns: repeat(var(--cols), 22px);
-  gap: 3px;
-  min-width: 3.4rem;
-  min-height: 2.3rem;
-  padding: 0.3rem 0.55rem;
+  justify-items: center;
+  gap: calc(0.45 * var(--s));
+}
+.iv-share--bags { --pw: 6.3; --ph: 2.85; --per: 4; --lines: 3; }
+.iv-share--zeci { --pw: 4.35; --ph: 4.95; --bw: 3.8; --bh: 2.6; }
+@container iv-stage (max-width: 30rem) {
+  .iv-share:not(.iv-share--bags) { --per: 4; --lines: 3; }
+}
+@container iv-stage (min-width: 40rem) {
+  .iv-share { --aw: calc(100cqw - var(--iv-side-w) - var(--sp-5)); --chrome: 5.5rem; }
+}
+.iv-share__basket {
+  display: grid;
+  grid-template-columns: repeat(var(--bc, 5), var(--s));
+  grid-auto-rows: var(--s);
+  gap: calc(0.15 * var(--s));
+  place-content: center;
+  box-sizing: border-box;
+  width: calc(var(--bw) * var(--s) + 4px);
+  height: calc(var(--bh) * var(--s) + 4px);
   border: 2px dashed var(--c-line-strong);
   border-radius: 0.4rem 0.4rem 1.1rem 1.1rem;
   background: var(--v-cream, #ffebcc);
 }
-.iv-share--zeci .iv-share__basket { display: flex; align-items: flex-end; gap: 2px; min-height: 3.3rem; }
-.iv-share__groups { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem; }
+.iv-share--zeci .iv-share__basket { display: flex; align-items: center; justify-content: center; gap: calc(0.09 * var(--s)); }
+/* masa: locurile au mărime fixă, iar rândurile se umplu de la mijloc, de sus în jos; fundalul arată cât e masa */
+.iv-share__groups {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: flex-start;
+  gap: calc(0.4 * var(--s) * var(--gfit, 1));
+  width: calc((var(--mw) + 0.6) * var(--s) + var(--per) * 4px + 2px);
+  height: calc((var(--mh) + 0.6) * var(--s) + var(--lines) * 4px);
+  padding: calc(0.3 * var(--s));
+  border-radius: calc(0.7 * var(--s));
+  background: var(--c-surface-2);
+}
 .iv-share__group {
-  --cols: 3;
+  --n: calc(var(--s) * var(--fit, 1));
   display: grid;
-  grid-template-columns: repeat(var(--cols), 22px);
-  gap: 3px;
-  padding: 0.4rem 0.5rem;
+  grid-template-columns: repeat(var(--pc, 3), var(--n));
+  grid-auto-rows: var(--n);
+  gap: calc(0.15 * var(--n));
+  place-content: center;
+  box-sizing: border-box;
+  width: calc(var(--pw) * var(--s) * var(--gfit, 1) + 4px);
+  height: calc(var(--ph) * var(--s) * var(--gfit, 1) + 4px);
   border: 2px solid var(--c-rows);
   border-radius: 50% / 40%;
   background: var(--c-rows-bg);
 }
 .iv-share__group.is-bag { border-color: var(--c-cols); border-radius: 0.45rem 0.45rem 1rem 1rem; background: var(--c-cols-bg); }
-.iv-share--zeci .iv-share__group { display: flex; align-items: flex-end; gap: 2px; padding: 0.35rem 0.6rem; border-radius: 1.2rem; }
+/* la bețișoare: pachetele pe rândul de sus (`--zc` pe rând), bețișoarele dedesubt */
+.iv-share--zeci .iv-share__group { grid-template-columns: auto; grid-auto-rows: auto; justify-items: center; border-radius: 1.2rem; }
+.iv-share__tens { display: grid; grid-template-columns: repeat(var(--zc, 4), auto); gap: calc(0.15 * var(--n)) calc(0.09 * var(--n)); }
+.iv-share__units { display: flex; gap: calc(0.09 * var(--n)); }
+.iv-share__tens:empty, .iv-share__units:empty { display: none; }
+.iv-share .iv-nut { width: var(--n, var(--s)); height: var(--n, var(--s)); }
 .iv-nut {
   display: block;
   width: 22px;
@@ -587,19 +704,20 @@
   background: radial-gradient(circle at 34% 30%, var(--v-brown-light, #d9a066) 0 20%, var(--v-brown, #a86b3c) 21% 100%);
   box-shadow: inset 0 -2px 0 var(--v-brown-dark, #7f4f2a);
 }
-/* un pachet de 10 bețișoare, legat cu o bandă; un bețișor liber */
+/* un pachet de 10 bețișoare, legat cu o bandă; un bețișor liber (în nuci: 0,82 × 2 și 0,23 × 2) */
 .iv-bundle {
   position: relative;
   display: block;
-  width: 18px;
-  height: 44px;
+  width: calc(0.82 * var(--n, var(--s)));
+  height: calc(2 * var(--n, var(--s)));
   border-radius: 3px;
   background: repeating-linear-gradient(90deg, var(--v-yellow-dark, #f2b705) 0 1.6px, var(--v-yellow, #ffd34d) 1.6px 3.6px);
 }
 .iv-bundle::after { content: ''; position: absolute; inset: 44% -2px auto; height: 5px; border-radius: 2px; background: var(--c-rows); }
-.iv-stick { display: block; width: 5px; height: 44px; border-radius: 2px; background: var(--v-yellow-dark, #f2b705); box-shadow: inset -1px 0 0 var(--v-orange-dark, #e07b39); }
-.iv-bundle + .iv-stick { margin-left: 4px; } /* o mică pauză între zeci și unități */
-.iv-share.is-dealing .iv-share__group > * { animation: iv-deal 0.32s var(--ease-out) both; animation-delay: calc(var(--k) * var(--deal-step, 45ms)); }
+.iv-stick { display: block; width: calc(0.23 * var(--n, var(--s))); height: calc(2 * var(--n, var(--s))); border-radius: 2px; background: var(--v-yellow-dark, #f2b705); box-shadow: inset -1px 0 0 var(--v-orange-dark, #e07b39); }
+.iv-share.is-dealing .iv-share__group .iv-nut,
+.iv-share.is-dealing .iv-share__group .iv-bundle,
+.iv-share.is-dealing .iv-share__group .iv-stick { animation: iv-deal 0.32s var(--ease-out) both; animation-delay: calc(var(--k) * var(--deal-step, 45ms)); }
 @keyframes iv-deal {
   from { opacity: 0; transform: translateY(-0.9rem) scale(0.6); }
   to { opacity: 1; transform: none; }
@@ -611,17 +729,17 @@
    talere, sacul (cu „?” sau cu numărul ghicit) și nucile (16 px, câte 4–5 pe rând, ca 20 de nuci să încapă). */
 .iv-balanta, .iv-bare, .iv-masina { display: grid; justify-items: center; gap: var(--sp-3); }
 .iv-balanta__controls, .iv-bare .iv-control, .iv-masina .iv-control { width: 100%; max-width: 32rem; }
-.iv-scale { --tilt: 0deg; --sin: 0; container-type: inline-size; position: relative; width: min(100%, 22rem); height: 12rem; margin-inline: auto; }
-.iv-scale__post { position: absolute; left: 50%; bottom: 0; width: 0.6rem; height: 9rem; translate: -50% 0; border-radius: 0.3rem 0.3rem 0 0; background: var(--v-brown, #a86b3c); }
-.iv-scale__post::after { content: ''; position: absolute; left: 50%; bottom: 0; width: 5rem; height: 0.7rem; translate: -50% 0; border-radius: 0.4rem 0.4rem 0 0; background: var(--v-brown-dark, #7f4f2a); }
+.iv-scale { --tilt: 0deg; --sin: 0; container-type: inline-size; position: relative; width: min(100%, 22em); height: 12em; margin-inline: auto; font-size: 1rem; }
+.iv-scale__post { position: absolute; left: 50%; bottom: 0; width: 0.6em; height: 9em; translate: -50% 0; border-radius: 0.3em 0.3em 0 0; background: var(--v-brown, #a86b3c); }
+.iv-scale__post::after { content: ''; position: absolute; left: 50%; bottom: 0; width: 5em; height: 0.7em; translate: -50% 0; border-radius: 0.4em 0.4em 0 0; background: var(--v-brown-dark, #7f4f2a); }
 /* bara: de la 18% la 82% din lățime, rotită în jurul mijlocului; capetele ei urcă și coboară cu 32cqw × sin(înclinare) */
 .iv-scale__arm {
   position: absolute;
   left: 18%;
-  top: 2.6rem;
+  top: 2.6em;
   width: 64%;
-  height: 0.5rem;
-  border-radius: 0.25rem;
+  height: 0.5em;
+  border-radius: 0.25em;
   background: var(--v-brown-dark, #7f4f2a);
   transform: rotate(var(--tilt));
   transition: transform 0.45s var(--ease-out);
@@ -629,7 +747,7 @@
 /* talerele: câte 36% din lățime, cu mijlocul sub capetele barei (18% și 82%) */
 .iv-scale__pan {
   position: absolute;
-  top: 2.85rem;
+  top: 2.85em;
   display: grid;
   justify-items: center;
   width: 36%;
@@ -638,23 +756,24 @@
 .iv-scale__pan--l { left: 0; transform: translateY(calc(var(--sin) * -32cqw)); }
 .iv-scale__pan--r { left: 64%; transform: translateY(calc(var(--sin) * 32cqw)); }
 /* firul de care atârnă talerul */
-.iv-scale__pan::before { content: ''; width: 2px; height: 0.8rem; background: var(--c-line-strong); }
-.iv-scale__load { display: flex; align-items: flex-end; justify-content: center; gap: 4px; min-height: 4.4rem; width: 100%; }
-.iv-scale__pile { --cols: 5; display: grid; grid-template-columns: repeat(var(--cols), 16px); gap: 2px; }
+.iv-scale__pan::before { content: ''; width: 2px; height: 0.8em; background: var(--c-line-strong); }
+.iv-scale__load { display: flex; align-items: flex-end; justify-content: center; gap: 0.25em; min-height: 4.4em; width: 100%; }
+.iv-scale__pile { --cols: 5; display: grid; grid-template-columns: repeat(var(--cols), 1em); gap: 0.125em; }
 .iv-scale__pile:empty { display: none; }
-.iv-scale .iv-nut { width: 16px; height: 16px; }
-.iv-scale__dish { width: 100%; height: 0.8rem; border-radius: 0 0 50% 50% / 0 0 100% 100%; background: var(--c-line-strong); }
+.iv-scale .iv-nut { width: 1em; height: 1em; }
+.iv-scale__dish { width: 100%; height: 0.8em; border-radius: 0 0 50% 50% / 0 0 100% 100%; background: var(--c-line-strong); }
+/* sacul: litera lui e de 1,3 ori cea a balanței, deci mărimile lui sunt împărțite la 1,3 (2,6 × 3 em ale balanței) */
 .iv-sack {
   display: grid;
   place-items: center;
-  width: 2.6rem;
-  height: 3rem;
+  width: 2em;
+  height: 2.31em;
   border-radius: 42% 42% 46% 46% / 30% 30% 60% 60%;
   background: var(--v-brown-light, #d9a066);
-  box-shadow: inset 0 -4px 0 var(--v-brown, #a86b3c), inset 0 0.45rem 0 -0.2rem var(--v-brown-dark, #7f4f2a);
+  box-shadow: inset 0 -0.19em 0 var(--v-brown, #a86b3c), inset 0 0.35em 0 -0.15em var(--v-brown-dark, #7f4f2a);
   color: var(--c-ink);
   font-family: var(--font-title);
-  font-size: 1.3rem;
+  font-size: 1.3em;
   font-weight: 700;
 }
 .iv-sack.is-guess { background: var(--c-cols-bg); box-shadow: inset 0 0 0 3px var(--c-cols); color: var(--c-cols-ink); }
@@ -694,6 +813,23 @@
 .iv-machine__target { margin-left: 0.4rem; padding: 0.2rem 0.5rem; border: 2px dashed var(--c-line-strong); border-radius: 0.5rem; font-weight: 700; }
 .iv-machine__target.is-ok { border-style: solid; border-color: var(--c-ok-ink); color: var(--c-ok-ink); }
 
+/* ——— Scena lată (de la 40rem): desenele mici cresc ———
+   După regulile lor de bază, ca să le bată: balanța (în em) și barele cu lățimea coloanei și cu înălțimea rămasă, mașina de numere cu
+   litera; întregul tăiat se strânge cât lasă loc scării de tăiere și glisoarelor de sub el. */
+@container iv-stage (min-width: 40rem) {
+  .iv-scale { font-size: clamp(1rem, min((100cqw - var(--iv-side-w) - var(--sp-5)) / 22, (var(--iv-h, 100dvh) - 7rem) / 12.5), 1.45rem); }
+  .iv-bars { width: min(100%, 36rem); gap: 0.7rem; }
+  .iv-bar { height: 3.3rem; font-size: var(--fs-3); }
+  .iv-machine__value, .iv-machine__card { font-size: var(--fs-3); }
+  .iv-parts { --parts-chrome: 6.5rem; }
+  .iv-parts:has(.iv-parts__controls .iv-control + .iv-control) { --parts-chrome: 11.5rem; }
+  .iv-parts:has(.iv-ladder-box) { --parts-chrome: 17.5rem; }
+  .iv-parts__art { width: min(100%, 20rem, var(--iv-h, 100dvh) - var(--parts-chrome)); }
+  .iv-parts__art[data-shape='bar'] { width: min(100%, 32rem); }
+  /* farfuriile înmulțirii (cel mult 6 × 6) pot crește mai mult decât careul de 10 × 10 */
+  .iv-array--plates { --cell: clamp(1.75rem, min((var(--avail-w) - var(--track) - var(--side) - 2 * var(--gap)) / var(--cols-max), var(--avail-h) / var(--rows-max) - 0.5rem), 3.75rem); }
+}
+
 /* ——— Ecranele joase (telefonul ținut orizontal): desenul în stânga; Cifruța, calculul și butoanele în dreapta ———
    Scena și widgetul devin `display: contents`, ca bucățile widgetului să se așeze direct în grila lecției; căsuța se socotește
    atunci după înălțime (fără container, unitățile cq trec la ecran). */
@@ -702,38 +838,44 @@
   body.is-lesson .c-logo__art { width: 2rem; height: 2rem; }
   body.is-lesson .c-logo__sub { display: none; }
   body.is-lesson .l-main { padding-block: var(--sp-2) var(--sp-5); }
-  .iv-lesson { gap: var(--sp-2); }
+  /* desenul are toată înălțimea ecranului (fără container, unitățile cq trec la ecran): `--chrome` scade doar ce stă lângă el */
+  .iv-lesson { --iv-h: 100dvh; gap: var(--sp-2); }
   .iv-lesson__title { font-size: var(--fs-2); }
   .iv-lesson__body {
     grid-template-columns: auto minmax(14rem, 1fr);
-    grid-template-rows: auto auto auto auto auto auto 1fr;
-    grid-template-areas: 'stage guide' 'stage eq' 'stage ctrl' 'stage tools' 'stage more' 'stage text' 'stage .';
+    grid-template-rows: auto auto auto auto auto auto auto 1fr;
+    grid-template-areas: 'goal goal' 'stage guide' 'stage eq' 'stage ctrl' 'stage tools' 'stage more' 'stage text' 'stage .';
     column-gap: var(--sp-5);
     row-gap: var(--sp-2);
   }
-  .iv-lesson__guide { grid-area: guide; }
+  /* „Ce învățăm” deasupra ambelor coloane, ca provocarea din balon să rămână pe ecran */
+  .iv-lesson__guide { display: contents; }
+  .iv-goal { grid-area: goal; max-width: none; }
+  .iv-guide { grid-area: guide; }
   /* widgeturile noi (împărțirea, balanța, barele, mașina) au clasele comune `iv-widget` și `iv-art`, ca să nu se adauge aici unul câte unul */
-  .iv-stage, .iv-array, .iv-jumps, .iv-parts, .iv-widget { display: contents; }
+  .iv-stage, .iv-array, .iv-jumps, .iv-parts, .iv-widget, .iv-head, .iv-main, .iv-foot { display: contents; }
   .iv-array__stage, .iv-jumps__art, .iv-parts__art, .iv-art { grid-area: stage; }
   /* desenul widgeturilor noi are o lățime dată (coloana lui e cât conținutul, iar balanța e un container de mărime), glisorul stă sub
      calcul, iar legenda după butoane */
-  .iv-art { width: min(22rem, 46vw); align-self: center; }
-  .iv-widget > .iv-control, .iv-widget > .iv-balanta__controls { grid-area: ctrl; justify-self: stretch; }
-  .iv-widget > .iv-legend { grid-area: more; justify-self: start; text-align: left; }
-  .iv-parts__art { width: min(14rem, 40vw); align-self: center; }
+  .iv-art { width: min(22rem, 46vw); align-self: start; }
+  .iv-widget .iv-main > .iv-control, .iv-widget .iv-main > .iv-balanta__controls { grid-area: ctrl; justify-self: stretch; }
+  .iv-widget .iv-head > .iv-legend { grid-area: more; justify-self: start; text-align: left; }
+  /* masa împărțirii: puțin mai lată decât celelalte desene, cu toată înălțimea */
+  .iv-share { width: min(28rem, 52vw); --aw: min(28rem, 52vw); --chrome: 5rem; }
+  .iv-parts__art { width: min(14rem, 40vw); align-self: start; }
   .iv-parts__controls { grid-area: ctrl; justify-self: stretch; }
   /* la fracții: scara de tăiere sub calcul, apoi glisorul de colorat, apoi alegerea formei */
   .iv-ladder-box { grid-area: ctrl; justify-items: start; }
   .iv-parts:has(.iv-ladder-box) .iv-parts__controls { grid-area: tools; }
   .iv-parts .iv-tools { grid-area: more; }
-  .iv-jumps__art { width: min(26rem, 52vw); align-self: center; }
+  .iv-jumps__art { width: min(26rem, 52vw); align-self: start; }
   .iv-eq { grid-area: eq; justify-self: start; font-size: var(--fs-3); }
   .iv-jumps__controls { grid-area: ctrl; justify-self: stretch; }
   .iv-frac-eq { font-size: var(--fs-4); }
   .iv-tools { grid-area: tools; justify-self: start; justify-content: flex-start; }
   .iv-text { grid-area: text; justify-items: start; text-align: left; }
   .iv-array { --chrome: 7.5rem; }
-  .iv-guide .c-mascot__art { width: 3rem; }
+  .iv-guide { --mascot: 2.5rem; }
   .iv-intro { font-size: var(--fs-0); }
   .iv-ask { font-size: var(--fs-1); }
 }
@@ -747,7 +889,7 @@
   .iv-parts__art { width: min(100%, 12.5rem); }
   .iv-frac-eq { font-size: var(--fs-4); }
   .iv-lesson { gap: var(--sp-3); }
-  .iv-guide .c-mascot__art { width: 2.75rem; }
+  .iv-guide { --mascot: 2.75rem; }
   .iv-intro { font-size: var(--fs-0); }
   .iv-ask { font-size: var(--fs-1); }
   .iv-array { --gap: 0.15rem; }
