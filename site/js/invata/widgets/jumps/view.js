@@ -45,14 +45,15 @@ export function mount(host, params, { logic, dispatch }) {
     timers = Array.from({ length: state.count }, (_, i) => setTimeout(() => play('tap', { step: Math.min(5, i) }), i * 280));
   }
 
-  function render(next, { hidden = [] } = {}) {
+  function render(next) {
     const fresh = next.step === state.step && next.count === state.count + 1 ? next.count - 1 : -1;
+    if (next.step !== state.step || next.count !== state.count) timers.forEach(clearTimeout); // „Sari!” se oprește
     state = next;
     sliders.step.set(state.step);
     sliders.count.set(state.count);
     art.classList.remove('is-playing');
     art.innerHTML = visualSVG({ v: 'skip-line', step: state.step, count: state.count, fresh });
-    const t = logic.texts(params, state, hidden);
+    const t = logic.texts(params, state);
     const [a, b] = factorsOf(state.count, state.step);
     const [ta, tb] = factorsOf('rows', 'cols');
     const tone = (v, which) => h('span', { class: `iv-f iv-f--${which}` }, String(v));

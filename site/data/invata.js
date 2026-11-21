@@ -66,7 +66,7 @@ export default {
           tasks: [
             { id: 'trei-cinci', ask: 'Fă 3 sărituri de câte 5.', want: { count: 3, step: 5 } },
             { id: 'din-patru', ask: 'Numără din 4 în 4 până la 28.', want: { step: 4, end: 28 } },
-            { id: 'optsprezece', ask: 'Ajungi la 18 din sărituri egale, în 2 feluri.', collect: { end: 18 }, by: ['step', 'count'], need: 2 },
+            { id: 'optsprezece', ask: 'Fă sărituri egale până la 18, în 2 feluri.', collect: { end: 18 }, by: ['step', 'count'], need: 2 },
           ],
           notes: [
             '3 sărituri de câte 5: 5 + 5 + 5 = 3 × 5 = 15.',
@@ -131,8 +131,8 @@ export default {
               ask: 'Care desen arată două jumătăți?',
               pick: [
                 { v: 'fraction', shape: 'circle', parts: 2, sizes: [1, 2] },
-                { v: 'fraction', shape: 'square', parts: 2, cut: 'diagonal' },
                 { v: 'fraction', shape: 'bar', parts: 3 },
+                { v: 'fraction', shape: 'square', parts: 2, cut: 'diagonal' },
               ],
               rule: 'jumatati',
               hint: 'Încă nu. Jumătățile sunt două bucăți la fel de mari.',
@@ -171,6 +171,7 @@ export default {
           notes: [
             'Un **sfert** e jumătate dintr-o jumătate: tai jumătatea încă o dată în două.',
             'Două sferturi fac o jumătate, iar patru sferturi fac un întreg.',
+            'În clasa a III-a, jumătatea se mai numește **doime**, iar sfertul **pătrime**.',
           ],
         },
         {
@@ -188,7 +189,7 @@ export default {
               id: 'ce-fractie',
               ask: 'Ce fracție e colorată?',
               show: { v: 'fraction', shape: 'circle', parts: 5, on: [0, 1, 2] },
-              pick: ['2/5', '3/5', '3/8'],
+              pick: ['3/5', '2/5', '3/8'],
               rule: 'valoare',
               of: [3, 5],
               hint: 'Încă nu. Numără bucățile colorate, apoi toate bucățile.',
@@ -225,8 +226,8 @@ export default {
           widget: { w: 'wall', den: 3, num: 1 },
           tasks: [
             { id: 'o-doime', ask: 'Arată {{f:1/2}} pe zid.', want: { den: 2, num: 1 } },
-            { id: 'zecimi', ask: 'Găsește, la zecimi, fracția egală cu {{f:1/2}}.', want: { den: 10, num: 5 } },
-            { id: 'sesimi', ask: 'Găsește, la șesimi, fracția egală cu {{f:2/3}}.', want: { den: 6, num: 4 } },
+            { id: 'zecimi', ask: 'Găsește, la zecimi, fracția egală cu {{f:1/2}}.', want: { den: 10, num: 5 }, hide: ['same'] },
+            { id: 'sesimi', ask: 'Găsește, la șesimi, fracția egală cu {{f:2/3}}.', want: { den: 6, num: 4 }, hide: ['same'] },
             { id: 'mai-mare', ask: 'Care e mai mare?', pick: ['1/5', '1/3'], rule: 'mai-mare', hint: 'Încă nu. Uită-te pe zid: care bucată e mai lungă?' },
           ],
           notes: [

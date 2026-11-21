@@ -59,7 +59,7 @@ export function mount(host, params, { logic, dispatch }) {
   );
   host.append(root);
 
-  function render(next) {
+  function render(next, { hidden = [] } = {}) {
     state = next;
     sliders.den.set(state.den);
     sliders.num.setCount(state.den);
@@ -75,7 +75,7 @@ export function mount(host, params, { logic, dispatch }) {
       b.el.classList.toggle('is-eq', within && logic.same(state).some(([, d]) => d === b.d));
       b.el.classList.toggle('is-end', ends);
     }
-    const t = logic.texts(params, state);
+    const t = logic.texts(params, state, hidden);
     eq.innerHTML = md(keepMath(t.equation));
     reading.textContent = t.reading;
     sum.textContent = t.sum;

@@ -12,7 +12,6 @@ import { factorsOf, keepMath } from '../../text.js';
 import { ITEMS, SPLIT_ITEMS, STRATEGIES, litCells } from './logic.js';
 
 const ITEM_ICONS = { mar: emojiHTML('mar'), stea: emojiHTML('stea'), punct: '<span class="iv-bead"></span>', patrat: '<span class="iv-tile"></span>' };
-const ITEM_NAMES = { mar: 'Mere', stea: 'Stele', punct: 'Buline', patrat: 'Pătrățele' };
 
 /** Numele glisoarelor și textele citite, pe aspecte. */
 function labels(p, unit) {

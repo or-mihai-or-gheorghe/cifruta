@@ -32,12 +32,16 @@ export const STRATEGIES = [
 ];
 
 export const QUANTITIES = ['rows', 'cols', 'product', 'cut', 'top', 'bottom', 'known', 'left', 'pairs', 'marked', 'part', ...STRATEGIES.map((s) => s.id)];
-/** Ce poate ascunde o provocare („Cât face 7 × 8?” nu arată produsul). */
-export const HIDEABLE = ['product'];
+/**
+ * Ce poate ascunde o provocare („Cât face 7 × 8?” nu arată produsul): doar unde toate textele scriu „?”; pe hartă, căsuțele știute
+ * (și cea oglindită) arată produsul, iar la farfuriile colorate calculul e altul.
+ */
+const hideable = (p) => (p.skin === 'table' || p.mark ? [] : ['product']);
 
 const limit = (p) => LIMIT[p.skin] ?? 10;
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
-const minRows = (p) => (p.skin === 'split' ? 2 : 1);
+// tăietura cere două rânduri; fracția dintr-o mulțime, cel puțin două farfurii (numitorul 1 n-ar avea sens)
+const minRows = (p) => (p.skin === 'split' || p.mark ? 2 : 1);
 
 /** Căsuțele aprinse ale hărții, ca „r,c” (rândul și coloana, de la 1). */
 export function litCells(lit = []) {
@@ -65,7 +69,7 @@ export function pairsLeft(on) {
 
 export default {
   QUANTITIES,
-  HIDEABLE,
+  hideable,
 
   check(p) {
     const errors = [];

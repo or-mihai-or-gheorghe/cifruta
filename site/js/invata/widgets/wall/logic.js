@@ -5,14 +5,14 @@ import { fractionWords } from '../../../core/ro.js';
 import { equivalents, fractionText, reduce } from '../../fractions.js';
 
 export const QUANTITIES = ['den', 'num', 'value'];
-export const HIDEABLE = [];
 export const ROWS = 10;
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
 export default {
   QUANTITIES,
-  HIDEABLE,
+  // „Găsește, la zecimi, fracția egală cu 1/2”: lista fracțiilor egale ar da răspunsul; linia și semnele „=” de pe zid rămân
+  hideable: () => ['same'],
 
   check(p) {
     const errors = [];
@@ -56,15 +56,19 @@ export default {
     return [[s.num, s.den], ...others];
   },
 
-  texts(p, s) {
-    const all = this.same(s);
+  texts(p, s, hidden = []) {
+    const all = hidden.includes('same') ? [[s.num, s.den]] : this.same(s);
     const out = {
       markup: true,
       equation: all.map(([n, d]) => `{{f:${n}/${d}}}`).join(' = '),
       reading: fractionWords(s.num, s.den),
-      sum: all.length > 1 ? 'Toate se termină în același loc pe zid.' : 'Nicio altă fracție de pe zid nu se termină în același loc.',
+      sum: hidden.includes('same')
+        ? 'Caută pe zid: unde se termină la fel?'
+        : all.length > 1
+          ? 'Toate se termină în același loc pe zid.'
+          : 'Nicio altă fracție de pe zid nu se termină în același loc.',
     };
-    out.spoken = all.length > 1 ? `${out.reading} este egal cu ${all.slice(1).map((f) => fractionWords(...f)).join(', cu ')}` : out.reading;
+    out.spoken = all.length > 1 ? `${out.reading}: la fel de mult ca ${all.slice(1).map((f) => fractionWords(...f)).join(', ca ')}` : out.reading;
     return out;
   },
 };

@@ -3,7 +3,7 @@ import { test } from 'node:test';
 
 import {
   addAttempt, clearAccountCopies, clearFulger, clearHistory, clearScopeData, getAttempt, getDraft, getFulger, getLessons, getScoped, isUnsaved, lastAttempt,
-  listAttempts, listDrafts, mergeLessons, moveDrafts, moveLessons, onWrite, readScopeData, saveDraft, saveFulgerRound, saveLessons, setScope, setScoped,
+  listAttempts, listDrafts, mergeLessons, moveDrafts, moveLessons, onWrite, readLessons, readScopeData, saveDraft, saveFulgerRound, saveLessons, setScope, setScoped,
   updateAttempt, writeScopeData,
 } from '../site/js/core/storage.js';
 import { formatDateTime } from '../site/js/core/ro.js';
@@ -148,6 +148,7 @@ test('storage: progresul din Învață e pe profil, se mută la prima intrare î
   setScope(ana);
   assert.deepEqual(getLessons(), {});
   saveLessons({ 'inmultirea/grupe-egale': { done: ['c'], at: '2026-11-21T09:00:00Z' } });
+  assert.equal(Object.keys(readLessons(null)).length, 2, 'fără cont: două lecții începute (pentru întrebarea despre mutare)');
   setScope(null);
   moveLessons(null, ana); // înainte de clearScopeData(null), ca în moveAnonymousInto
   clearScopeData(null);

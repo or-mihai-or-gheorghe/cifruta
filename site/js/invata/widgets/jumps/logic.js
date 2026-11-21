@@ -5,13 +5,13 @@ import { cantitate } from '../../../core/ro.js';
 import { equation, factorsOf, repeatedSum, spokenMath } from '../../text.js';
 
 export const QUANTITIES = ['step', 'count', 'end'];
-export const HIDEABLE = ['end'];
 const MAX = 10;
 const valid = (v) => Number.isInteger(v) && v >= 1 && v <= MAX;
 
 export default {
   QUANTITIES,
-  HIDEABLE,
+  // desenul arată unde aterizează veverița, deci nimic nu se poate ascunde
+  hideable: () => [],
 
   check(p) {
     const errors = [];
@@ -40,14 +40,14 @@ export default {
   derive: (p, s) => ({ step: s.step, count: s.count, end: s.step * s.count }),
 
   /** `landings`: numerele pe care aterizează veverița (numărătoarea din `step` în `step`). */
-  texts(p, s, hidden = []) {
-    const end = hidden.includes('end') ? '?' : s.step * s.count;
+  texts(p, s) {
+    const end = s.step * s.count;
     const [a, b] = factorsOf(s.count, s.step);
     const out = {
       reading: `${cantitate(s.count, 'săritură', 'sărituri')} de câte ${s.step}`,
       equation: equation(a, b, end),
       sum: repeatedSum(s.step, s.count, end),
-      landings: Array.from({ length: s.count }, (_, i) => (hidden.includes('end') && i === s.count - 1 ? '?' : (i + 1) * s.step)),
+      landings: Array.from({ length: s.count }, (_, i) => (i + 1) * s.step),
     };
     out.spoken = `${out.reading}: ${spokenMath(out.equation)}`;
     return out;

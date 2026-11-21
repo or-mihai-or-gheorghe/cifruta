@@ -8,7 +8,7 @@ import data from '../site/data/invata.js';
 import CONCEPTS from '../site/data/concepts.js';
 import { findNonJSON, lintText, walkTexts } from '../site/js/core/lint.js';
 import { markupErrors, plain } from '../site/js/core/markup.js';
-import { chapterConcepts, findLesson, lessonErrors, paramsOf, pickCorrect, playableChapters, reachable, search, widgetOf } from '../site/js/invata/logic.js';
+import { chapterConcepts, findLesson, hideable, lessonErrors, paramsOf, pickAnswer, pickCorrect, playableChapters, reachable, search, widgetOf } from '../site/js/invata/logic.js';
 import { WIDGETS } from '../site/js/invata/registry.js';
 import { keyStep, percentOf, valueAt } from '../site/js/invata/ruler.js';
 import { NBSP, equation, keepMath, repeatedSum, spokenMath } from '../site/js/invata/text.js';
@@ -49,7 +49,9 @@ test('învață: fiecare lecție se poate parcurge din interfață, provocare du
 
 test('învață: alegerile au răspunsul pe locuri diferite, iar conceptele lecțiilor există', () => {
   const places = lessons.flatMap(({ lesson }) => lesson.tasks.filter((t) => t.pick).map((t) => pickCorrect(t)[0]));
-  if (places.length >= 3) assert.ok(new Set(places).size > 1, `răspunsul alegerilor stă mereu pe locul ${places[0] + 1}`);
+  // niciun loc nu ține mai mult de 60% din răspunsuri (altfel copilul ghicește „a doua”)
+  const most = Math.max(...[0, 1, 2, 3].map((i) => places.filter((x) => x === i).length));
+  assert.ok(most <= Math.ceil(places.length * 0.6), `răspunsurile alegerilor: ${places.join(', ')}`);
   for (const { lesson } of lessons) {
     assert.ok(lesson.concepts.length >= 1, `${lesson.id}: concepte`);
     for (const id of lesson.concepts) assert.ok(CONCEPTS[id], `${lesson.id}: concept necunoscut ${id}`);
@@ -129,7 +131,6 @@ test('învață: săriturile ajung la produs, cu numărătoarea din pas în pas'
   assert.equal(t.reading, '4 sărituri de câte 3');
   assert.equal(t.equation.replaceAll(NBSP, ' '), '4 × 3 = 12');
   assert.deepEqual(t.landings, [3, 6, 9, 12]);
-  assert.deepEqual(jumps.texts(p, jumps.initial(p), ['end']).landings, [3, 6, 9, '?']);
   assert.equal(jumps.texts({ step: 5, count: 1 }, { step: 5, count: 1 }).reading, '1 săritură de câte 5');
 });
 
@@ -161,6 +162,9 @@ test('învață: lessonErrors prinde provocările care nu merg', () => {
   assert.match(errs([{ id: 'a', ask: 'x', pick: [12, 12], rule: 'produs', of: [3, 4] }]), /repetate/);
   assert.match(errs([{ id: 'a', ask: 'x', pick: [11, 13], rule: 'produs', of: [3, 4] }]), /are 0 variante corecte/);
   assert.match(errs([{ id: 'a', ask: 'x', pick: [12, 13], rule: 'produs', of: [3, 4], hide: ['rows'] }]), /nu se poate ascunde/);
+  // pe hartă, căsuțele știute arată produsul: acolo nu se poate ascunde
+  const table = { id: 'proba', widget: { w: 'array', skin: 'table', rows: 2, cols: 3 }, tasks: [{ id: 'a', ask: 'x', pick: [12, 13], rule: 'produs', of: [3, 4], hide: ['product'] }] };
+  assert.match(lessonErrors(table).join(), /nu se poate ascunde/);
   assert.match(errs([{ id: 'A b', ask: 'x', want: { rows: 5, cols: 5 } }]), /id lipsă, greșit/);
   assert.match(lessonErrors({ id: 'x', widget: { w: 'nimic' }, tasks: [] }).join(), /widget necunoscut/);
 });
@@ -259,7 +263,7 @@ test('învață: întregul tăiat — tăiatul în două păstrează bucățile 
 test('învață: zidul fracțiilor arată fracțiile egale, cu cea aleasă întâi', () => {
   const p = { den: 3, num: 1 };
   assert.equal(wall.texts(p, { den: 6, num: 3 }).equation, '{{f:3/6}} = {{f:1/2}} = {{f:2/4}} = {{f:4/8}} = {{f:5/10}}');
-  assert.equal(wall.texts(p, { den: 6, num: 3 }).spoken, 'trei șesimi este egal cu o jumătate, cu două sferturi, cu patru optimi, cu cinci zecimi');
+  assert.equal(wall.texts(p, { den: 6, num: 3 }).spoken, 'trei șesimi: la fel de mult ca o jumătate, ca două sferturi, ca patru optimi, ca cinci zecimi');
   assert.equal(wall.texts(p, { den: 7, num: 2 }).equation, '{{f:2/7}}');
   assert.deepEqual(wall.apply(p, { den: 8, num: 7 }, { set: 'den', value: 4 }), { den: 4, num: 4 }, 'numărătorul rămâne în rând');
   assert.deepEqual(wall.apply(p, { den: 8, num: 7 }, { tap: [9, 4] }), { den: 10, num: 5 });
@@ -272,7 +276,8 @@ test('învață: fracția dintr-o mulțime — farfuriile colorate', () => {
   assert.deepEqual(array.derive(p, s), { rows: 3, cols: 4, product: 12, marked: 2, part: 8 });
   assert.equal(array.texts(p, s).equation, '{{f:2/3}} din 12 mere = 8 mere');
   assert.equal(array.texts(p, s).spoken, 'două treimi din 12 mere înseamnă 8 mere');
-  assert.equal(array.apply(p, s, { set: 'rows', value: 1 }).marked, 1, 'cel mult câte farfurii sunt');
+  const three = array.apply(p, s, { set: 'marked', value: 3 });
+  assert.deepEqual([array.apply(p, three, { set: 'rows', value: 2 }).marked, array.apply(p, three, { set: 'rows', value: 1 }).rows], [2, 2], 'cel mult câte farfurii sunt, iar farfuriile sunt cel puțin două');
 });
 
 test('învață: regulile alegerilor cu fracții', () => {
@@ -282,4 +287,25 @@ test('învață: regulile alegerilor cu fracții', () => {
   assert.deepEqual(pickCorrect({ pick: ['1/5', '1/3', '1/4'], rule: 'mai-mare' }), [1]);
   assert.deepEqual(pickCorrect({ pick: ['1/2', '2/4'], rule: 'mai-mare' }), [], 'la egalitate nu e niciuna mai mare');
   assert.deepEqual(pickCorrect({ pick: ['2/5', '3/5', '6/10'], rule: 'valoare', of: [3, 5] }), [1]);
+});
+
+test('învață: „Bravo!” după o alegere spune răspunsul ales, nu desenul', () => {
+  assert.equal(pickAnswer({ pick: [54, 56, 63], rule: 'produs', of: [7, 8] }), '7 × 8 = 56');
+  assert.equal(pickAnswer({ pick: ['1/5', '1/3'], rule: 'mai-mare' }), '{{f:1/3}} e mai mare decât {{f:1/5}}.');
+  assert.equal(pickAnswer({ pick: ['3/5', '2/5'], rule: 'valoare', of: [3, 5] }), '{{f:3/5}}: trei cincimi.');
+  assert.match(pickAnswer({ pick: [{ v: 'fraction', shape: 'bar', parts: 2 }], rule: 'jumatati' }), /jumătăți/);
+  for (const { lesson } of lessons) for (const t of lesson.tasks.filter((x) => x.pick)) assert.ok(pickAnswer(t), `${lesson.id}/${t.id}`);
+});
+
+test('învață: o provocare ascunde doar ce toate desenele chiar ascund', () => {
+  assert.deepEqual(hideable(array, { skin: 'split' }), ['product']);
+  assert.deepEqual(hideable(array, { skin: 'table' }), [], 'pe hartă, căsuțele știute arată produsul');
+  assert.deepEqual(hideable(array, { skin: 'plates', mark: true }), []);
+  assert.deepEqual(hideable(jumps, {}), [], 'veverița stă pe numărul la care ajunge');
+  assert.deepEqual(hideable(wall, {}), ['same']);
+  const t = wall.texts({}, { den: 2, num: 1 }, ['same']);
+  assert.equal(t.equation, '{{f:1/2}}', 'fără lista fracțiilor egale');
+  assert.equal(t.spoken, 'o jumătate');
+  assert.equal(wall.texts({}, { den: 2, num: 1 }).spoken, 'o jumătate: la fel de mult ca două sferturi, ca trei șesimi, ca patru optimi, ca cinci zecimi');
+  assert.equal(array.check({ skin: 'plates', mark: true, rows: 1, cols: 3, item: 'mar' }).length, 1, 'cel puțin două farfurii la fracții');
 });

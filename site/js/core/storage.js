@@ -206,6 +206,8 @@ function cleanLessons(value) {
 }
 
 export const getLessons = () => cleanLessons(read(scope + LESSONS, {}));
+/** Progresul din Învață al unui scop anume (fără cont: `null`). */
+export const readLessons = (p) => cleanLessons(read(`${scopeOf(p)}${LESSONS}`, {}));
 export const saveLessons = (value) => write(scope + LESSONS, cleanLessons(value));
 
 /** Unește două progrese: provocările făcute în oricare, cu data cea mai nouă. */

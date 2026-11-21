@@ -1267,14 +1267,21 @@ def iv_solve(run: Run, page: Page, label: str, wrong_pick: bool = True) -> int:
         sol = page.evaluate("window.__dbg.invata.solution()")
         if task["hide"]:
             eq = page.get_by_test_id("iv-eq").inner_text().strip()
-            run.check(eq.endswith("?"), f"{label}: {task['id']}: rezultatul e ascuns cât timp se cere („{eq}”)")
+            hidden = eq.endswith("?") if "product" in task["hide"] else "=" not in eq
+            run.check(hidden, f"{label}: {task['id']}: răspunsul e ascuns cât timp se cere („{eq}”)")
         if "pick" in sol:
             if wrong_pick:
                 count = page.locator("[data-testid^=iv-option-]").count()
                 wrong = next(i for i in range(count) if i != sol["pick"])
                 page.get_by_test_id(f"iv-option-{wrong}").click()
+                focus = page.evaluate("document.activeElement?.matches('.iv-option:not([disabled])') ?? false")
+                said = page.get_by_test_id("iv-status").inner_text()
                 run.check(page.get_by_test_id("iv-hint").is_visible() and page.evaluate(IV_TASK)["phase"] == "task", f"{label}: {task['id']}: la o variantă greșită, un indiciu, iar provocarea rămâne")
+                run.check(focus and said.startswith("Încă nu"), f"{label}: {task['id']}: indiciul se anunță, iar focusul trece pe o variantă rămasă („{said}”)")
             page.get_by_test_id(f"iv-option-{sol['pick']}").click()
+            answer = page.get_by_test_id("iv-won-text").inner_text() if page.get_by_test_id("iv-won-text").count() else ""
+            said = page.get_by_test_id("iv-status").inner_text()
+            run.check(said.startswith("Bravo") and (answer or page.get_by_test_id("iv-done").count()), f"{label}: {task['id']}: „Bravo!” cu răspunsul ales („{answer}”), anunțat („{said}”)")
         else:
             before = len(task["found"])
             iv_reach(page, sol)
@@ -1307,6 +1314,10 @@ def invata_flow(run: Run, page: Page, vp: str):
         run.check(won == lesson["tasks"] and page.get_by_test_id("iv-notes").is_visible(), f"{label}: toate cele {lesson['tasks']} provocări, apoi „Ce am aflat” ({won})")
         if vp == "laptop":
             run.shot(page, f"{vp}-invata-{lesson['lesson']}-gata")
+        if lesson["lesson"] == "harta-tablei":
+            page.get_by_test_id("iv-again").click()
+            st, task = page.evaluate(IV_STATE), page.evaluate(IV_TASK)
+            run.check(st.get("lit") == [] and task["index"] == 0 and task["phase"] == "task", f"{label}: „Încă o dată” reîncepe de la desenul de la început ({st}, {task['phase']})")
     run.goto(page, "invata")
     page.reload()
     page.wait_for_selector("[data-testid^=iv-card-state-]")
@@ -1463,6 +1474,11 @@ def invata_keyboard(run: Run, browser, base: str):
     run.check(page.evaluate("document.activeElement?.closest('[data-testid]')?.dataset.testid") == "iv-slider-cols", "[tastatură] învață: Shift+Tab trece la glisorul de sus")
     page.goto(f"{base}?debug=1#/invata/inmultirea/grupe-egale")
     page.wait_for_selector("[data-testid=iv-slider-rows]")
+    iv_reach(page, page.evaluate("window.__dbg.invata.solution()"))
+    run.check(page.evaluate("document.activeElement?.dataset.testid") == "iv-continue", "[tastatură] învață: după „Bravo!”, focusul stă pe „Mai departe”")
+    page.keyboard.press("Enter")
+    said = page.get_by_test_id("iv-status").inner_text()
+    run.check(page.evaluate("document.activeElement?.dataset.testid") == "iv-ask" and said.startswith("Arată"), f"[tastatură] învață: provocarea nouă primește focusul și se anunță („{said}”)")
     iv_solve(run, page, "[tastatură] grupe-egale", wrong_pick=False)
     page.wait_for_timeout(300)
     run.check(page.locator(".anim-confetti").count() == 0 and page.get_by_test_id("iv-done").is_visible(), "[tastatură] învață: lecția terminată, fără confetti la mișcare redusă")

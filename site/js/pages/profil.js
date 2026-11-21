@@ -289,8 +289,15 @@ export default function profil(container) {
             const created = await addProfile({ nickname: nickname.value, avatar: studio.get(), showOnBoards: boards.checked });
             close();
             const anon = anonymousCounts();
-            if (accountState().profiles.length === 1 && (anon.attempts || anon.rounds)) {
-              const parts = [anon.attempts ? `${cantitate(anon.attempts, 'încercare', 'încercări')} la teste` : null, anon.rounds ? `${cantitate(anon.rounds, 'rundă', 'runde')} de la Jocuri fulger` : null].filter(Boolean).join(' și ');
+            if (accountState().profiles.length === 1 && (anon.attempts || anon.rounds || anon.lessons)) {
+              const parts = [
+                anon.attempts ? `${cantitate(anon.attempts, 'încercare', 'încercări')} la teste` : null,
+                anon.rounds ? `${cantitate(anon.rounds, 'rundă', 'runde')} de la Jocuri fulger` : null,
+                anon.lessons ? `${cantitate(anon.lessons, 'lecție începută', 'lecții începute')} din Învață` : null,
+              ]
+                .filter(Boolean)
+                .join(', ')
+                .replace(/, ([^,]*)$/, ' și $1');
               const move = await confirmModal({ title: 'Adaugi rezultatele din acest browser?', text: `Aici sunt salvate fără cont ${parts}. Le adaugi în profilul **${escapeHTML(created.nickname)}**?`, confirm: 'Da, adaugă-le', cancel: 'Nu' });
               if (move) await moveAnonymousInto(created.id);
             }

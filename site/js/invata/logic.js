@@ -2,6 +2,7 @@
 // căutarea în lățime prin acțiunile lui (aceleași ca în interfață) arată că fiecare provocare se poate rezolva atingând ecranul.
 
 import { WIDGETS } from './registry.js';
+import { fractionWords } from '../core/ro.js';
 import { compareFractions, equalParts, parseFraction } from './fractions.js';
 
 export const widgetOf = (lesson) => WIDGETS[lesson?.widget?.w] ?? null;
@@ -77,6 +78,20 @@ export const PICK_RULES = {
 /** Locurile variantelor corecte ale unei alegeri. */
 export const pickCorrect = (task) => task.pick.flatMap((option, i) => (PICK_RULES[task.rule]?.(task, option) ? [i] : []));
 
+/** Ce s-a răspuns, pentru „Bravo!” (mini-markup): „7 × 8 = 56”, „1/3 e mai mare decât 1/5”. */
+export function pickAnswer(task) {
+  const option = task.pick[pickCorrect(task)[0]];
+  if (task.rule === 'produs') return `${task.of[0]} × ${task.of[1]} = ${option}`;
+  if (task.rule === 'mai-mare') return `{{f:${option}}} e mai mare decât ${task.pick.filter((o) => o !== option).map((o) => `{{f:${o}}}`).join(' și ')}.`;
+  if (task.rule === 'valoare') return `{{f:${option}}}: ${fractionWords(...parseFraction(option))}.`;
+  if (task.rule === 'jumatati') return 'Două bucăți la fel de mari: două jumătăți.';
+  if (task.rule === 'sferturi') return 'Patru bucăți la fel de mari: patru sferturi.';
+  return '';
+}
+
+/** Ce poate ascunde o provocare din widgetul ei (doar unde toate desenele și textele chiar ascund mărimea). */
+export const hideable = (W, params) => W.hideable?.(params) ?? [];
+
 export const taskKind = (t) => (t.want ? 'want' : t.collect ? 'collect' : t.pick ? 'pick' : null);
 
 const ID = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -108,7 +123,7 @@ export function lessonErrors(lesson) {
     for (const k of [...Object.keys(t.want ?? {}), ...Object.keys(t.collect ?? {}), ...(t.by ?? [])]) {
       if (!W.QUANTITIES.includes(k)) errors.push(`${at}: „${k}” nu e o mărime a widgetului`);
     }
-    for (const k of t.hide ?? []) if (!W.HIDEABLE?.includes(k)) errors.push(`${at}: „${k}” nu se poate ascunde`);
+    for (const k of t.hide ?? []) if (!hideable(W, params).includes(k)) errors.push(`${at}: „${k}” nu se poate ascunde aici`);
     if (kind === 'want') {
       if (matches(t.want, W.derive(params, state))) errors.push(`${at}: e deja rezolvată de starea de dinainte`);
       const found = search(W, params, state, (d) => matches(t.want, d));

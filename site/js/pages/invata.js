@@ -120,13 +120,22 @@ function hub(container, focus = null) {
   };
 }
 
+/** Lecția de pe ecran: dacă alta s-a deschis cât timp se încărca, curățenia celei vechi nu atinge clasa și depanarea celei noi. */
+let shown = null;
+
 async function lessonPage(container, found) {
   document.title = `${found.lesson.title} · Învață — Cifruța`;
-  document.body.classList.add('is-lesson');
+  const token = {};
+  shown = token;
   const lesson = await mountLesson(container, found);
-  if (debug()) window.__dbg = { invata: lesson.debug };
+  if (shown === token) {
+    document.body.classList.add('is-lesson');
+    if (debug()) window.__dbg = { invata: lesson.debug };
+  }
   return () => {
     lesson.destroy();
+    if (shown !== token) return;
+    shown = null;
     document.body.classList.remove('is-lesson');
     if (debug()) delete window.__dbg;
   };

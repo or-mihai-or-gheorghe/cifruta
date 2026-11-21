@@ -122,7 +122,6 @@
 .iv-option { min-width: 4rem; font-size: var(--fs-2); }
 .iv-option.is-correct { --btn-bg: var(--c-ok-bg); --btn-edge: var(--c-ok-ink); }
 .iv-option.is-wrong { text-decoration: line-through; }
-.iv-option .v-svg { width: 5.5rem; height: auto; }
 .iv-hint { margin: 0; font-weight: 700; color: var(--c-bad-ink); }
 .iv-bravo { margin: 0; font-family: var(--font-title); font-size: var(--fs-3); color: var(--c-ok-ink); }
 .iv-notes__title { margin: 0; font-family: var(--font-title); font-weight: 700; }

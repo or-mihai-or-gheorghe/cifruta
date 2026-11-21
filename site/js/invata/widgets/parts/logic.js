@@ -8,7 +8,6 @@ import { fractionText, reduce } from '../../fractions.js';
 /** Formele și numele lor din lecție. */
 export const SHAPES = { circle: 'Pizza', bar: 'Ciocolata', square: 'Napolitana' };
 export const QUANTITIES = ['shape', 'parts', 'on', 'value'];
-export const HIDEABLE = [];
 const MAX = 10;
 const CUTS = [1, 2, 4, 8];
 
@@ -18,7 +17,7 @@ const limits = (p) => (p.cut ? [1, 8] : [p.min ?? 1, p.max ?? MAX]);
 
 export default {
   QUANTITIES,
-  HIDEABLE,
+  hideable: () => [],
 
   check(p) {
     const errors = [];
