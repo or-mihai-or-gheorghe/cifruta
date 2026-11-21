@@ -62,7 +62,8 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
 
 ## Comenzi
 - Mediul, o singură dată pe un calculator nou (README, „Mediul de lucru”): `npm ci`, `brew install openjdk@21` (găsit de
-  `tools/with-java21.sh`), Playwright pentru Python și Chromium. `npm test` merge și fără ele.
+  `tools/with-java21.sh`), Playwright pentru Python și Chromium. `npm test` merge și fără ele. Playwright se reinstalează după ce
+  Homebrew trece `python3` la o versiune nouă (`pip --user` ține pachetele pe versiune): altfel E2E cade la `import playwright`.
 - `npm test` — teste unitare + validarea întregului conținut (schemă, răspunsuri, unicitate, durată exact 45 min, diacritice,
   etichete „cu / fără trecere”) + verifică dacă tabelul de acoperire din `docs/curriculum.md` e la zi (`npm run acoperire` îl regenerează).
 - `npm run serve` — site local la http://localhost:8080 (`?debug=1` expune `window.__dbg`).

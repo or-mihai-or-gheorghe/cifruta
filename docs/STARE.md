@@ -952,6 +952,17 @@
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
 
+- **2026-11-21 (mediul de lucru după Python 3.15)**
+  - **Cererea utilizatorului:** întâi o analiză a proiectului, fără schimbări; apoi „instalează și configurează ce e nevoie” ca
+    dezvoltarea, testarea și validarea să meargă din nou.
+  - **Ce se stricase:** Homebrew trecuse `python3` la 3.15.2, iar Playwright era instalat (`pip --user`) doar pentru 3.14, deci
+    `npm run e2e` și `npm run e2e:cloud` cădeau la `import playwright`. Restul mediului era în regulă: Node 26, dependențele npm,
+    Java 21, emulatorul Firestore, poppler și `gh` (autentificat, cu dreptul `workflow`).
+  - **Reparat:** `python3 -m pip install --user --break-system-packages playwright==1.63.0`, aceeași versiune ca la 3.14, deci
+    Chromium-ul din cache s-a refolosit, fără descărcare. Pașii erau deja în README („Mediul de lucru”); în `CLAUDE.md`, un rând spune
+    acum când se reinstalează Playwright.
+  - **Rezultate:** npm test 124/124, reguli 16/16, E2E cont 82/82, E2E complet 2691/2691.
+
 - **2026-10-11 (variantele fără tipare peste tot și praguri mai blânde, v0.19.1)**
   - **Cererea utilizatorului**, după publicarea v0.19.0: aceeași reparație a variantelor la temele vechi cu calcule, apoi pragurile
     relaxate („aur este foarte greu de atins chiar și pentru cineva rapid și priceput”), pentru copii de clasa a II-a.
