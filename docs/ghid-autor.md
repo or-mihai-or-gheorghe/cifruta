@@ -294,7 +294,7 @@ La începutul clasei a II-a se adaugă ~20–30 s pentru citirea fiecărui enun�
 ## 11. Lecții în Învață
 Secțiunea Învață (`#/invata`) are lecții, nu teste: copilul mișcă un desen, vede calculul la zi și rezolvă provocări mici, fără scor
 și fără cronometru. Lecțiile stau în `site/data/invata.js`, pe capitole (un capitol „în curând” are doar `soon: true`, titlul, textul
-și iconița). Acolo se învață și conceptele pe care testele le ocolesc (înmulțirea, fracțiile, împărțirea).
+și iconița). Acolo se învață și conceptele pe care testele le ocolesc (înmulțirea, fracțiile, împărțirea, ecuațiile).
 
 **Lecția:** `{ id, title, icon, goal, intro, concepts, widget: { w, ...parametri }, tasks, notes }`.
 - `goal` — caseta „Ce învățăm”, sub titlu și pe cardul lecției: scopul și ce înseamnă desenul („Fiecare farfurie e o grupă, cu la
@@ -306,6 +306,11 @@ Secțiunea Învață (`#/invata`) are lecții, nu teste: copilul mișcă un dese
   - `imparte` (împărțirea): `mode: 'parti'` (pe farfurii, câte una pe fiecare, pe rând), `mode: 'grupe'` (câte `by` într-o pungă, cu
     scăderea repetată) și `zeci: true` (pachete de câte 10 bețișoare și bețișoare libere; pachetele care nu ajung pe toate farfuriile
     se desfac), cu `total` (cel mult 30 de nuci, 99 de bețișoare);
+  - `balanta` (balanța): `eq` doar cu adunări („□ + 7 = 15”, „8 + 4 = □ + 5”) și `mode: 'guess'` (glisorul pune nuci în sac, balanța se
+    înclină) sau `'take'` (glisorul ia aceleași nuci din ambele talere, până rămâne sacul singur); modul se schimbă cu `start`;
+  - `bare` (partea care lipsește): `eq` cu o căsuță („□ + 7 = 15”, „15 − □ = 8”, „□ − 7 = 8”), `lo` (glisorul merge de la `lo` la `lo + 10`);
+  - `masina` (mașina de numere): `ops` (1–2 operații: `[['×', 4]]`, `[['+', 20], ['−', 8]]`), `out` (ce trebuie să iasă), `lo`; butonul
+    „Pe dos” arată drumul înapoi;
   - `jumps` (săriturile pe axă);
   - `parts` (întregul tăiat: `shapes`, `min`/`max` sau `cut: true` pentru „Taie fiecare bucată în două”, `labels` pentru numărător și
     numitor);

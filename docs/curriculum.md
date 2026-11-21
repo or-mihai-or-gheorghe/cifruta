@@ -119,6 +119,7 @@ Ce altă documentare am folosit (exemple de exerciții, aplicații, UX): `docs/c
 | Tabla împărțirii: înmulțirea citită pe dos, cu proba (24 : 6 = 4, pentru că 4 × 6 = 24) — în Învață și în Jocuri fulger | II | 📜 | `mat.op.tabla-impartirii` |
 | Deîmpărțitul și împărțitorul necunoscut (□ : 3 = 6, 24 : □ = 4) — în Învață și în Jocuri fulger | II | ➕ | `mat.op.impartire-necunoscut` |
 | Împărțirea zecilor și a unităților (84 : 4 = 21, 80 : 4 = 20) — în programă: clasa a III-a; doar în Învață și în Jocuri fulger | II | ➕ | `mat.op.impartire-zeci` |
+| Ecuații în doi pași (□ + 5 = 3 × 4, □ − 8 = 20 : 4) — doar în Jocuri fulger, tema „Termenul necunoscut” | II | ➕ | `mat.op.necunoscut-doi-pasi` |
 
 ### 3. Rezolvarea problemelor
 

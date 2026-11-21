@@ -44,7 +44,8 @@ site/                      ← publicat
   js/fulger/               Jocuri fulger (jocuri pe viteză, pe teme, #/fulger): kinds (calcule până la 100), kinds-1000 (numerele până
                            la 1000), kinds-calcule-1000 (adunări și scăderi până la 1000, cu trecere), kinds-inmultire (tabla,
                            o cifră × două cifre, × 10, × 11, zeci rotunde), kinds-impartire (tabla împărțirii, căsuța, câturi
-                           de două cifre), kinds-forme (figuri), kinds-grafice și kinds-grafuri
+                           de două cifre), kinds-ecuatii (termenul necunoscut, balanța, doi pași), kinds-forme (figuri),
+                           kinds-grafice și kinds-grafuri
                            (grafice, hărți, arbori), generate cu sămânță, cu concepte · intrebari (formele întrebărilor: calcule și
                            desene) · contexte (unități, nume, zile, date, obiectele grupelor) · rand · art (desenul și numele unei
                            variante, cerința cu emoji) · engine (temele, runda și punctajul, pur) · records (chei „temă:nivel”,
@@ -56,7 +57,8 @@ site/                      ← publicat
                            slider + ruler (glisorul-riglă) · text (calculele scrise, convenția factorilor) · progress (bifele, pe
                            profil) · fractions (fracțiile: simplificare, egale, comparare) · widgets/<w>/logic.js (pur) + view.js:
                            array (farfurii, și colorate; careu; tăietură; harta tablei, și citită pe dos), imparte (împărțirea:
-                           farfurii, pungi, pachete de bețișoare), jumps, parts (întregul tăiat), wall (zidul);
+                           farfurii, pungi, pachete de bețișoare), balanta (balanța: ghicești sau iei din ambele talere), bare
+                           (partea care lipsește), masina (mașina de numere, și pe dos), jumps, parts (întregul tăiat), wall (zidul);
                            pagina e pages/invata.js
   data/catalog.js          secțiuni → grupuri → teste · concepts.js (ID-uri de concepte) · scoring.js · demo.js · fulger.js (jocul)
                            · invata.js (capitolele, lecțiile și provocările din Învață)

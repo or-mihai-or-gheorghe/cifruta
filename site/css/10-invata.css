@@ -605,6 +605,95 @@
   to { opacity: 1; transform: none; }
 }
 
+/* ——— Termenul necunoscut: balanța (iv-scale), barele (iv-bars) și mașina de numere (iv-machine) ———
+   Balanța: o bară care se rotește cu cel mult ±12° (`--tilt`) și două talere care atârnă de capetele ei și urcă sau coboară cu ele
+   (`--sin` × jumătatea barei, în unități ale containerului, ca desenul să se strângă pe telefon); doar transform, cu tranziție. Pe
+   talere, sacul (cu „?” sau cu numărul ghicit) și nucile (16 px, câte 4–5 pe rând, ca 20 de nuci să încapă). */
+.iv-balanta, .iv-bare, .iv-masina { display: grid; justify-items: center; gap: var(--sp-3); }
+.iv-balanta__controls, .iv-bare .iv-control, .iv-masina .iv-control { width: 100%; max-width: 32rem; }
+.iv-scale { --tilt: 0deg; --sin: 0; container-type: inline-size; position: relative; width: min(100%, 22rem); height: 12rem; margin-inline: auto; }
+.iv-scale__post { position: absolute; left: 50%; bottom: 0; width: 0.6rem; height: 9rem; translate: -50% 0; border-radius: 0.3rem 0.3rem 0 0; background: var(--v-brown, #a86b3c); }
+.iv-scale__post::after { content: ''; position: absolute; left: 50%; bottom: 0; width: 5rem; height: 0.7rem; translate: -50% 0; border-radius: 0.4rem 0.4rem 0 0; background: var(--v-brown-dark, #7f4f2a); }
+/* bara: de la 18% la 82% din lățime, rotită în jurul mijlocului; capetele ei urcă și coboară cu 32cqw × sin(înclinare) */
+.iv-scale__arm {
+  position: absolute;
+  left: 18%;
+  top: 2.6rem;
+  width: 64%;
+  height: 0.5rem;
+  border-radius: 0.25rem;
+  background: var(--v-brown-dark, #7f4f2a);
+  transform: rotate(var(--tilt));
+  transition: transform 0.45s var(--ease-out);
+}
+/* talerele: câte 36% din lățime, cu mijlocul sub capetele barei (18% și 82%) */
+.iv-scale__pan {
+  position: absolute;
+  top: 2.85rem;
+  display: grid;
+  justify-items: center;
+  width: 36%;
+  transition: transform 0.45s var(--ease-out);
+}
+.iv-scale__pan--l { left: 0; transform: translateY(calc(var(--sin) * -32cqw)); }
+.iv-scale__pan--r { left: 64%; transform: translateY(calc(var(--sin) * 32cqw)); }
+/* firul de care atârnă talerul */
+.iv-scale__pan::before { content: ''; width: 2px; height: 0.8rem; background: var(--c-line-strong); }
+.iv-scale__load { display: flex; align-items: flex-end; justify-content: center; gap: 4px; min-height: 4.4rem; width: 100%; }
+.iv-scale__pile { --cols: 5; display: grid; grid-template-columns: repeat(var(--cols), 16px); gap: 2px; }
+.iv-scale__pile:empty { display: none; }
+.iv-scale .iv-nut { width: 16px; height: 16px; }
+.iv-scale__dish { width: 100%; height: 0.8rem; border-radius: 0 0 50% 50% / 0 0 100% 100%; background: var(--c-line-strong); }
+.iv-sack {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 3rem;
+  border-radius: 42% 42% 46% 46% / 30% 30% 60% 60%;
+  background: var(--v-brown-light, #d9a066);
+  box-shadow: inset 0 -4px 0 var(--v-brown, #a86b3c), inset 0 0.45rem 0 -0.2rem var(--v-brown-dark, #7f4f2a);
+  color: var(--c-ink);
+  font-family: var(--font-title);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+.iv-sack.is-guess { background: var(--c-cols-bg); box-shadow: inset 0 0 0 3px var(--c-cols); color: var(--c-cols-ink); }
+
+/* barele: aceeași scară (`--scale` unități pe lățime), fără animație la lungime (doar transform și opacity se animă) */
+.iv-bars { --scale: 22; position: relative; display: grid; gap: 0.5rem; width: min(100%, 26rem); padding-block: 0.4rem; }
+.iv-bars__row { display: flex; gap: 0; }
+.iv-bar {
+  display: grid;
+  place-items: center;
+  width: calc(var(--n) * 100% / var(--scale));
+  min-width: 1.6rem;
+  height: 2.6rem;
+  border: 2px solid var(--c-rows);
+  background: var(--c-rows-bg);
+  color: var(--c-rows-ink);
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: var(--fs-2);
+}
+.iv-bar--part { border-color: var(--c-cols); background: var(--c-cols-bg); color: var(--c-cols-ink); }
+.iv-bar--part + .iv-bar--part { border-left-width: 0; }
+.iv-bar.is-unknown { background: repeating-linear-gradient(45deg, var(--c-warn-bg) 0 7px, var(--c-paper) 7px 12px); border-style: dashed; color: var(--c-ink); }
+.iv-bar.is-fit { border-style: solid; background: var(--c-ok-bg); color: var(--c-ok-ink); }
+/* unde se termină întregul */
+.iv-bars__guide { position: absolute; top: 0; bottom: 0; left: calc(var(--n) * 100% / var(--scale)); width: 0; border-left: 2px dashed var(--c-ink-soft); pointer-events: none; }
+
+/* mașina de numere: intră → cartonașe → iese, cu „trebuie” alături; pe dos, rândul de dedesubt */
+.iv-machine { display: grid; gap: 0.6rem; justify-items: center; width: 100%; }
+.iv-machine__row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.3rem; }
+.iv-machine__row.is-back { padding-top: 0.5rem; border-top: 2px dashed var(--c-line-strong); }
+.iv-machine__value { min-width: 2.4rem; padding: 0.25rem 0.5rem; border: 2px solid var(--c-line-strong); border-radius: 0.5rem; background: var(--c-paper); font-family: var(--font-title); font-weight: 700; font-size: var(--fs-2); text-align: center; }
+.iv-machine__value.is-in { border-color: var(--c-cols); background: var(--c-cols-bg); color: var(--c-cols-ink); }
+.iv-machine__value.is-out { border-color: var(--c-rows); background: var(--c-rows-bg); color: var(--c-rows-ink); }
+.iv-machine__card { padding: 0.3rem 0.6rem; border-radius: 0.6rem; background: var(--c-ink); color: var(--c-paper); font-family: var(--font-title); font-weight: 700; font-size: var(--fs-2); }
+.iv-machine__arrow { color: var(--c-ink-soft); font-weight: 700; }
+.iv-machine__target { margin-left: 0.4rem; padding: 0.2rem 0.5rem; border: 2px dashed var(--c-line-strong); border-radius: 0.5rem; font-weight: 700; }
+.iv-machine__target.is-ok { border-style: solid; border-color: var(--c-ok-ink); color: var(--c-ok-ink); }
+
 /* ——— Ecranele joase (telefonul ținut orizontal): desenul în stânga; Cifruța, calculul și butoanele în dreapta ———
    Scena și widgetul devin `display: contents`, ca bucățile widgetului să se așeze direct în grila lecției; căsuța se socotește
    atunci după înălțime (fără container, unitățile cq trec la ecran). */
@@ -626,6 +715,11 @@
   /* widgeturile noi (împărțirea, balanța, barele, mașina) au clasele comune `iv-widget` și `iv-art`, ca să nu se adauge aici unul câte unul */
   .iv-stage, .iv-array, .iv-jumps, .iv-parts, .iv-widget { display: contents; }
   .iv-array__stage, .iv-jumps__art, .iv-parts__art, .iv-art { grid-area: stage; }
+  /* desenul widgeturilor noi are o lățime dată (coloana lui e cât conținutul, iar balanța e un container de mărime), glisorul stă sub
+     calcul, iar legenda după butoane */
+  .iv-art { width: min(22rem, 46vw); align-self: center; }
+  .iv-widget > .iv-control, .iv-widget > .iv-balanta__controls { grid-area: ctrl; justify-self: stretch; }
+  .iv-widget > .iv-legend { grid-area: more; justify-self: start; text-align: left; }
   .iv-parts__art { width: min(14rem, 40vw); align-self: center; }
   .iv-parts__controls { grid-area: ctrl; justify-self: stretch; }
   /* la fracții: scara de tăiere sub calcul, apoi glisorul de colorat, apoi alegerea formei */

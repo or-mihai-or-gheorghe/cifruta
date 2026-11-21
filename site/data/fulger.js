@@ -338,6 +338,56 @@ export default {
       ],
     },
     {
+      id: 'ecuatii',
+      title: 'Termenul necunoscut',
+      short: 'Ecuații',
+      // spații nedespărțite: exemplele stau pe un rând
+      text: 'Aflăm numărul din căsuță: □ + 7 = 15, 15 − □ = 8, □ × 4 = 24; apoi balanța (8 + 4 = □ + 5) și ecuații în doi pași.',
+      icon: 'balanta',
+      grade: 2,
+      concepts: [
+        'mat.op.necunoscut', 'mat.op.fara-trecere', 'mat.op.cu-trecere', 'mat.op.balanta', 'mat.op.comparare-expresii', 'mat.op.factor-necunoscut',
+        'mat.op.tabla-inmultirii', 'mat.op.impartire-necunoscut', 'mat.op.tabla-impartirii', 'mat.op.necunoscut-doi-pasi', 'mat.op1000.fara-trecere',
+        'mat.op1000.cu-trecere',
+      ],
+      levels: [
+        {
+          id: 'usor',
+          warmup: ['ec-termen-20', 'cmp-balanta-20'],
+          mix: [
+            { kind: 'ec-termen-20', weight: 3 },
+            { kind: 'cmp-balanta-20', weight: 2 },
+            { kind: 'ec-scadere-20', weight: 2.5 },
+          ],
+          stars: [30, 75, 150],
+        },
+        {
+          id: 'intermediar',
+          warmup: ['ec-termen-100', 'cmp-balanta-100'],
+          mix: [
+            { kind: 'ec-termen-100', weight: 2.5 },
+            { kind: 'cmp-balanta-100', weight: 1.5 },
+            { kind: 'ec-scadere-100', weight: 2 },
+            { kind: 'inm-factor-lipsa', weight: 1.5 },
+            { kind: 'imp-lipsa', weight: 1.5 },
+          ],
+          stars: [25, 70, 150],
+        },
+        {
+          id: 'avansat',
+          warmup: ['ec-balanta', 'cmp-balanta-x'],
+          mix: [
+            { kind: 'ec-balanta', weight: 2.5 },
+            { kind: 'cmp-balanta-x', weight: 1.5 },
+            { kind: 'ec-doi-pasi', weight: 2.5 },
+            { kind: 'ec-termen-1000', weight: 2 },
+            { kind: 'ec-termen-100', weight: 0.5 },
+          ],
+          stars: [30, 75, 155],
+        },
+      ],
+    },
+    {
       id: 'siruri-intrusi',
       title: 'Șiruri și intruși',
       short: 'Șiruri și intruși',
@@ -644,16 +694,6 @@ export default {
           stars: [26, 65, 145],
         },
       ],
-    },
-    {
-      id: 'ecuatii',
-      title: 'Ecuații simple',
-      short: 'Ecuații',
-      text: 'Aflarea numărului necunoscut, de exemplu □ + 7 = 15.', // spații nedespărțite: exemplul stă pe un rând
-      icon: 'proba',
-      grade: 1,
-      concepts: ['mat.op.necunoscut'],
-      soon: true,
     },
   ],
   // Medaliile: 3 stele la un nivel al unei teme aduc medalia metalului acelui nivel; aceeași medalie la mai multe teme aduce medaliile

@@ -48,6 +48,7 @@ export const EMOJI = {
   calcul: { char: '🧮', code: '1f9ee', label: 'socotitoare' },
   capcana: { char: '⚠️', code: '26a0', label: 'atenție' },
   proba: { char: '🔍', code: '1f50d', label: 'verificare' },
+  balanta: { char: '⚖️', code: '2696', label: 'balanță' },
   muschi: { char: '💪', code: '1f4aa', label: 'putere' },
   petrecere: { char: '🎉', code: '1f389', label: 'sărbătoare' },
   deget: { char: '👆', code: '1f446', label: 'deget' },

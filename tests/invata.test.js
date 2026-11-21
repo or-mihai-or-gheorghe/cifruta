@@ -11,6 +11,8 @@ import { markupErrors, plain } from '../site/js/core/markup.js';
 import { chapterConcepts, findLesson, hideable, lessonErrors, paramsOf, pickAnswer, pickCorrect, playableChapters, reachable, search, startState, widgetOf } from '../site/js/invata/logic.js';
 import { WIDGETS } from '../site/js/invata/registry.js';
 import { shareTens } from '../site/js/invata/widgets/imparte/logic.js';
+import { bars } from '../site/js/invata/widgets/bare/logic.js';
+import { backwards, steps } from '../site/js/invata/widgets/masina/logic.js';
 import { keyStep, percentOf, valueAt } from '../site/js/invata/ruler.js';
 import { NBSP, equation, keepMath, repeatedSum, spokenMath } from '../site/js/invata/text.js';
 import '../site/js/visuals/all.js';
@@ -396,4 +398,58 @@ test('învață: harta tablei citită pe dos — împărțirea și proba, fără
   assert.ok(!W.actions(p, W.initial(p)).some((a) => a.toggle), 'fără butoanele strategiilor');
   assert.match(W.check({ skin: 'grid', rows: 2, cols: 2, item: 'mar', read: 'div' }).join(), /doar pentru aspectul table/);
   assert.match(W.check({ ...p, read: 'impartire' }).join(), /doar pentru aspectul table/);
+});
+
+test('învață: balanța — ghicitul înclină balanța, iar luatul din ambele talere o lasă dreaptă', () => {
+  const W = WIDGETS.balanta;
+  const nbsp = (t) => t.replaceAll(NBSP, ' ');
+  const p = { mode: 'guess', eq: '□ + 7 = 15' };
+  const at = (guess) => ({ ...W.initial(p), guess });
+  // prea puține nuci în sac: talerul cu sacul (stânga) e mai ușor, deci coboară dreapta
+  assert.ok(W.tilt(p, at(5)) > 0 && W.tilt(p, at(10)) < 0 && W.tilt(p, at(8)) === 0);
+  assert.equal(nbsp(W.texts(p, at(5)).equation), '5 + 7 < 15');
+  assert.equal(nbsp(W.texts(p, at(8)).equation), '8 + 7 = 15');
+  assert.deepEqual(W.derive(p, at(8)), { guess: 8, taken: 0, balanced: true, alone: false, bag: 8 });
+  // luatul din ambele talere: ecuația se micșorează, balanța rămâne dreaptă
+  const q = { mode: 'take', eq: '8 + 4 = □ + 5' };
+  assert.deepEqual(W.controls(q, W.initial(q)), [{ id: 'taken', min: 0, max: 5, axis: 'cols' }]);
+  assert.equal(nbsp(W.texts(q, { ...W.initial(q), taken: 3 }).equation), '9 = □ + 2');
+  const alone = { ...W.initial(q), taken: 5 };
+  assert.equal(W.derive(q, alone).alone, true);
+  assert.equal(W.tilt(q, alone), 0);
+  assert.equal(nbsp(W.texts(q, alone).extra), '□ = 12 − 5 = 7. Proba: 7 + 5 = 12.');
+  assert.match(W.check({ mode: 'guess', eq: '□ − 7 = 8' }).join(), /doar adunări/);
+  assert.match(W.check({ mode: 'guess', eq: '□ + 2 = 15' }).join(), /între 0 și 10/);
+});
+
+test('învață: barele — partea care lipsește, scăzătorul și descăzutul', () => {
+  const W = WIDGETS.bare;
+  const nbsp = (t) => t.replaceAll(NBSP, ' ');
+  const texts = (eq, guess, lo = 0) => W.texts({ eq, lo }, { eq, lo, guess });
+  assert.equal(nbsp(texts('□ + 7 = 15', 5).equation), '5 + 7 < 15');
+  assert.equal(texts('□ + 7 = 15', 8).extra, 'Termenul necunoscut: □ = 15 − 7 = 8.');
+  assert.equal(nbsp(texts('15 − □ = 9', 4).equation), '15 − 4 > 9');
+  assert.equal(texts('15 − □ = 8', 7).extra, 'Scăzătorul: □ = 15 − 8 = 7.');
+  assert.equal(texts('□ − 7 = 8', 15, 10).extra, 'Descăzutul: □ = 8 + 7 = 15.');
+  assert.deepEqual(bars('□ − 7 = 8', 12), { top: 12, bottom: [8, 7], unknownTop: true, unknownAt: -1 });
+  assert.deepEqual(W.controls({}, { eq: '□ − 7 = 8', lo: 10, guess: 10 }), [{ id: 'guess', min: 10, max: 20, axis: 'cols' }]);
+  assert.match(W.check({ eq: '□ − 7 = 8', lo: 0 }).join(), /nu e pe glisor/);
+  assert.match(W.check({ eq: '□ × 7 = 42' }).join(), /ecuație greșită/);
+});
+
+test('învață: mașina de numere — înainte, blocată la împărțiri neexacte, și pe dos', () => {
+  const W = WIDGETS.masina;
+  const nbsp = (t) => t.replaceAll(NBSP, ' ');
+  const p = { ops: [['+', 20], ['−', 8]], out: 50, lo: 30 };
+  const s = { ...W.initial(p), input: 38, back: true };
+  assert.equal(nbsp(W.texts(p, s).equation), '38 + 20 = 58, 58 − 8 = 50');
+  assert.equal(nbsp(W.texts(p, s).extra), 'Pe dos: 50 + 8 = 58, 58 − 20 = 38. A intrat 38.');
+  assert.deepEqual(W.derive(p, s), { input: 38, fits: true, back: true });
+  const div = { ops: [[':', 3]], out: 6, lo: 10 };
+  assert.equal(W.texts(div, { ...W.initial(div), input: 13 }).reading, 'Mașina s-a oprit: 13 nu se împarte exact la 3.');
+  assert.deepEqual(backwards([['×', 4]], 24), [24, 6]);
+  assert.deepEqual(steps([[':', 3]], 13), [13, null]);
+  assert.ok(W.actions(div, W.initial(div)).some((a) => a.toggle === 'back'));
+  assert.match(W.check({ ops: [['×', 4]], out: 25 }).join(), /nu se poate merge pe dos/);
+  assert.match(W.check({ ops: [['×', 4]], out: 80 }).join(), /nu e pe glisor/);
 });

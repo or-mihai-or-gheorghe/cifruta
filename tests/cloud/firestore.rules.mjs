@@ -113,6 +113,7 @@ test('reguli: încercările, rundele (cu temă) și starea le scrie doar proprie
   await assertSucceeds(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-2'), untopical)); // o filă de dinainte de teme
   await assertFails(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-3'), { ...round, topic: 'tema-viitoare' })); // temă care nu se joacă
   await assertSucceeds(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-13'), { ...round, topic: 'impartirea' })); // împărțirea
+  await assertSucceeds(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-14'), { ...round, topic: 'ecuatii' })); // termenul necunoscut
   await assertSucceeds(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-7'), { ...round, topic: 'pozitii-trasee' })); // o temă cu figuri
   await assertSucceeds(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-8'), { ...round, topic: 'grafice-tabele' })); // o temă cu grafice
   await assertSucceeds(setDoc(doc(db, 'users/ana/profiles/p1/fulger/usor-9'), { ...round, topic: 'harti-arbori' })); // o temă cu hărți și arbori
@@ -159,6 +160,7 @@ test('reguli: clasamentul îl văd doar autentificații; o intrare e a contului,
   await assertSucceeds(setDoc(doc(ana, 'leaderboards/fulger-adunari-scaderi-1000-avansat-all/entries/ana_p1'), entry('ana'))); // calculele până la 1000
   await assertSucceeds(setDoc(doc(ana, 'leaderboards/fulger-inmultirea-intermediar-all/entries/ana_p1'), entry('ana'))); // înmulțirea
   await assertSucceeds(setDoc(doc(ana, 'leaderboards/fulger-impartirea-avansat-all/entries/ana_p1'), entry('ana'))); // împărțirea
+  await assertSucceeds(setDoc(doc(ana, 'leaderboards/fulger-ecuatii-usor-all/entries/ana_p1'), entry('ana'))); // termenul necunoscut
   await assertFails(setDoc(doc(ana, `${board('expert')}/ana_p1`), entry('ana')));
   await assertFails(setDoc(doc(ana, 'leaderboards/fulger-usor-all/entries/ana_p1'), entry('ana'))); // clasament de dinainte de teme
   await assertFails(setDoc(doc(ana, 'leaderboards/fulger-tema-viitoare-usor-all/entries/ana_p1'), entry('ana'))); // temă care nu se joacă

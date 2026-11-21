@@ -1,8 +1,9 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-11-21 · **Versiune:** 0.23.0 (împărțirea: în Învață, capitolul „Împărțirea”, cu 4 lecții, iar în Jocuri fulger, tema
-  „Împărțirea”, cu 11 tipuri; ecuațiile cu căsuța în joc; secțiunea **Învață**: în 0.21.0 cinci lecții interactive de înmulțire și
+- **Data:** 2026-11-21 · **Versiune:** 0.24.0 (termenul necunoscut: în Învață, capitolul cu balanța, barele și mașina de numere, iar în
+  Jocuri fulger, tema „Termenul necunoscut”, cu 10 tipuri noi; în 0.23.0, împărțirea: în Învață, capitolul „Împărțirea”, cu 4 lecții,
+  iar în Jocuri fulger, tema „Împărțirea”, cu 11 tipuri; ecuațiile cu căsuța în joc; secțiunea **Învață**: în 0.21.0 cinci lecții interactive de înmulțire și
   antetul refăcut, în 0.22.0 cinci lecții de fracții, în 0.22.1 scopul fiecărei lecții, scara de tăiere și versiunea în adresele
   modulelor; în 0.20.0, tema fulger „Înmulțirea”, cu 13 tipuri noi și grupele desenate)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
@@ -23,12 +24,13 @@
   cifre cu × 10, × 11 și zeci rotunde, până la 1000), patru teme cu figuri, fără calcule, „Șiruri și intruși”, „Puzzle cu forme”, „Figuri și corpuri”, „Poziții și
   trasee”, și două teme cu grafice și grafuri, „Grafice și tabele” și „Hărți și arbori”; „Împărțirea” (v0.23.0: tabla împărțirii,
   scăderea repetată, probleme cu părți egale și grupe, deîmpărțitul și împărțitorul lipsă ca ecuații cu căsuța, câturi de două cifre);
-  ecuațiile simple apar „în curând”; runde de 2 minute,
-  128 de tipuri de întrebări generate (16 cu calcule până la 100, 18 cu numerele până la 1000, 14 cu trecere până la 1000, 13 cu
-  înmulțiri, 11 cu împărțiri, 24 cu figuri, 32 cu grafice, hărți și arbori), fiecare cu conceptele ei („Ce exersăm”), alune cu bonus de viteză și
+  „Termenul necunoscut” (v0.24.0: ecuații cu căsuța până la 20, 100 și 1000, balanța cu sume, cu înmulțiri și cu căsuța, ecuații în doi
+  pași); runde de 2 minute,
+  138 de tipuri de întrebări generate (16 cu calcule până la 100, 18 cu numerele până la 1000, 14 cu trecere până la 1000, 13 cu
+  înmulțiri, 11 cu împărțiri, 10 cu ecuații, 24 cu figuri, 32 cu grafice, hărți și arbori), fiecare cu conceptele ei („Ce exersăm”), alune cu bonus de viteză și
   de serie, Turbo, pistă spre stele și record, medalii pe niveluri, „Greșelile tale” și ținta următoarei stele la rezultate: 3 stele la
   un nivel al unei teme aduc medalia de bronz, argint sau aur, iar aceeași medalie la 2, 3 și 5 teme aduce „dublul”, colecția și cupa;
-  acum 42 de medalii, pe raftul de pe pagina jocului, pe cardurile nivelurilor și pe prima pagină). **Învață** (`#/invata`, din
+  acum 45 de medalii, pe raftul de pe pagina jocului, pe cardurile nivelurilor și pe prima pagină). **Învață** (`#/invata`, din
   v0.21.0): lecții interactive pe capitole, fiecare în jurul unui desen pe care copilul îl mișcă, cu Cifruța care dă indicația și
   provocările, verificate automat, și cu „Ce am aflat” la final; bifele rămân pe profil, doar în browser. Capitolul „Înmulțirea” are 5
   lecții: grupe egale (farfurii), rânduri și coloane (careul de 10 × 10 cu glisoare pe orizontală și pe verticală, „Întoarce”,
@@ -38,7 +40,9 @@
   mulțime (farfurii colorate) și zidul fracțiilor (fracțiile egale și compararea). Capitolul „Împărțirea” (v0.23.0) are 4 lecții:
   nuci împărțite în mod egal pe farfurii (câte una pe fiecare, pe rând; ce nu ajunge rămâne în coș), pungi umplute (scăderea
   repetată), tabla înmulțirii citită pe dos (rândul împărțitorului, cu proba) și pachete de câte 10 bețișoare (84 : 4; pachetele care nu
-  ajung pe toate farfuriile se desfac). Conținut: **4 teste
+  ajung pe toate farfuriile se desfac). Capitolul „Termenul necunoscut” (v0.24.0) are 3 lecții: balanța (ghicești câte nuci are sacul
+  sau iei aceleași nuci din ambele talere; 8 + 4 = □ + 5 dă 7, nu 12), partea care lipsește (barele: termenul, scăzătorul și
+  descăzutul) și mașina de numere (□ × 4 = 24, □ : 3 = 6, doi pași, cu drumul înapoi). Conținut: **4 teste
   de recapitulare a clasei I** (T1–T4 v2),
   **8 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc, spațiu,
   școală) și **8 teste „Călătorie pe Planeta Albastră”** (adunarea și scăderea până la 1000 cu trecere peste ordin, cu Pământul:
@@ -1057,6 +1061,26 @@
   - **Publicat:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
+
+- **2026-11-21 (Termenul necunoscut: capitolul din Învață și tema din Jocuri fulger, v0.24.0)**
+  - **Învață, 3 lecții**, cu trei widgeturi noi, fiecare cu ecuația adusă de `start`:
+    - `balanta` (ghicești câte nuci are sacul, iar balanța se înclină; sau iei aceleași nuci din ambele talere);
+    - `bare` (partea care lipsește, la scară);
+    - `masina` (1–2 operații, cu „Pe dos”).
+  - **Capturile au prins** talerele balanței ieșind din ecran pe telefon (bara avea 16rem): balanța e acum un container de mărime, cu
+    bara și talerele în procente și urcatul în `cqw`. Pe telefonul ținut orizontal, desenele widgeturilor noi au o lățime dată (coloana
+    lor e cât conținutul), iar glisorul și legenda își au locul lor în grilă.
+  - **Tema fulger „Termenul necunoscut”** (`ecuatii`, din „în curând”, la clasa a II-a), cu 10 tipuri noi și două refolosite
+    (`inm-factor-lipsa`, `imp-lipsa`).
+    - Ghicitorul pe unități a prins ecuațiile în doi pași cu forma [0, 1, c, c + 1] (95%): răspunsurile lor trec de 20, deci ultima cifră
+      le arăta. Variantele lor vin acum din `calcChoices`, cu forma calculelor cu trecere (aceleași unități).
+    - Balanța cu căsuța și-a păstrat forma (răspunsurile ei rămân sub 23), cu greșeala „=” citit ca „scrie rezultatul” în jumătate din
+      întrebări.
+  - **E2E nou** (`invata_new_widgets`): împărțirea (câte nuci pe fiecare farfurie și în coș), balanța (se înclină, apoi se îndreaptă),
+    barele (se potrivesc) și mașina (drumul înapoi). Prima formă trecea glisorul prin 3, unde prima provocare se rezolvă și focusul pleacă
+    pe „Bravo!”; acum glisorul merge întâi la capăt.
+  - **Rezultate:** npm test 160/160, reguli 16/16; E2E lecții și jocuri 1618 verificări (3 picate: verificarea de mai sus, reparată),
+    apoi lecțiile 487/487 pe toate ecranele.
 
 - **2026-11-21 (Împărțirea: capitolul din Învață și tema din Jocuri fulger, v0.23.0)**
   - **Cerința:** „încă 2 lecții (termen necunoscut, împărțirea în concentrul 100 plecând de la tabla înmulțirii) și încă 3 teste fulger

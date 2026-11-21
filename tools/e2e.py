@@ -963,6 +963,7 @@ def fulger_screens(run: Run, browser, base: str):
         (CALC_1000_TOPIC, ("add-3op-1000-cu", "cmp-fara-calcul-1000", "cifra-lipsa-1000", "calcul-gresit-1000", "nr-regrupat", "estimare-sute", "pana-la-1000")),
         ("inmultirea", ("cmp-inm-1000", "inm-factor-lipsa-mare", "inm-adunare-repetata", "inm-grupe", "inm-1x2-500", "inm-11")),
         ("impartirea", ("imp-lipsa-2c", "cmp-imp-2c", "imp-scadere-repetata", "imp-problema", "imp-2c")),
+        ("ecuatii", ("ec-doi-pasi", "ec-balanta", "ec-termen-1000", "cmp-balanta-x", "cmp-balanta-100")),
     ]
     for name, opts, min_text in screens:
         context = browser.new_context(locale="ro-RO", **opts)
@@ -1336,6 +1337,42 @@ def invata_flow(run: Run, page: Page, vp: str):
     run.check(page.evaluate("location.hash") == "#/invata", f"[{vp}] un capitol necunoscut duce la #/invata")
 
 
+def invata_new_widgets(run: Run, page: Page, vp: str):
+    """Widgeturile împărțirii și ale termenului necunoscut, din desen: farfuriile și coșul, balanța care se înclină și se îndreaptă,
+    barele care se potrivesc și drumul înapoi al mașinii de numere."""
+    # împărțirea: 12 nuci pe 5 farfurii, câte 2 pe fiecare, iar 2 rămân în coș
+    run.goto(page, "invata/impartirea/impartim-egal", debug=True)
+    page.wait_for_selector("[data-testid=iv-imparte]")
+    # pe 3 farfurii se rezolvă prima provocare (și focusul pleacă pe „Bravo!”): glisorul merge întâi la capăt, apoi înapoi la 5
+    page.get_by_test_id("iv-slider-by").locator("input").focus()
+    page.keyboard.press("End")
+    iv_slide(page, "by", 5)
+    d = page.evaluate("window.__dbg.invata.derived()")
+    sizes = page.get_by_test_id("iv-group").evaluate_all("els => els.map((e) => e.children.length)")
+    left = page.get_by_test_id("iv-basket").evaluate("e => e.children.length")
+    run.check(len(sizes) == 5 and set(sizes) == {d["each"]} and d["each"] == 2 and left == d["left"] == 2, f"[{vp}] împărțirea: {len(sizes)} farfurii cu câte {sizes}, {left} în coș (12 : 5)")
+    # balanța: prea puține nuci în sac coboară talerul celălalt; la răspunsul bun, stă dreaptă
+    run.goto(page, "invata/ecuatii/balanta", debug=True)
+    page.wait_for_selector("[data-testid=iv-scale]")
+    iv_slide(page, "guess", 5)
+    light = float(page.get_by_test_id("iv-scale").get_attribute("data-tilt"))
+    iv_slide(page, "guess", 8)
+    page.wait_for_selector("[data-testid=iv-bravo]")
+    level = float(page.get_by_test_id("iv-scale").get_attribute("data-tilt"))
+    run.check(light > 0 and level == 0, f"[{vp}] balanța: cu 5 nuci în sac coboară dreapta ({light}°), cu 8 stă dreaptă ({level}°)")
+    # barele: se potrivesc la 8
+    run.goto(page, "invata/ecuatii/partea-lipsa", debug=True)
+    page.wait_for_selector("[data-testid=iv-bars]")
+    iv_slide(page, "guess", 8)
+    run.check(page.get_by_test_id("iv-bars").get_attribute("data-fits") == "true", f"[{vp}] barele: la 8, bara de jos e cât cea de sus")
+    # mașina: „Pe dos” arată drumul înapoi, de la 24 la 6
+    run.goto(page, "invata/ecuatii/masina", debug=True)
+    page.wait_for_selector("[data-testid=iv-machine]")
+    page.get_by_test_id("iv-toggle-back").click()
+    back = page.get_by_test_id("iv-machine-back")
+    run.check(back.is_visible() and "24" in back.inner_text() and "6" in back.inner_text(), f"[{vp}] mașina: pe dos, „{back.inner_text().strip()}”")
+
+
 def invata_gestures(run: Run, page: Page, vp: str):
     """Gesturile pe dreptunghi: atingerea pe careu, tragerea glisoarelor (mouse sau deget, fără să se miște pagina), „Întoarce”,
     obiectele și „Numără”."""
@@ -1530,6 +1567,7 @@ def main() -> int:
             if not only or invata_only:
                 invata_flow(run, page, vp)
                 invata_gestures(run, page, vp)
+                invata_new_widgets(run, page, vp)
             if tests:
                 pages_flow(run, page, tests[0], vp)
             for test in tests:

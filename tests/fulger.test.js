@@ -22,6 +22,7 @@ import { calcOptions, RULES_1000 } from './fulger-1000.rules.js';
 import { CALC_1000_RULES } from './fulger-calcule-1000.rules.js';
 import { INMULTIRE_RULES } from './fulger-inmultire.rules.js';
 import { IMPARTIRE_RULES } from './fulger-impartire.rules.js';
+import { ECUATII_RULES } from './fulger-ecuatii.rules.js';
 import { SHAPE_RULES } from './fulger-forme.rules.js';
 import { CHART_RULES } from './fulger-grafice.rules.js';
 import { MAP_RULES } from './fulger-grafuri.rules.js';
@@ -68,6 +69,7 @@ const RULES = {
   ...CALC_1000_RULES, // adunările și scăderile până la 1000, cu trecere: tests/fulger-calcule-1000.rules.js
   ...INMULTIRE_RULES, // înmulțirile: tests/fulger-inmultire.rules.js
   ...IMPARTIRE_RULES, // împărțirile: tests/fulger-impartire.rules.js
+  ...ECUATII_RULES, // ecuațiile cu căsuța: tests/fulger-ecuatii.rules.js
   ...SHAPE_RULES, // tipurile cu figuri: regulile sunt în tests/fulger-forme.rules.js
   ...CHART_RULES, // tipurile cu grafice: tests/fulger-grafice.rules.js
   ...MAP_RULES, // hărțile, rețelele și arborii: tests/fulger-grafuri.rules.js
@@ -230,9 +232,9 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
   }
 });
 
-test('fulger: regulile graficelor, ale grafurilor, ale calculelor cu trecere, ale înmulțirilor și ale împărțirilor pe încă 2500 de semințe (ramurile rare)', () => {
+test('fulger: regulile graficelor, ale grafurilor, ale calculelor cu trecere, ale înmulțirilor, ale împărțirilor și ale ecuațiilor pe încă 2500 de semințe (ramurile rare)', () => {
   // ramurile rare scapă din 500 de semințe: „cu 5 mai mult”, într-o lună de mai, se citea ca data „5 mai” (1 întrebare din 1000)
-  for (const id of Object.keys({ ...CHART_RULES, ...MAP_RULES, ...CALC_1000_RULES, ...INMULTIRE_RULES, ...IMPARTIRE_RULES })) {
+  for (const id of Object.keys({ ...CHART_RULES, ...MAP_RULES, ...CALC_1000_RULES, ...INMULTIRE_RULES, ...IMPARTIRE_RULES, ...ECUATII_RULES })) {
     for (let seed = SEEDS + 1; seed <= 3000; seed++) {
       const q = KINDS[id].generate(seededRandom(seed));
       assert.ok(RULES[id](q), `${id} (sămânța ${seed}) încalcă regulile tipului: ${JSON.stringify(q)}`);
@@ -302,11 +304,11 @@ function unitsOdds(q) {
 }
 
 // calculele cu o cifră (și cele pe sute rotunde): răspunsul pe oricare loc are întâietate față de plauzibilitate
-const ONE_DIGIT = ['add-1c', 'add-1c-2c', 'sub-20-fara', 'sub-20-cu', 'add-3op-1c', 'op-sute'];
+const ONE_DIGIT = ['add-1c', 'add-1c-2c', 'sub-20-fara', 'sub-20-cu', 'add-3op-1c', 'op-sute', 'ec-termen-20', 'ec-scadere-20'];
 
 test('fulger: la temele cu calcule, forma variantelor nu arată răspunsul (ghicitorii pe tipare, pe mărimi și pe unități)', () => {
   // temele cu desene au câteva tipuri cu sume (arbori, bare, drumuri) la 33–47%: backlog
-  const calcTopics = ['adunari-scaderi-100', 'numere-1000', 'adunari-scaderi-1000', 'inmultirea', 'impartirea'].map(topicConfig);
+  const calcTopics = ['adunari-scaderi-100', 'numere-1000', 'adunari-scaderi-1000', 'inmultirea', 'impartirea', 'ecuatii'].map(topicConfig);
   const kinds = [...new Set(calcTopics.flatMap((t) => t.levels.flatMap((l) => l.mix.map((m) => m.kind))))].filter((k) => !['compare', 'sort'].includes(KINDS[k].mode));
   const SEEDS_GUESS = 2000;
   for (const id of kinds) {
@@ -399,8 +401,9 @@ test('fulger: runda e deterministă, începe cu încălzirea și nu repetă înt
   }
   assert.throws(() => createRound({ topic: LEGACY_TOPIC, level: 'nu-exista' }));
   assert.throws(() => createRound({ topic: 'nu-exista', level: 'usor' }));
+  // o temă „în curând” nu se joacă (azi nu mai e niciuna: atunci, doar o temă care nu există, mai sus)
   const soon = config.topics.find((t) => t.soon);
-  assert.throws(() => createRound({ topic: soon.id, level: 'usor' }), 'o temă „în curând” nu se joacă');
+  if (soon) assert.throws(() => createRound({ topic: soon.id, level: 'usor' }), 'o temă „în curând” nu se joacă');
 });
 
 test('fulger: rezumatul adună alunele, seria cea mai lungă și bonusul de precizie', () => {
