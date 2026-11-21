@@ -64,8 +64,10 @@
     măsurat pe ecran, fiecare temă jucată tip cu tip, mascota care se mișcă doar unde trebuie);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** publicarea v0.21.0 și v0.22.0, după confirmarea utilizatorului (regulile Firestore nu se schimbă). v0.20.0 e
-  publicată (regulile `80fba2c5`, rularea 44900403986, tag `v0.20.0`).
+- **Următorul pas:** v0.22.1 e publicată (rularea 44931822006, tag `v0.22.1`; regulile Firestore nu s-au schimbat). Urmează planul
+  aprobat pe 21 noiembrie: în Învață, capitolele „Împărțirea” (4 lecții) și „Termenul necunoscut” (3 lecții); în Jocuri fulger, temele
+  „Împărțirea”, „Termenul necunoscut” și „Fracțiile”, pe etape (v0.23.0, v0.24.0, v0.25.0), publicate doar la cererea utilizatorului
+  (cu `npm run deploy:rules` înaintea lui `npm run deploy`, pentru că temele noi intră în `fulgerTopics()`).
   - Copilul parcurge lecțiile de înmulțire și de fracții: ce provocări sunt prea ușoare sau prea grele, ce gesturi merg pe telefonul
     lui.
   - Copilul joacă temele pe fiecare nivel, și înmulțirea: din tabelul „Pentru părinți” (timpul mediu pe tip) se reglează `fastMs` și
@@ -672,6 +674,10 @@
 - „Greșelile tale” arată × și − cu semnul și pentru cititorul de ecran (doar arena le citește „ori” și „minus”).
 - Învață: bifele lecțiilor se pierd la ieșirea din cont (stau doar în browser, cu copiile profilului) și nu trec pe alt dispozitiv;
   ieșirea din cont nu avertizează (backlog: progresul în cont).
+- Versiunea din adresele modulelor nu alege conținutul: GitHub Pages servește mereu ultima publicare, oricare ar fi `?v=`. Rămâne un caz
+  rar: o pagină deschisă cu cel mult 10 minute înainte de o publicare, care încarcă abia după publicare un modul neîncărcat încă.
+  Acela vine din versiunea nouă, cu dependențele lui noi. Nu mai dă eroare de legare (ca în v0.22.0), dar poate avea o a doua copie
+  a unui modul cu stare (de exemplu `core/storage.js`), până la reîncărcare.
 - E2E local: o dată, în `fulger_topics_flow`, o variantă a rămas „nestabilă” 30 s la „adunarea repetată” (pe laptop), iar rularea s-a
   oprit; rulat singur, fluxul trece (396/396). Încă o instabilitate trecătoare, ca pasul „Șterge toate rezultatele”.
 - Învață: convenția factorilor („3 × 4” = de 3 ori câte 4) e încă neverificată cu manualul.
@@ -1064,6 +1070,8 @@
     `max-age=600`), iar pagina a arătat „Ceva nu a mers” („storage.js does not provide an export named getLessons”). Eroarea s-a
     reprodus pe site-ul live; trece la o reîncărcare forțată. De la v0.22.1, la publicare, `tools/versiune.mjs` pune `?v=<commit>`
     în adresele modulelor (încercat pe o copie a site-ului, cu E2E-ul complet pe laptop).
+  - **Publicat:** v0.22.1, prin GitHub Actions (rularea 44931822006; regulile Firestore nu se schimbă), tag `v0.22.1`. Pe site-ul live,
+    `index.html` încarcă `js/app.js?v=6639863`, iar importurile au aceeași versiune; E2E pe site-ul live 3130/3130.
 
 - **2026-11-21 (Învață: recenzia și E2E-ul complet)**
   - **Recenzia** (agent fără istoricul conversației, cu fiecare problemă verificată în Chromium, cu Node sau pe drumul codului): 8
