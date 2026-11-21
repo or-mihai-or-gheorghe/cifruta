@@ -2,7 +2,8 @@
 //   plates — farfurii una sub alta, câte o tavă pe rând (grupe egale; cel mult 6 × 6);
 //   grid   — rânduri și coloane pe un careu de 10 × 10, cu „Întoarce” (ordinea factorilor);
 //   split  — dreptunghiul tăiat între rânduri: 7 × 6 = 5 × 6 + 2 × 6;
-//   table  — harta tablei înmulțirii, cu strategiile care aprind căsuțele știute.
+//   table  — harta tablei înmulțirii, cu strategiile care aprind căsuțele știute; cu `read: 'div'`, aceeași hartă citită pe dos
+//            (împărțirea: 24 : 6 = 4 e coloana în care stă 24 pe rândul lui 6), fără butoanele strategiilor.
 // Starea se schimbă doar prin apply(); vederea (view.js) desenează starea și trimite acțiunile.
 
 import { cantitate, fractionWords } from '../../../core/ro.js';
@@ -82,6 +83,7 @@ export default {
     if (['plates', 'grid'].includes(p.skin) && !ITEMS[p.item]) errors.push(`obiect necunoscut „${p.item}”`);
     if (p.flip !== undefined && (typeof p.flip !== 'boolean' || p.skin !== 'grid')) errors.push('„flip” e doar pentru aspectul grid');
     if (p.mark !== undefined && (typeof p.mark !== 'boolean' || p.skin !== 'plates')) errors.push('„mark” (farfuriile colorate) e doar pentru aspectul plates');
+    if (p.read !== undefined && (p.read !== 'div' || p.skin !== 'table')) errors.push('„read: div” (tabla citită pe dos) e doar pentru aspectul table');
     return errors;
   },
 
@@ -113,7 +115,7 @@ export default {
     for (const c of this.controls(p, s)) for (let v = c.min; v <= c.max; v++) if (v !== s[c.id]) list.push({ set: c.id, value: v });
     if (p.skin === 'grid' && p.flip) list.push({ do: 'flip' });
     if (p.skin === 'grid') for (const item of Object.keys(ITEMS)) if (item !== s.item) list.push({ set: 'item', value: item });
-    if (p.skin === 'table') for (const st of STRATEGIES) list.push({ toggle: st.id });
+    if (p.skin === 'table' && p.read !== 'div') for (const st of STRATEGIES) list.push({ toggle: st.id });
     return list;
   },
 
@@ -190,6 +192,12 @@ export default {
       out.legend = [['rows', cantitate(s.rows, 'rând', 'rânduri')], ['', ' cu câte '], ['cols', String(s.cols)], ['', ', tăietura după rândul '], ['cut', String(s.cut)]];
       out.parts = [equation(ta, tb, d.top), equation(ba, bb, d.bottom)];
       out.equation = `${times(a, b)}${NBSP}=${NBSP}${times(ta, tb)}${NBSP}+ ${times(ba, bb)}${NBSP}=${NBSP}${d.top}${NBSP}+ ${d.bottom}${NBSP}=${NBSP}${product}`;
+    } else if (p.skin === 'table' && p.read === 'div') {
+      // împărțirea pe hartă: rândul e împărțitorul, coloana e câtul; proba e înmulțirea câtului cu împărțitorul
+      out.equation = `${d.product}${NBSP}:${NBSP}${s.rows}${NBSP}=${NBSP}${s.cols}`;
+      out.reading = `${d.product} e pe rândul lui ${s.rows}, în coloana ${s.cols}`;
+      out.legend = [['', `${d.product} : `], ['rows', `rândul lui ${s.rows}`], ['', ' = '], ['cols', `coloana ${s.cols}`]];
+      out.extra = `Proba: ${times(s.cols, s.rows)}${NBSP}=${NBSP}${d.product}.`;
     } else if (p.skin === 'table') {
       out.reading = `rândul ${s.rows}, coloana ${s.cols}`;
       out.legend = [['rows', `rândul ${s.rows}`], ['', ' și '], ['cols', `coloana ${s.cols}`]];

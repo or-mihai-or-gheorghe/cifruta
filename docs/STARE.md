@@ -1,7 +1,8 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-11-21 · **Versiune:** 0.22.1 (secțiunea nouă **Învață**: în 0.21.0 cinci lecții interactive de înmulțire și
+- **Data:** 2026-11-21 · **Versiune:** 0.23.0 (împărțirea: în Învață, capitolul „Împărțirea”, cu 4 lecții, iar în Jocuri fulger, tema
+  „Împărțirea”, cu 11 tipuri; ecuațiile cu căsuța în joc; secțiunea **Învață**: în 0.21.0 cinci lecții interactive de înmulțire și
   antetul refăcut, în 0.22.0 cinci lecții de fracții, în 0.22.1 scopul fiecărei lecții, scara de tăiere și versiunea în adresele
   modulelor; în 0.20.0, tema fulger „Înmulțirea”, cu 13 tipuri noi și grupele desenate)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
@@ -20,20 +21,24 @@
   peste zero, trei termeni, cifra lipsă din calculul în scris, calculul greșit, estimări, numere aproape rotunde), „Înmulțirea” (tabla,
   adunarea repetată, grupe egale desenate, factorul lipsă; o cifră × două cifre până la 200, apoi până la 500, și două cifre × două
   cifre cu × 10, × 11 și zeci rotunde, până la 1000), patru teme cu figuri, fără calcule, „Șiruri și intruși”, „Puzzle cu forme”, „Figuri și corpuri”, „Poziții și
-  trasee”, și două teme cu grafice și grafuri, „Grafice și tabele” și „Hărți și arbori”; împărțirea și ecuațiile simple
-  apar „în curând”; runde de 2 minute,
-  117 tipuri de întrebări generate (16 cu calcule până la 100, 18 cu numerele până la 1000, 14 cu trecere până la 1000, 13 cu înmulțiri,
-  24 cu figuri, 32 cu grafice, hărți și arbori), fiecare cu conceptele ei („Ce exersăm”), alune cu bonus de viteză și
+  trasee”, și două teme cu grafice și grafuri, „Grafice și tabele” și „Hărți și arbori”; „Împărțirea” (v0.23.0: tabla împărțirii,
+  scăderea repetată, probleme cu părți egale și grupe, deîmpărțitul și împărțitorul lipsă ca ecuații cu căsuța, câturi de două cifre);
+  ecuațiile simple apar „în curând”; runde de 2 minute,
+  128 de tipuri de întrebări generate (16 cu calcule până la 100, 18 cu numerele până la 1000, 14 cu trecere până la 1000, 13 cu
+  înmulțiri, 11 cu împărțiri, 24 cu figuri, 32 cu grafice, hărți și arbori), fiecare cu conceptele ei („Ce exersăm”), alune cu bonus de viteză și
   de serie, Turbo, pistă spre stele și record, medalii pe niveluri, „Greșelile tale” și ținta următoarei stele la rezultate: 3 stele la
   un nivel al unei teme aduc medalia de bronz, argint sau aur, iar aceeași medalie la 2, 3 și 5 teme aduce „dublul”, colecția și cupa;
-  acum 39 de medalii, pe raftul de pe pagina jocului, pe cardurile nivelurilor și pe prima pagină). **Învață** (`#/invata`, din
+  acum 42 de medalii, pe raftul de pe pagina jocului, pe cardurile nivelurilor și pe prima pagină). **Învață** (`#/invata`, din
   v0.21.0): lecții interactive pe capitole, fiecare în jurul unui desen pe care copilul îl mișcă, cu Cifruța care dă indicația și
   provocările, verificate automat, și cu „Ce am aflat” la final; bifele rămân pe profil, doar în browser. Capitolul „Înmulțirea” are 5
   lecții: grupe egale (farfurii), rânduri și coloane (careul de 10 × 10 cu glisoare pe orizontală și pe verticală, „Întoarce”,
   „Numără”), sărituri pe axă, dreptunghiul spart (7 × 6 = 5 × 6 + 2 × 6) și harta tablei înmulțirii (strategiile lasă doar 15 calcule
   de învățat). Capitolul „Fracțiile” (v0.22.0) are tot 5 lecții: părți egale (și „Care desen arată două jumătăți?”), jumătatea și
   sfertul (tăiatul în două păstrează bucățile colorate: 1/2 = 2/4), numărătorul și numitorul (până la zecimi), fracția dintr-o
-  mulțime (farfurii colorate) și zidul fracțiilor (fracțiile egale și compararea); „Împărțirea” apare „în curând”. Conținut: **4 teste
+  mulțime (farfurii colorate) și zidul fracțiilor (fracțiile egale și compararea). Capitolul „Împărțirea” (v0.23.0) are 4 lecții:
+  nuci împărțite în mod egal pe farfurii (câte una pe fiecare, pe rând; ce nu ajunge rămâne în coș), pungi umplute (scăderea
+  repetată), tabla înmulțirii citită pe dos (rândul împărțitorului, cu proba) și pachete de câte 10 bețișoare (84 : 4; pachetele care nu
+  ajung pe toate farfuriile se desfac). Conținut: **4 teste
   de recapitulare a clasei I** (T1–T4 v2),
   **8 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc, spațiu,
   școală) și **8 teste „Călătorie pe Planeta Albastră”** (adunarea și scăderea până la 1000 cu trecere peste ordin, cu Pământul:
@@ -1052,6 +1057,34 @@
   - **Publicat:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
+
+- **2026-11-21 (Împărțirea: capitolul din Învață și tema din Jocuri fulger, v0.23.0)**
+  - **Cerința:** „încă 2 lecții (termen necunoscut, împărțirea în concentrul 100 plecând de la tabla înmulțirii) și încă 3 teste fulger
+    (fracții, împărțire, termen necunoscut)”. Planul (aprobat după două treceri de verificare, cu machete și simulări): două capitole a
+    câte 3–4 lecții, trei teme noi, pe etape (v0.23.0 împărțirea, v0.24.0 termenul necunoscut, v0.25.0 fracțiile în joc).
+  - **Părțile comune:**
+    - `solveBox` (`core/expr.js`): căsuța unei ecuații, căutată până la 1000 (unică); prea lentă pentru generatoare (0,84 ms), deci o
+      folosesc doar testele, regulile și alegerile din Învață;
+    - întrebările cu căsuța din joc sunt `choice` (`boxChoice`): răspunsul stă în căsuță, cardul arată căsuța goală, „Greșelile tale”
+      o completează; `inm-factor-lipsa` și `inm-factor-lipsa-mare` au trecut și ele la căsuță;
+    - variantele-fracție (`{ frac }`) și fracțiile din cerințe (`{{f:}}`), pregătite pentru tema fracțiilor;
+    - în Învață, `start` pe provocare (punctul de plecare: alt total, altă ecuație), `setScale` pe glisor, regulile `cat` și
+      `necunoscut`, „:” și „□” citite și ținute pe rând.
+  - **Împărțirea în Învață:** widgetul `imparte` (farfurii, pungi, pachete de bețișoare) și harta tablei citită pe dos (`read: 'div'`,
+    cu rândul împărțitorului desfăcut în numere).
+    - Măsurat întâi pe machete: batoanele și cuburile depășeau ecranul pe telefonul ținut orizontal (84 : 10 = 401 px); bețișoarele,
+      ca la clasă, încap (cel mult 242 px).
+  - **Tema fulger „Împărțirea”:** 11 tipuri (tabla, scăderea repetată, probleme, căsuța, câturi de două cifre), cu ghicitorii din test.
+    - Zecile rotunde (80 : 4) au intrat în câturile de două cifre: singure ar fi avut prea puține întrebări diferite.
+    - La deîmpărțitul lipsă cu cât de două cifre, ultima cifră dădea răspunsul în 98% din întrebări: variantele sunt acum zeci la rând,
+      cu aceleași unități.
+    - Pragurile de stele vin din calibrare.
+  - **E2E-ul a prins** o lecție nouă cu același id ca una din „Fracțiile” („parti-egale”): cardurile din pagina Învață se căutau după
+    id. Lecția a devenit `impartim-egal`, iar un test cere acum id-uri unice în toată secțiunea. Pe „Tabla, pe dos”, rândul
+    împărțitorului își arată toate numerele (copilul caută 24 printre ele).
+  - **Rezultate:** npm test 156/156, reguli 16/16; E2E: după părțile comune 635/635 (laptop), lecțiile 409/409 (toate ecranele),
+    jocurile 434/434 (laptop) și 734/734 (tabletă, telefon). O rulare completă s-a oprit o dată la „Înmulțirea”, pe un buton
+    „nestabil” 30 s (problema știută, trecătoare); reluarea a trecut.
 
 - **2026-11-21 (Învață: scopul lecțiilor și scara de tăiere)**
   - **Ce a observat utilizatorul**, după publicare:

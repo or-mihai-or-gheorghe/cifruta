@@ -43,19 +43,19 @@ function oneByTwo(text) {
   return inRange(a, 2, 9) && inRange(n, 10, 99) ? [a, n] : null;
 }
 
-/** „Ce lipsește? ? × 6 = 42”: un singur „?”, factorul cunoscut, produsul și factorul care lipsește. */
+/** „□ × 6 = 42” (o ecuație cu căsuța): o singură căsuță, factorul cunoscut, produsul și factorul care lipsește. */
 function missing(q) {
-  const m = /^Ce lipsește\? (\?|\d+) × (\?|\d+) = (\d+)$/.exec(q.prompt);
-  if (!m || [m[1], m[2]].filter((x) => x === '?').length !== 1) return null;
-  const known = Number(m[1] === '?' ? m[2] : m[1]);
+  const m = q.mode === 'choice' && /^(□|\d+) × (□|\d+) = (\d+)$/.exec(q.text);
+  if (!m || [m[1], m[2]].filter((x) => x === '□').length !== 1) return null;
+  const known = Number(m[1] === '□' ? m[2] : m[1]);
   const total = Number(m[3]);
   return total % known === 0 ? { known, total, factor: total / known } : null;
 }
 
 /** Variantele factorului lipsă: patru numere la rând, între 1 și 10 (factorul vizibil poate fi printre ele). */
 function missingOptions(q, { factor }) {
-  const values = q.choices.map((id) => Number(q.options[id].text));
-  return numberAnswer(q, factor) && values[0] >= 1 && values[3] <= 10 && values.every((x, i) => i === 0 || x - values[i - 1] === 1);
+  const values = q.choices;
+  return q.answer === factor && values[0] >= 1 && values[3] <= 10 && values.every((x, i) => i === 0 || x - values[i - 1] === 1);
 }
 
 /** Pluralele care cer „Câți” (masculine); celelalte obiecte numărate cer „Câte”. */

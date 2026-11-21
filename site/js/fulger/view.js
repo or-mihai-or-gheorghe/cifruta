@@ -9,7 +9,7 @@ import { cantitate, formatNumber } from '../core/ro.js';
 import { play, unlockSound } from '../core/sound.js';
 import { emojiHTML } from '../visuals/emoji.js';
 import { visualSVG } from '../visuals/index.js';
-import { artHTML, artName, aspect, isChart, promptHTML, promptLength, promptSpoken } from './art.js';
+import { artHTML, artName, aspect, boxParts, isChart, promptHTML, promptLength, promptSpoken } from './art.js';
 import { badge, banner, burst, flyTo, stamp } from './effects.js';
 import { createRound, levelConfig, nextStar, streakTier, TURBO_FROM } from './engine.js';
 import { KINDS } from './kinds.js';
@@ -23,8 +23,16 @@ const CHEERS = { 3: 'Ai prins o serie!', 5: 'Alunele valorează dublu!', 10: 'Tu
 const COMFORT = ['Nu-i nimic!', 'Data viitoare iese!', 'Respiră și continuă!'];
 const STAR_WORDS = ['Prima', 'A doua', 'A treia'];
 
-/** Calculele pentru cititorul de ecran: „7 × 8” se citește „7 ori 8”, „9 − 4”, „9 minus 4”. */
-const spoken = (text) => String(text).replace(/−/g, 'minus').replace(/×/g, 'ori');
+/**
+ * Calculele pentru cititorul de ecran: „7 × 8” se citește „7 ori 8”, „9 − 4” „9 minus 4”, „24 : 6” „24 împărțit la 6”, iar căsuța
+ * unei ecuații „căsuța”. Două puncte se citesc „împărțit la” doar între numere: „Compară:” sau „Pe 5 mai:” rămân cum sunt.
+ */
+const spoken = (text) =>
+  String(text)
+    .replace(/(?<=[\d□]) : (?=[\d□])/g, ' împărțit la ')
+    .replace(/−/g, 'minus')
+    .replace(/×/g, 'ori')
+    .replace(/□/g, 'căsuța');
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
 /** Plăcile unei ordonări: numerele (la calcule) sau id-urile plăcuțelor desenate (la grafice). */
 const tilesOf = (q) => q.tiles ?? q.numbers;
@@ -56,14 +64,15 @@ function press(el, fn) {
   });
 }
 
-/** Desenul unei variante în buton; o variantă-text rămâne text, ca cifrele. */
+/** Desenul unei variante în buton; o variantă-text rămâne text, ca cifrele, iar o fracție e etajată. */
 function optionArt(spec) {
+  if (spec.frac) return h('span', { class: 'fg-opt__frac', 'aria-hidden': 'true', html: artHTML(spec) });
   if (!spec.v && !spec.emoji) return h('span', {}, spec.text);
   return h('span', { class: 'fg-opt__art', 'aria-hidden': 'true', style: { '--ar': String(aspect(spec)) }, html: artHTML(spec) });
 }
 
 /** Un emoji sau un text mic, pentru rândul de răspuns și pentru casetele ordonării. */
-const tinyArt = (spec) => (spec.emoji ? h('span', { class: 'fg-strip__art', html: artHTML(spec) }) : h('span', {}, spec.text));
+const tinyArt = (spec) => (spec.emoji || spec.frac ? h('span', { class: 'fg-strip__art', html: artHTML(spec) }) : h('span', {}, spec.text));
 
 /** O latură a comparării desenate: emoji-uri sau texte, unite cu „+”. */
 const sideArt = (list) =>
@@ -355,7 +364,11 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
       }
     } else if (q.mode === 'choice') {
       slot = h('span', { class: 'fg-q__slot' }, '?');
-      body = h('div', { class: 'fg-q', 'data-testid': 'fg-question' }, h('span', {}, q.text), h('span', { 'aria-hidden': 'true' }, '='), slot);
+      // o ecuație cu căsuța („□ + 7 = 15”): răspunsul se pune în locul căsuței, nu după „=”
+      const box = boxParts(q.text);
+      body = box
+        ? h('div', { class: 'fg-q fg-q--box', 'data-testid': 'fg-question' }, box[0].trim() ? h('span', {}, box[0].trim()) : null, slot, box[1].trim() ? h('span', {}, box[1].trim()) : null)
+        : h('div', { class: 'fg-q', 'data-testid': 'fg-question' }, h('span', {}, q.text), h('span', { 'aria-hidden': 'true' }, '='), slot);
     } else if (q.mode === 'compare') {
       slot = h('span', { class: 'fg-q__slot fg-q__slot--sign' });
       body = h('div', { class: 'fg-q', 'data-testid': 'fg-question' }, h('span', {}, q.left), slot, h('span', {}, q.right));
@@ -399,12 +412,13 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
       return btn;
     });
     // variantele cu piese sau rețele (multe căsuțe mici) stau pe două coloane pe telefoanele înalte, ca să iasă mai mari
-    const detailed = q.mode === 'figure' && q.choices.some((id) => q.options[id].v === 'cell-grid');
+    // la fel desenele cu fracții: o bară tăiată în zecimi ar avea felii de ~6 px pe un singur rând
+    const detailed = q.mode === 'figure' && q.choices.some((id) => ['cell-grid', 'fraction'].includes(q.options[id].v));
     // numerele lungi (patru cifre) n-ar încăpea în patru butoane pe un telefon îngust
     const wide = numericOptions(q) && q.choices.some((id) => q.options[id].text.length >= 4);
     // variantele-calcule stau pe două coloane: cele lungi („470 + 50 = 520”) cu litera mai mică, ca fiecare să încapă pe un rând, cele
     // scurte („4 × 5”) cu litera obișnuită
-    const calcTexts = q.mode === 'figure' && q.choices.every((id) => / [=×] /.test(String(q.options[id].text ?? '')));
+    const calcTexts = q.mode === 'figure' && q.choices.every((id) => / [=×:] /.test(String(q.options[id].text ?? '')));
     const calcs = calcTexts && q.choices.some((id) => q.options[id].text.length > 7);
     const pairs = calcTexts && !calcs;
     answers.className = `fg-answers fg-answers--${q.mode}${detailed ? ' fg-answers--detailed' : ''}${wide ? ' fg-answers--wide' : ''}${calcs ? ' fg-answers--calcs' : ''}${pairs ? ' fg-answers--pairs' : ''}${strip ? ' fg-answers--strip' : ''}`;
@@ -421,7 +435,9 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
           : q.figure
             ? `${said} ${artName(q.figure)}. Plăcuțe: ${options.map((o) => o.name).join(', ')}.`
             : q.mode === 'choice'
-          ? `${spoken(q.text)} fac?`
+          ? boxParts(q.text)
+            ? `Ce număr lipsește? ${spoken(q.text)}.`
+            : `${spoken(q.text)} fac?`
           : q.mode === 'compare'
             ? `Compară ${spoken(q.left)} cu ${spoken(q.right)}.`
             : `Ordonează ${q.dir === 'asc' ? 'crescător' : 'descrescător'}: ${q.numbers.join(', ')}.`;

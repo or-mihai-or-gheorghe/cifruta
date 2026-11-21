@@ -418,6 +418,8 @@
 .iv-cell.is-lit { color: var(--c-ok-ink); }
 .iv-cell.is-lit:not(.is-in) { background: var(--c-ok-bg); }
 .iv-cell.is-todo { border: 2px dashed var(--c-bad-ink); }
+/* tabla citită pe dos: rândul împărțitorului, cu toate numerele lui (24 se caută pe rândul lui 6) */
+.iv-cell.is-row { color: var(--c-rows-ink); background: var(--c-rows-bg); }
 .iv-cell.is-sel { z-index: 1; color: var(--c-ink); background: var(--c-accent); box-shadow: 0 0 0 3px var(--c-ink); }
 
 /* ——— Săriturile pe axă ——— */
@@ -544,6 +546,65 @@
   pointer-events: none;
 }
 
+/* ——— Împărțirea (imparte): coșul, apoi farfuriile sau pungile, cu nucile ori bețișoarele lor ———
+   Farfuriile trec pe rândul următor, fiecare cu un careu mic (nucile de 22 px; măsurat: cel mult 162 px de desen cu 24 de nuci, pe
+   326 px de lățime). Bețișoarele: un pachet de 10 (zecea) și bețișoarele libere (unitățile), cel mult 242 px la 84 : 10. Obiectele
+   apar în ordinea împărțirii (`--k`), doar prin transform și opacity. */
+.iv-imparte { display: grid; justify-items: center; gap: var(--sp-3); }
+.iv-imparte__control { width: 100%; max-width: 32rem; }
+.iv-share { display: flex; flex-direction: column; align-items: center; gap: 0.45rem; width: 100%; }
+.iv-share__basket {
+  --cols: 4;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 22px);
+  gap: 3px;
+  min-width: 3.4rem;
+  min-height: 2.3rem;
+  padding: 0.3rem 0.55rem;
+  border: 2px dashed var(--c-line-strong);
+  border-radius: 0.4rem 0.4rem 1.1rem 1.1rem;
+  background: var(--v-cream, #ffebcc);
+}
+.iv-share--zeci .iv-share__basket { display: flex; align-items: flex-end; gap: 2px; min-height: 3.3rem; }
+.iv-share__groups { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem; }
+.iv-share__group {
+  --cols: 3;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 22px);
+  gap: 3px;
+  padding: 0.4rem 0.5rem;
+  border: 2px solid var(--c-rows);
+  border-radius: 50% / 40%;
+  background: var(--c-rows-bg);
+}
+.iv-share__group.is-bag { border-color: var(--c-cols); border-radius: 0.45rem 0.45rem 1rem 1rem; background: var(--c-cols-bg); }
+.iv-share--zeci .iv-share__group { display: flex; align-items: flex-end; gap: 2px; padding: 0.35rem 0.6rem; border-radius: 1.2rem; }
+.iv-nut {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50% 50% 46% 46%;
+  background: radial-gradient(circle at 34% 30%, var(--v-brown-light, #d9a066) 0 20%, var(--v-brown, #a86b3c) 21% 100%);
+  box-shadow: inset 0 -2px 0 var(--v-brown-dark, #7f4f2a);
+}
+/* un pachet de 10 bețișoare, legat cu o bandă; un bețișor liber */
+.iv-bundle {
+  position: relative;
+  display: block;
+  width: 18px;
+  height: 44px;
+  border-radius: 3px;
+  background: repeating-linear-gradient(90deg, var(--v-yellow-dark, #f2b705) 0 1.6px, var(--v-yellow, #ffd34d) 1.6px 3.6px);
+}
+.iv-bundle::after { content: ''; position: absolute; inset: 44% -2px auto; height: 5px; border-radius: 2px; background: var(--c-rows); }
+.iv-stick { display: block; width: 5px; height: 44px; border-radius: 2px; background: var(--v-yellow-dark, #f2b705); box-shadow: inset -1px 0 0 var(--v-orange-dark, #e07b39); }
+.iv-bundle + .iv-stick { margin-left: 4px; } /* o mică pauză între zeci și unități */
+.iv-share.is-dealing .iv-share__group > * { animation: iv-deal 0.32s var(--ease-out) both; animation-delay: calc(var(--k) * var(--deal-step, 45ms)); }
+@keyframes iv-deal {
+  from { opacity: 0; transform: translateY(-0.9rem) scale(0.6); }
+  to { opacity: 1; transform: none; }
+}
+
 /* ——— Ecranele joase (telefonul ținut orizontal): desenul în stânga; Cifruța, calculul și butoanele în dreapta ———
    Scena și widgetul devin `display: contents`, ca bucățile widgetului să se așeze direct în grila lecției; căsuța se socotește
    atunci după înălțime (fără container, unitățile cq trec la ecran). */
@@ -562,8 +623,9 @@
     row-gap: var(--sp-2);
   }
   .iv-lesson__guide { grid-area: guide; }
-  .iv-stage, .iv-array, .iv-jumps, .iv-parts { display: contents; }
-  .iv-array__stage, .iv-jumps__art, .iv-parts__art { grid-area: stage; }
+  /* widgeturile noi (împărțirea, balanța, barele, mașina) au clasele comune `iv-widget` și `iv-art`, ca să nu se adauge aici unul câte unul */
+  .iv-stage, .iv-array, .iv-jumps, .iv-parts, .iv-widget { display: contents; }
+  .iv-array__stage, .iv-jumps__art, .iv-parts__art, .iv-art { grid-area: stage; }
   .iv-parts__art { width: min(14rem, 40vw); align-self: center; }
   .iv-parts__controls { grid-area: ctrl; justify-self: stretch; }
   /* la fracții: scara de tăiere sub calcul, apoi glisorul de colorat, apoi alegerea formei */

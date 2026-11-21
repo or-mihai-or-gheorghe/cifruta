@@ -13,7 +13,7 @@ import { cantitate, formatDateTime, formatNumber } from '../core/ro.js';
 import { redirect, refresh } from '../core/router.js';
 import { play } from '../core/sound.js';
 import { clearFulger, getFulger, saveFulgerRound } from '../core/storage.js';
-import { artHTML, artName, aspect, isChart, promptHTML, promptSpoken } from '../fulger/art.js';
+import { artHTML, artName, aspect, boxParts, isChart, promptHTML, promptSpoken } from '../fulger/art.js';
 import { levelConfig, nextStar, playableTopics, practiceFor, starsFor, topicConfig, topicStars, topicTotal } from '../fulger/engine.js';
 import { isDrawn, KINDS } from '../fulger/kinds.js';
 import { medalCatalog, medalsAfterRound, medalsWon, metalCount, metalOf } from '../fulger/medals.js';
@@ -151,7 +151,15 @@ function sample(kind, seed) {
       h('span', { class: 'u-visually-hidden' }, q.mode === 'figure' ? promptSpoken(q.prompt) : KINDS[kind].label),
     );
   }
-  const content = q.mode === 'choice' ? q.text : q.mode === 'compare' ? [q.left, h('span', { class: 'fg-box', 'aria-label': 'căsuță' }), q.right] : q.numbers.join(' · ');
+  // o ecuație cu căsuța arată căsuța goală, ca o comparare: exemplul nu dă răspunsul
+  const box = q.mode === 'choice' && boxParts(q.text);
+  const content = box
+    ? [box[0], h('span', { class: 'fg-box', 'aria-label': 'căsuță' }), box[1]]
+    : q.mode === 'choice'
+      ? q.text
+      : q.mode === 'compare'
+        ? [q.left, h('span', { class: 'fg-box', 'aria-label': 'căsuță' }), q.right]
+        : q.numbers.join(' · ');
   return h('li', { class: 'fg-sample' }, content);
 }
 
@@ -346,7 +354,11 @@ function suggestion(topic, lvl, summary) {
 
 /** Miniatura unui desen din „Greșelile tale” (o variantă-text rămâne text, scrisă întreg: „miercuri”, „10 iunie”). */
 const mistakeArt = (spec, cls = 'fg-mistake__art') =>
-  spec.v || spec.emoji ? h('span', { class: cls, 'aria-hidden': 'true', style: { '--ar': String(aspect(spec)) }, html: artHTML(spec) }) : h('span', {}, spec.alt ?? spec.text);
+  spec.v || spec.emoji
+    ? h('span', { class: cls, 'aria-hidden': 'true', style: { '--ar': String(aspect(spec)) }, html: artHTML(spec) })
+    : spec.frac
+      ? h('span', { html: artHTML(spec) })
+      : h('span', {}, spec.alt ?? spec.text);
 /** Desenul întrebării la „Greșelile tale”: graficele și hărțile ies mai mari, ca să se poată citi. */
 const mistakeFigure = (spec) => mistakeArt(spec, `fg-mistake__fig${isChart(spec) ? ' fg-mistake__fig--chart' : ''}`);
 const SEPARATORS = { asc: ' < ', desc: ' > ', path: ' → ' };
@@ -401,8 +413,11 @@ function mistake({ question: q, given }) {
       chosen ? h('span', { class: 'fg-mistake__note' }, 'ai ales ', mistakeArt(chosen), h('span', { class: 'u-visually-hidden' }, artName(chosen))) : null,
     );
   }
-  const [line, note] =
-    q.mode === 'choice'
+  // la o ecuație cu căsuța, răspunsul stă chiar în căsuță: „[8] + 7 = 15”
+  const box = q.mode === 'choice' && boxParts(q.text);
+  const [line, note] = box
+    ? [[box[0], ok(String(q.answer)), box[1]], `ai ales ${given}`]
+    : q.mode === 'choice'
       ? [[q.text, ' = ', ok(String(q.answer))], `ai ales ${given}`]
       : q.mode === 'compare'
         ? [[q.left, ' ', ok(q.answer), ' ', q.right], `ai ales ${given}`]

@@ -8,8 +8,9 @@ import data from '../site/data/invata.js';
 import CONCEPTS from '../site/data/concepts.js';
 import { findNonJSON, lintText, walkTexts } from '../site/js/core/lint.js';
 import { markupErrors, plain } from '../site/js/core/markup.js';
-import { chapterConcepts, findLesson, hideable, lessonErrors, paramsOf, pickAnswer, pickCorrect, playableChapters, reachable, search, widgetOf } from '../site/js/invata/logic.js';
+import { chapterConcepts, findLesson, hideable, lessonErrors, paramsOf, pickAnswer, pickCorrect, playableChapters, reachable, search, startState, widgetOf } from '../site/js/invata/logic.js';
 import { WIDGETS } from '../site/js/invata/registry.js';
+import { shareTens } from '../site/js/invata/widgets/imparte/logic.js';
 import { keyStep, percentOf, valueAt } from '../site/js/invata/ruler.js';
 import { NBSP, equation, keepMath, repeatedSum, spokenMath } from '../site/js/invata/text.js';
 import '../site/js/visuals/all.js';
@@ -74,13 +75,20 @@ test('învață: textele sunt scurte, cu diacritice corecte, NFC și doar mini-m
   }
 });
 
+test('învață: id-urile lecțiilor sunt unice în toată secțiunea (cardurile și testele E2E le caută după id)', () => {
+  const ids = lessons.map(({ lesson }) => lesson.id);
+  assert.deepEqual(ids.filter((id, i) => ids.indexOf(id) !== i), []);
+});
+
 test('învață: findLesson găsește lecțiile, nu și capitolele „în curând”', () => {
   const first = lessons[0];
   const found = findLesson(data, first.chapter.id, first.lesson.id);
   assert.equal(found.lesson, first.lesson);
   assert.equal(found.index, 0);
   assert.equal(findLesson(data, first.chapter.id, 'nu-exista').lesson, null);
-  assert.equal(findLesson(data, 'impartirea'), null);
+  // un capitol „în curând” n-are lecții (azi toate capitolele se joacă, deci unul închipuit)
+  assert.equal(findLesson({ chapters: [{ id: 'viitor', title: 'Viitor', icon: 'idee', soon: true, text: 'În curând.' }] }, 'viitor'), null);
+  assert.equal(findLesson(data, 'impartirea', 'impartim-egal').index, 0);
   assert.equal(findLesson(data, 'nu-exista'), null);
 });
 
@@ -143,6 +151,12 @@ test('învață: căutarea trece doar prin acțiunile interfeței', () => {
       const states = reachable(W, params);
       assert.ok(states.length >= 10 && states.length <= 20000, `${lesson.id}: ${states.length} stări`);
       for (const s of states.slice(0, 50)) for (const a of W.actions(params, s)) assert.doesNotThrow(() => W.apply(params, s, a));
+      // și din punctul de plecare pe care și-l aduce o provocare (`start`): o ecuație nouă, alt număr de obiecte
+      for (const t of lesson.tasks.filter((x) => x.start)) {
+        for (const s of reachable(W, params, startState(W.initial(params), t)).slice(0, 50)) {
+          for (const a of W.actions(params, s)) assert.doesNotThrow(() => W.apply(params, s, a), `${lesson.id}/${t.id}`);
+        }
+      }
     }
   }
   const lesson = lessons.find(({ lesson }) => lesson.id === 'randuri-coloane').lesson;
@@ -169,6 +183,23 @@ test('învață: lessonErrors prinde provocările care nu merg', () => {
   assert.match(lessonErrors(table).join(), /nu se poate ascunde/);
   assert.match(errs([{ id: 'A b', ask: 'x', want: { rows: 5, cols: 5 } }]), /id lipsă, greșit/);
   assert.match(lessonErrors({ id: 'x', widget: { w: 'nimic' }, tasks: [] }).join(), /widget necunoscut/);
+  // `start`: doar mărimi pe care starea le are, iar provocarea nu e rezolvată chiar de punctul ei de plecare
+  assert.equal(errs([{ id: 'a', ask: 'x', start: { rows: 2 }, want: { rows: 5, cols: 4 } }]), '');
+  assert.match(errs([{ id: 'a', ask: 'x', start: { culoare: 2 }, want: { rows: 5 } }]), /câmpuri pe care widgetul nu le știe \(culoare\)/);
+  assert.match(errs([{ id: 'a', ask: 'x', start: { rows: 5, cols: 5 }, want: { rows: 5, cols: 5 } }]), /deja rezolvată/);
+  // `collect` își numără soluțiile din starea pusă de `start`
+  assert.equal(errs([{ id: 'a', ask: 'x', start: { rows: 2 }, collect: { product: 12 }, by: ['rows', 'cols'], need: 3 }]), '');
+});
+
+test('învață: alegerile cu câtul și cu termenul necunoscut își socotesc răspunsul', () => {
+  const cat = { id: 'c', ask: 'x', pick: [3, 4, 18], rule: 'cat', of: [24, 6] };
+  assert.deepEqual(pickCorrect(cat), [1]);
+  assert.equal(pickAnswer(cat), '24 : 6 = 4. Proba: 4 × 6 = 24.');
+  assert.deepEqual(pickCorrect({ ...cat, of: [25, 6] }), [], 'o împărțire neexactă n-are cât în tablă');
+  const box = { id: 'n', ask: 'x', pick: [4, 13, 22], rule: 'necunoscut', of: ['□ + 9 = 13'] };
+  assert.deepEqual(pickCorrect(box), [0]);
+  assert.equal(pickAnswer(box), '□ = 4, pentru că 4 + 9 = 13.');
+  assert.deepEqual(pickCorrect({ ...box, pick: [5, 6, 49], of: ['□ × 7 = 42'] }), [1]);
 });
 
 test('învață: glisorul e rigla desenului (poziția, valoarea de sub deget, tastele)', () => {
@@ -196,6 +227,11 @@ test('învață: textele lecțiilor țin calculele pe un rând', () => {
   assert.equal(keepMath('Găsește pe hartă 6 × 7.'), `Găsește pe hartă 6${NBSP}×${NBSP}7.`);
   assert.equal(keepMath('7 × 6 = 5 × 6 + 2 × 6'), `7${NBSP}×${NBSP}6${NBSP}=${NBSP}5${NBSP}×${NBSP}6${NBSP}+ 2${NBSP}×${NBSP}6`);
   assert.equal(keepMath('Arată 5 + 5.'), `Arată 5${NBSP}+ 5.`);
+  // împărțirea nu se rupe nici ea, dar două puncte lipite de cuvânt rămân cum sunt; căsuța e un număr ca oricare altul
+  assert.equal(keepMath('Proba: 24 : 6 = 4.'), `Proba: 24${NBSP}:${NBSP}6${NBSP}=${NBSP}4.`);
+  assert.equal(keepMath('□ + 7 = 15'), `□${NBSP}+ 7${NBSP}=${NBSP}15`);
+  assert.equal(spokenMath('24 : 6 = ? Proba: 4 × 6 = 24.'), '24 împărțit la 6 egal cât Proba: 4 ori 6 egal 24.');
+  assert.equal(spokenMath('□ + 7 = 15'), 'căsuța plus 7 egal 15');
   assert.equal(keepMath('fără calcule'), 'fără calcule');
 });
 
@@ -316,4 +352,48 @@ test('învață: o provocare ascunde doar ce toate desenele chiar ascund', () =>
   assert.equal(t.spoken, 'o jumătate');
   assert.equal(wall.texts({}, { den: 2, num: 1 }).spoken, 'o jumătate: la fel de mult ca două sferturi, ca trei șesimi, ca patru optimi, ca cinci zecimi');
   assert.equal(array.check({ skin: 'plates', mark: true, rows: 1, cols: 3, item: 'mar' }).length, 1, 'cel puțin două farfurii la fracții');
+});
+
+test('învață: împărțirea — farfuriile, pungile și pachetele de bețișoare', () => {
+  const W = WIDGETS.imparte;
+  const nbsp = (t) => t.replaceAll(NBSP, ' ');
+  // părți egale: câte una pe fiecare farfurie, pe rând; ce nu ajunge rămâne în coș
+  assert.deepEqual(W.derive({ mode: 'parti', total: 12 }, { total: 12, by: 3 }), { total: 12, plates: 3, each: 4, left: 0, exact: true });
+  assert.deepEqual(W.derive({ mode: 'parti', total: 12 }, { total: 12, by: 5 }), { total: 12, plates: 5, each: 2, left: 2, exact: false });
+  assert.equal(nbsp(W.texts({ mode: 'parti', total: 12 }, { total: 12, by: 3 }).equation), '12 : 3 = 4');
+  assert.equal(nbsp(W.texts({ mode: 'parti', total: 12 }, { total: 12, by: 3 }).extra), 'Proba: 3 × 4 = 12.');
+  assert.equal(nbsp(W.texts({ mode: 'parti', total: 12 }, { total: 12, by: 5 }).equation), '12 : 5 = 2 și rămân 2');
+  // rezultatul ascuns nu apare nici în calcul, nici în citire, nici în legendă
+  const hidden = W.texts({ mode: 'parti', total: 18 }, { total: 18, by: 6 }, ['each']);
+  assert.equal(nbsp(hidden.equation), '18 : 6 = ?');
+  assert.ok(!/\b3\b/.test(hidden.reading) && !hidden.legend.some(([, text]) => /\b3\b/.test(text)), JSON.stringify(hidden));
+  // prin cuprindere: pungile, cu scăderea repetată (spusă în cuvinte când e lungă)
+  const bags = W.texts({ mode: 'grupe', total: 12 }, { total: 12, by: 3 });
+  assert.equal(nbsp(bags.sum), '12 − 3 − 3 − 3 − 3 = 0');
+  assert.equal(W.texts({ mode: 'grupe', total: 24 }, { total: 24, by: 1 }).sum, 'Din 24 scazi 1 de 24 de ori și rămân 0.');
+  assert.equal(W.texts({ mode: 'grupe', total: 24 }, { total: 24, by: 6 }, ['bags']).sum, undefined, 'scăderea repetată ar număra pungile');
+  // zecile, apoi unitățile: pachetele care nu ajung pe toate farfuriile se desfac
+  assert.deepEqual(shareTens(84, 4), { tensEach: 2, unitsEach: 1, broken: 0, left: 0, each: 21 });
+  assert.deepEqual(shareTens(84, 3), { tensEach: 2, unitsEach: 8, broken: 2, left: 0, each: 28 });
+  assert.deepEqual(shareTens(84, 9), { tensEach: 0, unitsEach: 9, broken: 8, left: 3, each: 9 });
+  const zeci = W.texts({ mode: 'parti', total: 84, zeci: true }, { total: 84, by: 3 });
+  assert.equal(zeci.reading, '84 de bețișoare pe 3 farfurii: câte 2 pachete și 8 bețișoare pe fiecare');
+  assert.equal(zeci.extra, '2 pachete n-au ajuns pe toate farfuriile: le-am desfăcut în 20 de bețișoare.');
+  // glisorul: 1–10; parametrii greșiți se văd
+  assert.equal(W.apply({ mode: 'parti', total: 12 }, { total: 12, by: 3 }, { set: 'by', value: 14 }).by, 10);
+  assert.deepEqual(W.hideable({ mode: 'grupe' }), ['bags']);
+  assert.match(W.check({ mode: 'grupe', total: 12, zeci: true }).join(), /doar pentru modul parti/);
+  assert.match(W.check({ mode: 'parti', total: 40 }).join(), /între 1 și 30/);
+  assert.match(W.check({ mode: 'impartit', total: 12 }).join(), /mod necunoscut/);
+});
+
+test('învață: harta tablei citită pe dos — împărțirea și proba, fără trucurile înmulțirii', () => {
+  const W = WIDGETS.array;
+  const p = { skin: 'table', rows: 1, cols: 1, read: 'div' };
+  const t = W.texts(p, { rows: 6, cols: 4, lit: [] });
+  assert.equal(t.equation.replaceAll(NBSP, ' '), '24 : 6 = 4');
+  assert.equal(t.extra.replaceAll(NBSP, ' '), 'Proba: 4 × 6 = 24.');
+  assert.ok(!W.actions(p, W.initial(p)).some((a) => a.toggle), 'fără butoanele strategiilor');
+  assert.match(W.check({ skin: 'grid', rows: 2, cols: 2, item: 'mar', read: 'div' }).join(), /doar pentru aspectul table/);
+  assert.match(W.check({ ...p, read: 'impartire' }).join(), /doar pentru aspectul table/);
 });

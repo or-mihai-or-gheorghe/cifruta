@@ -294,14 +294,18 @@ La începutul clasei a II-a se adaugă ~20–30 s pentru citirea fiecărui enun�
 ## 11. Lecții în Învață
 Secțiunea Învață (`#/invata`) are lecții, nu teste: copilul mișcă un desen, vede calculul la zi și rezolvă provocări mici, fără scor
 și fără cronometru. Lecțiile stau în `site/data/invata.js`, pe capitole (un capitol „în curând” are doar `soon: true`, titlul, textul
-și iconița). Acolo se învață și conceptele pe care testele le ocolesc (înmulțirea, apoi fracțiile).
+și iconița). Acolo se învață și conceptele pe care testele le ocolesc (înmulțirea, fracțiile, împărțirea).
 
 **Lecția:** `{ id, title, icon, goal, intro, concepts, widget: { w, ...parametri }, tasks, notes }`.
 - `goal` — caseta „Ce învățăm”, sub titlu și pe cardul lecției: scopul și ce înseamnă desenul („Fiecare farfurie e o grupă, cu la
   fel de multe mere.”), cel mult 170 de caractere; fără ea, copilul mișcă glisoare fără să știe de ce;
 - `intro` — indicația Cifruței: ce face fiecare glisor și fiecare buton (și „Numără”, „Întoarce”, butonul din colț), cel mult 170;
 - `widget` — unul din `js/invata/registry.js`, cu parametrii lui (`check` îi validează):
-  - `array` cu `skin: 'plates' | 'grid' | 'split' | 'table'` (la `plates`, `mark: true` colorează farfurii: fracția dintr-o mulțime);
+  - `array` cu `skin: 'plates' | 'grid' | 'split' | 'table'` (la `plates`, `mark: true` colorează farfurii: fracția dintr-o mulțime; la
+    `table`, `read: 'div'` citește harta pe dos: „24 : 6 = 4”, cu rândul împărțitorului desfăcut în numere și proba);
+  - `imparte` (împărțirea): `mode: 'parti'` (pe farfurii, câte una pe fiecare, pe rând), `mode: 'grupe'` (câte `by` într-o pungă, cu
+    scăderea repetată) și `zeci: true` (pachete de câte 10 bețișoare și bețișoare libere; pachetele care nu ajung pe toate farfuriile
+    se desfac), cu `total` (cel mult 30 de nuci, 99 de bețișoare);
   - `jumps` (săriturile pe axă);
   - `parts` (întregul tăiat: `shapes`, `min`/`max` sau `cut: true` pentru „Taie fiecare bucată în două”, `labels` pentru numărător și
     numitor);
@@ -316,9 +320,16 @@ Secțiunea Învață (`#/invata`) are lecții, nu teste: copilul mișcă un dese
 | o stare | `want` | „Arată 4 × 6.” → `{ rows: 4, cols: 6 }` |
 | mai multe soluții | `collect`, `by`, `need` | „Găsește toate dreptunghiurile cu 24.” → `{ product: 24 }`, `by: ['rows', 'cols']`, `need: 4` |
 | o alegere | `pick`, `rule`, datele regulii, `hint`, `hide`, `show` | „Cât face 7 × 8?” → `[54, 56, 63]`, `rule: 'produs'`, `of: [7, 8]`, `hide: ['product']` |
+| alt punct de plecare | `start` (cu oricare dintre cele de sus) | „Acum sunt 15 nuci. Împarte-le pe 5 farfurii.” → `start: { total: 15 }`, `want: { plates: 5 }` |
 
 Regulile alegerilor (`PICK_RULES`): `produs` (`of: [a, b]`), `jumatati` și `sferturi` (variantele sunt desene `fraction`; corect e cel
-tăiat în 2, respectiv 4 părți egale), `mai-mare` (variante „n/d”), `valoare` (`of: [n, d]`: exact fracția colorată din desenul `show`).
+tăiat în 2, respectiv 4 părți egale), `mai-mare` (variante „n/d”), `valoare` (`of: [n, d]`: exact fracția colorată din desenul `show`),
+`cat` (`of: [24, 6]`: câtul unei împărțiri exacte) și `necunoscut` (`of: ['□ + 9 = 13']`: numărul din căsuță, căutat cu `solveBox`).
+
+`start` pune câteva mărimi peste starea lăsată de provocarea dinainte, când provocarea apare (și la „Încă o dată”): o ecuație nouă pe
+balanță, alt număr de nuci. Așa, o lecție dă numere diferite fără glisoare lungi (un glisor are cel mult ~11 gradații pe telefon;
+`setScale` îi mută intervalul). `npm test` cere ca `start` să pună doar mărimi pe care starea le are și ca provocarea să nu fie
+rezolvată chiar de punctul ei de plecare.
 
 - Mărimile din `want`, `collect` și `by` sunt cele din `derive` ale widgetului (`QUANTITIES`); `hide` ascunde una dintre ele cât e
   activă provocarea (altfel răspunsul ar sta scris lângă desen).

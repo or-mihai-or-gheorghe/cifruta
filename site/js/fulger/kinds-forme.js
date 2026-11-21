@@ -53,6 +53,7 @@ const cellOf = ({ v, ...g }) => g;
 export function artId(spec) {
   if (spec.v === 'glyph') return `${glyphKey(spec)}${spec.axis ? `|${spec.axis}` : ''}`;
   if (spec.emoji) return `emoji:${spec.emoji}`;
+  if (spec.frac) return `frac:${spec.frac}`;
   if (spec.text !== undefined) return `text:${spec.text}`;
   const { v, ...params } = spec;
   return `${v}:${JSON.stringify(params)}`;

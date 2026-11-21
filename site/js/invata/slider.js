@@ -16,7 +16,7 @@ const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
  * @param {string} o.label        numele pentru cititorul de ecran („Rânduri”)
  * @param {number} o.min, o.max   intervalul care se poate alege
  * @param {number} [o.count]      câte gradații are rigla (implicit `max`; cele din afara intervalului apar stinse)
- * @param {number} [o.origin]     valoarea primei gradații (1; 0 la „Câte colorăm?”)
+ * @param {number} [o.origin]     valoarea primei gradații (1; 0 la „Câte colorăm?”); se schimbă cu `setScale`
  * @param {boolean} [o.vertical]  valorile cresc în jos, iar săgețile merg după direcția de pe ecran
  * @param {(v: number) => string} [o.valueText]  textul citit („3 rânduri”)
  * @param {[string, string]} [o.steppers]        butoane − și + la capete, cu numele lor
@@ -150,6 +150,17 @@ export function slider({ id, label, min, max, count = max, origin = 1, value, ve
     /** Alt număr de gradații (zidul: câte bucăți are rândul ales). */
     setCount(n) {
       if (n === count) return;
+      count = n;
+      makeTicks();
+      paint();
+    },
+    /**
+     * Altă riglă: prima gradație și câte sunt. O provocare își poate aduce intervalul (barele, mașina de numere: 10–20 la un întreg
+     * necunoscut), iar glisorul se făcuse o singură dată, cu `origin` fix.
+     */
+    setScale(newOrigin, n) {
+      if (newOrigin === origin && n === count) return;
+      origin = newOrigin;
       count = n;
       makeTicks();
       paint();

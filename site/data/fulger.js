@@ -291,6 +291,53 @@ export default {
       ],
     },
     {
+      id: 'impartirea',
+      title: 'Împărțirea',
+      short: 'Împărțirea',
+      // spații nedespărțite: exemplul stă pe un rând
+      text: 'Tabla împărțirii, împărțirea în părți egale și în grupe, deîmpărțitul și împărțitorul lipsă; apoi câturi de două cifre (84 : 4).',
+      icon: 'bomboane',
+      grade: 2,
+      concepts: ['mat.op.tabla-impartirii', 'mat.op.impartire', 'mat.op.impartire-necunoscut', 'mat.op.impartire-zeci', 'mat.op.comparare-expresii', 'mat.op.tabla-inmultirii'],
+      levels: [
+        {
+          id: 'usor',
+          warmup: ['imp-tabla-mica', 'cmp-imp-tabla-mica'],
+          mix: [
+            { kind: 'imp-tabla-mica', weight: 3 },
+            { kind: 'cmp-imp-tabla-mica', weight: 2 },
+            { kind: 'imp-scadere-repetata', weight: 2 },
+            { kind: 'imp-problema-mica', weight: 2 },
+          ],
+          stars: [30, 75, 160],
+        },
+        {
+          id: 'intermediar',
+          warmup: ['imp-tabla', 'cmp-imp-tabla'],
+          mix: [
+            { kind: 'imp-tabla', weight: 3 },
+            { kind: 'cmp-imp-tabla', weight: 2 },
+            { kind: 'imp-lipsa', weight: 2 },
+            { kind: 'imp-problema', weight: 1.5 },
+            { kind: 'imp-tabla-mica', weight: 0.5 },
+          ],
+          stars: [30, 70, 155],
+        },
+        {
+          id: 'avansat',
+          warmup: ['imp-2c', 'cmp-imp-2c'],
+          mix: [
+            { kind: 'imp-2c', weight: 3 },
+            { kind: 'cmp-imp-2c', weight: 1.5 },
+            { kind: 'imp-lipsa-2c', weight: 2 },
+            { kind: 'imp-tabla', weight: 1 },
+            { kind: 'imp-problema', weight: 0.5 },
+          ],
+          stars: [30, 75, 165],
+        },
+      ],
+    },
+    {
       id: 'siruri-intrusi',
       title: 'Șiruri și intruși',
       short: 'Șiruri și intruși',
@@ -597,16 +644,6 @@ export default {
           stars: [26, 65, 145],
         },
       ],
-    },
-    {
-      id: 'impartirea',
-      title: 'Împărțirea',
-      short: 'Împărțirea',
-      text: 'Împărțirea în părți egale, ca scădere repetată.',
-      icon: 'bomboane',
-      grade: 2,
-      concepts: ['mat.op.impartire'],
-      soon: true,
     },
     {
       id: 'ecuatii',

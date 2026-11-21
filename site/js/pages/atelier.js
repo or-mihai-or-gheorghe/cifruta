@@ -116,13 +116,17 @@ async function types(wrap, ctls) {
 /** Jocuri fulger: câte 12 întrebări (semințele 1–12) din fiecare tip cu figuri, cu varianta corectă încadrată, ca itemii nepotriviți să se vadă din ochi. */
 function fulgerReview() {
   const art = (spec, cls) =>
-    spec.v || spec.emoji ? h('span', { class: cls, 'aria-hidden': 'true', style: { '--ar': String(aspect(spec)) }, html: artHTML(spec) }) : h('span', { class: `${cls} fg-review__text` }, spec.text);
+    spec.v || spec.emoji
+      ? h('span', { class: cls, 'aria-hidden': 'true', style: { '--ar': String(aspect(spec)) }, html: artHTML(spec) })
+      : spec.frac
+        ? h('span', { class: `${cls} fg-review__text`, html: artHTML(spec) })
+        : h('span', { class: `${cls} fg-review__text` }, spec.text);
   const SEPARATORS = { asc: '<', desc: '>', path: '→' };
   /** Sub desen: variantele (cu cea corectă încadrată), comparația corectă sau ordinea corectă a plăcuțelor. */
   function answerRow(q) {
     if (q.mode === 'figure') {
       // variantele-calcule („470 + 50 = 520”) stau pe două coloane, ca în arenă
-      const calcs = q.choices.every((c) => / [=×] /.test(String(q.options[c].text ?? '')));
+      const calcs = q.choices.every((c) => / [=×:] /.test(String(q.options[c].text ?? '')));
       return h('div', { class: `fg-review__opts${calcs ? ' fg-review__opts--calcs' : ''}` }, q.choices.map((c) => h('span', { class: `fg-review__opt${c === q.answer ? ' is-answer' : ''}` }, art(q.options[c], 'fg-review__art'))));
     }
     const items =

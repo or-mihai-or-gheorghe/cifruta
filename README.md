@@ -20,13 +20,14 @@ explicații pe înțelesul copiilor. Mascota site-ului este **Veverița Cifruța
   plan, calcul în scris pe coloane, piramidă), axa numerelor și termometrul, unire cu săgeți, ordonare cu cuvânt secret, sortare în coșuri, colorare (și cu reguli
   de buget), numărătoare, ceas, bani, traseu pe harta liniilor, grafic cu bare construit de copil.
 - La final: scor, calificativ, stele pe niveluri, explicații pas cu pas, rezolvarea completă și „Mai încerc o dată”.
-- **Jocuri fulger** — runde de 2 minute pe 10 teme (adunări și scăderi până la 100, numerele până la 1000, adunări și scăderi până
-  la 1000 cu trecere, înmulțirea, șiruri și intruși, puzzle cu forme, figuri și corpuri, poziții și trasee, grafice și tabele, hărți
-  și arbori), fiecare cu trei niveluri, stele, recorduri și medalii.
+- **Jocuri fulger** — runde de 2 minute pe 11 teme (adunări și scăderi până la 100, numerele până la 1000, adunări și scăderi până
+  la 1000 cu trecere, înmulțirea, împărțirea, șiruri și intruși, puzzle cu forme, figuri și corpuri, poziții și trasee, grafice și
+  tabele, hărți și arbori), fiecare cu trei niveluri, stele, recorduri și medalii.
 - **Învață** — lecții interactive, cu desene pe care copilul le mișcă: la înmulțire, grupe egale, un dreptunghi de rânduri și coloane
   întins cu glisoare pe orizontală și pe verticală (și întors, ca să se vadă că 4 × 6 = 6 × 4), sărituri pe axă, dreptunghiul spart
   în două bucăți ușoare și harta tablei înmulțirii; la fracții, părți egale, jumătatea și sfertul, numărătorul și numitorul, fracția
-  dintr-o mulțime și zidul fracțiilor; fiecare lecție are provocări cu „Bravo!” și „Ce am aflat”, iar bifele rămân.
+  dintr-o mulțime și zidul fracțiilor; la împărțire, nuci împărțite pe farfurii și în pungi, tabla înmulțirii citită pe dos și
+  pachete de câte 10 bețișoare (84 : 4); fiecare lecție are provocări cu „Bravo!” și „Ce am aflat”, iar bifele rămân.
 - **Contul familiei** (opțional) — părintele intră cu Google și face profiluri pentru copii (poreclă și avatar desenat);
   rezultatele se păstrează și în cloud, iar cei din cont văd clasamentul.
 - Funcționează pe telefon, tabletă și calculator; progresul se salvează în browser.

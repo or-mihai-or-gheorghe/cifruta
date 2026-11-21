@@ -133,6 +133,33 @@ export function trace(src, env = {}) {
   return ops;
 }
 
+/** Căsuța unei ecuații (Învață, Jocuri fulger): „□ + 7 = 15”, „24 : □ = 4”, „8 + 4 = □ + 5”. */
+export const BOX = '□';
+
+/**
+ * Valoarea căsuței: singurul număr natural până la `max` care face ecuația adevărată (solveBox("□ + 7 = 15") → 8). Caută pe rând,
+ * deci e independentă de felul în care a fost făcută ecuația (testele și regulile o folosesc ca să verifice generatoarele); o
+ * împărțire neexactă sau la 0 nu e o soluție. Aruncă o eroare dacă nu există soluție sau dacă sunt mai multe. Generatoarele de
+ * întrebări nu o cheamă: o căutare până la 1000 durează aproape o milisecundă, iar calibrarea stelelor face zeci de mii de întrebări.
+ */
+export function solveBox(src, max = 1000) {
+  if (String(src).split(BOX).length !== 2) throw new Error(`Ecuația are nevoie de exact o căsuță: ${src}`);
+  let found = null;
+  for (let x = 0; x <= max; x++) {
+    let ok = false;
+    try {
+      ok = holds(src, { [BOX]: x });
+    } catch {
+      ok = false;
+    }
+    if (!ok) continue;
+    if (found !== null) throw new Error(`Ecuația are mai multe soluții (${found}, ${x}): ${src}`);
+    found = x;
+  }
+  if (found === null) throw new Error(`Ecuația n-are soluție până la ${max}: ${src}`);
+  return found;
+}
+
 export const relation = (a, b) => (a < b ? '<' : a > b ? '>' : '=');
 
 export const hasRelation = (src) => tokenize(src).some((t) => t.t === 'rel');

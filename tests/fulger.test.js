@@ -3,7 +3,7 @@ import { test } from 'node:test';
 
 import concepts from '../site/data/concepts.js';
 import config from '../site/data/fulger.js';
-import { calc, relation } from '../site/js/core/expr.js';
+import { calc, holds, relation, solveBox, trace } from '../site/js/core/expr.js';
 import { glyphKey } from '../site/js/core/forme.js';
 import { lintText } from '../site/js/core/lint.js';
 import { seededRandom } from '../site/js/core/rng.js';
@@ -12,7 +12,7 @@ import {
   createRound, levelConfig, milestone, nextStar, pauseAfter, playableTopics, practiceFor, precisionBonus, scoreAnswer, starsFor,
   topicConfig, topicStars, topicTotal,
 } from '../site/js/fulger/engine.js';
-import { artName, promptLength, promptSpoken } from '../site/js/fulger/art.js';
+import { artName, boxParts, promptLength, promptSpoken } from '../site/js/fulger/art.js';
 import { KINDS } from '../site/js/fulger/kinds.js';
 import { LEGACY_TOPIC, LEVEL_IDS, normalizeFulger, recordKey, splitKey } from '../site/js/fulger/records.js';
 import '../site/js/visuals/all.js';
@@ -21,6 +21,7 @@ import { visualErrors, visualSVG } from '../site/js/visuals/index.js';
 import { calcOptions, RULES_1000 } from './fulger-1000.rules.js';
 import { CALC_1000_RULES } from './fulger-calcule-1000.rules.js';
 import { INMULTIRE_RULES } from './fulger-inmultire.rules.js';
+import { IMPARTIRE_RULES } from './fulger-impartire.rules.js';
 import { SHAPE_RULES } from './fulger-forme.rules.js';
 import { CHART_RULES } from './fulger-grafice.rules.js';
 import { MAP_RULES } from './fulger-grafuri.rules.js';
@@ -66,6 +67,7 @@ const RULES = {
   ...RULES_1000, // numerele până la 1000: tests/fulger-1000.rules.js
   ...CALC_1000_RULES, // adunările și scăderile până la 1000, cu trecere: tests/fulger-calcule-1000.rules.js
   ...INMULTIRE_RULES, // înmulțirile: tests/fulger-inmultire.rules.js
+  ...IMPARTIRE_RULES, // împărțirile: tests/fulger-impartire.rules.js
   ...SHAPE_RULES, // tipurile cu figuri: regulile sunt în tests/fulger-forme.rules.js
   ...CHART_RULES, // tipurile cu grafice: tests/fulger-grafice.rules.js
   ...MAP_RULES, // hărțile, rețelele și arborii: tests/fulger-grafuri.rules.js
@@ -83,6 +85,15 @@ function carries(text) {
 
 /** Calculul din text trece peste ordin (ca `carries`). */
 const carriesOf = (text) => carries(text);
+
+/**
+ * Adunările și scăderile unei ecuații cu căsuța, completată cu răspunsul („□ + 7 = 15” → 8 + 7): trecerea peste ordin se socotește pe
+ * ele, ca la calculele obișnuite (`trace` le dă de pe ambele părți ale lui „=”, cu operanzii deja socotiți: 20 : 4 + 3 → 5 + 3).
+ */
+const boxOps = (q) => trace(q.text.replace('□', String(q.answer)));
+
+/** Calculul care stă în spatele unei întrebări „choice”: la ecuațiile cu căsuța, cel care o rezolvă (verificat față de ecuație). */
+const calcText = (q) => q.solving ?? q.text;
 
 /** Un răspuns greșit la întâmplare. */
 function wrongAnswer(q, rand) {
@@ -126,12 +137,19 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
       assert.ok(q.kind === id && q.mode === kind.mode && q.key, where);
       assert.ok(RULES[id](q), `${where} încalcă regulile tipului`);
       const validSpec = (spec) =>
-        spec.v ? !visualErrors(spec).length && !/NaN|undefined/.test(visualSVG(spec)) : spec.emoji ? Boolean(EMOJI[spec.emoji]) : typeof spec.text === 'string';
+        spec.v
+          ? !visualErrors(spec).length && !/NaN|undefined/.test(visualSVG(spec))
+          : spec.emoji
+            ? Boolean(EMOJI[spec.emoji])
+            : spec.frac !== undefined
+              ? /^[1-9]\d*\/[1-9]\d*$/.test(spec.frac)
+              : typeof spec.text === 'string';
       if (kind.mode === 'compare' || kind.mode === 'sort') assert.equal(Boolean(q.figure), Boolean(kind.drawn), `${where}: desenul comparărilor și ordonărilor`);
       if (q.mode === 'figure' || q.figure) {
-        // cerința scurtă (emoji-urile {{e:}} contează cât două litere), desene valide, iar întrebarea rămâne aceeași după JSON
+        // cerința scurtă (emoji-urile {{e:}} și fracțiile {{f:}} contează cât două litere), desene valide, iar întrebarea rămâne aceeași
+        // după JSON; alt marcaj decât {{e:nume}} și {{f:n/d}} nu e voie
         const max = kind.promptMax ?? 45;
-        assert.ok(q.prompt && promptLength(q.prompt) <= max && !lintText(promptSpoken(q.prompt)).length && !/\{\{(?!e:[a-z0-9]+\}\})/.test(q.prompt), `${where}: cerința`);
+        assert.ok(q.prompt && promptLength(q.prompt) <= max && !lintText(promptSpoken(q.prompt)).length && !/\{\{(?!(?:e:[a-z0-9]+|f:\d+\/\d+)\}\})/.test(q.prompt), `${where}: cerința`);
         for (const spec of [q.figure, q.solved].filter(Boolean)) assert.ok(validSpec(spec), `${where}: desenul ${JSON.stringify(spec)}`);
         assert.deepEqual(JSON.parse(JSON.stringify(q)), q, `${where}: întrebarea se schimbă după JSON`);
       }
@@ -140,8 +158,7 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
         assert.ok(q.choices.length === 4 && new Set(q.choices).size === 4 && q.choices.includes(q.answer), `${where}: variantele`);
         assert.deepEqual(Object.keys(q.options).sort(), [...q.choices].sort(), `${where}: desenele variantelor`);
         for (const spec of [q.figure, q.solved, ...Object.values(q.options)].filter(Boolean)) {
-          if (!spec.v) assert.ok(spec.emoji ? EMOJI[spec.emoji] : typeof spec.text === 'string', `${where}: variantă fără desen`);
-          else assert.ok(!visualErrors(spec).length && !/NaN|undefined/.test(visualSVG(spec)), `${where}: desenul ${JSON.stringify(spec)}`);
+          assert.ok(validSpec(spec), spec.v ? `${where}: desenul ${JSON.stringify(spec)}` : `${where}: variantă fără desen`);
         }
         // mărimea nici ea: desenul întrebării și variantele au scări diferite, deci „mare” și „mic” nu se pot compara între ele
         const bare = q.choices.map((c) => q.options[c]).map((o) => (o.v === 'glyph' ? `${glyphKey({ ...o, color: 'albastru', size: 'mare' })}|${o.axis ?? ''}` : JSON.stringify(o)));
@@ -151,13 +168,25 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
         assert.equal(new Set(names).size, 4, `${where}: două variante au același nume (${names.join(' | ')})`);
         positions[q.choices.indexOf(q.answer)]++;
       } else if (q.mode === 'choice') {
-        assert.equal(q.answer, calc(q.text), where);
+        if (boxParts(q.text)) {
+          // o ecuație cu căsuța: răspunsul o face adevărată, vine din calculul care o rezolvă și e singurul (căutarea până la 1000 ține
+          // aproape o milisecundă, deci unicitatea se verifică pe primele semințe)
+          assert.ok(holds(q.text.replace('□', String(q.answer))) && calc(q.solving) === q.answer, `${where}: ecuația cu căsuța`);
+          if (seed <= 60) assert.equal(solveBox(q.text), q.answer, `${where}: o singură soluție`);
+        } else assert.equal(q.answer, calc(q.text), where);
         assert.equal(new Set(q.choices).size, 4, where);
         assert.ok(q.choices.includes(q.answer) && q.choices.every((c) => Number.isInteger(c) && c >= 0), where);
         assert.deepEqual(q.choices, [...q.choices].sort((a, b) => a - b), where);
         positions[q.choices.indexOf(q.answer)]++;
-        // trecerea peste ordin privește adunările și scăderile: la înmulțiri nu se numără, deci tipurile lor n-au etichete de trecere
-        if (/[+−]/.test(q.text)) {
+        // trecerea peste ordin privește adunările și scăderile: la înmulțiri nu se numără, deci tipurile lor n-au etichete de trecere;
+        // la o ecuație cu căsuța, se socotește pe ecuația completată cu răspunsul
+        if (boxParts(q.text)) {
+          const ops = boxOps(q);
+          if (ops.length) {
+            carry[ops.some(({ op, a, b }) => trecere(op, a, b)) ? 'cu' : 'fara']++;
+            carry.max = Math.max(carry.max, ...ops.flatMap(({ a, b }) => [a, b]), ...ops.map(({ op, a, b }) => (op === '+' ? a + b : a - b)));
+          }
+        } else if (/[+−]/.test(q.text)) {
           carry[carries(q.text) ? 'cu' : 'fara']++;
           carry.max = Math.max(carry.max, ...terms(q.text), q.answer);
         }
@@ -201,9 +230,9 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
   }
 });
 
-test('fulger: regulile graficelor, ale grafurilor, ale calculelor cu trecere și ale înmulțirilor pe încă 2500 de semințe (ramurile rare)', () => {
+test('fulger: regulile graficelor, ale grafurilor, ale calculelor cu trecere, ale înmulțirilor și ale împărțirilor pe încă 2500 de semințe (ramurile rare)', () => {
   // ramurile rare scapă din 500 de semințe: „cu 5 mai mult”, într-o lună de mai, se citea ca data „5 mai” (1 întrebare din 1000)
-  for (const id of Object.keys({ ...CHART_RULES, ...MAP_RULES, ...CALC_1000_RULES, ...INMULTIRE_RULES })) {
+  for (const id of Object.keys({ ...CHART_RULES, ...MAP_RULES, ...CALC_1000_RULES, ...INMULTIRE_RULES, ...IMPARTIRE_RULES })) {
     for (let seed = SEEDS + 1; seed <= 3000; seed++) {
       const q = KINDS[id].generate(seededRandom(seed));
       assert.ok(RULES[id](q), `${id} (sămânța ${seed}) încalcă regulile tipului: ${JSON.stringify(q)}`);
@@ -236,15 +265,22 @@ function patternPick(q) {
 /** Factorii unei înmulțiri („7 × 8”), sau null la adunări și scăderi. */
 const factorsOf = (text) => (String(text ?? '').includes(' × ') ? text.split(' × ').map(Number) : null);
 
+/** Deîmpărțitul și împărțitorul unei împărțiri („84 : 4”), sau null. */
+const divisionOf = (text) => (String(text ?? '').includes(' : ') ? text.split(' : ').map(Number) : null);
+
 /** Șansa unui copil care scoate întâi variantele absurde (o sumă cel mult cât un termen, o diferență cel puțin cât descăzutul, un
  * produs cel mult cât factorul mai mare), apoi alege după tipar printre celelalte. */
 function magnitudeOdds(q) {
   let pool = q;
   if (q.mode === 'choice') {
-    const nums = terms(q.text);
-    const minus = q.text.includes('−');
-    const f = factorsOf(q.text);
-    const ok = q.choices.filter((c) => (f ? c > Math.max(...f) : minus ? c < nums[0] : c > Math.max(...nums)));
+    // la o ecuație cu căsuța, variantele absurde vin din calculul care o rezolvă („□ + 27 = 45” → 45 − 27: □ nu trece de 45)
+    const text = calcText(q);
+    const nums = terms(text);
+    const minus = text.includes('−');
+    const f = factorsOf(text);
+    const d = divisionOf(text);
+    // un cât e mai mic decât deîmpărțitul (împărțitorul e cel puțin 2)
+    const ok = q.choices.filter((c) => (d ? c < d[0] : f ? c > Math.max(...f) : minus ? c < nums[0] : c > Math.max(...nums)));
     if (ok.length) pool = { ...q, choices: ok };
   }
   const pick = patternPick(pool);
@@ -260,7 +296,7 @@ const zeros = (x) => (x !== 0 && x % 10 === 0 ? 1 + zeros(x / 10) : 0);
  * cifră de deasupra zerourilor comune ale variantelor: la 12 × 20, cifra zecilor (2 × 2 = 4, deci …40).
  */
 function unitsOdds(q) {
-  const z = factorsOf(q.text) ? Math.min(...q.choices.map(zeros)) : 0;
+  const z = factorsOf(calcText(q)) ? Math.min(...q.choices.map(zeros)) : 0;
   const digit = (c) => Math.floor(c / 10 ** z) % 10;
   return 1 / q.choices.filter((c) => digit(c) === digit(q.answer)).length;
 }
@@ -270,7 +306,7 @@ const ONE_DIGIT = ['add-1c', 'add-1c-2c', 'sub-20-fara', 'sub-20-cu', 'add-3op-1
 
 test('fulger: la temele cu calcule, forma variantelor nu arată răspunsul (ghicitorii pe tipare, pe mărimi și pe unități)', () => {
   // temele cu desene au câteva tipuri cu sume (arbori, bare, drumuri) la 33–47%: backlog
-  const calcTopics = ['adunari-scaderi-100', 'numere-1000', 'adunari-scaderi-1000', 'inmultirea'].map(topicConfig);
+  const calcTopics = ['adunari-scaderi-100', 'numere-1000', 'adunari-scaderi-1000', 'inmultirea', 'impartirea'].map(topicConfig);
   const kinds = [...new Set(calcTopics.flatMap((t) => t.levels.flatMap((l) => l.mix.map((m) => m.kind))))].filter((k) => !['compare', 'sort'].includes(KINDS[k].mode));
   const SEEDS_GUESS = 2000;
   for (const id of kinds) {
@@ -286,8 +322,11 @@ test('fulger: la temele cu calcule, forma variantelor nu arată răspunsul (ghic
       // la calculele cu trecere, cu mai multe cifre: unitățile singure nu trebuie să dea răspunsul (trecerea decide); la înmulțirea cu
       // un factor de două cifre, ultimele cifre se înmulțesc dintr-o privire (6 × 47 → 2, 12 × 20 → 4), deci nici ele; la × 10 și la
       // calculele cu cifre singure (3 × 40, 20 × 30), ele sunt chiar calculul
-      const f = factorsOf(q.text);
-      const shortcut = f ? f.every((x) => core(x) !== 1) && f.some((x) => core(x) >= 10) : q.mode === 'choice' && carriesOf(q.text);
+      // la împărțirile cu un cât de două cifre (84 : 4), unitățile câtului se află din unitățile deîmpărțitului (4 : 4 = 1)
+      const text = q.mode === 'choice' ? calcText(q) : '';
+      const f = factorsOf(text);
+      const d = divisionOf(text);
+      const shortcut = f ? f.every((x) => core(x) !== 1) && f.some((x) => core(x) >= 10) : d ? q.answer >= 10 : q.mode === 'choice' && carriesOf(text);
       if (q.mode === 'choice' && q.answer >= 20 && !ONE_DIGIT.includes(id) && shortcut) {
         units += unitsOdds(q);
         carries++;

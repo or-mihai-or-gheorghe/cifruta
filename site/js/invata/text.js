@@ -28,6 +28,9 @@ export function repeatedSum(term, n, result) {
 export const spokenMath = (text) =>
   String(text ?? '')
     .replace(/ /g, ' ')
+    // „24 : 6” se citește „24 împărțit la 6”, dar „Proba: 4 × 6” rămâne cum e (două puncte lipite de cuvânt)
+    .replace(/(?<=[\d□?]) : (?=[\d□?])/g, ' împărțit la ')
+    .replace(/□/g, 'căsuța')
     .replace(/×/g, 'ori')
     .replace(/=/g, 'egal')
     .replace(/\+/g, 'plus')
@@ -36,9 +39,9 @@ export const spokenMath = (text) =>
     .replace(/\s+/g, ' ')
     .trim();
 
-/** Un text al lecției (cerință, indicație, „Ce am aflat”) cu calculele ținute pe un rând: „6 × 7 = 42” nu se rupe, o sumă se rupe
- *  doar după „+”. Textele din date se scriu cu spații obișnuite. */
+/** Un text al lecției (cerință, indicație, „Ce am aflat”) cu calculele ținute pe un rând: „6 × 7 = 42” și „24 : 6 = 4” nu se rup, o sumă
+ *  se rupe doar după „+”. Textele din date se scriu cu spații obișnuite (două puncte lipite de cuvânt, ca în „Proba:”, nu se ating). */
 export const keepMath = (text) =>
   String(text ?? '')
-    .replace(/(\S) ([×=]) (?=\S)/g, `$1${NBSP}$2${NBSP}`)
+    .replace(/(\S) ([×=:]) (?=\S)/g, `$1${NBSP}$2${NBSP}`)
     .replace(/(\S) ([+−]) (?=\S)/g, `$1${NBSP}$2 `);

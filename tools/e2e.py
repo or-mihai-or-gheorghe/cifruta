@@ -962,6 +962,7 @@ def fulger_screens(run: Run, browser, base: str):
         ("numere-1000", ("sort-4-1000-dir", "cmp-expr-1000", "add-3op-1000", "nr-litere", "nr-numaratoare", "sir-1000")),
         (CALC_1000_TOPIC, ("add-3op-1000-cu", "cmp-fara-calcul-1000", "cifra-lipsa-1000", "calcul-gresit-1000", "nr-regrupat", "estimare-sute", "pana-la-1000")),
         ("inmultirea", ("cmp-inm-1000", "inm-factor-lipsa-mare", "inm-adunare-repetata", "inm-grupe", "inm-1x2-500", "inm-11")),
+        ("impartirea", ("imp-lipsa-2c", "cmp-imp-2c", "imp-scadere-repetata", "imp-problema", "imp-2c")),
     ]
     for name, opts, min_text in screens:
         context = browser.new_context(locale="ro-RO", **opts)
@@ -1196,7 +1197,7 @@ IV_TASK = "window.__dbg.invata.task()"
 # mărimile de pe ecran: scena (desenul cu glisoarele) încape sub antet, pistele glisoarelor au cel puțin 44 px, căsuțele cel puțin
 # 20 px, iar textul HTML și cel din desene are cel puțin `min_text` px
 IV_FIT = """(() => {
-  const stage = document.querySelector('.iv-array__stage, .iv-jumps__art, .iv-parts__art');
+  const stage = document.querySelector('.iv-array__stage, .iv-jumps__art, .iv-parts__art, .iv-art');
   const r = stage.getBoundingClientRect();
   const tracks = [...document.querySelectorAll('.iv-slider__track')].map((t) => { const b = t.getBoundingClientRect(); return t.closest('.iv-slider--v') ? b.width : b.height; });
   const board = document.querySelector('.iv-array__board');
@@ -1264,7 +1265,8 @@ def iv_solve(run: Run, page: Page, label: str, wrong_pick: bool = True) -> int:
         sol = page.evaluate("window.__dbg.invata.solution()")
         if task["hide"]:
             eq = page.get_by_test_id("iv-eq").inner_text().strip()
-            hidden = eq.endswith("?") if "product" in task["hide"] else "=" not in eq
+            # rezultatul ascuns (produsul, câtul, câte pungi) lasă „?” la capătul calculului; la zid, fracțiile egale lipsesc cu totul
+            hidden = "=" not in eq if task["hide"] == ["same"] else eq.endswith("?")
             run.check(hidden, f"{label}: {task['id']}: răspunsul e ascuns cât timp se cere („{eq}”)")
         if "pick" in sol:
             if wrong_pick:
@@ -1297,7 +1299,7 @@ def invata_flow(run: Run, page: Page, vp: str):
     run.goto(page, "")
     page.evaluate("localStorage.removeItem('cifruta:invata')")
     lessons = iv_lessons(run, page)
-    run.check(len(lessons) >= 5 and page.get_by_test_id("iv-soon-impartirea").is_visible(), f"[{vp}] învață: {len(lessons)} lecții, iar „Împărțirea” e „în curând”")
+    run.check(len(lessons) >= 5 and page.get_by_test_id("iv-chapter-impartirea").is_visible(), f"[{vp}] învață: {len(lessons)} lecții, iar „Împărțirea” are capitolul ei")
     run.layout_ok(page, f"[{vp}] învață")
     run.shot(page, f"{vp}-invata")
     chosen = lessons if vp == "laptop" else [x for x in lessons if x["lesson"] in ("randuri-coloane", "spargem-dreptunghiul")]

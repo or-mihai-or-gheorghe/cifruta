@@ -43,7 +43,8 @@ site/                      ← publicat
                            tăiat în bucăți egale sau nu, cu bucățile colorate și hașurate)
   js/fulger/               Jocuri fulger (jocuri pe viteză, pe teme, #/fulger): kinds (calcule până la 100), kinds-1000 (numerele până
                            la 1000), kinds-calcule-1000 (adunări și scăderi până la 1000, cu trecere), kinds-inmultire (tabla,
-                           o cifră × două cifre, × 10, × 11, zeci rotunde), kinds-forme (figuri), kinds-grafice și kinds-grafuri
+                           o cifră × două cifre, × 10, × 11, zeci rotunde), kinds-impartire (tabla împărțirii, căsuța, câturi
+                           de două cifre), kinds-forme (figuri), kinds-grafice și kinds-grafuri
                            (grafice, hărți, arbori), generate cu sămânță, cu concepte · intrebari (formele întrebărilor: calcule și
                            desene) · contexte (unități, nume, zile, date, obiectele grupelor) · rand · art (desenul și numele unei
                            variante, cerința cu emoji) · engine (temele, runda și punctajul, pur) · records (chei „temă:nivel”,
@@ -54,7 +55,8 @@ site/                      ← publicat
                            regulile alegerilor) · registry (widgeturile) · lesson (cadrul: Cifruța, provocările, „Ce am aflat”) ·
                            slider + ruler (glisorul-riglă) · text (calculele scrise, convenția factorilor) · progress (bifele, pe
                            profil) · fractions (fracțiile: simplificare, egale, comparare) · widgets/<w>/logic.js (pur) + view.js:
-                           array (farfurii, și colorate; careu; tăietură; harta tablei), jumps, parts (întregul tăiat), wall (zidul);
+                           array (farfurii, și colorate; careu; tăietură; harta tablei, și citită pe dos), imparte (împărțirea:
+                           farfurii, pungi, pachete de bețișoare), jumps, parts (întregul tăiat), wall (zidul);
                            pagina e pages/invata.js
   data/catalog.js          secțiuni → grupuri → teste · concepts.js (ID-uri de concepte) · scoring.js · demo.js · fulger.js (jocul)
                            · invata.js (capitolele, lecțiile și provocările din Învață)
@@ -119,6 +121,11 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
     12 × 20 → 4), afară de × 10 și de calculele cu cifre singure (3 × 40), unde ea e chiar calculul. O sumă din cerință are spații
     nedespărțite (un termen rămas singur pe rândul următor s-ar număra greșit), iar la comparări, două produse fără niciun număr comun
     nu sunt mereu egale. `spoken` din `view.js` citește × ca „ori”.
+  - **Ecuațiile cu căsuța** („□ + 7 = 15”, „24 : □ = 4”, „8 + 4 = □ + 5”) sunt `choice`: `boxChoice(kind, text, solving, choices)` din
+    `intrebari.js`, cu răspunsul din calculul care rezolvă (`solving`: „15 − 7”) și variantele de obicei din `calcChoices(rand, solving)`.
+    Arena pune răspunsul chiar în căsuță, cardul arată căsuța goală, iar „Greșelile tale” o completează. Testul verifică ecuația cu
+    `solveBox` (`core/expr.js`, căutare până la 1000, deci prea lentă pentru generatoare) și socotește trecerea pe ecuația completată
+    (`trace`). `spoken` citește □ „căsuța” și „:” „împărțit la”, doar între numere.
   - `numberQuestion` primește mereu `ask` (fără el rămâne `ask: undefined`, iar verificarea după JSON pică), iar `solved` stă doar la
     întrebările cu desen (E2E caută desenul rezolvat). Variantele-calcule („470 + 50 = 520”, texte în `figureQuestion`) stau pe două
     coloane (`fg-answers--calcs`).
@@ -151,7 +158,8 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
     `tests/fulger-1000.rules.js`). Câteva tipuri cu sume din temele cu desene (arbori, bare, drumuri) au încă 33–47% (backlog).
 - **Tip cu figuri în Jocuri fulger:** o intrare în `SHAPE_KINDS` (`js/fulger/kinds-forme.js`, `mode: 'figure'`), al cărei `generate(rand)`
   întoarce `figureQuestion(kind, rand, { prompt, figure, solved, key, answer, distractors })`: desene din bancă (`glyph`, `glyph-cells`,
-  `cell-grid`, `robot-grid`, `net`, `solid`, `farm-grid`), emoji sau texte; distractorii vin din greșeli tipice, iar id-ul unei variante e
+  `cell-grid`, `robot-grid`, `net`, `solid`, `farm-grid`, `fraction`), emoji, fracții (`{ frac: '3/5' }`, etajate, citite „trei cincimi”) sau
+  texte; distractorii vin din greșeli tipice, iar id-ul unei variante e
   cheia ei canonică. Regula tipului stă în `tests/fulger-forme.rules.js` și găsește singură răspunsul, fără codul generatorului.
   `fulger.test.js` mai cere: cerința de cel mult 45 de caractere, 4 variante diferite și fără culori, și fără mărime, nume diferite pentru
   cititorul de ecran, desene valide, răspunsul pe toate pozițiile la fel de des și aceeași întrebare după JSON. Capturile din
@@ -168,7 +176,8 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
     - cardul arată doar desenul;
     - legenda (cel mult 24 de caractere) și operanzii stau în rândul de răspuns (`fg-strip`);
     - la ordonare, `tiles` sunt id-uri, cu desenele lor în `options`.
-  - **Cerința:** cel mult `promptMax` caractere (45 implicit, 60 la grafice; un `{{e:nume}}` numără 2); singurul markup permis e `{{e:}}`.
+  - **Cerința:** cel mult `promptMax` caractere (45 implicit, 60 la grafice; un `{{e:nume}}` sau o fracție `{{f:n/d}}` numără 2); singurele
+    marcaje permise sunt `{{e:}}` și `{{f:}}`.
   - **Unitățile, numele, zilele și datele** vin din `js/fulger/contexte.js` (genul dă „Câte / Câți”, cantitățile se scriu cu `cantitate`).
   - **Un desen nou de acest fel** intră și în `isChart` (`js/fulger/art.js`), în `FULGER_TEXT` (`tools/e2e.py`) și în grupurile testului de
     mărime din `tests/visuals.test.js`.
@@ -189,10 +198,15 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   - **Provocările:**
     - `want`: o stare a widgetului, prin mărimile din `derive`;
     - `collect` + `by` + `need`: mai multe soluții diferite;
-    - `pick` + `rule` (+ `hint`, `hide`): o alegere, cu răspunsul calculat de `PICK_RULES` din `js/invata/logic.js`.
+    - `pick` + `rule` (+ `hint`, `hide`): o alegere, cu răspunsul calculat de `PICK_RULES` din `js/invata/logic.js` (`cat` socotește
+      câtul, `necunoscut` caută căsuța cu `solveBox`);
+    - `start`: punctul de plecare al provocării, pus peste starea lăsată de cea dinainte (o ecuație nouă pe balanță, alt număr de nuci),
+      la montare, la provocarea următoare și la „Încă o dată”. Așa, glisoarele rămân de cel mult ~11 gradații (`setScale` le mută
+      intervalul).
   - **Ce verifică `npm test`** (`lessonErrors`):
     - fiecare provocare se poate rezolva prin aceleași acțiuni ca în interfață, căutate în lățime;
-    - starea lăsată de provocarea dinainte nu o rezolvă deja pe următoarea;
+    - starea lăsată de provocarea dinainte (cu `start` peste ea) nu o rezolvă deja pe următoarea, iar `start` pune doar mărimi pe care
+      starea le are;
     - o alegere are exact un răspuns.
   - **Widget nou:** `js/invata/widgets/<w>/logic.js`, pur, cu `QUANTITIES`, `HIDEABLE`, `check`, `controls`, `initial`, `actions`,
     `apply`, `derive`, `texts`. Starea se schimbă doar prin `apply`. Lângă el, `view.js`: `mount(el, params, { logic, dispatch })` →

@@ -455,6 +455,10 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 .fg-answers--pairs { grid-template-columns: repeat(2, 1fr); }
 .fg-answers--pairs .fg-opt { white-space: nowrap; }
 .fg-opt__art { --opt-h: clamp(2.8rem, 10vh, 5rem); display: block; width: min(100%, calc(var(--opt-h) * var(--ar, 1))); }
+/* o fracție ca variantă: etajată, cu litera puțin mai mică decât cifrele, ca să încapă în buton și pe laptop (măsurat: 72 px de fracție
+   într-un buton de 89 px depășea) */
+.fg-opt__frac { display: inline-flex; line-height: 1; }
+.fg-opt__frac .c-frac { font-size: 0.8em; }
 .fg-opt__art .c-emoji,
 .fg-fig .c-emoji,
 .fg-sample__art .c-emoji,

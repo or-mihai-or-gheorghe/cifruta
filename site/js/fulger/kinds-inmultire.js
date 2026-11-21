@@ -1,5 +1,5 @@
 // Jocuri fulger: tipurile temei „Înmulțirea”. La Ușor, tabla înmulțirii (factori de o cifră), adunarea repetată, grupe egale desenate
-// și factorul lipsă; la Intermediar, și o cifră × două cifre, cu rezultate până la 200; la Avansat, o cifră × două cifre până la 500 și
+// și factorul lipsă (o ecuație cu căsuța); la Intermediar, și o cifră × două cifre, cu rezultate până la 200; la Avansat, o cifră × două cifre până la 500 și
 // două cifre × două cifre „prietenoase” (× 10, × 11, zeci rotunde), până la 1000. Alunele sunt pe măsura timpului (cam 1 la 2 s de timp
 // „fulger”), iar calculul mai lung de 9 s are pauza „Hopa” cât timpul lui.
 //
@@ -14,7 +14,7 @@
 // Convenția: n × t înseamnă „de n ori t” = t + t + … (n termeni). Variantele nu depind de ea.
 
 import { cate, GROUP_ITEMS } from './contexte.js';
-import { compare, numberQuestion, pickQuestion, shapedChoice } from './intrebari.js';
+import { boxChoice, compare, numberQuestion, pickQuestion, shapedChoice } from './intrebari.js';
 import { int, pickOne, placeAt, row, SHAPES, shuffle } from './rand.js';
 
 const TIMES = ' × ';
@@ -57,17 +57,18 @@ const placed = (kind, rand, [a, b], shape, slot, max) => {
 };
 
 /**
- * „Ce lipsește? ? × 6 = 42”: factorul lipsă (2–9), cu „?” pe primul sau pe al doilea loc, lângă factorul vizibil `k`. Variantele sunt
- * patru numere la rând, între 1 și 10, cu răspunsul pe un loc ales întâi. Factorul vizibil poate fi printre ele, iar pătratele
- * (? × 6 = 36) se întreabă și ele: un copil care l-ar scoate din variante pentru că e scris în cerință tot o dată din patru nimerește.
+ * „□ × 6 = 42”: factorul lipsă (2–9), cu căsuța pe primul sau pe al doilea loc, lângă factorul vizibil `k` (ca la tema „Termenul
+ * necunoscut”, unde tipul intră și el). Variantele sunt patru numere la rând, între 1 și 10, cu răspunsul pe un loc ales întâi. Factorul
+ * vizibil poate fi printre ele, iar pătratele (□ × 6 = 36) se întreabă și ele: un copil care l-ar scoate din variante pentru că e scris
+ * în cerință tot o dată din patru nimerește.
  */
 function missingFactor(kind, rand, k) {
   const slot = int(rand, 0, 3);
   let m;
   do m = int(rand, 2, 9);
   while (m - slot < 1 || m - slot + 3 > 10);
-  const equation = rand() < 0.5 ? `?${TIMES}${k} = ${m * k}` : `${k}${TIMES}? = ${m * k}`;
-  return numberQuestion(kind, rand, { prompt: `Ce lipsește? ${equation}`, key: equation, answer: m, fixed: windowOf(m - slot), ask: { op: 'factor-lipsa' } });
+  const equation = rand() < 0.5 ? `□${TIMES}${k} = ${m * k}` : `${k}${TIMES}□ = ${m * k}`;
+  return boxChoice(kind, equation, `${m * k} : ${k}`, windowOf(m - slot));
 }
 
 /** Întâi fereastra de patru numere (factorul lipsă, numărul de grupe sau de termeni), apoi locul răspunsului în ea. */
@@ -147,7 +148,7 @@ export const INMULTIRE_KINDS = {
     label: 'Factorul lipsă din tabla înmulțirii',
     points: 3,
     fastMs: 6000,
-    mode: 'figure',
+    mode: 'choice',
     concepts: [FACTOR, TABLA],
     generate(rand) {
       // toate cele 64 de fapte ale tablei, la fel de des
@@ -399,7 +400,7 @@ export const INMULTIRE_KINDS = {
     label: 'Factorul lipsă, cu zeci rotunde sau numere până la 19',
     points: 4,
     fastMs: 8000,
-    mode: 'figure',
+    mode: 'choice',
     concepts: [FACTOR, INM_1000, STRATEGII],
     generate(rand) {
       // factorul vizibil: o zece rotundă (20–90) sau un număr de la 11 la 19 (produsul rămâne sub 1000)

@@ -80,6 +80,14 @@ export function calcChoice(kind, rand, text, { min = 0, max, plausible = true })
  */
 export const shapedChoice = (kind, text, choices) => ({ kind, mode: 'choice', key: `${kind}:${text}`, text, answer: calc(text), choices });
 
+/**
+ * O ecuație cu căsuța („□ + 7 = 15”, „24 : □ = 4”): copilul alege numărul din căsuță, care apare chiar în locul ei. Răspunsul se socotește
+ * din calculul care o rezolvă (`solving`: „15 − 7”, „24 : 4”), iar variantele vin de obicei din `calcChoices` pe același calcul, deci au
+ * formele calculelor obișnuite. `solving` rămâne în întrebare: testele îl verifică față de ecuație (cu `solveBox`) și scot din el
+ * variantele absurde ale ghicitorilor.
+ */
+export const boxChoice = (kind, text, solving, choices) => ({ kind, mode: 'choice', key: `${kind}:${text}`, text, solving, answer: calc(solving), choices });
+
 /** Două laturi de comparat (numere sau calcule) și semnul dintre ele. */
 export function compare(kind, left, right) {
   const [l, r] = [String(left), String(right)];

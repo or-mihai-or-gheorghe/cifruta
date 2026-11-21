@@ -8,7 +8,7 @@ import { play } from '../core/sound.js';
 import { backLink, confetti } from '../components/ui.js';
 import { emojiHTML } from '../visuals/emoji.js';
 import { visualLabel, visualSVG } from '../visuals/index.js';
-import { matches, paramsOf, pickAnswer, pickCorrect, search, solutionKey, widgetOf } from './logic.js';
+import { matches, paramsOf, pickAnswer, pickCorrect, search, solutionKey, startState, widgetOf } from './logic.js';
 import { markTask } from './progress.js';
 import { VIEWS } from './registry.js';
 import { keepMath } from './text.js';
@@ -25,7 +25,8 @@ export async function mountLesson(host, { chapter, lesson, index }) {
   const W = widgetOf(lesson);
   const params = paramsOf(lesson);
   const tasks = lesson.tasks;
-  let state = W.initial(params);
+  // prima provocare își poate aduce punctul de plecare (`start`): o ecuație, un număr de nuci
+  let state = startState(W.initial(params), tasks[0]);
   let current = 0;
   let phase = 'task'; // task → won (Bravo) → task … → done (Ce am aflat)
   let found = new Map(); // soluțiile găsite la `collect`: cheie → calculul arătat
@@ -145,6 +146,8 @@ export async function mountLesson(host, { chapter, lesson, index }) {
     hint = '';
     already = false;
     setMood('vesela');
+    // provocarea nouă își pune punctul de plecare înaintea desenului și a verificărilor de mai jos
+    state = startState(state, tasks[current]);
     view.render(state, { hidden: hiddenNow() });
     paint();
     const t = tasks[current];

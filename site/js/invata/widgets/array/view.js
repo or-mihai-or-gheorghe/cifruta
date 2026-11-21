@@ -22,6 +22,7 @@ function labels(p, unit) {
       cols: [`${unit[1][0].toUpperCase()}${unit[1].slice(1)} pe farfurie`, (v) => `câte ${cantitate(v, unit[0], unit[1])} pe farfurie`],
     };
   }
+  if (p.skin === 'table' && p.read === 'div') return { rows: ['Rândul: numărul la care împarți', (v) => `rândul lui ${v}`], cols: ['Coloana: câtul', (v) => `coloana ${v}`] };
   if (p.skin === 'table') return { rows: ['Rândul', (v) => `rândul ${v}`], cols: ['Coloana', (v) => `coloana ${v}`] };
   return { rows: ['Rânduri', (v) => cantitate(v, 'rând', 'rânduri')], cols: ['Câte pe rând', (v) => `câte ${v} pe rând`] };
 }
@@ -91,7 +92,8 @@ export function mount(host, params, { logic, dispatch }) {
     picker = h('button', { type: 'button', class: 'iv-picker', 'data-testid': 'iv-item', onClick: () => dispatch({ set: 'item', value: order[(order.indexOf(state.item) + 1) % order.length] }) });
   }
   const toggles = {};
-  if (p.skin === 'table') {
+  // pe harta citită pe dos (împărțirea) nu sunt trucurile înmulțirii
+  if (p.skin === 'table' && p.read !== 'div') {
     for (const st of STRATEGIES) {
       toggles[st.id] = h('button', { type: 'button', class: 'c-btn c-btn--sm iv-toggle', 'aria-pressed': 'false', 'data-testid': `iv-toggle-${st.id}`, onClick: () => dispatch({ toggle: st.id }) }, st.label);
       tools.append(toggles[st.id]);
@@ -183,6 +185,8 @@ export function mount(host, params, { logic, dispatch }) {
         s.el.classList.toggle('is-lit', on);
         s.el.classList.toggle('is-in', inside);
         s.el.classList.toggle('is-sel', s.r === state.rows - 1 && s.c === state.cols - 1);
+        // tabla citită pe dos: rândul împărțitorului își arată toate numerele, ca deîmpărțitul să se caute pe el
+        s.el.classList.toggle('is-row', p.read === 'div' && s.r === state.rows - 1);
         s.el.classList.toggle('is-todo', state.lit.includes('intoarse') && !on);
         s.el.textContent = s.r === state.rows - 1 && s.c === state.cols - 1 && hidden.includes('product') ? '?' : String((s.r + 1) * (s.c + 1));
       } else {
@@ -204,6 +208,11 @@ export function mount(host, params, { logic, dispatch }) {
     // calculul: factorii în culorile glisoarelor (rândurile / grupele, apoi câte în fiecare)
     if (t.markup) eq.innerHTML = md(keepMath(t.equation));
     else if (p.skin === 'split') eq.textContent = t.equation;
+    else if (p.read === 'div') {
+      // împărțirea pe hartă: împărțitorul în culoarea rândurilor, câtul în culoarea coloanelor
+      const tone = (v, which) => h('span', { class: `iv-f iv-f--${which}` }, String(v));
+      eq.replaceChildren(`${state.rows * state.cols}\u00a0:\u00a0`, tone(state.rows, 'rows'), '\u00a0=\u00a0', tone(state.cols, 'cols'));
+    }
     else {
       const [a, b] = factorsOf(state.rows, state.cols);
       const [ta, tb] = factorsOf('rows', 'cols');

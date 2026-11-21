@@ -84,7 +84,11 @@ export default {
   // produsele peste 100 sunt materie de clasa a III-a: apar doar în Jocuri fulger (tema „Înmulțirea”, la Intermediar și la Avansat)
   'mat.op1000.inmultire': { domain: 'mat', title: 'Înmulțirea cu un număr de două cifre, până la 1000', grade: 2, competencies: ['1.5'], source: ['imbogatire'] },
   'mat.op1000.inmultire-strategii': { domain: 'mat', title: 'Calcul mental la înmulțire: × 10, × 11, zeci rotunde', grade: 2, competencies: ['1.5'], source: ['imbogatire'] },
-  'mat.op.impartire': { domain: 'mat', title: 'Împărțirea ca scădere repetată', grade: 2, competencies: ['1.5'], source: ['programa', 'en2'] },
+  'mat.op.impartire': { domain: 'mat', title: 'Împărțirea în părți egale și ca scădere repetată', grade: 2, competencies: ['1.5'], source: ['programa', 'en2'] },
+  'mat.op.tabla-impartirii': { domain: 'mat', title: 'Tabla împărțirii: înmulțirea citită pe dos, cu proba', grade: 2, competencies: ['1.5', '1.6'], source: ['programa'] },
+  'mat.op.impartire-necunoscut': { domain: 'mat', title: 'Deîmpărțitul și împărțitorul necunoscut (□ : 3 = 6, 24 : □ = 4)', grade: 2, competencies: ['1.5'], source: ['imbogatire'] },
+  // câturile de două cifre sunt materie de clasa a III-a: lecția „Zecile, apoi unitățile” din Învață și Avansatul temei „Împărțirea”
+  'mat.op.impartire-zeci': { domain: 'mat', title: 'Împărțirea zecilor și a unităților (84 : 4 = 21)', grade: 2, competencies: ['1.5'], source: ['imbogatire'] },
 
   // ——— 3. Rezolvarea problemelor ———
   'mat.pb.o-operatie': { domain: 'mat', title: 'Probleme care se rezolvă printr-o operație', grade: 1, competencies: ['5.2'], source: ['manual', 'auxiliar', 'programa'] },

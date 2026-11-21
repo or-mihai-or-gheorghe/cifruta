@@ -115,7 +115,10 @@ Ce altă documentare am folosit (exemple de exerciții, aplicații, UX): `docs/c
 | Fracții egale (1/2 = 2/4 = 5/10), pe zidul fracțiilor — în programă: clasa a III-a; doar în Învață | II | ➕ | `mat.fractii.egale` |
 | Compararea fracțiilor (1/3 e mai mare decât 1/5) — în programă: clasa a III-a; doar în Învață | II | ➕ | `mat.fractii.comparare` |
 | Înmulțirea cu un număr de două cifre, până la 1000 (6 × 47); în calcul mental: × 10, × 11, zeci rotunde (12 × 20, 20 × 30) — în programă: clasa a III-a; doar în Jocuri fulger, tema „Înmulțirea” (până la 200 la Intermediar, până la 1000 la Avansat) | II | ➕ | `mat.op1000.inmultire`, `mat.op1000.inmultire-strategii` |
-| Împărțirea (scădere repetată, împărțirea în părți egale) | II | 📜 | `mat.op.impartire` |
+| Împărțirea (scădere repetată, împărțirea în părți egale) — în Învață și în Jocuri fulger | II | 📜 | `mat.op.impartire` |
+| Tabla împărțirii: înmulțirea citită pe dos, cu proba (24 : 6 = 4, pentru că 4 × 6 = 24) — în Învață și în Jocuri fulger | II | 📜 | `mat.op.tabla-impartirii` |
+| Deîmpărțitul și împărțitorul necunoscut (□ : 3 = 6, 24 : □ = 4) — în Învață și în Jocuri fulger | II | ➕ | `mat.op.impartire-necunoscut` |
+| Împărțirea zecilor și a unităților (84 : 4 = 21, 80 : 4 = 20) — în programă: clasa a III-a; doar în Învață și în Jocuri fulger | II | ➕ | `mat.op.impartire-zeci` |
 
 ### 3. Rezolvarea problemelor
 

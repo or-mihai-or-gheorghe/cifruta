@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { calc, holds, relation, trace } from '../site/js/core/expr.js';
+import { calc, holds, relation, solveBox, trace } from '../site/js/core/expr.js';
 import { lintText, walkTexts } from '../site/js/core/lint.js';
 import { md, markupErrors, plain } from '../site/js/core/markup.js';
 import { cantitate, fixCedilla, formatNumber, fractionWords, niceMinus, numberToWords, sameText, singularOf } from '../site/js/core/ro.js';
@@ -295,4 +295,21 @@ test('niceMinus: semnul minus în calcule, cratima rămâne în cuvinte și în 
   assert.equal(niceMinus('După-amiaza'), 'După-amiaza');
   assert.equal(niceMinus('{{v:ten-frame n=7}} - 2'), '{{v:ten-frame n=7}} − 2');
   assert.equal(niceMinus('-'), '−');
+});
+
+test('expr: căsuța unei ecuații se află prin căutare, una singură', () => {
+  assert.equal(solveBox('□ + 7 = 15'), 8);
+  assert.equal(solveBox('15 − □ = 8'), 7);
+  assert.equal(solveBox('□ − 7 = 8'), 15);
+  assert.equal(solveBox('□ × 4 = 24'), 6);
+  assert.equal(solveBox('□ : 3 = 6'), 18);
+  assert.equal(solveBox('24 : □ = 4'), 6); // 24 : 0 și împărțirile neexacte nu sunt soluții
+  assert.equal(solveBox('8 + 4 = □ + 5'), 7);
+  assert.equal(solveBox('□ + 5 = 3 × 4'), 7);
+  assert.equal(solveBox('□ + 250 = 730'), 480);
+  assert.throws(() => solveBox('□ × 0 = 0'), /mai multe soluții/);
+  assert.throws(() => solveBox('□ + 9 = 4'), /n-are soluție/);
+  assert.throws(() => solveBox('□ + 7 = 15', 5), /n-are soluție până la 5/);
+  assert.throws(() => solveBox('7 + 8 = 15'), /exact o căsuță/);
+  assert.throws(() => solveBox('□ + □ = 8'), /exact o căsuță/);
 });
