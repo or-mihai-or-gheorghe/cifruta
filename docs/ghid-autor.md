@@ -284,3 +284,33 @@ La începutul clasei a II-a se adaugă ~20–30 s pentru citirea fiecărui enun�
 - [ ] durata exact 45 min (suma `estMin`), 4/4/3 exerciții, 1–2 de explorarea mediului, fiecare exercițiu cu `explain`
 - [ ] catalogul actualizat (`version`, `estMin`, `exercises`), `npm run acoperire`, `docs/STARE.md` actualizat
 - [ ] răspunsul nu e vizibil în enunț, desen sau variante; variantele fără ordine naturală sunt amestecate
+
+## 11. Lecții în Învață
+Secțiunea Învață (`#/invata`) are lecții, nu teste: copilul mișcă un desen, vede calculul la zi și rezolvă provocări mici, fără scor
+și fără cronometru. Lecțiile stau în `site/data/invata.js`, pe capitole (un capitol „în curând” are doar `soon: true`, titlul, textul
+și iconița). Acolo se învață și conceptele pe care testele le ocolesc (înmulțirea, apoi fracțiile).
+
+**Lecția:** `{ id, title, icon, intro, concepts, widget: { w, ...parametri }, tasks, notes }`.
+- `intro` — indicația Cifruței pentru desen, cu verbul întâi („Trage de glisoare: …”), cel mult 90 de caractere;
+- `widget` — unul din `js/invata/registry.js` (`array` cu `skin: 'plates' | 'grid' | 'split' | 'table'`, `jumps`), cu parametrii lui
+  (`check` îi validează);
+- `tasks` — 3–4 provocări, în ordinea în care se fac;
+- `notes` — 1–3 propoziții pentru „Ce am aflat”, cu termenii în **aldin** („**factorii**”, „**produsul**”).
+
+**Provocările** (`ask`: cel mult 60 de caractere; răspunsurile se calculează, nu se scriu de mână):
+
+| fel | câmpuri | exemplu |
+|-|-|-|
+| o stare | `want` | „Arată 4 × 6.” → `{ rows: 4, cols: 6 }` |
+| mai multe soluții | `collect`, `by`, `need` | „Găsește toate dreptunghiurile cu 24.” → `{ product: 24 }`, `by: ['rows', 'cols']`, `need: 4` |
+| o alegere | `pick`, `rule`, datele regulii, `hint`, `hide` | „Cât face 7 × 8?” → `[54, 56, 63]`, `rule: 'produs'`, `of: [7, 8]`, `hide: ['product']` |
+
+- Mărimile din `want`, `collect` și `by` sunt cele din `derive` ale widgetului (`QUANTITIES`); `hide` ascunde una dintre ele cât e
+  activă provocarea (altfel răspunsul ar sta scris lângă desen).
+- `npm test` caută în lățime, prin aceleași acțiuni ca interfața, o cale spre fiecare provocare. Starea lăsată de provocarea
+  dinainte nu trebuie s-o rezolve deja pe următoarea, iar o alegere are exact un răspuns corect.
+- Textele urmează regulile din § 6 și § 7, iar mini-markup-ul din § 4 merge și aici. Calculele („6 × 7”) se scriu cu spații
+  obișnuite: lecția le ține pe un rând.
+- Id-urile capitolelor, ale lecțiilor și ale provocărilor sunt permanente: stau în bifele salvate (`cifruta:invata`).
+- Convenția factorilor (`js/invata/text.js`): „3 × 4” = „de 3 ori câte 4” = 4 + 4 + 4, adică rânduri × câte pe rând, farfurii ×
+  câte pe farfurie, sărituri × lungimea săriturii.

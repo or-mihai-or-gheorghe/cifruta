@@ -1,8 +1,8 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-11-21 · **Versiune:** 0.20.0 (Jocuri fulger: tema „Înmulțirea”, cu 13 tipuri noi și grupele desenate; în 0.19.1,
-  variantele fără tipare la toate temele cu calcule și pragurile de stele mai blânde; în 0.19.0, tema „Adunări și scăderi până la 1000”)
+- **Data:** 2026-11-21 · **Versiune:** 0.21.0 (secțiunea nouă **Învață**, cu cinci lecții interactive de înmulțire, și antetul
+  refăcut; în 0.20.0, tema fulger „Înmulțirea”, cu 13 tipuri noi și grupele desenate)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -25,7 +25,12 @@
   24 cu figuri, 32 cu grafice, hărți și arbori), fiecare cu conceptele ei („Ce exersăm”), alune cu bonus de viteză și
   de serie, Turbo, pistă spre stele și record, medalii pe niveluri, „Greșelile tale” și ținta următoarei stele la rezultate: 3 stele la
   un nivel al unei teme aduc medalia de bronz, argint sau aur, iar aceeași medalie la 2, 3 și 5 teme aduce „dublul”, colecția și cupa;
-  acum 39 de medalii, pe raftul de pe pagina jocului, pe cardurile nivelurilor și pe prima pagină). Conținut: **4 teste
+  acum 39 de medalii, pe raftul de pe pagina jocului, pe cardurile nivelurilor și pe prima pagină). **Învață** (`#/invata`, din
+  v0.21.0): lecții interactive pe capitole, fiecare în jurul unui desen pe care copilul îl mișcă, cu Cifruța care dă indicația și
+  provocările, verificate automat, și cu „Ce am aflat” la final; bifele rămân pe profil, doar în browser. Capitolul „Înmulțirea” are 5
+  lecții: grupe egale (farfurii), rânduri și coloane (careul de 10 × 10 cu glisoare pe orizontală și pe verticală, „Întoarce”,
+  „Numără”), sărituri pe axă, dreptunghiul spart (7 × 6 = 5 × 6 + 2 × 6) și harta tablei înmulțirii (strategiile lasă doar 15 calcule
+  de învățat); „Fracțiile” și „Împărțirea” apar „în curând”. Conținut: **4 teste
   de recapitulare a clasei I** (T1–T4 v2),
   **8 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc, spațiu,
   școală) și **8 teste „Călătorie pe Planeta Albastră”** (adunarea și scăderea până la 1000 cu trecere peste ordin, cu Pământul:
@@ -43,7 +48,7 @@
   - Fără configurarea Firebase, site-ul arată ca în v0.8.1, plus legătura „Confidențialitate” din subsol.
 
   **Calitate:**
-  - 125 de teste Node, plus validarea conținutului (cu regula secțiunii U2: trecerile pe nivel, calculele în 0–1000, cifrele
+  - 139 de teste Node (și lecțiile din Învață: fiecare provocare se poate rezolva din interfață, în ordine), plus validarea conținutului (cu regula secțiunii U2: trecerile pe nivel, calculele în 0–1000, cifrele
     calculate și unicitatea cifrelor ascunse), a tabelului de acoperire (fiecare concept are acum cel puțin un exercițiu) și a contrastului, calibrarea stelelor din Jocurile fulger
     pe fiecare temă și nivel, regulile independente ale celor 24 de tipuri cu figuri, ale celor 32 cu grafice și grafuri (numele din
     cerință, sensul și răspunsul, calculate din datele desenului, pe 3000 de semințe) ale celor 14 cu trecere până la 1000 (și forma
@@ -56,8 +61,9 @@
     măsurat pe ecran, fiecare temă jucată tip cu tip, mascota care se mișcă doar unde trebuie);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.20.0 e publicată, împreună cu v0.19.1 (regulile `80fba2c5`, rularea 44900403986, tag `v0.20.0`; E2E pe
-  site-ul live 2793/2802: cele 9 căzute, dintr-un 503 trecător pe `modal.js`, trec la reluare).
+- **Următorul pas:** capitolul „Fracțiile” din Învață (v0.22.0), apoi publicarea, după confirmarea utilizatorului (regulile Firestore
+  nu se schimbă). v0.20.0 e publicată (regulile `80fba2c5`, rularea 44900403986, tag `v0.20.0`).
+  - Copilul parcurge lecțiile de înmulțire: ce provocări sunt prea ușoare sau prea grele, ce gesturi merg pe telefonul lui.
   - Copilul joacă temele pe fiecare nivel, și înmulțirea: din tabelul „Pentru părinți” (timpul mediu pe tip) se reglează `fastMs` și
     pragurile.
   - Copilul încearcă un test U2 pe dispozitivul lui: timpii reali, căsuțele „ține minte”, calculul pe coloane pe telefon.
@@ -292,6 +298,19 @@
     24; regulile Firestore nu se schimbă), tag `v0.18.0`; E2E pe site-ul live 2566/2567 — singura verificare căzută (pe tabletă,
     peisajul unui card din secțiunea de recapitulare, „lipsă” la prima încărcare după publicare) trece la reluare, de trei ori din
     trei.
+- [x] M40 (v0.21.0): secțiunea **Învață**, cu capitolul „Înmulțirea” (5 lecții), și antetul refăcut.
+  - **Cererea utilizatorului:** o secțiune nouă, pe lângă teste și Jocuri fulger, pentru învățat interactiv: întâi înmulțirea, cu
+    glisoare pe orizontală și pe verticală care schimbă rândurile și coloanele, apoi fracțiile; totul vizual, interactiv, intuitiv.
+    Răspunsurile lui: numele „Învață”, progresul în browser, pe profil, și fracțiile de la ½ și ¼ până la zecimi.
+  - **Lecțiile:** grupe egale (farfurii), rânduri și coloane, sărituri pe axă, dreptunghiul spart, harta tablei înmulțirii; 16
+    provocări (stări-țintă, „găsește toate” și o alegere cu produsul ascuns), cu „Ce am aflat” la final.
+  - **Cum e făcut:** două widgeturi cu logica pură (`array` cu patru aspecte, `jumps`), un glisor-riglă peste un input nativ ascuns,
+    cadrul lecției (Cifruța, provocările verificate la gestul încheiat, regiunea de stare) și desenul nou `skip-line`.
+  - **Antetul:** baleiajul 320–1280 a arătat că, deja înainte, cu contul deschis, „Jocuri fulger” trecea pe două rânduri la
+    761–900 px și sunetul se strivea la 30 px. Linkurile nu se mai strâng, treptele stau într-un singur loc, antetul e mai lat decât
+    conținutul (72rem), iar `header_ok` păzește regula.
+  - **Verificare:** npm test 139/139, E2E Învață 184/184 (lecțiile rezolvate din interfață pe 3 ecrane, tragerile cu mouse-ul și cu
+    degetul fără ca pagina să se miște, 360×640 și 844×390, tastatura), E2E cont 80/80.
 - [x] M39 (v0.20.0): Jocuri fulger, tema „Înmulțirea”.
   - **Conținut:** 13 tipuri noi, în `js/fulger/kinds-inmultire.js`:
     - Ușor: tabla înmulțirii (factori 2–9), adunarea repetată („Cum scrii ca înmulțire? 4 + 4 + 4”), grupe egale desenate, factorul
@@ -563,6 +582,11 @@
 | 2026-11-21 | La comparările cu înmulțiri, două produse fără niciun număr comun sunt egale doar în cam jumătate din cazuri (un factor schimbat cu 1) | recenzia: „fără număr comun” însemna „=” în 89–100% din cazuri |
 | 2026-11-21 | O sumă din cerință se scrie cu spații nedespărțite; variantele-calcule scurte („4 × 5”) păstrează litera mare | recenzia: pe telefon, un termen rămânea singur pe rândul următor și se număra greșit; pe capturi, variantele scurte ieșeau mici |
 | 2026-11-21 | Patru concepte noi: tabla înmulțirii, factorul necunoscut, înmulțirea cu un număr de două cifre până la 1000 și calculul mental la înmulțire (ultimele trei, îmbogățire: în programă sunt de clasa a III-a) | „Ce exersăm” spune ce exersează tema; produsele peste 100 vin din alegerea utilizatorului |
+| 2026-11-21 | Secțiunea nouă **Învață** (`#/invata`), lângă Teste și Jocuri fulger: lecții interactive pe capitole, fiecare în jurul unui desen pe care copilul îl mișcă, cu provocări verificate automat, fără scor și fără cronometru; conceptele „viitoare” (înmulțirea, fracțiile) se învață aici, iar testele rămân fără ele | cererea utilizatorului; numele ales de el |
+| 2026-11-21 | Progresul din Învață (provocările făcute) stă doar în browser, pe profil: se mută la prima intrare în cont și pleacă la ieșirea din cont, odată cu copiile profilului | alegerea utilizatorului; urcarea în cont cere reguli Firestore noi (backlog) |
+| 2026-11-21 | Convenția factorilor: „3 × 4” = „de 3 ori câte 4” = 4 + 4 + 4 (rânduri × câte pe rând), într-o singură constantă (`js/invata/text.js`) | neverificată încă cu manualul; lecția „Rânduri și coloane” arată oricum că ordinea nu schimbă produsul |
+| 2026-11-21 | Glisoarele din Învață sunt rigle aliniate cu desenul, peste un input nativ ascuns; cel vertical crește în jos, iar săgețile merg după direcția de pe ecran; provocările se verifică doar la gestul încheiat | glisorul trebuie să arate ce schimbă (gradația lângă rândul ei); cititoarele de ecran de pe telefon schimbă doar inputurile native; trecerea de la 2 la 8 ar fi rezolvat din greșeală „4” |
+| 2026-11-21 | Antetul: linkurile nu se strâng și nu se rup, treptele stau într-un singur loc, antetul e mai lat decât conținutul (72rem), iar un baleiaj 320–1280 (`header_ok`) le verifică, cu și fără cont | măsurat: cu un al cincilea link, depășiri la 360, 481 și 673 px, iar deja înainte „Jocuri fulger” trecea pe două rânduri cu contul deschis |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -614,6 +638,8 @@
   strategie bună, dar scurtează calculul.
 - E2E pe site-ul live: pasul „Șterge toate rezultatele” din `pages_flow` a rămas o dată fără buton vizibil (30 s); la reluare trece.
 - „Greșelile tale” arată × și − cu semnul și pentru cititorul de ecran (doar arena le citește „ori” și „minus”).
+- Învață: bifele lecțiilor se pierd la ieșirea din cont (stau doar în browser, cu copiile profilului) și nu trec pe alt dispozitiv.
+- Învață: convenția factorilor („3 × 4” = de 3 ori câte 4) e încă neverificată cu manualul.
 - GitHub Actions: eticheta `ubuntu-latest` trece pe Ubuntu 26 din 19 octombrie 2026 (anunț la publicarea v0.18.0). Fluxul folosește
   doar Node și npm, deci nu ar trebui să se schimbe nimic; de privit prima publicare de după.
 
@@ -636,6 +662,8 @@
 - Jocuri fulger cu figuri, mai departe: tangram cu triunghiuri, perechi de piese care formează o figură, vederi de sus ale corpurilor,
   emoji-urile unei teme încărcate înainte de start, `fastMs` și pragurile de stele ajustate după rundele reale.
 - Amânate la cerere: citire cu voce (TTS), tastatură numerică proprie pe ecran.
+- Învață, mai departe: progresul în cont (reguli Firestore noi), capitolul „Împărțirea” (grupe egale și legătura cu înmulțirea),
+  lecții noi după rundele copilului, un atelier al widgeturilor (`#/atelier`).
 - Din feedback-ul nr. 2, neaplicate: explicații vizuale interactive
   (evidențieri pas cu pas în desen); ceas și termometru cu tragere directă; validator care leagă desenele cu date de răspunsuri.
 - Contul familiei, mai departe: App Check (reCAPTCHA) împotriva scorurilor trimise din afara site-ului; pagina cu istoricul clasamentelor pe
@@ -983,6 +1011,25 @@
   - **Publicat:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
+
+- **2026-11-21 (secțiunea Învață și lecțiile de înmulțire, v0.21.0)**
+  - **Cererea utilizatorului:** o secțiune nouă pentru învățat interactiv, întâi înmulțirea (glisoare pe orizontală și pe verticală
+    care schimbă rândurile și coloanele), apoi fracțiile; „vizual, interactiv, intuitiv”. Răspunsurile lui la cele 3 întrebări:
+    „Învață”, progresul în browser pe profil, fracțiile de la ½ și ¼ până la zecimi.
+  - **Planul:** trei explorări ale codului, o revizuire independentă a designului și, la cererea utilizatorului, a doua trecere de
+    verificare, cu măsurători în Chromium. Măsurătorile au schimbat planul: antetul se rupea deja (nu doar la 360 px), iar desenul
+    `groups` își reașază tăvile, deci nu merge pentru o lecție interactivă.
+  - **Cum s-a lucrat** (un commit pe pas): antetul și baleiajul lui; nucleul pur (logica widgeturilor, căutarea în lățime prin
+    acțiuni, datele, progresul); interfața (glisorul, vederile, cadrul lecției, pagina, cardul, stilurile, E2E). Fiecare lecție a
+    fost privită în capturi pe laptop, 360×640 și 844×390, și reașezată după ele: calculul deasupra desenului, obiectele într-un
+    buton din colț, bulinele în balon, iar pe telefonul ținut orizontal desenul în stânga (`display: contents`).
+  - **Lecții:**
+    - o clasă dintr-un widget (`.iv-dot`, bulina de pe careu) a lovit una din cadru (bulinele provocărilor): numele de clase ale
+      widgeturilor poartă numele obiectului (`iv-bead`, `iv-tile`);
+    - `anim-pop` animă `transform`, deci pe obiectele așezate cu `translate` le-ar fi aruncat în colț: animația lor folosește
+      proprietatea `scale`;
+    - `replaceChildren` cu `null` ar fi scris „null” în balon: listele se filtrează (`fill`).
+  - **Rezultate:** npm test 139/139, E2E Învață 184/184, E2E cont 80/80.
 
 - **2026-11-21 (tema „Înmulțirea” în Jocuri fulger, v0.20.0)**
   - **Cererea utilizatorului:** un joc fulger pentru înmulțiri, cu trei niveluri, pentru clasa a II-a și puțin peste: o cifră × o

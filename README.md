@@ -23,6 +23,9 @@ explicații pe înțelesul copiilor. Mascota site-ului este **Veverița Cifruța
 - **Jocuri fulger** — runde de 2 minute pe 10 teme (adunări și scăderi până la 100, numerele până la 1000, adunări și scăderi până
   la 1000 cu trecere, înmulțirea, șiruri și intruși, puzzle cu forme, figuri și corpuri, poziții și trasee, grafice și tabele, hărți
   și arbori), fiecare cu trei niveluri, stele, recorduri și medalii.
+- **Învață** — lecții interactive, cu desene pe care copilul le mișcă: la înmulțire, grupe egale, un dreptunghi de rânduri și coloane
+  întins cu glisoare pe orizontală și pe verticală (și întors, ca să se vadă că 4 × 6 = 6 × 4), sărituri pe axă, dreptunghiul spart
+  în două bucăți ușoare și harta tablei înmulțirii; fiecare lecție are provocări cu „Bravo!” și „Ce am aflat”, iar bifele rămân.
 - **Contul familiei** (opțional) — părintele intră cu Google și face profiluri pentru copii (poreclă și avatar desenat);
   rezultatele se păstrează și în cloud, iar cei din cont văd clasamentul.
 - Funcționează pe telefon, tabletă și calculator; progresul se salvează în browser.

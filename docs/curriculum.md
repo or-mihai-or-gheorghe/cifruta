@@ -108,6 +108,7 @@ Ce altă documentare am folosit (exemple de exerciții, aplicații, UX): `docs/c
 | Înmulțirea ca adunare repetată, grupe egale | II | 📜 | `mat.op.inmultire` |
 | Tabla înmulțirii (factori de o cifră) | II | 📜 | `mat.op.tabla-inmultirii` |
 | Aflarea factorului necunoscut (? × 6 = 42), pregătirea împărțirii | II | ➕ | `mat.op.factor-necunoscut` |
+| Ordinea factorilor (4 × 6 = 6 × 4) și desfacerea unui factor (7 × 6 = 5 × 6 + 2 × 6), pe dreptunghiul de obiecte — doar în Învață | II | ➕ | `mat.op.inmultire-proprietati` |
 | Înmulțirea cu un număr de două cifre, până la 1000 (6 × 47); în calcul mental: × 10, × 11, zeci rotunde (12 × 20, 20 × 30) — în programă: clasa a III-a; doar în Jocuri fulger, tema „Înmulțirea” (până la 200 la Intermediar, până la 1000 la Avansat) | II | ➕ | `mat.op1000.inmultire`, `mat.op1000.inmultire-strategii` |
 | Împărțirea (scădere repetată, împărțirea în părți egale) | II | 📜 | `mat.op.impartire` |
 

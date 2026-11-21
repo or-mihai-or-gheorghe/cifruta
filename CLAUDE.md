@@ -38,7 +38,8 @@ site/                      ← publicat
                            avatar (desenul și accesoriile) · avatar-animals (cele 24 de animale) · avatar-parts (blănuri, ochi, umeri)
                            grafice (bare, linii, pictograme, tabel, cerc, Venn) · grafuri (hartă, rețea, turneu, arbore): desenele jocurilor
                            calcule (column-op: un calcul în scris desenat, eventual greșit sau cu o cifră lipsă „?”)
-                           inmultire (groups: grupe egale de obiecte pe tăvi, cu numărătoarea în desenul rezolvat)
+                           inmultire (groups: grupe egale de obiecte pe tăvi, cu numărătoarea în desenul rezolvat;
+                           skip-line: săriturile egale pe axă, pentru Învață)
   js/fulger/               Jocuri fulger (jocuri pe viteză, pe teme, #/fulger): kinds (calcule până la 100), kinds-1000 (numerele până
                            la 1000), kinds-calcule-1000 (adunări și scăderi până la 1000, cu trecere), kinds-inmultire (tabla,
                            o cifră × două cifre, × 10, × 11, zeci rotunde), kinds-forme (figuri), kinds-grafice și kinds-grafuri
@@ -48,7 +49,13 @@ site/                      ← publicat
                            datele vechi) · medals (medaliile: catalogul, cele câștigate, cele ale unei runde; pur) · view (arena) ·
                            effects (particule, bannere);
                            pagina e pages/fulger.js
+  js/invata/               Învață (lecții interactive, #/invata): logic (lecțiile: căutarea prin acțiunile widgetului, provocările,
+                           regulile alegerilor) · registry (widgeturile) · lesson (cadrul: Cifruța, provocările, „Ce am aflat”) ·
+                           slider + ruler (glisorul-riglă) · text (calculele scrise, convenția factorilor) · progress (bifele, pe
+                           profil) · widgets/<w>/logic.js (pur) + view.js: array (farfurii, careu, tăietură, harta tablei), jumps;
+                           pagina e pages/invata.js
   data/catalog.js          secțiuni → grupuri → teste · concepts.js (ID-uri de concepte) · scoring.js · demo.js · fulger.js (jocul)
+                           · invata.js (capitolele, lecțiile și provocările din Învață)
   data/tests/<grup>/tN-nume.js   testele (NU le numi test-*.js)
 docs/  STARE.md · curriculum.md (harta conceptelor + surse) · cercetare.md · ghid-autor.md
 tests/ *.test.js (node --test)   tools/ e2e.py (Playwright), acoperire.mjs (tabelul teste × concepte), fetch_assets.py
@@ -171,6 +178,23 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   („temă:nivel”) și în id-urile clasamentelor. O temă jucabilă nouă aduce singură cele 3 medalii ale ei (bronz, argint, aur, cu
   id-urile `<metal>:<temă>`); pragurile medaliilor în plus (`medals.extras[].count`) rămân cel mult numărul temelor jucabile (testul
   din `tests/fulger-medals.test.js` verifică).
+- **Lecție nouă în Învață** (`site/data/invata.js`, `docs/ghid-autor.md` § 11):
+  - **Lecția:** `{ id, title, icon, intro, concepts, widget: { w, ...params }, tasks, notes }`, cu id-uri permanente (stau în
+    progres). `intro` începe cu verbul (cel mult 90 de caractere), 3–4 provocări (`ask` de cel mult 60 de caractere) și 1–3 lucruri în
+    „Ce am aflat”.
+  - **Provocările:**
+    - `want`: o stare a widgetului, prin mărimile din `derive`;
+    - `collect` + `by` + `need`: mai multe soluții diferite;
+    - `pick` + `rule` (+ `hint`, `hide`): o alegere, cu răspunsul calculat de `PICK_RULES` din `js/invata/logic.js`.
+  - **Ce verifică `npm test`** (`lessonErrors`):
+    - fiecare provocare se poate rezolva prin aceleași acțiuni ca în interfață, căutate în lățime;
+    - starea lăsată de provocarea dinainte nu o rezolvă deja pe următoarea;
+    - o alegere are exact un răspuns.
+  - **Widget nou:** `js/invata/widgets/<w>/logic.js`, pur, cu `QUANTITIES`, `HIDEABLE`, `check`, `controls`, `initial`, `actions`,
+    `apply`, `derive`, `texts`. Starea se schimbă doar prin `apply`. Lângă el, `view.js`: `mount(el, params, { logic, dispatch })` →
+    `{ render(state, { hidden }), destroy }`, iar vederea nu socotește. Amândouă intră în `js/invata/registry.js`.
+  - **Gesturile:** în timpul tragerii, `dispatch(…, { commit: false })` doar previzualizează; provocările se verifică la gestul
+    încheiat.
 - **Animal sau accesoriu nou pentru avatar:**
   1. Id permanent (`[a-z]+`, fără `fara` și `natural`), eticheta și genul în listele din `js/core/avatar.js`. La un animal, `natural`
      e culoarea lui din listă sau null; cu null, desenul are paleta proprie (`fur`).
@@ -221,8 +245,9 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   ca butoanele radio native; o variantă nouă cu `role=radio` se leagă la fel. Bara din `chart` e un `spinbutton` (săgeți, Page Up/Down,
   Home/End), iar + și − repetă pasul ținute apăsat. Șabloanele din `fill` trec prin `niceMinus` (`core/ro.js`): „-” devine „−” în
   calcule, dar cratima dintre litere rămâne („s-a”, „După-amiaza”).
-- E2E: `--only` primește id-uri despărțite prin virgulă, cu `*` (`'u2-t*'`), plus `tipuri` (atelierul de tipuri și tastatura) și
-  `fulger`; fără ele, sare fluxurile de atelier și de tastatură (`types_flow`, `keyboard_flow`), care rulează și fără `--only`.
+- E2E: `--only` primește id-uri despărțite prin virgulă, cu `*` (`'u2-t*'`), plus `tipuri` (atelierul de tipuri și tastatura),
+  `fulger` și `invata` (lecțiile, gesturile, ecranele mici și tastatura din Învață); fără ele, sare fluxurile de atelier și de
+  tastatură (`types_flow`, `keyboard_flow`), care rulează și fără `--only`.
   Serverul local din `tools/e2e.py` are `request_queue_size = 128`: cu coada implicită (5), macOS resetează conexiunile când o
   pagină cere ~40 de module deodată (`ERR_CONNECTION_RESET` pe `127.0.0.1`).
 - Sarcini deschise (`mark.rules`, `route.rules`, `chart.rules`, `money.distinct`): orice răspuns care respectă regulile ia tot creditul;
@@ -346,6 +371,24 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   săptămânii au chei „temă:nivel” (`js/fulger/records.js`), datele de dinainte de teme se normalizează la fiecare citire
   (`normalizeFulger`), iar clasamentele sunt `fulger-<temă>-<nivel|total>-<perioadă>`; cele vechi (`fulger-<nivel>-…`) se mută cu
   scorul lor în tema veche, apoi se șterg. Clasamentele săptămânilor trecute nu se șterg: rezultatele sunt persistente.
+- Învață (`js/invata/`, `pages/invata.js`, `css/10-invata.css`):
+  - **Glisorul** e un `<input type="range">` nativ ascuns vizual, cu o pistă desenată peste el. Focusul, tastatura și cititoarele de
+    ecran merg prin input, iar degetul și mouse-ul prin pistă (pointer capture, `touch-action: pan-y pinch-zoom` pe pista orizontală,
+    `pinch-zoom` pe cea verticală).
+    - Gradațiile stau la mijlocul căsuțelor desenului (`js/invata/ruler.js`), deci glisorul e rigla dreptunghiului.
+    - La glisorul vertical, valorile cresc în jos, iar săgețile merg după direcția de pe ecran (↓ adaugă).
+    - `pointercancel` și `lostpointercapture` întorc valoarea de dinainte.
+  - **Desenele lecțiilor** au `aria-hidden`. Glisoarele sunt controlul echivalent, iar calculul se anunță într-o regiune
+    `role="status"`, cu × citit „ori”.
+  - **Dreptunghiul** își construiește locurile o dată. Obiectele stau la `translate(var(--c)…, var(--r)…)`, iar „Întoarce” comută doar
+    `.is-flipped`; o animație pe obiecte folosește proprietatea `scale` (`is-bump`), nu `anim-pop`, care ar înlocui `transform`.
+  - **Ecranele:**
+    - mărimea căsuței vine din `cqw` (scena e container) și din `dvh`;
+    - pe telefonul ținut orizontal, scena și widgetul devin `display: contents`, ca desenul să stea în stânga și restul în dreapta;
+    - `invata_screens` măsoară desenul, pistele (≥ 44 px), căsuțele (≥ 20 px) și textul.
+  - **Progresul** (`cifruta:invata`, `getLessons`/`saveLessons`) stă doar în browser, pe profil. `moveAnonymousInto` îl mută înaintea
+    lui `clearScopeData(null)`. La ieșirea din cont pleacă odată cu copiile profilului.
+  - **Textele lecțiilor** trec prin `keepMath`, ca „6 × 7” să nu se rupă pe două rânduri.
 - Avatarul desenat (`core/avatar.js`, `visuals/avatar*.js`, `components/avatar-studio.js`):
   - **Textul:** profilul și intrările din clasamente păstrează un singur text canonic, `animal[.culoare-…][.fundal-…][.cap-…][.fata-…][.gat-…]`,
     fără valorile implicite. Un avatar vechi (`vulpe`) înseamnă aspectul implicit, iar același aspect dă mereu același text.
