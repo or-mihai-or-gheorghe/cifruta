@@ -349,6 +349,7 @@ def account_flow(run: Run, browser):
     page4.wait_for_selector("[data-testid=fulger-card]")
     page4.wait_for_selector("[data-testid=nav-account] svg.v-avatar")
     run.layout_ok(page4, "telefon mic 360 px: antetul cu avatar și clasament")
+    run.check(page4.get_by_test_id("nav-invata").is_visible() and page4.get_by_test_id("nav-fulger").is_visible(), "telefon mic 360 px, cu cont: „Învață” și „Jocuri fulger” se văd în antet")
     run.shot(page4, "cloud-antet-telefon-mic")
     small.close()
 

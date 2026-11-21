@@ -50,7 +50,7 @@
   - Fără configurarea Firebase, site-ul arată ca în v0.8.1, plus legătura „Confidențialitate” din subsol.
 
   **Calitate:**
-  - 147 de teste Node (și lecțiile din Învață: fiecare provocare se poate rezolva din interfață, în ordine), plus validarea conținutului (cu regula secțiunii U2: trecerile pe nivel, calculele în 0–1000, cifrele
+  - 150 de teste Node (și lecțiile din Învață: fiecare provocare se poate rezolva din interfață, în ordine), plus validarea conținutului (cu regula secțiunii U2: trecerile pe nivel, calculele în 0–1000, cifrele
     calculate și unicitatea cifrelor ascunse), a tabelului de acoperire (fiecare concept are acum cel puțin un exercițiu) și a contrastului, calibrarea stelelor din Jocurile fulger
     pe fiecare temă și nivel, regulile independente ale celor 24 de tipuri cu figuri, ale celor 32 cu grafice și grafuri (numele din
     cerință, sensul și răspunsul, calculate din datele desenului, pe 3000 de semințe) ale celor 14 cu trecere până la 1000 (și forma
@@ -315,8 +315,17 @@
     - widgeturile `parts` și `wall`, plus `mark` la farfurii;
     - regulile alegerilor cu fracții;
     - patru concepte de îmbogățire, plus rândul lipsă pentru `mat.fractii.jumatate-sfert` în `docs/curriculum.md`.
-  - **Verificare:** npm test 147/147, E2E Învață 291/291 (toate lecțiile rezolvate din interfață pe laptop, atingeri pe bucăți, pe
-    zid și pe farfurii, 360×640 și 844×390).
+  - **Verificare:** npm test 150/150, E2E Învață 309/309 după recenzie (toate lecțiile rezolvate din interfață pe laptop, atingeri
+    pe bucăți, pe zid și pe farfurii, 360×640 și 844×390, anunțurile și focusul), E2E cont 81/81.
+  - **Recenzia** (un agent fără istoricul conversației): 8 probleme verificate, toate reparate:
+    - „Bravo!” după o alegere arăta calculul rămas în desen (7 × 6 = 42 după „Cât face 7 × 8?”);
+    - pe zid, lista fracțiilor egale dădea răspunsul („la zecimi, egală cu 1/2”);
+    - „Încă o dată” pornea de la o stare deja rezolvată;
+    - indiciul, „Bravo!” și provocarea nouă nu se anunțau, iar focusul cădea pe pagină;
+    - întrebarea despre mutarea datelor nu număra lecțiile;
+    - o singură farfurie la fracții dădea un text greșit;
+    - o lecție încă în încărcare strica la curățenie lecția de pe ecran;
+    - ascunderea răspunsului promitea mai mult decât arătau desenele (`hideable` pe widget și parametri).
 - [x] M40 (v0.21.0): secțiunea **Învață**, cu capitolul „Înmulțirea” (5 lecții), și antetul refăcut.
   - **Cererea utilizatorului:** o secțiune nouă, pe lângă teste și Jocuri fulger, pentru învățat interactiv: întâi înmulțirea, cu
     glisoare pe orizontală și pe verticală care schimbă rândurile și coloanele, apoi fracțiile; totul vizual, interactiv, intuitiv.
@@ -658,7 +667,10 @@
   strategie bună, dar scurtează calculul.
 - E2E pe site-ul live: pasul „Șterge toate rezultatele” din `pages_flow` a rămas o dată fără buton vizibil (30 s); la reluare trece.
 - „Greșelile tale” arată × și − cu semnul și pentru cititorul de ecran (doar arena le citește „ori” și „minus”).
-- Învață: bifele lecțiilor se pierd la ieșirea din cont (stau doar în browser, cu copiile profilului) și nu trec pe alt dispozitiv.
+- Învață: bifele lecțiilor se pierd la ieșirea din cont (stau doar în browser, cu copiile profilului) și nu trec pe alt dispozitiv;
+  ieșirea din cont nu avertizează (backlog: progresul în cont).
+- E2E local: o dată, în `fulger_topics_flow`, o variantă a rămas „nestabilă” 30 s la „adunarea repetată” (pe laptop), iar rularea s-a
+  oprit; rulat singur, fluxul trece (396/396). Încă o instabilitate trecătoare, ca pasul „Șterge toate rezultatele”.
 - Învață: convenția factorilor („3 × 4” = de 3 ori câte 4) e încă neverificată cu manualul.
 - GitHub Actions: eticheta `ubuntu-latest` trece pe Ubuntu 26 din 19 octombrie 2026 (anunț la publicarea v0.18.0). Fluxul folosește
   doar Node și npm, deci nu ar trebui să se schimbe nimic; de privit prima publicare de după.
@@ -1031,6 +1043,18 @@
   - **Publicat:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
+
+- **2026-11-21 (Învață: recenzia și E2E-ul complet)**
+  - **Recenzia** (agent fără istoricul conversației, cu fiecare problemă verificată în Chromium, cu Node sau pe drumul codului): 8
+    probleme, toate reparate și acoperite de teste. Lista e la M41.
+  - **Lecții:**
+    - textul de după „Bravo!” trebuie să vină din provocarea rezolvată, nu din desen: la o alegere, desenul rămâne la provocarea
+      dinainte;
+    - validatorul urmează doar drumul lui de căutare, deci nu vede „Încă o dată” și nici gesturile copilului făcute înainte. De aceea,
+      o provocare deja îndeplinită primește „Bravo!” imediat, iar „Încă o dată” pornește de la desenul de la început;
+    - o regiune `role="status"` care primește doar calculul tace tocmai la momentele care contează (indiciul, „Bravo!”).
+  - **E2E complet:** o rulare s-a oprit o dată în Jocuri fulger („adunarea repetată”: varianta „nestabilă” 30 s, pe laptop). Rulate
+    singure, Jocurile fulger trec 396/396; problema e trecută la „Probleme cunoscute”.
 
 - **2026-11-21 (Învață: fracțiile, v0.22.0)**
   - **Ce s-a făcut:** capitolul „Fracțiile”, cu 5 lecții și 18 provocări. Noi: desenul `fraction`, fracția etajată `{{f:n/d}}`,

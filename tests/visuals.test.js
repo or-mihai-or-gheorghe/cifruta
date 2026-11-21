@@ -5,7 +5,7 @@ import { existsSync } from 'node:fs';
 import { test } from 'node:test';
 
 import { EMOJI } from '../site/js/visuals/emoji.js';
-import { listVisuals, visualErrors, visualSVG, visualViewBox } from '../site/js/visuals/index.js';
+import { listVisuals, visualErrors, visualLabel, visualSVG, visualViewBox } from '../site/js/visuals/index.js';
 import '../site/js/visuals/all.js';
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -138,4 +138,23 @@ test('desenele pentru calculul în scris își verifică parametrii', () => {
   assert.match(visualSVG({ v: 'column-op', op: '+', terms: '?47,85', result: '432' }), /aria-label="calcul în scris: cifra lipsă, 47 \+ 85 = 432"/);
   // numele desenului nu spune opririle ascunse ale axei
   assert.doesNotMatch(visualSVG({ v: 'number-line', hops: '465,?,?,?', jumps: '−100,−30,−2' }), /aria-label="[^"]*(365|335|333)/);
+});
+
+test('fraction: bucățile, cele colorate (cu hașuri) și numele, fără să spună dacă bucățile sunt egale', () => {
+  const svg = (p) => visualSVG({ v: 'fraction', ...p });
+  const count = (html, re) => (html.match(re) ?? []).length;
+  const quarters = svg({ shape: 'circle', parts: 4, on: [0, 2] });
+  assert.equal(count(quarters, /data-piece="/g), 4);
+  assert.equal(count(quarters, /class="v-fraction__piece is-on"/g), 2);
+  assert.equal(count(quarters, /fill="url\(#fraction\d+h\)"/g), 2, 'hașurile, nu doar culoarea');
+  assert.equal(visualLabel({ v: 'fraction', shape: 'circle', parts: 4, on: [0, 2] }), 'un cerc tăiat în 4 bucăți, cu 2 bucăți colorate');
+  assert.equal(visualLabel({ v: 'fraction', shape: 'bar', parts: 1 }), 'o bară întreagă');
+  assert.equal(visualLabel({ v: 'fraction', shape: 'circle', parts: 2, sizes: [1, 2] }), 'un cerc tăiat în 2 bucăți');
+  assert.equal(count(svg({ shape: 'square', parts: 4, cut: 'diagonal' }), /data-piece="/g), 4);
+  assert.equal(count(svg({ shape: 'square', parts: 4, cut: 'grid' }), /data-piece="/g), 4);
+  assert.deepEqual(visualErrors({ v: 'fraction', shape: 'square', parts: 2, cut: 'diagonal' }), []);
+  assert.equal(visualErrors({ v: 'fraction', shape: 'circle', parts: 3, cut: 'grid' }).length, 1, 'careul e doar la pătrat');
+  assert.equal(visualErrors({ v: 'fraction', shape: 'bar', parts: 3, sizes: [1, 2] }).length, 1, 'câte o mărime pe bucată');
+  assert.equal(visualErrors({ v: 'fraction', shape: 'bar', parts: 3, on: [3] }).length, 1);
+  assert.equal(visualErrors({ v: 'fraction', shape: 'stea', parts: 11 }).length, 2);
 });
