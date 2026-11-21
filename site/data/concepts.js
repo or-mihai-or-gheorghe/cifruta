@@ -74,6 +74,11 @@ export default {
   'mat.op1000.strategii': { domain: 'mat', title: 'Calcul mental până la 1000: pe ordine, în salturi, cu numere rotunde', grade: 2, competencies: ['1.4'], source: ['manual', 'imbogatire'] },
   'mat.op1000.estimare': { domain: 'mat', title: 'Estimarea rezultatului prin rotunjire, ca verificare', grade: 2, competencies: ['1.3', '1.4'], source: ['programa', 'imbogatire'] },
   'mat.op.inmultire': { domain: 'mat', title: 'Înmulțirea ca adunare repetată de termeni egali', grade: 2, competencies: ['1.5'], source: ['programa', 'en2'] },
+  'mat.op.tabla-inmultirii': { domain: 'mat', title: 'Tabla înmulțirii (factori de o cifră)', grade: 2, competencies: ['1.5'], source: ['programa', 'en2'] },
+  'mat.op.factor-necunoscut': { domain: 'mat', title: 'Aflarea factorului necunoscut', grade: 2, competencies: ['1.5'], source: ['imbogatire'] },
+  // produsele peste 100 sunt materie de clasa a III-a: apar doar în Jocuri fulger (tema „Înmulțirea”, la Intermediar și la Avansat)
+  'mat.op1000.inmultire': { domain: 'mat', title: 'Înmulțirea cu un număr de două cifre, până la 1000', grade: 2, competencies: ['1.5'], source: ['imbogatire'] },
+  'mat.op1000.inmultire-strategii': { domain: 'mat', title: 'Calcul mental la înmulțire: × 10, × 11, zeci rotunde', grade: 2, competencies: ['1.5'], source: ['imbogatire'] },
   'mat.op.impartire': { domain: 'mat', title: 'Împărțirea ca scădere repetată', grade: 2, competencies: ['1.5'], source: ['programa', 'en2'] },
 
   // ——— 3. Rezolvarea problemelor ———

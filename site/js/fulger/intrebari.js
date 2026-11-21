@@ -74,6 +74,12 @@ export function calcChoice(kind, rand, text, { min = 0, max, plausible = true })
   return { kind, mode: 'choice', key: `${kind}:${text}`, text, answer: calc(text), choices: calcChoices(rand, text, { min, max, plausible }) };
 }
 
+/**
+ * Un calcul cu variantele date, crescătoare (la înmulțire, `calcChoices` nu se poate folosi: formele lui știu doar + și −; generatorul
+ * alege forma și locul răspunsului, cu `row` și `placeAt` din rand.js).
+ */
+export const shapedChoice = (kind, text, choices) => ({ kind, mode: 'choice', key: `${kind}:${text}`, text, answer: calc(text), choices });
+
 /** Două laturi de comparat (numere sau calcule) și semnul dintre ele. */
 export function compare(kind, left, right) {
   const [l, r] = [String(left), String(right)];

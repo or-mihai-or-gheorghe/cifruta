@@ -176,6 +176,10 @@ HTML nu este permis (se afișează ca text).
       - arborele alegerilor;
       - clasificarea cu da / nu pe ramuri;
       - crengile veveriței (`branch`, cu alunele în `edge`).
+- **Înmulțirea (făcut pentru Jocurile fulger, aceeași formă de 320 de unități):** `groups {n: 1–6, each: 1–6, emoji, unit: [sg, pl],
+  counts?}`: grupe egale de obiecte pe tăvi cu contur (cel mult 3 pe rând, obiectele așezate ca punctele zarului); `counts` adaugă sub
+  fiecare tavă numărătoarea din grupă în grupă (4, 8, 12), pe aceleași dimensiuni. Numele spune grupele („3 grupe cu câte 4 mere”),
+  nu totalul.
 
 Toate apar cu exemple la `#/atelier/vizualuri`. **Desen nou:** `registerVisual('nume', { group, defaults, label, render, viewBox, demos })`
 într-un modul din `site/js/visuals/`; culori doar din variabile `--v-*` (vezi `css/00-tokens.css`), contur

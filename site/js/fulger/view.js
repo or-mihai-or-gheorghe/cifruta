@@ -23,7 +23,8 @@ const CHEERS = { 3: 'Ai prins o serie!', 5: 'Alunele valorează dublu!', 10: 'Tu
 const COMFORT = ['Nu-i nimic!', 'Data viitoare iese!', 'Respiră și continuă!'];
 const STAR_WORDS = ['Prima', 'A doua', 'A treia'];
 
-const spoken = (text) => String(text).replace(/−/g, 'minus');
+/** Calculele pentru cititorul de ecran: „7 × 8” se citește „7 ori 8”, „9 − 4”, „9 minus 4”. */
+const spoken = (text) => String(text).replace(/−/g, 'minus').replace(/×/g, 'ori');
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
 /** Plăcile unei ordonări: numerele (la calcule) sau id-urile plăcuțelor desenate (la grafice). */
 const tilesOf = (q) => q.tiles ?? q.numbers;
@@ -375,7 +376,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     card.replaceChildren(...[body, bolt].filter(Boolean));
     if (!reduced) pop(card, 'is-enter');
 
-    const drawnOption = (spec) => ({ art: spec, name: artName(spec), label: spec.note });
+    const drawnOption = (spec) => ({ art: spec, name: spoken(artName(spec)), label: spec.note });
     const options =
       q.mode === 'figure'
         ? q.choices.map((id) => drawnOption(q.options[id]))
@@ -401,14 +402,14 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     const detailed = q.mode === 'figure' && q.choices.some((id) => q.options[id].v === 'cell-grid');
     // numerele lungi (patru cifre) n-ar încăpea în patru butoane pe un telefon îngust
     const wide = numericOptions(q) && q.choices.some((id) => q.options[id].text.length >= 4);
-    // variantele-calcule („470 + 50 = 520”) stau pe două coloane, cu litera mai mică, ca fiecare să încapă pe un rând
-    const calcs = q.mode === 'figure' && q.choices.every((id) => String(q.options[id].text ?? '').includes(' = '));
+    // variantele-calcule („470 + 50 = 520”, „4 × 5”) stau pe două coloane, cu litera mai mică, ca fiecare să încapă pe un rând
+    const calcs = q.mode === 'figure' && q.choices.every((id) => / [=×] /.test(String(q.options[id].text ?? '')));
     answers.className = `fg-answers fg-answers--${q.mode}${detailed ? ' fg-answers--detailed' : ''}${wide ? ' fg-answers--wide' : ''}${calcs ? ' fg-answers--calcs' : ''}${strip ? ' fg-answers--strip' : ''}`;
     answers.style.setProperty('--n', String(buttons.length));
     answers.setAttribute('aria-busy', 'true');
     answers.replaceChildren(...[strip, ...buttons].filter(Boolean));
     if (!reduced) pop(answers, 'is-enter');
-    const said = promptSpoken(q.prompt);
+    const said = spoken(promptSpoken(q.prompt));
     live.textContent =
       q.mode === 'figure'
         ? `${said}${q.figure ? ` ${artName(q.figure)}.` : ''} Variante: ${options.map((o) => o.name).join('; ')}.`

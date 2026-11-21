@@ -5,7 +5,7 @@ import { existsSync } from 'node:fs';
 import { test } from 'node:test';
 
 import { EMOJI } from '../site/js/visuals/emoji.js';
-import { listVisuals, visualErrors, visualSVG } from '../site/js/visuals/index.js';
+import { listVisuals, visualErrors, visualSVG, visualViewBox } from '../site/js/visuals/index.js';
 import '../site/js/visuals/all.js';
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -75,7 +75,7 @@ test('desenele cu date își verifică parametrii', () => {
 
 test('graficele și grafurile pentru jocuri au text și emoji destul de mari pentru telefon', () => {
   // desenate pe 320 de unități lățime, ca pe telefon să iasă cel puțin 13 px (tests/fulger: FULGER_TEXT măsoară și pe ecran)
-  const groups = new Set(['Grafice pentru jocuri', 'Hărți, rețele și arbori']);
+  const groups = new Set(['Grafice pentru jocuri', 'Hărți, rețele și arbori', 'Desene pentru înmulțire']);
   const drawn = listVisuals().filter((v) => groups.has(v.group));
   assert.ok(drawn.length >= 11, `doar ${drawn.length} desene în grupurile noi`);
   for (const { name, demos } of drawn) {
@@ -86,6 +86,21 @@ test('graficele și grafurile pentru jocuri au text și emoji destul de mari pen
       for (const [, size] of svg.matchAll(/<text[^>]*font-size="([\d.]+)"/g)) assert.ok(Number(size) >= 18, `${where}: text de ${size}`);
       for (const [, w] of svg.matchAll(/<image[^>]*width="([\d.]+)"/g)) assert.ok(Number(w) >= 24, `${where}: emoji de ${w}`);
     }
+  }
+});
+
+test('grupele de la înmulțire: parametrii se verifică, numele spune grupele (nu totalul), iar desenul rezolvat are aceleași dimensiuni', () => {
+  const groups = (p) => ({ v: 'groups', emoji: 'mar', unit: ['măr', 'mere'], ...p });
+  assert.deepEqual(visualErrors(groups({ n: 3, each: 4 })), []);
+  assert.equal(visualErrors(groups({ n: 7, each: 4 })).length, 1);
+  assert.equal(visualErrors(groups({ n: 3, each: 0, emoji: 'nimic', unit: 'mere' })).length, 3);
+  const label = (p) => /aria-label="([^"]*)"/.exec(visualSVG(groups(p)))[1];
+  assert.equal(label({ n: 3, each: 4 }), '3 grupe cu câte 4 mere');
+  assert.equal(label({ n: 1, each: 1 }), '1 grupă cu câte 1 măr');
+  assert.equal(label({ n: 3, each: 4, counts: true }), '3 grupe cu câte 4 mere; din 4 în 4: 4, 8, 12');
+  for (const [n, each] of [[2, 3], [3, 6], [4, 2], [6, 6]]) {
+    assert.equal(visualViewBox(groups({ n, each, counts: true })), visualViewBox(groups({ n, each })), `${n} × ${each}`);
+    assert.equal((visualSVG(groups({ n, each })).match(/<image /g) ?? []).length, n * each, `${n} grupe cu câte ${each}`);
   }
 });
 

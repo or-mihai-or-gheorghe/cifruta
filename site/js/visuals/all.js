@@ -15,3 +15,4 @@ import './avatar.js';
 import './awards.js';
 import './grafice.js';
 import './grafuri.js';
+import './inmultire.js';

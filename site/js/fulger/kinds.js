@@ -9,13 +9,14 @@
 // Comparările și ordonările pot avea și un desen (`drawn: true`, tipurile din kinds-grafice.js): atunci left / right sunt liste de
 // desene, iar ordonarea are plăcuțele în `tiles` (id-uri), desenele lor în `options` și ordinea corectă în `answer`.
 // Fiecare tip poartă conceptele din data/concepts.js pe care le exersează (`concepts`); „fără / cu trecere” se verifică în teste.
-// Un tip nou: o intrare aici (cu figuri: în kinds-forme.js), o linie în `mix`-ul unui nivel al unei teme din data/fulger.js și regulile
-// lui în tests/fulger.test.js (cu figuri: în tests/fulger-forme.rules.js).
+// Un tip nou: o intrare aici (cu figuri: în kinds-forme.js; la înmulțire: în kinds-inmultire.js), o linie în `mix`-ul unui nivel al
+// unei teme din data/fulger.js și regulile lui în tests/fulger.test.js (cu figuri: în tests/fulger-forme.rules.js).
 
 import { trecere } from '../core/rules.js';
 import { calcChoice, compare, sorting } from './intrebari.js';
 import { KINDS_1000 } from './kinds-1000.js';
 import { CALC_1000_KINDS } from './kinds-calcule-1000.js';
+import { INMULTIRE_KINDS } from './kinds-inmultire.js';
 import { CHART_KINDS } from './kinds-grafice.js';
 import { MAP_KINDS } from './kinds-grafuri.js';
 import { SHAPE_KINDS } from './kinds-forme.js';
@@ -298,6 +299,7 @@ export const KINDS = {
   },
   ...KINDS_1000,
   ...CALC_1000_KINDS,
+  ...INMULTIRE_KINDS,
   ...SHAPE_KINDS,
   ...CHART_KINDS,
   ...MAP_KINDS,

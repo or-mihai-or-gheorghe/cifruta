@@ -1,7 +1,7 @@
 # Curriculum — harta conceptelor
 
 > Documentul de referință pentru **ce** exersăm în Cifruța. ID-urile de concepte din acest fișier sunt aceleași ca în
-> `site/data/concepts.js` și în câmpul `concepts: [...]` al fiecărui exercițiu. Actualizat: 11 septembrie 2026.
+> `site/data/concepts.js` și în câmpul `concepts: [...]` al fiecărui exercițiu. Actualizat: 21 noiembrie 2026.
 
 ## Scop
 
@@ -105,7 +105,11 @@ Ce altă documentare am folosit (exemple de exerciții, aplicații, UX): `docs/c
 | Adunarea și scăderea în scris, pe coloane: transportul, împrumutul, împrumutul peste zero | II | 📘📜 | `mat.op1000.in-scris` |
 | Calcul în minte până la 1000: pe ordine (200 + 80 + 13), în salturi pe axă, cu numere rotunde (398 + 145 = 400 + 145 − 2) | II | 📘➕ | `mat.op1000.strategii` |
 | Estimarea rezultatului prin rotunjire la sute, ca verificare (programa, 1.3) | II | 📜➕ | `mat.op1000.estimare` |
-| Înmulțirea și împărțirea (adunare / scădere repetată) | II | 📜 | `mat.op.inmultire`, `mat.op.impartire` |
+| Înmulțirea ca adunare repetată, grupe egale | II | 📜 | `mat.op.inmultire` |
+| Tabla înmulțirii (factori de o cifră) | II | 📜 | `mat.op.tabla-inmultirii` |
+| Aflarea factorului necunoscut (? × 6 = 42), pregătirea împărțirii | II | ➕ | `mat.op.factor-necunoscut` |
+| Înmulțirea cu un număr de două cifre, până la 1000 (6 × 47); în calcul mental: × 10, × 11, zeci rotunde (12 × 20, 20 × 30) — în programă: clasa a III-a; doar în Jocuri fulger, tema „Înmulțirea” (până la 200 la Intermediar, până la 1000 la Avansat) | II | ➕ | `mat.op1000.inmultire`, `mat.op1000.inmultire-strategii` |
+| Împărțirea (scădere repetată, împărțirea în părți egale) | II | 📜 | `mat.op.impartire` |
 
 ### 3. Rezolvarea problemelor
 

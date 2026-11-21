@@ -931,6 +931,7 @@ def fulger_screens(run: Run, browser, base: str):
         ("harti-arbori", ("drum-compara", "linie-ordine", "arbore-clasificare", "turneu", "drum-scurt", "veverita-drum", "veverita-bogat", "arbore-alegeri")),
         ("numere-1000", ("sort-4-1000-dir", "cmp-expr-1000", "add-3op-1000", "nr-litere", "nr-numaratoare", "sir-1000")),
         (CALC_1000_TOPIC, ("add-3op-1000-cu", "cmp-fara-calcul-1000", "cifra-lipsa-1000", "calcul-gresit-1000", "nr-regrupat", "estimare-sute", "pana-la-1000")),
+        ("inmultirea", ("cmp-inm-1000", "inm-factor-lipsa-mare", "inm-adunare-repetata", "inm-grupe", "inm-1x2-500", "inm-11")),
     ]
     for name, opts, min_text in screens:
         context = browser.new_context(locale="ro-RO", **opts)

@@ -51,6 +51,18 @@ export const SHAPES = {
   place: [0, 1, 10, 100],
 };
 
+/** Un rând al tablei înmulțirii: patru multipli la rând ai unui factor (deplasările față de cel mai mic). */
+export const row = (step) => [0, step, 2 * step, 3 * step];
+
+/**
+ * Variantele unei forme cu răspunsul pe locul `slot`, dacă toate stau între `min` și `max`; altfel null. La înmulțire, locul se alege
+ * înaintea calculului, iar generatorul caută un calcul care încape cu răspunsul acolo (locul nu se vede nici din formă, nici din calcul).
+ */
+export function placeAt(answer, shape, slot, { min = 0, max = Infinity } = {}) {
+  const values = shape.map((d) => answer - shape[slot] + d);
+  return values[0] >= min && values.at(-1) <= max ? values : null;
+}
+
 /**
  * Patru variante într-o formă fixă, cu răspunsul pe un loc al formei ales la întâmplare dintre cele care țin toate variantele între
  * `min` și `max`. Locul răspunsului nu se vede din formă: un copil care alege după tipar (mijlocul a trei numere egal depărtate, mai

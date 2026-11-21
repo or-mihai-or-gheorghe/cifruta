@@ -212,3 +212,23 @@ export const VENN_SETS = [
   { id: 'sport', verb: 'fac', a: { emoji: 'fotbal', name: 'fotbal' }, b: { emoji: 'inot', name: 'înot' } },
   { id: 'desert', verb: 'au ales', a: { emoji: 'inghetata', name: 'înghețată' }, b: { emoji: 'prajitura', name: 'prăjitură' } },
 ];
+
+/**
+ * Obiecte numărate în grupe egale (tema „Înmulțirea”): emoji, singularul și pluralul (unitatea desenului `groups`), genul pentru
+ * „Câte / Câți”. Doar emoji-uri cu un singur obiect: cireșele sau strugurii s-ar număra greșit.
+ */
+export const GROUP_ITEMS = [
+  { emoji: 'mar', sg: 'măr', name: 'mere', f: true },
+  { emoji: 'para', sg: 'pară', name: 'pere', f: true },
+  { emoji: 'portocala', sg: 'portocală', name: 'portocale', f: true },
+  { emoji: 'lamaie', sg: 'lămâie', name: 'lămâi', f: true },
+  { emoji: 'banana', sg: 'banană', name: 'banane', f: true },
+  { emoji: 'ou', sg: 'ou', name: 'ouă', f: true },
+  { emoji: 'stea', sg: 'stea', name: 'stele', f: true },
+  { emoji: 'balon', sg: 'balon', name: 'baloane', f: true },
+  { emoji: 'lalea', sg: 'lalea', name: 'lalele', f: true },
+  { emoji: 'creion', sg: 'creion', name: 'creioane', f: true },
+  { emoji: 'castana', sg: 'castană', name: 'castane', f: true },
+  { emoji: 'peste', sg: 'pește', name: 'pești', f: false },
+  { emoji: 'biscuit', sg: 'biscuit', name: 'biscuiți', f: false },
+];

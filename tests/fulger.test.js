@@ -20,6 +20,7 @@ import { EMOJI } from '../site/js/visuals/emoji.js';
 import { visualErrors, visualSVG } from '../site/js/visuals/index.js';
 import { calcOptions, RULES_1000 } from './fulger-1000.rules.js';
 import { CALC_1000_RULES } from './fulger-calcule-1000.rules.js';
+import { INMULTIRE_RULES } from './fulger-inmultire.rules.js';
 import { SHAPE_RULES } from './fulger-forme.rules.js';
 import { CHART_RULES } from './fulger-grafice.rules.js';
 import { MAP_RULES } from './fulger-grafuri.rules.js';
@@ -64,6 +65,7 @@ const RULES = {
   'sort-4-dir': ({ numbers }) => numbers.length === 4 && numbers.every((x) => inRange(x, 0, 100)),
   ...RULES_1000, // numerele până la 1000: tests/fulger-1000.rules.js
   ...CALC_1000_RULES, // adunările și scăderile până la 1000, cu trecere: tests/fulger-calcule-1000.rules.js
+  ...INMULTIRE_RULES, // înmulțirile: tests/fulger-inmultire.rules.js
   ...SHAPE_RULES, // tipurile cu figuri: regulile sunt în tests/fulger-forme.rules.js
   ...CHART_RULES, // tipurile cu grafice: tests/fulger-grafice.rules.js
   ...MAP_RULES, // hărțile, rețelele și arborii: tests/fulger-grafuri.rules.js
@@ -154,8 +156,11 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
         assert.ok(q.choices.includes(q.answer) && q.choices.every((c) => Number.isInteger(c) && c >= 0), where);
         assert.deepEqual(q.choices, [...q.choices].sort((a, b) => a - b), where);
         positions[q.choices.indexOf(q.answer)]++;
-        carry[carries(q.text) ? 'cu' : 'fara']++;
-        carry.max = Math.max(carry.max, ...terms(q.text), q.answer);
+        // trecerea peste ordin privește adunările și scăderile: la înmulțiri nu se numără, deci tipurile lor n-au etichete de trecere
+        if (/[+−]/.test(q.text)) {
+          carry[carries(q.text) ? 'cu' : 'fara']++;
+          carry.max = Math.max(carry.max, ...terms(q.text), q.answer);
+        }
       } else if (q.mode === 'compare') {
         if (q.figure) {
           // pe desen: laturile sunt liste de desene cu nume diferite; relația o verifică regula tipului
@@ -196,9 +201,9 @@ test('fulger: fiecare tip generează întrebări corecte, în limitele lui, cu c
   }
 });
 
-test('fulger: regulile graficelor, ale grafurilor și ale calculelor cu trecere pe încă 2500 de semințe (ramurile rare)', () => {
+test('fulger: regulile graficelor, ale grafurilor, ale calculelor cu trecere și ale înmulțirilor pe încă 2500 de semințe (ramurile rare)', () => {
   // ramurile rare scapă din 500 de semințe: „cu 5 mai mult”, într-o lună de mai, se citea ca data „5 mai” (1 întrebare din 1000)
-  for (const id of Object.keys({ ...CHART_RULES, ...MAP_RULES, ...CALC_1000_RULES })) {
+  for (const id of Object.keys({ ...CHART_RULES, ...MAP_RULES, ...CALC_1000_RULES, ...INMULTIRE_RULES })) {
     for (let seed = SEEDS + 1; seed <= 3000; seed++) {
       const q = KINDS[id].generate(seededRandom(seed));
       assert.ok(RULES[id](q), `${id} (sămânța ${seed}) încalcă regulile tipului: ${JSON.stringify(q)}`);
@@ -228,14 +233,18 @@ function patternPick(q) {
   return texts ? (q.choices.find((c, i) => absurd(texts[i])) ?? null) : null;
 }
 
-/** Șansa unui copil care scoate întâi variantele absurde (o sumă cel mult cât un termen, o diferență cel puțin cât descăzutul), apoi
- * alege după tipar printre celelalte. */
+/** Factorii unei înmulțiri („7 × 8”), sau null la adunări și scăderi. */
+const factorsOf = (text) => (String(text ?? '').includes(' × ') ? text.split(' × ').map(Number) : null);
+
+/** Șansa unui copil care scoate întâi variantele absurde (o sumă cel mult cât un termen, o diferență cel puțin cât descăzutul, un
+ * produs cel mult cât factorul mai mare), apoi alege după tipar printre celelalte. */
 function magnitudeOdds(q) {
   let pool = q;
   if (q.mode === 'choice') {
     const nums = terms(q.text);
     const minus = q.text.includes('−');
-    const ok = q.choices.filter((c) => (minus ? c < nums[0] : c > Math.max(...nums)));
+    const f = factorsOf(q.text);
+    const ok = q.choices.filter((c) => (f ? c > Math.max(...f) : minus ? c < nums[0] : c > Math.max(...nums)));
     if (ok.length) pool = { ...q, choices: ok };
   }
   const pick = patternPick(pool);
@@ -253,7 +262,7 @@ const ONE_DIGIT = ['add-1c', 'add-1c-2c', 'sub-20-fara', 'sub-20-cu', 'add-3op-1
 
 test('fulger: la temele cu calcule, forma variantelor nu arată răspunsul (ghicitorii pe tipare, pe mărimi și pe unități)', () => {
   // temele cu desene au câteva tipuri cu sume (arbori, bare, drumuri) la 33–47%: backlog
-  const calcTopics = ['adunari-scaderi-100', 'numere-1000', 'adunari-scaderi-1000'].map(topicConfig);
+  const calcTopics = ['adunari-scaderi-100', 'numere-1000', 'adunari-scaderi-1000', 'inmultirea'].map(topicConfig);
   const kinds = [...new Set(calcTopics.flatMap((t) => t.levels.flatMap((l) => l.mix.map((m) => m.kind))))].filter((k) => !['compare', 'sort'].includes(KINDS[k].mode));
   const SEEDS_GUESS = 2000;
   for (const id of kinds) {
@@ -266,8 +275,10 @@ test('fulger: la temele cu calcule, forma variantelor nu arată răspunsul (ghic
       const pick = patternPick(q);
       hits += pick === null ? 1 / q.choices.length : pick === q.answer ? 1 : 0;
       magnitude += magnitudeOdds(q);
-      // la calculele cu trecere, cu mai multe cifre: unitățile singure nu trebuie să dea răspunsul (trecerea decide)
-      if (q.mode === 'choice' && q.answer >= 20 && !ONE_DIGIT.includes(id) && carriesOf(q.text)) {
+      // la calculele cu trecere, cu mai multe cifre: unitățile singure nu trebuie să dea răspunsul (trecerea decide); la înmulțirea cu
+      // un factor de două cifre, cifra unităților produsului se află dintr-o privire (6 × 47 → 2), deci nici ea
+      const shortcut = factorsOf(q.text) ? factorsOf(q.text).some((x) => x >= 10) : q.mode === 'choice' && carriesOf(q.text);
+      if (q.mode === 'choice' && q.answer >= 20 && !ONE_DIGIT.includes(id) && shortcut) {
         units += unitsOdds(q);
         carries++;
       }

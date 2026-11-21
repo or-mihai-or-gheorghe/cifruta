@@ -38,13 +38,15 @@ site/                      ← publicat
                            avatar (desenul și accesoriile) · avatar-animals (cele 24 de animale) · avatar-parts (blănuri, ochi, umeri)
                            grafice (bare, linii, pictograme, tabel, cerc, Venn) · grafuri (hartă, rețea, turneu, arbore): desenele jocurilor
                            calcule (column-op: un calcul în scris desenat, eventual greșit sau cu o cifră lipsă „?”)
+                           inmultire (groups: grupe egale de obiecte pe tăvi, cu numărătoarea în desenul rezolvat)
   js/fulger/               Jocuri fulger (jocuri pe viteză, pe teme, #/fulger): kinds (calcule până la 100), kinds-1000 (numerele până
-                           la 1000), kinds-calcule-1000 (adunări și scăderi până la 1000, cu trecere), kinds-forme (figuri),
-                           kinds-grafice și kinds-grafuri (grafice, hărți, arbori), generate cu
-                           sămânță, cu concepte · intrebari (formele întrebărilor: calcule și desene) · contexte (unități, nume, zile,
-                           date) · rand · art (desenul și numele unei variante, cerința cu
-                           emoji) · engine (temele, runda și punctajul, pur) · records (chei „temă:nivel”, datele vechi) · medals
-                           (medaliile: catalogul, cele câștigate, cele ale unei runde; pur) · view (arena) · effects (particule, bannere);
+                           la 1000), kinds-calcule-1000 (adunări și scăderi până la 1000, cu trecere), kinds-inmultire (tabla,
+                           o cifră × două cifre, × 10, × 11, zeci rotunde), kinds-forme (figuri), kinds-grafice și kinds-grafuri
+                           (grafice, hărți, arbori), generate cu sămânță, cu concepte · intrebari (formele întrebărilor: calcule și
+                           desene) · contexte (unități, nume, zile, date, obiectele grupelor) · rand · art (desenul și numele unei
+                           variante, cerința cu emoji) · engine (temele, runda și punctajul, pur) · records (chei „temă:nivel”,
+                           datele vechi) · medals (medaliile: catalogul, cele câștigate, cele ale unei runde; pur) · view (arena) ·
+                           effects (particule, bannere);
                            pagina e pages/fulger.js
   data/catalog.js          secțiuni → grupuri → teste · concepts.js (ID-uri de concepte) · scoring.js · demo.js · fulger.js (jocul)
   data/tests/<grup>/tN-nume.js   testele (NU le numi test-*.js)
@@ -98,7 +100,13 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   - O întrebare `figure` **fără desen** (doar cerință și patru variante) e bună pentru șiruri, rotunjire sau numere scrise cu
     litere: cu variante numerice, cerința se scrie mai mare, iar cele de patru cifre trec pe două coloane pe ecranele înguste
     (`numericOptions` din `js/fulger/view.js`: altfel, variantele-nume ale pictogramei ar trece și ele pe două coloane).
-  - Eticheta „fără / cu trecere” are câte o pereche pentru 0–100 (`mat.op.*`) și pentru 0–1000 (`mat.op1000.*`).
+  - Eticheta „fără / cu trecere” are câte o pereche pentru 0–100 (`mat.op.*`) și pentru 0–1000 (`mat.op1000.*`) și privește doar
+    adunările și scăderile: tipurile cu × n-o poartă (testul o cere).
+  - **Înmulțirea** (`kinds-inmultire.js`): `calcChoice` nu merge (formele lui știu doar + și −). Locul răspunsului se alege întâi,
+    apoi un calcul a cărui formă încape cu răspunsul acolo (`placeAt`, `row` din `rand.js`), iar `shapedChoice` face întrebarea:
+    un rând al tablei la tablă, `SHAPES.tens` (aceleași unități) la o cifră × două cifre și la × 11, rândul factorului rotund la zeci
+    rotunde. Ghicitorii din test știu ×: o variantă cel mult cât factorul mai mare e absurdă, iar cu un factor de două cifre, cifra
+    unităților produsului e o scurtătură. `spoken` din `view.js` citește × ca „ori”.
   - `numberQuestion` primește mereu `ask` (fără el rămâne `ask: undefined`, iar verificarea după JSON pică), iar `solved` stă doar la
     întrebările cu desen (E2E caută desenul rezolvat). Variantele-calcule („470 + 50 = 520”, texte în `figureQuestion`) stau pe două
     coloane (`fg-answers--calcs`).

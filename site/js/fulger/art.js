@@ -7,6 +7,7 @@ import { EMOJI, emojiHTML } from '../visuals/emoji.js';
 import '../visuals/forme.js';
 import '../visuals/grafice.js';
 import '../visuals/grafuri.js';
+import '../visuals/inmultire.js';
 import { visualLabel, visualSVG, visualViewBox } from '../visuals/index.js';
 
 const TOKEN = /\{\{e:([a-z0-9]+)\}\}/g;
@@ -24,8 +25,8 @@ export const promptSpoken = (text) => String(text ?? '').replace(TOKEN, (_, name
 /** Lungimea vizibilă a cerinței: un emoji ocupă cam cât două litere. */
 export const promptLength = (text) => String(text ?? '').replace(TOKEN, 'ee').length;
 
-/** Desenele de date (grafice, hărți, rețele, arbori): se văd mai mari în arenă și la „Greșelile tale”. */
-export const isChart = (spec) => /^(chart-|metro$|network$|bracket$|tree$|venn$)/.test(spec?.v ?? '');
+/** Desenele de date (grafice, hărți, rețele, arbori, grupele de la înmulțire): se văd mai mari în arenă și la „Greșelile tale”. */
+export const isChart = (spec) => /^(chart-|metro$|network$|bracket$|tree$|venn$|groups$)/.test(spec?.v ?? '');
 
 export function artHTML(spec) {
   if (spec?.v) return visualSVG(spec);

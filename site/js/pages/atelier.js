@@ -122,7 +122,7 @@ function fulgerReview() {
   function answerRow(q) {
     if (q.mode === 'figure') {
       // variantele-calcule („470 + 50 = 520”) stau pe două coloane, ca în arenă
-      const calcs = q.choices.every((c) => String(q.options[c].text ?? '').includes(' = '));
+      const calcs = q.choices.every((c) => / [=×] /.test(String(q.options[c].text ?? '')));
       return h('div', { class: `fg-review__opts${calcs ? ' fg-review__opts--calcs' : ''}` }, q.choices.map((c) => h('span', { class: `fg-review__opt${c === q.answer ? ' is-answer' : ''}` }, art(q.options[c], 'fg-review__art'))));
     }
     const items =
