@@ -1068,6 +1068,37 @@
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
 
+- **2026-11-21 (Recenzia împărțirii, a termenului necunoscut și a fracțiilor, înainte de publicare)**
+  - **Cine:** un agent fără istoricul conversației, la cererea utilizatorului, după verificări (npm test 160/160, reguli 16/16, E2E complet
+    3566/3566, E2E cont 81/81). Fiecare problemă a venit cu o dovadă (semințe, Playwright); 6 erori, 3 riscuri, câteva mărunțișuri, toate
+    reparate.
+  - **Fracțiile din joc își arătau răspunsul prin forma variantelor:**
+    - fiecare greșeală schimba o singură parte a răspunsului, deci varianta cu numărătorul și numitorul cele mai „împărțite” cu celelalte
+      era răspunsul (96% la „Ce fracție e colorată?”, 48% la fracțiile egale);
+    - la „2/3 din 12”, multiplul numărătorului dintre patru numere la rând era răspunsul (68%);
+    - ghicitorul pe tipare din test nu vedea nimic din toate acestea (dădea mereu 25%).
+    - Acum: variantele stau „în pătrat” ({n, n′} × {d, d′}), la amplificare toate se simplifică la fel, iar la „2/3 din 12” sunt multipli
+      ai numărătorului; jumătatea (care nu intră într-un pătrat) are seturi alese. Un test nou pune trei ghicitori (părțile împărțite,
+      simplificarea, multiplul): toate sub 25%.
+  - **„Bravo!” arăta „.:”** după citirile-propoziție ale widgeturilor noi: punctul se scoate înaintea calculului.
+  - **Alegerile:**
+    - cea de la balanță („□ + 9 = 13”) arăta balanța provocării dinainte, iar indiciul nu se putea face pe ea: are acum `start` cu
+      ecuația ei (la fel, mașina, cu „× 7”);
+    - trei alegeri de la împărțire arătau răspunsul pe farfurii chiar de la pornire: pornesc acum de la o farfurie (`by: 1`).
+  - **Desenele cu fracții ca variante** erau mici pe telefon (bare de 56 × 21 px, felii de 6–7 px): stau pe două coloane la orice
+    înălțime (140 × 53 px).
+  - **`lessonErrors`** verifică și `start` cu `check`-ul widgetului.
+  - **`fr-unde`** avea cheia legată de ordinea variantelor, deci repeta întrebări în fereastra de 12: cheia e acum independentă de ordine.
+  - **Mărunțișuri:**
+    - acordurile („rămâne 1”, „o nucă în sac e prea puțin”);
+    - „:” cu spații nedespărțite, citit „împărțit la”;
+    - animația împărțirii nu se mai reia fără schimbare;
+    - un comentariu mutat, o înlocuire fără efect scoasă, textul temei fracțiilor;
+    - testul „temă în curând” folosește acum o temă închipuită, ca să nu se mai sară.
+  - **Rezultate după reparații:** npm test 161/161; E2E lecții și jocuri pe toate ecranele 1699/1699.
+  - **Lecție:** un ghicitor generic (tipare de numere) nu vede scurtăturile unui conținut nou; la fiecare temă nouă, întrebarea e „ce ar
+    vedea un copil care nu socotește, dar se uită la variante?”, iar ghicitorul se scrie pentru ea.
+
 - **2026-11-21 (Fracțiile în Jocuri fulger, v0.25.0)**
   - **Tema nouă `fractii`**, cu 9 tipuri, toate desenate (cardurile arată desene):
     - jumătatea și sfertul pe desen (cerc, bară, pătrat), desenul jumătății sau al sfertului și jumătatea sau sfertul unui număr;

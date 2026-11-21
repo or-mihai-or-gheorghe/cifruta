@@ -189,6 +189,8 @@ test('învață: lessonErrors prinde provocările care nu merg', () => {
   assert.equal(errs([{ id: 'a', ask: 'x', start: { rows: 2 }, want: { rows: 5, cols: 4 } }]), '');
   assert.match(errs([{ id: 'a', ask: 'x', start: { culoare: 2 }, want: { rows: 5 } }]), /câmpuri pe care widgetul nu le știe \(culoare\)/);
   assert.match(errs([{ id: 'a', ask: 'x', start: { rows: 5, cols: 5 }, want: { rows: 5, cols: 5 } }]), /deja rezolvată/);
+  // `start` trece și prin verificarea parametrilor widgetului (aici, 11 rânduri pe un careu de 10)
+  assert.match(errs([{ id: 'a', ask: 'x', start: { rows: 11 }, want: { rows: 5 } }]), /„start” nu e bun/);
   // `collect` își numără soluțiile din starea pusă de `start`
   assert.equal(errs([{ id: 'a', ask: 'x', start: { rows: 2 }, collect: { product: 12 }, by: ['rows', 'cols'], need: 3 }]), '');
 });
@@ -365,6 +367,10 @@ test('învață: împărțirea — farfuriile, pungile și pachetele de bețișo
   assert.equal(nbsp(W.texts({ mode: 'parti', total: 12 }, { total: 12, by: 3 }).equation), '12 : 3 = 4');
   assert.equal(nbsp(W.texts({ mode: 'parti', total: 12 }, { total: 12, by: 3 }).extra), 'Proba: 3 × 4 = 12.');
   assert.equal(nbsp(W.texts({ mode: 'parti', total: 12 }, { total: 12, by: 5 }).equation), '12 : 5 = 2 și rămân 2');
+  // la o singură nucă rămasă, verbul și numele sunt la singular
+  assert.equal(nbsp(W.texts({ mode: 'parti', total: 15 }, { total: 15, by: 2 }).equation), '15 : 2 = 7 și rămâne 1');
+  assert.match(W.texts({ mode: 'parti', total: 15 }, { total: 15, by: 2 }).reading, /iar în coș rămâne o nucă$/);
+  assert.match(W.texts({ mode: 'parti', total: 69, zeci: true }, { total: 69, by: 2 }).reading, /rămâne un bețișor$/);
   // rezultatul ascuns nu apare nici în calcul, nici în citire, nici în legendă
   const hidden = W.texts({ mode: 'parti', total: 18 }, { total: 18, by: 6 }, ['each']);
   assert.equal(nbsp(hidden.equation), '18 : 6 = ?');
@@ -408,6 +414,7 @@ test('învață: balanța — ghicitul înclină balanța, iar luatul din ambele
   // prea puține nuci în sac: talerul cu sacul (stânga) e mai ușor, deci coboară dreapta
   assert.ok(W.tilt(p, at(5)) > 0 && W.tilt(p, at(10)) < 0 && W.tilt(p, at(8)) === 0);
   assert.equal(nbsp(W.texts(p, at(5)).equation), '5 + 7 < 15');
+  assert.equal(W.texts(p, at(1)).reading, 'Balanța coboară în dreapta: o nucă în sac e prea puțin.');
   assert.equal(nbsp(W.texts(p, at(8)).equation), '8 + 7 = 15');
   assert.deepEqual(W.derive(p, at(8)), { guess: 8, taken: 0, balanced: true, alone: false, bag: 8 });
   // luatul din ambele talere: ecuația se micșorează, balanța rămâne dreaptă

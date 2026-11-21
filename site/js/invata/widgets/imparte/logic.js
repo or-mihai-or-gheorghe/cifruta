@@ -24,6 +24,8 @@ const pungi = (n) => cantitate(n, 'pungă', 'pungi');
 const betisoare = (n) => cantitate(n, 'bețișor', 'bețișoare');
 const pachete = (n) => cantitate(n, 'pachet', 'pachete');
 const deOri = (n) => (n === 1 ? 'o dată' : `de ${cantitate(n, 'dată', 'ori')}`);
+/** „rămân 2”, dar „rămâne 1”. */
+const remain = (n) => (n === 1 ? 'rămâne 1' : `rămân ${n}`);
 /** O împărțire scrisă pe un rând: „12 : 3 = 4” (spații nedespărțite). */
 const division = (a, b, q) => `${a}${NBSP}:${NBSP}${b}${NBSP}=${NBSP}${q}`;
 
@@ -97,7 +99,7 @@ export default {
     if (p.mode === 'grupe') {
       const hide = hidden.includes('bags');
       const bags = hide ? '?' : d.bags;
-      out.equation = d.exact || hide ? division(d.total, d.size, bags) : `${division(d.total, d.size, d.bags)} și rămân ${d.left}`;
+      out.equation = d.exact || hide ? division(d.total, d.size, bags) : `${division(d.total, d.size, d.bags)} și ${remain(d.left)}`;
       out.reading = hide
         ? `${nuci(d.total)}, câte ${d.size} într-o pungă`
         : `${nuci(d.total)}, câte ${d.size} într-o pungă: ${pungi(d.bags)}${d.left ? `, iar ${d.left === 1 ? 'o nucă rămâne' : `${nuci(d.left)} rămân`} în coș` : ''}`;
@@ -107,17 +109,18 @@ export default {
         out.sum =
           d.bags <= 6
             ? `${[d.total, ...Array(d.bags).fill(d.size)].join(`${NBSP}−${NBSP}`)}${NBSP}=${NBSP}${d.left}`
-            : `Din ${d.total} scazi ${d.size} ${deOri(d.bags)} și rămân ${d.left}.`;
+            : `Din ${d.total} scazi ${d.size} ${deOri(d.bags)} și ${remain(d.left)}.`;
       }
       if (d.exact && !hide) out.extra = `Proba: ${times(...factorsOf(d.bags, d.size))}${NBSP}=${NBSP}${d.total}.`;
     } else {
       const hide = hidden.includes('each');
       const each = hide ? '?' : d.each;
-      out.equation = d.exact || hide ? division(d.total, d.plates, each) : `${division(d.total, d.plates, d.each)} și rămân ${d.left}`;
+      out.equation = d.exact || hide ? division(d.total, d.plates, each) : `${division(d.total, d.plates, d.each)} și ${remain(d.left)}`;
       const what = isZeci(p) ? betisoare(d.total) : nuci(d.total);
       // la bețișoare, doar ce primește farfuria: „2 pachete și 8 bețișoare”, „9 bețișoare”, „2 pachete”
       const share = isZeci(p) ? [d.tens && pachete(d.tens), d.units && betisoare(d.units)].filter(Boolean).join(' și ') || 'nimic' : nuci(d.each);
-      const leftover = d.left ? `, iar în coș rămân ${isZeci(p) ? betisoare(d.left) : nuci(d.left)}` : '';
+      const one = isZeci(p) ? 'un bețișor' : 'o nucă';
+      const leftover = d.left ? `, iar în coș ${d.left === 1 ? `rămâne ${one}` : `rămân ${isZeci(p) ? betisoare(d.left) : nuci(d.left)}`}` : '';
       out.reading = hide ? `${what} pe ${farfurii(d.plates)}` : `${what} pe ${farfurii(d.plates)}: câte ${share} pe fiecare${leftover}`;
       out.legend = [['rows', farfurii(d.plates)], ...(hide ? [] : [['', ', '], ['cols', `câte ${d.each} pe fiecare`]])];
       if (isZeci(p) && d.broken) {

@@ -344,6 +344,47 @@ test('fulger: la temele cu calcule, forma variantelor nu arată răspunsul (ghic
   }
 });
 
+/** Numărătorul și numitorul unei variante: fracția scrisă (`frac`) sau desenul (colorate / bucăți); null la altele. */
+const fractionParts = (o) => (o.frac ? o.frac.split('/').map(Number) : o.v === 'fraction' ? [o.on.length, o.parts] : null);
+const gcdOf = (a, b) => (b ? gcdOf(b, a % b) : a);
+/** Șansa de a nimeri alegând la întâmplare printre candidați (fără candidați: o dată din patru). */
+const among = (q, candidates) => (candidates.length ? (candidates.includes(q.answer) ? 1 / candidates.length : 0) : 1 / q.choices.length);
+
+test('fulger: la fracții, nici forma variantelor nu arată răspunsul (ghicitorii pe părțile împărțite, pe simplificare și pe multipli)', () => {
+  const kinds = [...new Set(topicConfig('fractii').levels.flatMap((l) => l.mix.map((m) => m.kind)))];
+  const SEEDS_GUESS = 2000;
+  for (const id of kinds) {
+    let shared = 0;
+    let reducible = 0;
+    let multiple = 0;
+    let multiples = 0;
+    for (let seed = 1; seed <= SEEDS_GUESS; seed++) {
+      const q = KINDS[id].generate(seededRandom(seed));
+      const parts = q.choices.map((c) => fractionParts(q.options[c]));
+      if (parts.every(Boolean)) {
+        // varianta al cărei numărător și numitor apar cel mai des la celelalte (o greșeală pe rând față de răspuns le-ar da pe toate)
+        const score = parts.map(([n, d], i) => parts.filter(([m], j) => j !== i && m === n).length + parts.filter(([, e], j) => j !== i && e === d).length);
+        const best = Math.max(...score);
+        shared += among(q, q.choices.filter((c, i) => score[i] === best));
+        // la fracțiile egale: varianta care se simplifică (forma amplificată a fracției date)
+        reducible += among(q, q.choices.filter((c, i) => gcdOf(...parts[i]) > 1));
+      } else {
+        shared += 1 / q.choices.length;
+        reducible += 1 / q.choices.length;
+      }
+      // la „2/3 din 12”: multiplul numărătorului dintre variante
+      const m = /\{\{f:(\d+)\//.exec(q.prompt ?? '');
+      if (m && Number(m[1]) >= 2 && q.choices.every((c) => q.options[c].text !== undefined)) {
+        multiples++;
+        multiple += among(q, q.choices.filter((c) => Number(q.options[c].text) % Number(m[1]) === 0));
+      }
+    }
+    assert.ok(shared / SEEDS_GUESS <= 0.32, `${id}: părțile împărțite cu celelalte variante arată răspunsul în ${Math.round((100 * shared) / SEEDS_GUESS)}% din întrebări`);
+    if (id === 'fr-egale') assert.ok(reducible / SEEDS_GUESS <= 0.32, `${id}: varianta care se simplifică e răspunsul în ${Math.round((100 * reducible) / SEEDS_GUESS)}%`);
+    if (multiples) assert.ok(multiple / multiples <= 0.32, `${id}: multiplul numărătorului e răspunsul în ${Math.round((100 * multiple) / multiples)}%`);
+  }
+});
+
 test('fulger: alunele cresc cu viteza (doar în serie) și cu seria', () => {
   const alune = (kind, ms, streak) => scoreAnswer({ kind, ms, streak }).alune;
   assert.equal(alune('add-1c', 500, 1), 1); // primul răspuns din serie: fără bonus de viteză
@@ -403,9 +444,13 @@ test('fulger: runda e deterministă, începe cu încălzirea și nu repetă înt
   }
   assert.throws(() => createRound({ topic: LEGACY_TOPIC, level: 'nu-exista' }));
   assert.throws(() => createRound({ topic: 'nu-exista', level: 'usor' }));
-  // o temă „în curând” nu se joacă (azi nu mai e niciuna: atunci, doar o temă care nu există, mai sus)
-  const soon = config.topics.find((t) => t.soon);
-  if (soon) assert.throws(() => createRound({ topic: soon.id, level: 'usor' }), 'o temă „în curând” nu se joacă');
+  // o temă „în curând” nu se joacă (azi nu mai e niciuna în date: una închipuită, scoasă la loc după verificare)
+  config.topics.push({ id: 'tema-viitoare', title: 'Viitoare', short: 'Viitoare', text: 'În curând.', grade: 2, concepts: ['mat.op.impartire'], soon: true });
+  try {
+    assert.throws(() => createRound({ topic: 'tema-viitoare', level: 'usor' }), 'o temă „în curând” nu se joacă');
+  } finally {
+    config.topics.pop();
+  }
 });
 
 test('fulger: rezumatul adună alunele, seria cea mai lungă și bonusul de precizie', () => {

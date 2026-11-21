@@ -269,7 +269,7 @@ export default {
             { id: 'pe-trei', ask: 'Împarte cele 12 nuci pe 3 farfurii.', want: { plates: 3 } },
             { id: 'fara-rest', ask: 'Găsește 4 feluri în care nu rămâne nimic în coș.', collect: { exact: true }, by: ['plates'], need: 4 },
             { id: 'cincisprezece', ask: 'Acum sunt 15 nuci. Împarte-le pe 5 farfurii.', start: { total: 15 }, want: { plates: 5 } },
-            { id: 'cat-primeste', ask: '18 nuci pe 6 farfurii: câte primește fiecare?', start: { total: 18 }, pick: [2, 3, 12], rule: 'cat', of: [18, 6], hide: ['each'], hint: 'Încă nu. Pune 6 farfurii și numără nucile de pe una.' },
+            { id: 'cat-primeste', ask: '18 nuci pe 6 farfurii: câte primește fiecare?', start: { total: 18, by: 1 }, pick: [2, 3, 12], rule: 'cat', of: [18, 6], hide: ['each'], hint: 'Încă nu. Pune 6 farfurii și numără nucile de pe una.' },
           ],
           notes: [
             'Împărțirea în părți egale: 12 : 3 = 4, adică 12 împărțit în 3 părți egale, câte 4 în fiecare.',
@@ -289,7 +289,7 @@ export default {
             { id: 'cate-trei', ask: 'Pune câte 3 nuci într-o pungă. Câte pungi umpli?', want: { size: 3 } },
             { id: 'douazeci', ask: 'Acum sunt 20 de nuci. Pune câte 5 într-o pungă.', start: { total: 20 }, want: { size: 5 } },
             { id: 'fara-rest', ask: 'Găsește 3 mărimi de pungă fără nuci rămase.', collect: { exact: true }, by: ['size'], need: 3 },
-            { id: 'pungi-24', ask: '24 de nuci, câte 6 într-o pungă: câte pungi?', start: { total: 24 }, pick: [4, 6, 18], rule: 'cat', of: [24, 6], hide: ['bags'], hint: 'Încă nu. Pune câte 6 într-o pungă și numără pungile.' },
+            { id: 'pungi-24', ask: '24 de nuci, câte 6 într-o pungă: câte pungi?', start: { total: 24, by: 1 }, pick: [4, 6, 18], rule: 'cat', of: [24, 6], hide: ['bags'], hint: 'Încă nu. Pune câte 6 într-o pungă și numără pungile.' },
           ],
           notes: [
             'Împărțirea prin cuprindere: 12 : 3 = 4 înseamnă că 3 încape de 4 ori în 12.',
@@ -328,7 +328,7 @@ export default {
             { id: 'pe-patru', ask: 'Împarte 84 de bețișoare pe 4 farfurii.', want: { plates: 4 } },
             { id: 'pe-doua', ask: 'Acum împarte cele 84 pe 2 farfurii.', want: { plates: 2 } },
             { id: 'saizeci-noua', ask: 'Acum sunt 69. Împarte-le pe 3 farfurii.', start: { total: 69 }, want: { plates: 3 } },
-            { id: 'nouazeci-sase', ask: 'Cât face 96 : 3?', start: { total: 96 }, pick: [12, 23, 32], rule: 'cat', of: [96, 3], hide: ['each'], hint: 'Încă nu. Împarte întâi cele 9 pachete, apoi cele 6 bețișoare.' },
+            { id: 'nouazeci-sase', ask: 'Cât face 96 : 3?', start: { total: 96, by: 1 }, pick: [12, 23, 32], rule: 'cat', of: [96, 3], hide: ['each'], hint: 'Încă nu. Împarte întâi cele 9 pachete, apoi cele 6 bețișoare.' },
           ],
           notes: [
             '84 : 4 = 21: 8 zeci împărțite la 4 fac 2 zeci, iar 4 unități împărțite la 4 fac o unitate.',
@@ -358,7 +358,7 @@ export default {
             { id: 'ghiceste', ask: 'Câte nuci are sacul? Încearcă până stă dreaptă.', want: { balanced: true } },
             { id: 'ia-din-ambele', ask: 'Acum ia nuci din ambele talere, până rămâne sacul singur.', start: { mode: 'take', taken: 0 }, want: { alone: true } },
             { id: 'doua-sume', ask: '8 + 4 = □ + 5. Lasă sacul singur pe taler.', start: { mode: 'take', eq: '8 + 4 = □ + 5', taken: 0 }, want: { alone: true } },
-            { id: 'alege', ask: '□ + 9 = 13. Câte nuci are sacul?', pick: [4, 13, 22], rule: 'necunoscut', of: ['□ + 9 = 13'], hint: 'Încă nu. Ia 9 nuci din ambele talere: câte rămân în celălalt?' },
+            { id: 'alege', ask: '□ + 9 = 13. Câte nuci are sacul?', start: { mode: 'take', eq: '□ + 9 = 13', taken: 0 }, pick: [4, 13, 22], rule: 'necunoscut', of: ['□ + 9 = 13'], hint: 'Încă nu. Ia 9 nuci din ambele talere: câte rămân în celălalt?' },
           ],
           notes: [
             'Semnul = înseamnă „cântărește la fel”, nu „scrie rezultatul”: în 8 + 4 = □ + 5, □ e 7, nu 12.',
@@ -397,7 +397,7 @@ export default {
             { id: 'ori-patru', ask: 'Intră □, mașina face × 4 și iese 24. Cât e □?', want: { fits: true } },
             { id: 'impartit-trei', ask: 'Mașina face : 3 și iese 6. Ce număr a intrat?', start: { ops: [[':', 3]], out: 6, lo: 10, input: 10, back: false }, want: { fits: true } },
             { id: 'doi-pasi', ask: 'Intră □, + 20, apoi − 8, iese 50. Cât e □?', start: { ops: [['+', 20], ['−', 8]], out: 50, lo: 30, input: 30, back: false }, want: { fits: true } },
-            { id: 'alege', ask: '□ × 7 = 42. Ce număr a intrat?', pick: [5, 6, 49], rule: 'necunoscut', of: ['□ × 7 = 42'], hint: 'Încă nu. Pe dos, × 7 devine : 7.' },
+            { id: 'alege', ask: '□ × 7 = 42. Ce număr a intrat?', start: { ops: [['×', 7]], out: 42, lo: 0, input: 0, back: false }, pick: [5, 6, 49], rule: 'necunoscut', of: ['□ × 7 = 42'], hint: 'Încă nu. Pe dos, × 7 devine : 7.' },
           ],
           notes: [
             'Operațiile inverse: + și −, × și :. Pe dos, mașina face operația inversă.',

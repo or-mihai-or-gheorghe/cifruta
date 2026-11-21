@@ -32,8 +32,11 @@ function drawingOptions(q, target) {
   return values.filter((v) => same(v, target)).length === 1 && same(shown(q.options[q.answer]), target);
 }
 
-/** O întrebare „din număr”: grupele desenate dau totalul, iar răspunsul e n grupe din d (variantele, patru numere la rând). */
-function fromNumber(q, [n, d], prompt) {
+/**
+ * O întrebare „din număr”: grupele desenate dau totalul, iar răspunsul e n grupe din d. Variantele: patru numere la pas egal (`step`): la
+ * fracțiile unitare, la rând; la 2/3 din 12, multipli ai numărătorului (altfel, „multiplul lui 2” ar fi răspunsul).
+ */
+function fromNumber(q, [n, d], prompt, step = 1) {
   const g = q.figure;
   if (g?.v !== 'groups' || g.n !== d || !q.solved?.counts || /\d+ (?:grupe )?cu câte/.test(g.alt ?? '')) return false;
   const total = g.n * g.each;
@@ -42,7 +45,7 @@ function fromNumber(q, [n, d], prompt) {
     prompt.test(q.prompt) &&
     Number(q.prompt.match(/din (\d+)\?$/)?.[1]) === total &&
     numberAnswer(q, n * g.each) &&
-    values.every((v, i) => i === 0 || v - values[i - 1] === 1) &&
+    values.every((v, i) => (i === 0 ? v % step === 0 : v - values[i - 1] === step)) &&
     values[0] >= 1
   );
 }
@@ -81,7 +84,7 @@ export const FRACTII_RULES = {
   },
   'fr-din-numar-n': (q) => {
     const m = /^Cât fac \{\{f:(\d+)\/(\d+)\}\} din \d+\?$/.exec(q.prompt);
-    return Boolean(m) && Number(m[1]) >= 2 && fromNumber(q, [Number(m[1]), Number(m[2])], /./);
+    return Boolean(m) && Number(m[1]) >= 2 && fromNumber(q, [Number(m[1]), Number(m[2])], /./, Number(m[1]));
   },
   'fr-compara': (q) => {
     const most = q.prompt === 'Care fracție e cea mai mare?';

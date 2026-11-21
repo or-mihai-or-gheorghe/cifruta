@@ -94,7 +94,7 @@ export default {
     const out = {};
     // ecuația cu încercarea: „5 + 7 = 12, nu 15” se scrie „5 + 7 < 15”
     const filled = s.eq.replace('□', String(s.guess));
-    out.equation = fits ? filled : filled.replace(' = ', below < top ? ' < ' : ' > ').replace('−', '−');
+    out.equation = fits ? filled : filled.replace(' = ', below < top ? ' < ' : ' > ');
     if (!fits && b.op === '−') {
       // la scădere, semnul se pune între cele două părți ale scăderii: 15 − 5 > 8 (iar 15 − 9 < 8)
       const [left, right] = filled.split(' = ');

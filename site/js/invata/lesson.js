@@ -118,7 +118,8 @@ export async function mountLesson(host, { chapter, lesson, index }) {
     const t = tasks[current];
     if (t.pick) return pickAnswer(t);
     const w = W.texts(params, state);
-    return w.reading ? `${w.reading}: ${w.equation}` : w.equation;
+    // o citire care e o propoziție întreagă („Balanța stă dreaptă: în sac sunt 8 nuci.”) își pierde punctul înaintea calculului
+    return w.reading ? `${w.reading.replace(/\.$/, '')}: ${w.equation}` : w.equation;
   }
 
 

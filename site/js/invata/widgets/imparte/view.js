@@ -82,24 +82,27 @@ export function mount(host, params, { logic, dispatch }) {
     );
   }
 
+  let built = false;
   function render(next, { hidden = [] } = {}) {
-    const changed = next.total !== state.total || next.by !== state.by;
+    // farfuriile se refac (și obiectele se împart din nou, cu animația) doar când se schimbă totalul sau glisorul: la „Bravo!” și la
+    // provocarea următoare, cu aceeași stare, desenul rămâne pe loc
+    const changed = !built || next.total !== state.total || next.by !== state.by;
     state = next;
     by.set(state.by);
     const d = logic.derive(params, state);
-    // ce rămâne în coș stă pe loc; un coș gol rămâne desenat, ca să se vadă de unde pleacă obiectele
-    const leftover = Array.from({ length: d.left }, () => (zeci ? h('span', { class: 'iv-stick' }) : h('span', { class: 'iv-nut' })));
-    basket.style.setProperty('--cols', String(colsFor(Math.min(d.left, 8))));
-    basket.replaceChildren(...leftover);
-    basket.classList.toggle('is-empty', !d.left);
-    groups.replaceChildren(...drawGroups(d));
-    const items = d.total - d.left;
-    art.style.setProperty('--deal-step', `${stepMs(items)}ms`);
     if (changed) {
+      built = true;
+      // ce rămâne în coș stă pe loc; un coș gol rămâne desenat, ca să se vadă de unde pleacă obiectele
+      const leftover = Array.from({ length: d.left }, () => (zeci ? h('span', { class: 'iv-stick' }) : h('span', { class: 'iv-nut' })));
+      basket.style.setProperty('--cols', String(colsFor(Math.min(d.left, 8))));
+      basket.replaceChildren(...leftover);
+      basket.classList.toggle('is-empty', !d.left);
+      groups.replaceChildren(...drawGroups(d));
+      art.style.setProperty('--deal-step', `${stepMs(d.total - d.left)}ms`);
       art.classList.remove('is-dealing');
       void art.offsetWidth; // repornește animația
+      art.classList.add('is-dealing');
     }
-    art.classList.add('is-dealing');
     const t = logic.texts(params, state, hidden);
     eq.textContent = keepMath(t.equation);
     legend.replaceChildren(...legendNodes(t.legend));

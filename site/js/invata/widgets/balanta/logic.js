@@ -122,7 +122,7 @@ export default {
       out.reading =
         tilt === 0
           ? `Balanța stă dreaptă: în sac sunt ${nuts(s.guess)}.`
-          : `Balanța coboară în ${tilt < 0 ? 'stânga' : 'dreapta'}: ${nuts(s.guess)} în sac sunt ${(tilt < 0) === e.bagLeft ? 'prea multe' : 'prea puține'}.`;
+          : `Balanța coboară în ${tilt < 0 ? 'stânga' : 'dreapta'}: ${nuts(s.guess)} în sac ${s.guess === 1 ? 'e prea ' : 'sunt prea '}${(tilt < 0) === e.bagLeft ? (s.guess === 1 ? 'mult' : 'multe') : s.guess === 1 ? 'puțin' : 'puține'}.`;
       if (tilt === 0) out.extra = `□${NBSP}=${NBSP}${e.total}${NBSP}−${NBSP}${e.withBag}${NBSP}=${NBSP}${e.bag}.`;
     }
     out.spoken = `${out.reading} ${spokenMath(out.equation)}`;

@@ -1360,7 +1360,8 @@ def invata_new_widgets(run: Run, page: Page, vp: str):
     iv_slide(page, "guess", 8)
     page.wait_for_selector("[data-testid=iv-bravo]")
     level = float(page.get_by_test_id("iv-scale").get_attribute("data-tilt"))
-    run.check(light > 0 and level == 0, f"[{vp}] balanța: cu 5 nuci în sac coboară dreapta ({light}°), cu 8 stă dreaptă ({level}°)")
+    won = page.get_by_test_id("iv-won-text").inner_text()
+    run.check(light > 0 and level == 0 and ".:" not in won, f"[{vp}] balanța: cu 5 nuci în sac coboară dreapta ({light}°), cu 8 stă dreaptă ({level}°); „{won}”")
     # barele: se potrivesc la 8
     run.goto(page, "invata/ecuatii/partea-lipsa", debug=True)
     page.wait_for_selector("[data-testid=iv-bars]")

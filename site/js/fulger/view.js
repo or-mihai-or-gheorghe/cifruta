@@ -29,7 +29,7 @@ const STAR_WORDS = ['Prima', 'A doua', 'A treia'];
  */
 const spoken = (text) =>
   String(text)
-    .replace(/(?<=[\d□]) : (?=[\d□])/g, ' împărțit la ')
+    .replace(/(?<=[\d□])\s:\s(?=[\d□])/g, ' împărțit la ')
     .replace(/−/g, 'minus')
     .replace(/×/g, 'ori')
     .replace(/□/g, 'căsuța');
@@ -412,15 +412,16 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
       return btn;
     });
     // variantele cu piese sau rețele (multe căsuțe mici) stau pe două coloane pe telefoanele înalte, ca să iasă mai mari
-    // la fel desenele cu fracții: o bară tăiată în zecimi ar avea felii de ~6 px pe un singur rând
-    const detailed = q.mode === 'figure' && q.choices.some((id) => ['cell-grid', 'fraction'].includes(q.options[id].v));
+    const detailed = q.mode === 'figure' && q.choices.some((id) => q.options[id].v === 'cell-grid');
     // numerele lungi (patru cifre) n-ar încăpea în patru butoane pe un telefon îngust
     const wide = numericOptions(q) && q.choices.some((id) => q.options[id].text.length >= 4);
     // variantele-calcule stau pe două coloane: cele lungi („470 + 50 = 520”) cu litera mai mică, ca fiecare să încapă pe un rând, cele
     // scurte („4 × 5”) cu litera obișnuită
     const calcTexts = q.mode === 'figure' && q.choices.every((id) => / [=×:] /.test(String(q.options[id].text ?? '')));
     const calcs = calcTexts && q.choices.some((id) => q.options[id].text.length > 7);
-    const pairs = calcTexts && !calcs;
+    // desenele cu fracții tot pe două coloane, la orice înălțime: pe un rând, o bară în nouă bucăți are felii de 6–7 px
+    const fractions = q.mode === 'figure' && q.choices.some((id) => q.options[id].v === 'fraction');
+    const pairs = (calcTexts && !calcs) || fractions;
     answers.className = `fg-answers fg-answers--${q.mode}${detailed ? ' fg-answers--detailed' : ''}${wide ? ' fg-answers--wide' : ''}${calcs ? ' fg-answers--calcs' : ''}${pairs ? ' fg-answers--pairs' : ''}${strip ? ' fg-answers--strip' : ''}`;
     answers.style.setProperty('--n', String(buttons.length));
     answers.setAttribute('aria-busy', 'true');

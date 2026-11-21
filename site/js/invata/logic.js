@@ -142,6 +142,9 @@ export function lessonErrors(lesson) {
       const unknown = Object.keys(t.start).filter((k) => !Object.hasOwn(state, k));
       if (unknown.length) return errors.push(`${at}: „start” are câmpuri pe care widgetul nu le știe (${unknown.join(', ')})`);
       state = startState(state, t);
+      // aceeași verificare ca pentru parametrii lecției (o ecuație cu prea multe nuci, un total peste ce încape)
+      const invalid = W.check({ ...params, ...t.start });
+      if (invalid.length) return errors.push(`${at}: „start” nu e bun (${invalid.join('; ')})`);
       try {
         W.derive(params, state);
       } catch (e) {

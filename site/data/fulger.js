@@ -391,7 +391,7 @@ export default {
       id: 'fractii',
       title: 'Fracțiile',
       short: 'Fracții',
-      text: 'Jumătatea și sfertul pe desen, fracții până la zecimi, fracția dintr-un număr, fracții egale și cea mai mare fracție.',
+      text: 'Jumătatea și sfertul pe desen, fracții până la zecimi, fracția dintr-un număr, fracții egale, cea mai mare și cea mai mică fracție.',
       icon: 'prajitura',
       grade: 2,
       concepts: ['mat.fractii.jumatate-sfert', 'mat.fractii.din-multime', 'mat.fractii.numarator-numitor', 'mat.fractii.egale', 'mat.fractii.comparare'],

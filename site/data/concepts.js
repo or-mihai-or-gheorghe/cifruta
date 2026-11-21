@@ -88,8 +88,8 @@ export default {
   'mat.op.tabla-impartirii': { domain: 'mat', title: 'Tabla împărțirii: înmulțirea citită pe dos, cu proba', grade: 2, competencies: ['1.5', '1.6'], source: ['programa'] },
   'mat.op.impartire-necunoscut': { domain: 'mat', title: 'Deîmpărțitul și împărțitorul necunoscut (□ : 3 = 6, 24 : □ = 4)', grade: 2, competencies: ['1.5'], source: ['imbogatire'] },
   // câturile de două cifre sunt materie de clasa a III-a: lecția „Zecile, apoi unitățile” din Învață și Avansatul temei „Împărțirea”
-  'mat.op.necunoscut-doi-pasi': { domain: 'mat', title: 'Ecuații în doi pași (□ + 5 = 3 × 4)', grade: 2, competencies: ['1.4', '1.5'], source: ['imbogatire'] },
   'mat.op.impartire-zeci': { domain: 'mat', title: 'Împărțirea zecilor și a unităților (84 : 4 = 21)', grade: 2, competencies: ['1.5'], source: ['imbogatire'] },
+  'mat.op.necunoscut-doi-pasi': { domain: 'mat', title: 'Ecuații în doi pași (□ + 5 = 3 × 4)', grade: 2, competencies: ['1.4', '1.5'], source: ['imbogatire'] },
 
   // ——— 3. Rezolvarea problemelor ———
   'mat.pb.o-operatie': { domain: 'mat', title: 'Probleme care se rezolvă printr-o operație', grade: 1, competencies: ['5.2'], source: ['manual', 'auxiliar', 'programa'] },
