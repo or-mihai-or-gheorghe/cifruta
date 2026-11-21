@@ -257,7 +257,7 @@ export default {
             { kind: 'cmp-inm-tabla', weight: 2 },
             { kind: 'inm-factor-lipsa', weight: 1.5 },
           ],
-          stars: [30, 80, 180],
+          stars: [30, 80, 175],
         },
         {
           id: 'intermediar',

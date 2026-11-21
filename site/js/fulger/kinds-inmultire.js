@@ -9,8 +9,8 @@
 //   la o cifră × două cifre și la × 11, patru zeci la rând, cu aceleași unități (transportul uitat sau dublat; cifra unităților se
 //   află ușor, deci n-are voie să dea răspunsul); la zeci rotunde, rândul factorului rotund (toate se termină în 0);
 // - nicio variantă nu e mai mică decât factorul mai mare și niciuna nu trece de plafonul nivelului;
-// - la adunarea repetată, toate variantele au același al doilea factor (termenul), deci produsul inversat nu apare niciodată; la
-//   factorul lipsă, factorul vizibil nu e printre variante.
+// - la adunarea repetată, toate variantele au același al doilea factor (termenul), deci produsul inversat nu apare niciodată;
+// - la comparări, două produse fără niciun număr comun nu sunt mereu egale (unul dintre factori e uneori schimbat cu 1).
 // Convenția: n × t înseamnă „de n ori t” = t + t + … (n termeni). Variantele nu depind de ea.
 
 import { cate, GROUP_ITEMS } from './contexte.js';
@@ -56,10 +56,18 @@ const placed = (kind, rand, [a, b], shape, slot, max) => {
   return choices && shapedChoice(kind, product(rand, a, b), choices);
 };
 
-/** „Ce lipsește? ? × 6 = 42”: factorul lipsă `m`, cu „?” pe primul sau pe al doilea loc; variantele = fereastra de la `start`. */
-function missingFactor(kind, rand, m, k, start) {
+/**
+ * „Ce lipsește? ? × 6 = 42”: factorul lipsă (2–9), cu „?” pe primul sau pe al doilea loc, lângă factorul vizibil `k`. Variantele sunt
+ * patru numere la rând, între 1 și 10, cu răspunsul pe un loc ales întâi. Factorul vizibil poate fi printre ele, iar pătratele
+ * (? × 6 = 36) se întreabă și ele: un copil care l-ar scoate din variante pentru că e scris în cerință tot o dată din patru nimerește.
+ */
+function missingFactor(kind, rand, k) {
+  const slot = int(rand, 0, 3);
+  let m;
+  do m = int(rand, 2, 9);
+  while (m - slot < 1 || m - slot + 3 > 10);
   const equation = rand() < 0.5 ? `?${TIMES}${k} = ${m * k}` : `${k}${TIMES}? = ${m * k}`;
-  return numberQuestion(kind, rand, { prompt: `Ce lipsește? ${equation}`, key: equation, answer: m, fixed: windowOf(start), ask: { op: 'factor-lipsa' } });
+  return numberQuestion(kind, rand, { prompt: `Ce lipsește? ${equation}`, key: equation, answer: m, fixed: windowOf(m - slot), ask: { op: 'factor-lipsa' } });
 }
 
 /** Întâi fereastra de patru numere (factorul lipsă, numărul de grupe sau de termeni), apoi locul răspunsului în ea. */
@@ -102,7 +110,8 @@ export const INMULTIRE_KINDS = {
       const t = int(rand, 2, 9);
       const option = (k) => ({ text: `${k}${TIMES}${t}` });
       return pickQuestion('inm-adunare-repetata', rand, {
-        prompt: `Cum scrii ca înmulțire? ${Array(n).fill(t).join(' + ')}`,
+        // spații nedespărțite: suma stă pe un singur rând (un termen rămas singur pe rândul următor s-ar număra greșit)
+        prompt: `Cum scrii ca înmulțire? ${Array(n).fill(t).join(' + ')}`,
         key: `${n}x${t}:${start}`,
         answer: option(n),
         distractors: windowOf(start).filter((k) => k !== n).map(option),
@@ -141,10 +150,8 @@ export const INMULTIRE_KINDS = {
     mode: 'figure',
     concepts: [FACTOR, TABLA],
     generate(rand) {
-      // factorul vizibil (2–9) stă în afara ferestrei, ca să nu fie printre variante
-      const [start, m] = windowAndAnswer(rand, 2, 6);
-      const k = pickOne(rand, [2, 3, 4, 5, 6, 7, 8, 9].filter((x) => x < start || x > start + 3));
-      return missingFactor('inm-factor-lipsa', rand, m, k, start);
+      // toate cele 64 de fapte ale tablei, la fel de des
+      return missingFactor('inm-factor-lipsa', rand, int(rand, 2, 9));
     },
   },
   'cmp-inm-tabla': {
@@ -165,9 +172,11 @@ export const INMULTIRE_KINDS = {
           if (a === b) continue;
           [left, right] = [`${a}${TIMES}${b}`, `${b}${TIMES}${a}`];
         } else if (roll < 0.27) {
-          // același produs din alți factori (3 × 8 și 4 × 6)
+          // același produs din alți factori (3 × 8 și 4 × 6); jumătate din ele cu un factor schimbat cu 1 (4 × 7)
           const [a, b, c, d] = pickOne(rand, SAME_PRODUCT);
-          [left, right] = [product(rand, a, b), product(rand, c, d)];
+          const e = rand() < 0.5 ? d : d + pickOne(rand, [-1, 1]);
+          if (e < 2 || e > 9) continue;
+          [left, right] = [product(rand, a, b), product(rand, c, e)];
         } else if (roll < 0.6) {
           // un factor comun, celălalt mai mare sau mai mic cu 1–2
           const [a, b] = fact();
@@ -248,19 +257,23 @@ export const INMULTIRE_KINDS = {
           // aceiași factori, în altă ordine
           [left, right] = [`${a}${TIMES}${n}`, `${n}${TIMES}${a}`];
         } else if (roll < 0.3) {
-          // același produs din alți factori (4 × 15 și 2 × 30)
+          // același produs din alți factori (4 × 15 și 2 × 30); jumătate din ele cu numărul de două cifre schimbat cu 1 (2 × 31)
           const other = [2, 3, 4, 5, 6, 7, 8, 9].filter((b) => b !== a && p % b === 0 && p / b >= 10 && p / b <= 99);
           if (!other.length) continue;
           const b = pickOne(rand, other);
-          right = product(rand, b, p / b);
+          const m = p / b + (rand() < 0.5 ? 0 : pickOne(rand, [-1, 1]));
+          if (m < 10 || m > 99 || b * m > 200) continue;
+          right = product(rand, b, m);
         } else if (roll < 0.65) {
           // același factor de o cifră, celălalt mai mare sau mai mic cu 1–3
           const m = n + pickOne(rand, [-3, -2, -1, 1, 2, 3]);
           if (m < 11 || a * m > 200) continue;
           right = product(rand, a, m);
         } else {
-          // produsul față de zecea apropiată
-          right = String(Math.round(p / 10) * 10 + pickOne(rand, [-10, 0, 10]));
+          // produsul față de zecea apropiată (cel mult 200, plafonul nivelului)
+          const x = Math.round(p / 10) * 10 + pickOne(rand, [-10, 0, 10]);
+          if (x > 200) continue;
+          right = String(x);
         }
         if (rand() < 0.5) [left, right] = [right, left];
         return compare('cmp-inm-200', left, right);
@@ -309,14 +322,26 @@ export const INMULTIRE_KINDS = {
     concepts: [STRATEGII],
     generate(rand) {
       const slot = int(rand, 0, 3);
+      // întâi felul calculului (altfel × 10 ar ieși în trei sferturi din întrebări), apoi numerele; produsul din interior rămâne până
+      // la 100 (47 × 20 → 47 × 2 = 94), deci rezultatul până la 1000
+      const roll = rand();
       for (;;) {
-        const t = rand() < 0.25 ? 10 : 10 * int(rand, 2, 9);
-        const round = rand() < 0.25;
-        const m = round ? 10 * int(rand, 2, 9) : int(rand, 11, 99);
-        // „prietenoase”: produsul din interior rămâne până la 100 (47 × 20 → 47 × 2 = 94), deci rezultatul până la 1000
-        if ((!round && m % 10 === 0) || m * (t / 10) > 100 || m * t < 110) continue;
-        // zeci × zeci: sute la rând; × 10: zeci la rând; altfel, multiplii zecii rotunde (12 × 20: 220, 240, 260)
-        const shape = round ? row(100) : t === 10 ? row(10) : row(t);
+        let m;
+        let t;
+        let shape;
+        if (roll < 0.3) {
+          // × 10 (34 × 10): zeci la rând; cifrele numărului se văd în rezultat, iar asta e chiar deprinderea
+          [m, t, shape] = [int(rand, 11, 99), 10, row(10)];
+        } else if (roll < 0.85) {
+          // un număr de două cifre ori zeci rotunde (12 × 20): sute la rând, cu aceleași zeci (transportul uitat sau dublat:
+          // 37 × 20 → 640, 840), ca ultimele cifre singure (7 × 2 → …40) să nu dea răspunsul
+          t = 10 * int(rand, 2, 9);
+          [m, shape] = [int(rand, 11, Math.min(99, Math.floor(1000 / t))), row(100)];
+        } else {
+          // zeci ori zeci (20 × 30): sute la rând
+          [m, t, shape] = [10 * int(rand, 2, 5), 10 * int(rand, 2, 5), row(100)];
+        }
+        if ((roll < 0.85 && m % 10 === 0) || m * t > 1000) continue;
         const q = placed('inm-zeci-2x2', rand, [m, t], shape, slot, 1000);
         if (q) return q;
       }
@@ -334,11 +359,12 @@ export const INMULTIRE_KINDS = {
         let left;
         let right;
         if (roll < 0.2) {
-          // dublare și înjumătățire: 12 × 20 = 24 × 10
+          // dublare și înjumătățire: 12 × 20 = 24 × 10; jumătate din ele cu un factor schimbat cu 1 (25 × 10)
           const t = pickOne(rand, [20, 40, 60, 80]);
           const m = int(rand, 11, 49);
-          if (m * t > 1000) continue;
-          [left, right] = [product(rand, m, t), product(rand, 2 * m, t / 2)];
+          const d = 2 * m + (rand() < 0.5 ? 0 : pickOne(rand, [-1, 1]));
+          if (m * t > 1000 || d * (t / 2) > 1000) continue;
+          [left, right] = [product(rand, m, t), product(rand, d, t / 2)];
         } else if (roll < 0.35) {
           // × 11 = × 10 + încă o dată: 11 × 23 și 230 + 23 (uneori cu o unitate sau o zece greșită)
           const n = int(rand, 12, 90);
@@ -353,14 +379,16 @@ export const INMULTIRE_KINDS = {
           const [a, n] = oneByTwo(rand, { aMin: 3, min: 110, max: 500 });
           const d = pickOne(rand, [-2, -1, 1, 2]);
           const [b, m] = rand() < 0.5 ? [a + d, n] : [a, n + d];
-          if (b < 2 || b > 9 || m < 11 || b * m > 1000) continue;
+          if (b < 2 || b > 9 || m < 11 || m > 99 || b * m > 1000) continue;
           [left, right] = [product(rand, a, n), product(rand, b, m)];
         } else {
-          // un produs față de rotunjirea factorului mare (7 × 46 și 7 × 50) sau față de zecea apropiată
+          // un produs față de rotunjirea factorului mare (7 × 46 și 7 × 50; fără 100, care are trei cifre) sau față de zecea apropiată
           const [a, n] = oneByTwo(rand, { aMin: 3, min: 110, max: 500 });
           const p = a * n;
+          const rounded = Math.round(n / 10) * 10;
+          if (rounded === 100) continue;
           left = product(rand, a, n);
-          right = rand() < 0.5 ? product(rand, a, Math.round(n / 10) * 10) : String(Math.round(p / 10) * 10 + pickOne(rand, [-10, 0, 10]));
+          right = rand() < 0.5 ? product(rand, a, rounded) : String(Math.round(p / 10) * 10 + pickOne(rand, [-10, 0, 10]));
         }
         if (rand() < 0.5) [left, right] = [right, left];
         return compare('cmp-inm-1000', left, right);
@@ -374,10 +402,8 @@ export const INMULTIRE_KINDS = {
     mode: 'figure',
     concepts: [FACTOR, INM_1000, STRATEGII],
     generate(rand) {
-      const [start, m] = windowAndAnswer(rand, 2, 6);
       // factorul vizibil: o zece rotundă (20–90) sau un număr de la 11 la 19 (produsul rămâne sub 1000)
-      const k = rand() < 0.6 ? 10 * int(rand, 2, 9) : int(rand, 11, 19);
-      return missingFactor('inm-factor-lipsa-mare', rand, m, k, start);
+      return missingFactor('inm-factor-lipsa-mare', rand, rand() < 0.6 ? 10 * int(rand, 2, 9) : int(rand, 11, 19));
     },
   },
 };

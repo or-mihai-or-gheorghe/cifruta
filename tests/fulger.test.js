@@ -251,10 +251,18 @@ function magnitudeOdds(q) {
   return pick === null ? 1 / pool.choices.length : pick === q.answer ? 1 : 0;
 }
 
-/** Șansa unui copil care socotește doar unitățile și alege la întâmplare printre variantele cu cifra unităților bună. */
+/** Numărul fără zerourile de la sfârșit (340 → 34, 20 → 2, 10 → 1) și câte zerouri are acolo. */
+const core = (x) => (x !== 0 && x % 10 === 0 ? core(x / 10) : x);
+const zeros = (x) => (x !== 0 && x % 10 === 0 ? 1 + zeros(x / 10) : 0);
+
+/**
+ * Șansa unui copil care socotește doar ultima cifră și alege la întâmplare printre variantele cu cifra aceea bună. La înmulțire, ultima
+ * cifră de deasupra zerourilor comune ale variantelor: la 12 × 20, cifra zecilor (2 × 2 = 4, deci …40).
+ */
 function unitsOdds(q) {
-  const same = q.choices.filter((c) => c % 10 === q.answer % 10);
-  return 1 / same.length;
+  const z = factorsOf(q.text) ? Math.min(...q.choices.map(zeros)) : 0;
+  const digit = (c) => Math.floor(c / 10 ** z) % 10;
+  return 1 / q.choices.filter((c) => digit(c) === digit(q.answer)).length;
 }
 
 // calculele cu o cifră (și cele pe sute rotunde): răspunsul pe oricare loc are întâietate față de plauzibilitate
@@ -276,8 +284,10 @@ test('fulger: la temele cu calcule, forma variantelor nu arată răspunsul (ghic
       hits += pick === null ? 1 / q.choices.length : pick === q.answer ? 1 : 0;
       magnitude += magnitudeOdds(q);
       // la calculele cu trecere, cu mai multe cifre: unitățile singure nu trebuie să dea răspunsul (trecerea decide); la înmulțirea cu
-      // un factor de două cifre, cifra unităților produsului se află dintr-o privire (6 × 47 → 2), deci nici ea
-      const shortcut = factorsOf(q.text) ? factorsOf(q.text).some((x) => x >= 10) : q.mode === 'choice' && carriesOf(q.text);
+      // un factor de două cifre, ultimele cifre se înmulțesc dintr-o privire (6 × 47 → 2, 12 × 20 → 4), deci nici ele; la × 10 și la
+      // calculele cu cifre singure (3 × 40, 20 × 30), ele sunt chiar calculul
+      const f = factorsOf(q.text);
+      const shortcut = f ? f.every((x) => core(x) !== 1) && f.some((x) => core(x) >= 10) : q.mode === 'choice' && carriesOf(q.text);
       if (q.mode === 'choice' && q.answer >= 20 && !ONE_DIGIT.includes(id) && shortcut) {
         units += unitsOdds(q);
         carries++;

@@ -104,9 +104,12 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
     adunările și scăderile: tipurile cu × n-o poartă (testul o cere).
   - **Înmulțirea** (`kinds-inmultire.js`): `calcChoice` nu merge (formele lui știu doar + și −). Locul răspunsului se alege întâi,
     apoi un calcul a cărui formă încape cu răspunsul acolo (`placeAt`, `row` din `rand.js`), iar `shapedChoice` face întrebarea:
-    un rând al tablei la tablă, `SHAPES.tens` (aceleași unități) la o cifră × două cifre și la × 11, rândul factorului rotund la zeci
-    rotunde. Ghicitorii din test știu ×: o variantă cel mult cât factorul mai mare e absurdă, iar cu un factor de două cifre, cifra
-    unităților produsului e o scurtătură. `spoken` din `view.js` citește × ca „ori”.
+    un rând al tablei la tablă, `SHAPES.tens` (aceleași unități) la o cifră × două cifre și la × 11, zeci la rând la × 10 și sute la
+    rând la celelalte zeci rotunde (12 × 20: aceleași zeci). Ghicitorii din test știu ×: o variantă cel mult cât factorul mai mare e
+    absurdă, iar cu un factor de două cifre, ultima cifră de deasupra zerourilor comune ale variantelor e o scurtătură (6 × 47 → 2,
+    12 × 20 → 4), afară de × 10 și de calculele cu cifre singure (3 × 40), unde ea e chiar calculul. O sumă din cerință are spații
+    nedespărțite (un termen rămas singur pe rândul următor s-ar număra greșit), iar la comparări, două produse fără niciun număr comun
+    nu sunt mereu egale. `spoken` din `view.js` citește × ca „ori”.
   - `numberQuestion` primește mereu `ask` (fără el rămâne `ask: undefined`, iar verificarea după JSON pică), iar `solved` stă doar la
     întrebările cu desen (E2E caută desenul rezolvat). Variantele-calcule („470 + 50 = 520”, texte în `figureQuestion`) stau pe două
     coloane (`fg-answers--calcs`).

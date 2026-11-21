@@ -402,9 +402,12 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     const detailed = q.mode === 'figure' && q.choices.some((id) => q.options[id].v === 'cell-grid');
     // numerele lungi (patru cifre) n-ar încăpea în patru butoane pe un telefon îngust
     const wide = numericOptions(q) && q.choices.some((id) => q.options[id].text.length >= 4);
-    // variantele-calcule („470 + 50 = 520”, „4 × 5”) stau pe două coloane, cu litera mai mică, ca fiecare să încapă pe un rând
-    const calcs = q.mode === 'figure' && q.choices.every((id) => / [=×] /.test(String(q.options[id].text ?? '')));
-    answers.className = `fg-answers fg-answers--${q.mode}${detailed ? ' fg-answers--detailed' : ''}${wide ? ' fg-answers--wide' : ''}${calcs ? ' fg-answers--calcs' : ''}${strip ? ' fg-answers--strip' : ''}`;
+    // variantele-calcule stau pe două coloane: cele lungi („470 + 50 = 520”) cu litera mai mică, ca fiecare să încapă pe un rând, cele
+    // scurte („4 × 5”) cu litera obișnuită
+    const calcTexts = q.mode === 'figure' && q.choices.every((id) => / [=×] /.test(String(q.options[id].text ?? '')));
+    const calcs = calcTexts && q.choices.some((id) => q.options[id].text.length > 7);
+    const pairs = calcTexts && !calcs;
+    answers.className = `fg-answers fg-answers--${q.mode}${detailed ? ' fg-answers--detailed' : ''}${wide ? ' fg-answers--wide' : ''}${calcs ? ' fg-answers--calcs' : ''}${pairs ? ' fg-answers--pairs' : ''}${strip ? ' fg-answers--strip' : ''}`;
     answers.style.setProperty('--n', String(buttons.length));
     answers.setAttribute('aria-busy', 'true');
     answers.replaceChildren(...[strip, ...buttons].filter(Boolean));

@@ -52,14 +52,31 @@ function missing(q) {
   return total % known === 0 ? { known, total, factor: total / known } : null;
 }
 
-/** Variantele factorului lipsă: patru numere la rând, de la 2, fără factorul vizibil. */
-function missingOptions(q, { known, factor }) {
+/** Variantele factorului lipsă: patru numere la rând, între 1 și 10 (factorul vizibil poate fi printre ele). */
+function missingOptions(q, { factor }) {
   const values = q.choices.map((id) => Number(q.options[id].text));
-  return numberAnswer(q, factor) && values[0] >= 2 && values.every((x, i) => i === 0 || x - values[i - 1] === 1) && !values.includes(known);
+  return numberAnswer(q, factor) && values[0] >= 1 && values[3] <= 10 && values.every((x, i) => i === 0 || x - values[i - 1] === 1);
 }
 
 /** Pluralele care cer „Câți” (masculine); celelalte obiecte numărate cer „Câte”. */
 const CATI = new Set(['pești', 'biscuiți']);
+/** Ce arată fiecare emoji al grupelor (pluralul din cerință). */
+const PLURAL = {
+  mar: 'mere',
+  para: 'pere',
+  portocala: 'portocale',
+  lamaie: 'lămâi',
+  banana: 'banane',
+  ou: 'ouă',
+  stea: 'stele',
+  balon: 'baloane',
+  lalea: 'lalele',
+  creion: 'creioane',
+  castana: 'castane',
+  peste: 'pești',
+  biscuit: 'biscuiți',
+};
+const NBSP = ' ';
 
 export const INMULTIRE_RULES = {
   'inm-tabla': ({ text, answer, choices }) => {
@@ -69,9 +86,10 @@ export const INMULTIRE_RULES = {
     return f.some((step) => stepped(choices, answer, step, { above: Math.max(...f), max: 81 }));
   },
   'inm-adunare-repetata': (q) => {
-    const m = /^Cum scrii ca înmulțire\? (\d(?: \+ \d)+)$/.exec(q.prompt);
+    // suma, cu spații nedespărțite: stă pe un singur rând, ca niciun termen să nu rămână singur pe rândul următor
+    const m = new RegExp(`^Cum scrii ca înmulțire\\? (\\d(?:${NBSP}\\+${NBSP}\\d)+)$`).exec(q.prompt);
     if (!m) return false;
-    const terms = m[1].split(' + ').map(Number);
+    const terms = m[1].split(`${NBSP}+${NBSP}`).map(Number);
     const t = terms[0];
     if (!terms.every((x) => x === t) || !inRange(t, 2, 9) || !inRange(terms.length, 2, 6)) return false;
     const options = q.choices.map((id) => factors(q.options[id].text));
@@ -89,10 +107,11 @@ export const INMULTIRE_RULES = {
     if (g?.v !== 'groups' || !inRange(g.n, 2, 6) || !inRange(g.each, 2, 6)) return false;
     // cerința numește obiectele desenului, cu „Câte / Câți” potrivit; desenul rezolvat e același, cu numărătoarea
     const plural = g.unit?.[1];
-    if (q.prompt !== `${CATI.has(plural) ? 'Câți' : 'Câte'} ${plural} sunt în total?`) return false;
+    if (PLURAL[g.emoji] !== plural || q.prompt !== `${CATI.has(plural) ? 'Câți' : 'Câte'} ${plural} sunt în total?`) return false;
     if (JSON.stringify(solved) !== JSON.stringify({ ...g, counts: true })) return false;
+    // variantele: multipli ai mărimii grupei, de la 2 la 6 grupe
     const values = q.choices.map((id) => Number(q.options[id].text));
-    return numberAnswer(q, g.n * g.each) && values[0] >= 2 * g.each && values.every((x, i) => i === 0 || x - values[i - 1] === g.each);
+    return numberAnswer(q, g.n * g.each) && values[0] >= 2 * g.each && values[3] <= 6 * g.each && values.every((x, i) => i === 0 || x - values[i - 1] === g.each);
   },
   'inm-factor-lipsa': (q) => {
     const m = missing(q);
@@ -106,9 +125,10 @@ export const INMULTIRE_RULES = {
     // un fapt din tablă față de un număr apropiat (cel mult 3)
     if (!lf || !rf) return (tabla(lf) || tabla(rf)) && Math.abs(lv - rv) <= 3;
     if (!tabla(lf) || !tabla(rf)) return false;
-    // două fapte: aceiași factori, același produs, un factor comun și celălalt mai departe cu 1–2, sau produse apropiate
+    // două fapte: aceiași factori, același produs, un factor comun și celălalt mai departe cu 1–2, sau produse apropiate (cel mult 9:
+    // și același produs din alți factori, cu un factor schimbat cu 1)
     const shared = lf.some((x) => rf.includes(x)) && Math.abs(lf[0] + lf[1] - rf[0] - rf[1]) <= 2;
-    return lv === rv || shared || Math.abs(lv - rv) <= 4;
+    return lv === rv || shared || Math.abs(lv - rv) <= 9;
   },
   'inm-zeci': ({ text, answer, choices }) => {
     const f = oneByTwo(text);
@@ -127,10 +147,10 @@ export const INMULTIRE_RULES = {
     if (lv === null || rv === null || answer !== rel(lv, rv)) return false;
     const [lf, rf] = [oneByTwo(left), oneByTwo(right)];
     if (![lf, rf].filter(Boolean).every(([a, n]) => a * n <= 200)) return false;
-    // un produs față de zecea apropiată (cel mult 15 mai departe)
-    if (!lf || !rf) return Boolean(lf || rf) && /^\d+$/.test(lf ? right : left) && round10(lf ? rv : lv) && Math.abs(lv - rv) <= 15;
-    // același produs, sau același factor de o cifră și celălalt mai departe cu 1–3
-    return lv === rv || (lf[0] === rf[0] && Math.abs(lf[1] - rf[1]) <= 3);
+    // un produs față de zecea apropiată (cel mult 15 mai departe, cel mult 200)
+    if (!lf || !rf) return Boolean(lf || rf) && /^\d+$/.test(lf ? right : left) && round10(lf ? rv : lv) && Math.abs(lv - rv) <= 15 && Math.max(lv, rv) <= 200;
+    // același produs (uneori cu numărul de două cifre schimbat cu 1), sau același factor de o cifră și celălalt mai departe cu 1–3
+    return lv === rv || (lf[0] === rf[0] && Math.abs(lf[1] - rf[1]) <= 3) || Math.abs(lv - rv) <= 9;
   },
   'inm-1x2-500': ({ text, answer, choices }) => {
     const f = oneByTwo(text);
@@ -147,16 +167,16 @@ export const INMULTIRE_RULES = {
   'inm-zeci-2x2': ({ text, answer, choices }) => {
     const f = factors(text);
     if (!f || !f.every((x) => inRange(x, 10, 99)) || !f.some(round10) || answer !== f[0] * f[1] || !inRange(answer, 110, 1000)) return false;
-    // zeci × zeci: sute la rând; × 10: zeci la rând; altfel, multiplii factorului rotund
-    const step = f.every(round10) ? 100 : f.includes(10) ? 10 : f.find(round10);
+    // × 10 (celălalt factor nerotund): zeci la rând; altfel sute la rând, cu aceleași zeci (12 × 20: 140, 240, 340, 440)
+    const step = f.includes(10) && !f.every(round10) ? 10 : 100;
     return stepped(choices, answer, step, { above: Math.max(...f), max: 1000 });
   },
   'cmp-inm-1000': ({ left, right, answer }) => {
     const [lv, rv] = [sideValue(left), sideValue(right)];
     if (lv === null || rv === null || answer !== rel(lv, rv) || lv > 1000 || rv > 1000) return false;
     const [lf, rf] = [factors(left), factors(right)];
-    // măcar o latură e o înmulțire cu un factor de cel puțin două cifre; o sumă stă doar față de „11 × n” (× 10 + încă o dată)
-    if (![lf, rf].some((f) => f && f.some((x) => x >= 10))) return false;
+    // măcar o latură e o înmulțire cu un factor de două cifre (niciunul de trei); o sumă stă doar față de „11 × n” (× 10 + încă o dată)
+    if (![lf, rf].some((f) => f && f.some((x) => x >= 10)) || [lf, rf].some((f) => f && f.some((x) => x > 99))) return false;
     const sum = [left, right].find((s) => s.includes('+'));
     if (sum) {
       const eleven = factors(sum === left ? right : left);

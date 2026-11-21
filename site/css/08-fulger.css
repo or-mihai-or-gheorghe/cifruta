@@ -458,6 +458,9 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 /* variantele-calcule („470 + 50 = 520”): două coloane pe orice ecran, fiecare calcul pe un singur rând */
 .fg-answers--calcs { grid-template-columns: repeat(2, 1fr); }
 .fg-answers--calcs .fg-opt { font-size: clamp(1rem, 0.7rem + 1.4vw, 1.6rem); white-space: nowrap; }
+/* variantele-calcule scurte („4 × 5”): tot două coloane, cu litera obișnuită */
+.fg-answers--pairs { grid-template-columns: repeat(2, 1fr); }
+.fg-answers--pairs .fg-opt { white-space: nowrap; }
 .fg-opt__art { --opt-h: clamp(2.8rem, 10vh, 5rem); display: block; width: min(100%, calc(var(--opt-h) * var(--ar, 1))); }
 .fg-opt__art .c-emoji,
 .fg-fig .c-emoji,
