@@ -1,14 +1,7 @@
 /* Jocuri fulger: cardul de pe pagina principală, pagina jocului, arena rundei și rezultatele.
    Mișcare doar prin transform/opacity; particulele și zborul „+N” nu se creează la mișcare redusă. */
 
-/* ——— Antet și pagina principală ——— */
-.c-nav-fulger .c-emoji { width: 1.25rem; height: 1.25rem; margin: 0; }
-@media (max-width: 30rem) {
-  .c-nav-fulger { width: 2.5rem; padding: 0; }
-  /* ascuns doar vizual: linkul își păstrează numele pentru cititoarele de ecran */
-  .c-nav-fulger__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-}
-
+/* ——— Pagina principală ——— */
 .fg-home {
   display: grid;
   grid-template-columns: auto 1fr auto;

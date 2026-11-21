@@ -17,6 +17,7 @@ const PAGES = {
   rezultate: () => import('./pages/review.js'),
   atelier: () => import('./pages/atelier.js'),
   fulger: () => import('./pages/fulger.js'),
+  invata: () => import('./pages/invata.js'),
   profil: () => import('./pages/profil.js'),
   clasament: () => import('./pages/clasament.js'),
   admin: () => import('./pages/admin.js'),
@@ -37,13 +38,17 @@ function paintSound() {
 }
 paintSound();
 
+/** Un link din antet cu iconiță și text; pe ecranele înguste rămâne doar iconița (treptele din css/09-cloud.css). */
+const navLink = (cls, href, testid, icon, text) =>
+  h(
+    'a',
+    { class: `c-btn c-btn--ghost c-btn--sm c-nav ${cls}`, href, 'data-testid': testid, title: text },
+    h('span', { class: 'c-nav__icon', 'aria-hidden': 'true', html: emojiHTML(icon) }),
+    h('span', { class: 'c-nav__text' }, text),
+  );
+
 // clasamentul (doar în cont) și contul: „Intră” sau avatarul și porecla profilului care joacă (pe telefon, doar iconițele)
-const boardsLink = h(
-  'a',
-  { class: 'c-btn c-btn--ghost c-btn--sm c-nav-board', href: '#/clasament', 'data-testid': 'nav-board', title: 'Clasament' },
-  h('span', { 'aria-hidden': 'true', html: emojiHTML('trofeu') }),
-  h('span', { class: 'c-nav-board__text' }, 'Clasament'),
-);
+const boardsLink = navLink('c-nav-board', '#/clasament', 'nav-board', 'trofeu', 'Clasament');
 const accountLink = h('a', { class: 'c-btn c-btn--ghost c-btn--sm c-account', href: '#/profil', 'data-testid': 'nav-account' });
 function paintAccount() {
   const s = accountState();
@@ -91,18 +96,14 @@ app.replaceChildren(
         'a',
         { class: 'c-logo', href: '#/' },
         art({ v: 'mascot', mood: 'vesela', decorative: true }, { cls: 'c-logo__art' }),
-        h('span', {}, 'Cifruța', h('span', { class: 'c-logo__sub' }, 'exerciții pentru clasa a II-a')),
+        h('span', { class: 'c-logo__name' }, 'Cifruța', h('span', { class: 'c-logo__sub' }, 'exerciții pentru clasa a II-a')),
       ),
       h(
         'nav',
         { class: 'l-cluster', 'aria-label': 'Navigare' },
         h('a', { class: 'c-btn c-btn--ghost c-btn--sm c-nav-home', href: '#/' }, 'Teste'),
-        h(
-          'a',
-          { class: 'c-btn c-btn--ghost c-btn--sm c-nav-fulger', href: '#/fulger', 'data-testid': 'nav-fulger', title: 'Jocuri fulger' },
-          h('span', { 'aria-hidden': 'true', html: emojiHTML('fulger') }),
-          h('span', { class: 'c-nav-fulger__text' }, 'Jocuri fulger'),
-        ),
+        navLink('c-nav-fulger', '#/fulger', 'nav-fulger', 'fulger', 'Jocuri fulger'),
+        navLink('c-nav-invata', '#/invata', 'nav-invata', 'idee', 'Învață'),
         boardsLink,
         accountLink,
         soundBtn,

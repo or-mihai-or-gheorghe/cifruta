@@ -103,14 +103,44 @@ class Run:
         self.check(not CEDILLA.search(text), f"{label}: fără litere cu sedilă")
 
 
+HEADER_FIT = """() => {
+  const inner = document.querySelector('.l-header__inner');
+  const shown = [...inner.querySelectorAll('nav > *')].filter((e) => !e.hidden && getComputedStyle(e).display !== 'none');
+  const id = (e) => e.dataset.testid || e.className.split(' ').pop();
+  return { over: document.documentElement.scrollWidth - innerWidth,
+           tall: shown.filter((e) => e.getBoundingClientRect().height > 48.5).map(id),
+           thin: shown.filter((e) => e.getBoundingClientRect().width < 39.5).map(id),
+           height: Math.round(document.querySelector('.l-header').getBoundingClientRect().height) };
+}"""
+
+
+def header_ok(run: Run, page: Page, label: str):
+    """Baleiajul antetului, de la 320 la 1280 px, din 8 în 8: nimic nu iese din ecran, niciun link nu trece pe două rânduri și nu se
+    strivește (treptele din css/09-cloud.css), iar antetul își păstrează înălțimea."""
+    size = page.viewport_size
+    problems, heights = [], set()
+    for width in range(320, 1281, 8):
+        page.set_viewport_size({"width": width, "height": 800})
+        page.wait_for_timeout(10)
+        m = page.evaluate(HEADER_FIT)
+        heights.add(m["height"])
+        if m["over"] > 1 or m["tall"] or m["thin"]:
+            problems.append(f"{width} px: depășire {m['over']}, pe două rânduri {m['tall']}, strivite {m['thin']}")
+    page.set_viewport_size(size)
+    run.check(not problems, f"{label}: antetul încape între 320 și 1280 px ({'; '.join(problems[:3]) or 'fără probleme'})")
+    run.check(len(heights) == 1, f"{label}: antetul are aceeași înălțime la toate lățimile ({sorted(heights)} px)")
+
+
 def smoke(run: Run, page: Page, vp: str):
-    for route, name in [("", "acasa"), ("sectiune/recapitulare", "sectiune"), ("fulger", "calcul-fulger"), ("fulger/adunari-scaderi-100", "calcul-fulger-tema"), ("fulger/siruri-intrusi", "fulger-siruri-intrusi"), ("atelier/fulger", "atelier-fulger"), ("atelier/componente", "atelier-componente"), ("atelier/vizualuri", "atelier-vizualuri"), ("atelier/tipuri", "atelier-tipuri"), ("atelier/avatare", "atelier-avatare"), ("nu-exista", "404")]:
+    for route, name in [("", "acasa"), ("sectiune/recapitulare", "sectiune"), ("fulger", "calcul-fulger"), ("invata", "invata"), ("fulger/adunari-scaderi-100", "calcul-fulger-tema"), ("fulger/siruri-intrusi", "fulger-siruri-intrusi"), ("atelier/fulger", "atelier-fulger"), ("atelier/componente", "atelier-componente"), ("atelier/vizualuri", "atelier-vizualuri"), ("atelier/tipuri", "atelier-tipuri"), ("atelier/avatare", "atelier-avatare"), ("nu-exista", "404")]:
         run.goto(page, route)
         page.wait_for_function("document.querySelector('main')?.innerText.trim().length > 0")
         page.wait_for_timeout(300)
         run.check(page.locator("main").inner_text().strip() != "", f"[{vp}] pagina „{name}” are conținut")
         run.layout_ok(page, f"[{vp}] {name}")
         run.shot(page, f"{vp}-{name}")
+        if name == "acasa" and vp == "laptop":
+            header_ok(run, page, "fără cont")
         if name == "acasa":
             # mascota se mișcă pe ecranele mari, dar stă pe loc în siglă, unde detaliile fine nici nu se desenează
             play = page.evaluate(

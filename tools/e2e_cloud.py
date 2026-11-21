@@ -16,7 +16,7 @@ import urllib.error
 import urllib.request
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-from e2e import Run, serve  # noqa: E402
+from e2e import Run, header_ok, serve  # noqa: E402
 from playwright.sync_api import expect, sync_playwright  # noqa: E402
 
 PROJECT = "demo-cifruta"
@@ -212,6 +212,7 @@ def account_flow(run: Run, browser):
     run.check(not cloud_requests, f"fără cont, nicio cerere spre Firebase ({len(cloud_requests)})")
     expect(page.get_by_test_id("nav-account")).to_contain_text("Intră")
     run.check(page.get_by_test_id("nav-board").is_hidden(), "fără cont, antetul nu arată clasamentul")
+    header_ok(run, page, "site fără cont („Intră”)")
 
     page.get_by_test_id("nav-account").click()
     expect(page.get_by_test_id("sign-in-card")).to_be_visible()
@@ -298,10 +299,11 @@ def account_flow(run: Run, browser):
     card = page2.locator("[data-testid=profile-p1] svg.v-avatar").get_attribute("aria-label") or ""
     header = page2.locator("[data-testid=nav-account] svg.v-avatar").get_attribute("aria-label") or ""
     run.check("coroană" in card and "coroană" in header, f"avatar: desenul nou în card și în antet ({card} / {header})")
-    for width in (1024, 768, 600):
-        page2.set_viewport_size({"width": width, "height": 800})
-        page2.wait_for_timeout(150)
-        run.layout_ok(page2, f"{width} px: antetul cu avatarul")
+    # cea mai lungă poreclă permisă (20 de caractere), scrisă doar în antet: baleiajul verifică treptele cu ea
+    nick = "document.querySelector('[data-testid=nav-account] .c-account__text')"
+    shown = page2.evaluate(f"(() => {{ const el = {nick}; const was = el.textContent; el.textContent = 'Ana-Maria Popescu Io'; return was; }})()")
+    header_ok(run, page2, "cu cont, avatar și o poreclă de 20 de caractere")
+    page2.evaluate(f"(was) => {{ {nick}.textContent = was; }}", shown)
     page2.set_viewport_size({"width": 1280, "height": 800})
     page2.get_by_test_id("edit-p1").click()
     page2.get_by_test_id("profile-boards").uncheck()

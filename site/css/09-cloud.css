@@ -9,16 +9,20 @@
 /* profilul care joacă: avatarul desenat, mare, la stânga poreclei (desenul ia lățimea containerului) */
 .c-account.has-avatar { max-width: 13rem; padding: 0.125rem 0.9rem 0.125rem 0.125rem; }
 .c-account.has-avatar .c-account__icon { width: 2.5rem; }
-.c-nav-board .c-emoji { width: 1.25rem; height: 1.25rem; margin: 0; }
-/* Antetul cu contul se strânge în trepte, ca să nu depășească ecranul nici cu o poreclă de 20 de caractere: sub 47,5rem pleacă
-   subtitlul siglei și textul clasamentului, sub 42rem și „Teste” (sigla duce acolo) și porecla (rămâne avatarul). */
-@media (max-width: 47.5rem) {
-  .l-header:has(.c-account.is-signed) .c-logo__sub { display: none; }
+.c-nav__icon .c-emoji { width: 1.25rem; height: 1.25rem; margin: 0; }
+
+/* Antetul se strânge în trepte, ca nimic să nu iasă din ecran și niciun buton să nu treacă pe două rânduri, nici cu contul deschis și
+   o poreclă de 20 de caractere (baleiajul `header_ok` din tools/e2e.py și tools/e2e_cloud.py le verifică între 320 și 1280 px).
+   Linkurile nu se strâng și nu se rup; cu contul deschis, subtitlul siglei lipsește; pe rând rămân doar iconițele clasamentului, ale
+   contului, apoi ale secțiunilor („Teste” pleacă: sigla duce acolo), iar la final, cu contul deschis, și cuvântul din siglă. Textele
+   ascunse rămân pentru cititoarele de ecran. */
+.l-header__inner nav > * { flex-shrink: 0; white-space: nowrap; }
+.l-header:has(.c-account.is-signed) .c-logo__sub { display: none; }
+@media (max-width: 66rem) {
   .c-nav-board { width: 2.5rem; padding: 0; }
-  /* ascuns doar vizual: linkul își păstrează numele pentru cititoarele de ecran */
-  .c-nav-board__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .c-nav-board .c-nav__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
-@media (max-width: 42rem) {
+@media (max-width: 56rem) {
   .l-header:has(.c-account:not([hidden])) .c-nav-home { display: none; }
   .c-account { width: 2.5rem; padding: 0; }
   /* avatarul e chiar butonul: discul lui umple cercul */
@@ -26,9 +30,17 @@
   .c-account.has-avatar .c-account__icon { width: 2.75rem; }
   .c-account__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
+@media (max-width: 42rem) {
+  .c-nav-home, .c-logo__sub { display: none; }
+  .c-nav-fulger, .c-nav-invata { width: 2.5rem; padding: 0; }
+  .c-nav-fulger .c-nav__text, .c-nav-invata .c-nav__text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
 @media (max-width: 30rem) {
   .l-header__inner nav { --cluster-gap: 0.25rem; }
   .c-sound { width: 2.5rem; }
+}
+@media (max-width: 25rem) {
+  .l-header:has(.c-account.is-signed) .c-logo__name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
 
 /* ——— Mesaj trecător ——— */

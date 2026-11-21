@@ -353,11 +353,17 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   - **Id-urile** nu se scot, pentru că `validProfile()` verifică avatarul la fiecare scriere a profilului, și la contoare.
   - **Desenul** n-are id-uri și nici `clipPath` și se dimensionează prin container, ca orice `.v-svg`.
   - **Salvarea:** o schimbare doar de avatar rescrie numai clasamentele afișate (`shownBoards`); o poreclă nouă le rescrie pe toate.
-  - **Antetul** cu contul se strânge în trepte, ca să încapă și o poreclă de 20 de caractere:
-    - sub 47,5rem pleacă subtitlul siglei și textul clasamentului;
-    - sub 42rem pleacă „Teste” și porecla, iar avatarul rămâne buton;
-    - sub 30rem se strâng spațiile.
+  - **Antetul** (treptele stau toate în `css/09-cloud.css`) e mai lat decât conținutul (72rem), iar linkurile lui nu se strâng și
+    nu se rup (`flex-shrink: 0`, `nowrap`); textele lor sunt `.c-nav__text`, ascunse doar vizual. Cu contul deschis, subtitlul siglei
+    lipsește. Treptele:
+    - sub 66rem, clasamentul rămâne doar iconiță;
+    - sub 56rem pleacă porecla (avatarul rămâne buton) și „Teste”, dacă linkul contului se vede;
+    - sub 42rem, „Jocuri fulger” și „Învață” rămân iconițe, iar „Teste” și subtitlul pleacă mereu;
+    - sub 30rem se strâng spațiile;
+    - sub 25rem, cu contul deschis, pleacă și cuvântul din siglă (rămâne mascota).
 
-    E2E-ul contului verifică antetul la 1024, 768, 600, 390 și 360 px.
+    `header_ok` (`tools/e2e.py`) baleiază lățimile 320–1280 din 8 în 8: fără depășire, niciun link pe două rânduri sau strivit,
+    aceeași înălțime. Rulează fără cont în `npm run e2e` și, în `npm run e2e:cloud`, pe site fără cont și cu avatar și o poreclă de
+    20 de caractere. Un link nou în antet cere o treaptă nouă, găsită cu baleiajul.
   - **Atelierul:** miniatura unei variante e aspectul de acum cu doar acea alegere schimbată, iar culoarea naturală a animalului apare
     doar ca „Naturală”.

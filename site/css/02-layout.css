@@ -46,7 +46,9 @@
   backdrop-filter: blur(8px);
   border-bottom: 2px solid var(--c-line);
 }
+/* antetul e mai lat decât conținutul: pe ecranele mari încap toate etichetele, chiar și cu o poreclă de 20 de caractere */
 .l-header__inner {
+  max-width: 72rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
