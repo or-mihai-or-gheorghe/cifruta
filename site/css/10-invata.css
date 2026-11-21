@@ -1,0 +1,434 @@
+/* Învață: pagina lecțiilor (iv-hub, iv-chapter, iv-card), cadrul lecției (iv-lesson, balonul, bulinele), glisorul (iv-slider) și
+   widgeturile (iv-array, iv-jumps). Culorile factorilor: --c-rows (rândurile, grupele) și --c-cols (câte în fiecare), aceleași pe
+   glisoare și în calcul; culoarea nu e singurul indiciu (mânerul are numărul, calculul are cuvintele). */
+
+/* ——— Cardul de pe prima pagină: ca al Jocurilor fulger (.fg-home), în culorile secțiunii ——— */
+.iv-home {
+  border-color: var(--c-rows);
+  background: linear-gradient(120deg, var(--c-info-bg) 0%, #fffdf3 60%, var(--c-cols-bg) 100%);
+  box-shadow: var(--sh-edge) var(--c-rows-ink);
+}
+
+/* ——— Pagina: eroul, capitolele, cardurile lecțiilor ——— */
+.iv-hub__hero {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--sp-5);
+  padding: clamp(1.25rem, 0.8rem + 2vw, 2.25rem);
+  border: 2px solid var(--c-line);
+  border-radius: var(--r-4);
+  background: linear-gradient(135deg, #fff6d6 0%, var(--c-info-bg) 100%);
+}
+.iv-hub__bulb { width: clamp(3.5rem, 2.5rem + 4vw, 5.5rem); }
+.iv-hub__bulb .c-emoji { width: 100%; height: auto; margin: 0; }
+.iv-hub__title { font-size: var(--fs-5); }
+.iv-hub__text { font-size: var(--fs-2); color: var(--c-ink-soft); max-width: 46ch; }
+.iv-hub__mascot { width: clamp(5rem, 3rem + 6vw, 8rem); }
+@media (max-width: 40rem) {
+  .iv-hub__hero { grid-template-columns: auto 1fr; gap: var(--sp-3); }
+  .iv-hub__mascot { display: none; }
+}
+
+.iv-chapter {
+  display: grid;
+  gap: var(--sp-4);
+  padding: clamp(1rem, 0.5rem + 1.5vw, 1.25rem);
+  border: 2px solid var(--c-line);
+  border-radius: var(--r-4);
+  background: var(--c-paper-2);
+}
+.iv-chapter__head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-3); }
+.iv-chapter__head .c-card__icon { flex: none; }
+.iv-chapter__title { flex: 1 1 10rem; font-size: var(--fs-3); }
+.iv-chapter__text { max-width: 62ch; color: var(--c-ink-soft); }
+.iv-chapter__learn { display: grid; gap: 0.4rem; }
+.iv-chapter__label { font-size: var(--fs-1); }
+.iv-chapter__practice .c-emoji { width: 1.3rem; height: 1.3rem; margin: 0; }
+
+.iv-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr auto;
+  column-gap: var(--sp-3);
+  row-gap: var(--sp-2);
+  padding: var(--sp-4);
+  border: 2px solid var(--c-line);
+  border-radius: var(--r-3);
+  background: var(--c-surface);
+  color: var(--c-ink);
+  text-decoration: none;
+  transition: transform var(--dur-2) var(--ease-out), border-color var(--dur-2);
+}
+.iv-card:hover { transform: translateY(-2px); border-color: var(--c-brand); }
+.iv-card.is-done { border-color: var(--c-ok-ink); }
+.iv-card__num {
+  position: absolute;
+  top: -0.7rem;
+  left: -0.5rem;
+  display: grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  background: var(--c-brand);
+  color: var(--c-on-brand);
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.iv-card__icon { grid-row: 1 / span 2; }
+.iv-card__icon .c-emoji { width: 2.6rem; height: 2.6rem; margin: 0; }
+.iv-card__title { font-size: var(--fs-2); align-self: center; }
+.iv-card__text { grid-column: 2; font-size: var(--fs-0); color: var(--c-ink-soft); }
+.iv-card__foot { grid-column: 1 / -1; }
+
+/* ——— Cadrul lecției ——— */
+.iv-lesson { display: grid; gap: var(--sp-4); }
+.iv-lesson__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-2) var(--sp-3); }
+.iv-lesson__count { font-size: var(--fs-0); color: var(--c-ink-soft); }
+.iv-lesson__title { display: flex; align-items: center; gap: 0.5rem; font-size: clamp(1.45rem, 1.1rem + 1.6vw, 2.6rem); }
+.iv-lesson__icon .c-emoji { width: 1.15em; height: 1.15em; margin: 0; }
+.iv-lesson__body { display: grid; gap: var(--sp-4); align-items: start; }
+@media (min-width: 62rem) {
+  .iv-lesson__body { grid-template-columns: minmax(17rem, 24rem) 1fr; }
+}
+.iv-lesson__guide { display: grid; gap: var(--sp-2); }
+.iv-guide { align-items: flex-start; }
+.iv-guide .c-mascot__art { width: clamp(3.25rem, 2.5rem + 3vw, 5rem); }
+.iv-guide .c-bubble { flex: 1; min-width: 0; }
+.iv-lesson__nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sp-3); }
+.iv-lesson__link { font-family: var(--font-title); font-weight: 700; }
+
+/* balonul: indicația, provocarea, soluțiile găsite, variantele, „Bravo!” și „Ce am aflat” */
+.iv-bubble { display: grid; gap: 0.5rem; }
+.iv-intro { margin: 0; color: var(--c-ink-soft); }
+.iv-bubble__step { margin: 0; font-size: var(--fs-0); font-weight: 700; color: var(--c-ink-soft); }
+.iv-ask { margin: 0; font-size: var(--fs-2); font-weight: 700; line-height: 1.3; }
+.iv-founds { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0; padding: 0; list-style: none; }
+.iv-found {
+  min-width: 2.5rem;
+  padding: 0.2rem 0.65rem;
+  border: 2px dashed var(--c-line-strong);
+  border-radius: var(--r-pill);
+  font-family: var(--font-title);
+  font-weight: 700;
+  text-align: center;
+  color: var(--c-ink-soft);
+}
+.iv-found.is-found { border-style: solid; border-color: var(--c-ok-ink); background: var(--c-ok-bg); color: var(--c-ok-ink); }
+.iv-options { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.iv-option { min-width: 4rem; font-size: var(--fs-2); }
+.iv-option.is-correct { --btn-bg: var(--c-ok-bg); --btn-edge: var(--c-ok-ink); }
+.iv-option.is-wrong { text-decoration: line-through; }
+.iv-option .v-svg { width: 5.5rem; height: auto; }
+.iv-hint { margin: 0; font-weight: 700; color: var(--c-bad-ink); }
+.iv-bravo { margin: 0; font-family: var(--font-title); font-size: var(--fs-3); color: var(--c-ok-ink); }
+.iv-notes__title { margin: 0; font-family: var(--font-title); font-weight: 700; }
+.iv-notes { display: grid; gap: 0.3rem; margin: 0; padding-left: 1.2rem; }
+.iv-bubble__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.iv-dots { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0; padding: 0; list-style: none; }
+.iv-dot {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: 2px solid var(--c-line-strong);
+  border-radius: 50%;
+  background: var(--c-surface);
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--c-ink-soft);
+}
+.iv-dot.is-current { border-color: var(--c-brand); border-width: 3px; color: var(--c-brand-dark); }
+.iv-dot.is-done { border-color: var(--c-ok-ink); background: var(--c-ok-bg); color: var(--c-ok-ink); }
+
+/* scena widgetului: containerul după care se socotește mărimea căsuțelor */
+.iv-stage { container-type: inline-size; display: grid; gap: var(--sp-3); min-width: 0; }
+
+/* ——— Calculul de sub desen ——— */
+.iv-text { display: grid; justify-items: center; gap: 0.35rem; text-align: center; }
+.iv-eq { margin: 0; font-family: var(--font-title); font-size: var(--fs-4); font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.iv-array--split .iv-eq { font-size: var(--fs-2); }
+.iv-f--rows { color: var(--c-rows-ink); }
+.iv-f--cols { color: var(--c-cols-ink); }
+.iv-reading { margin: 0; font-size: var(--fs-1); }
+.iv-sum, .iv-extra { margin: 0; max-width: 40ch; font-size: var(--fs-1); color: var(--c-ink-soft); }
+.iv-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--sp-2); }
+/* obiectele careului: un buton în colțul dintre glisoare, care trece pe rând prin 🍎 ⭐ ● ■ */
+.iv-array__corner { grid-area: corner; display: grid; place-items: center; }
+.iv-picker {
+  display: grid;
+  place-items: center;
+  width: var(--track);
+  height: var(--track);
+  padding: 0;
+  border: 2px solid var(--c-line-strong);
+  border-radius: var(--r-2);
+  background: var(--c-surface);
+  box-shadow: 0 2px 0 var(--c-line-strong);
+  cursor: pointer;
+}
+.iv-picker:active { translate: 0 2px; box-shadow: none; }
+.iv-picker .c-emoji { width: 1.6rem; height: 1.6rem; margin: 0; }
+.iv-picker .iv-bead, .iv-picker .iv-tile { width: 1.3rem; }
+.iv-parts { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin: 0; }
+.iv-part { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.15rem 0.7rem; border-radius: var(--r-pill); background: var(--c-surface-2); font-family: var(--font-title); font-weight: 700; }
+.iv-part .c-emoji { width: 1.3rem; height: 1.3rem; margin: 0; }
+.iv-toggle[aria-pressed='true'] { --btn-bg: var(--c-ok-bg); --btn-edge: var(--c-ok-ink); color: var(--c-ok-ink); }
+.iv-toggle[aria-pressed='true']::before { content: '✓'; }
+
+/* ——— Glisorul: o riglă cu mânerul care arată numărul ——— */
+.iv-slider {
+  --tone: var(--c-cols);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.iv-slider[data-tone='rows'] { --tone: var(--c-rows); }
+.iv-slider[data-tone='cut'] { --tone: var(--c-ink); }
+.iv-slider--h { width: 100%; height: 100%; }
+.iv-slider--v { flex-direction: column; width: 100%; height: 100%; }
+.iv-slider__track {
+  position: relative;
+  flex: 1;
+  align-self: stretch;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: pan-y pinch-zoom;
+}
+.iv-slider--h .iv-slider__track { min-height: 2.75rem; }
+.iv-slider--v .iv-slider__track { min-width: 2.75rem; touch-action: pinch-zoom; }
+.iv-slider__track::before { content: ''; position: absolute; border-radius: var(--r-pill); background: var(--c-surface-2); box-shadow: inset 0 0 0 2px var(--c-line-strong); }
+.iv-slider--h .iv-slider__track::before { left: 0; right: 0; top: 62%; height: 0.55rem; translate: 0 -50%; }
+.iv-slider--v .iv-slider__track::before { top: 0; bottom: 0; left: 62%; width: 0.55rem; translate: -50% 0; }
+.iv-slider__fill { position: absolute; border-radius: var(--r-pill); background: var(--tone); }
+.iv-slider--h .iv-slider__fill { left: 0; top: 62%; height: 0.55rem; width: calc((var(--value) - 0.5) / var(--count) * 100%); translate: 0 -50%; }
+.iv-slider--v .iv-slider__fill { top: 0; left: 62%; width: 0.55rem; height: calc((var(--value) - 0.5) / var(--count) * 100%); translate: -50% 0; }
+.iv-slider__ticks { position: absolute; inset: 0; display: flex; margin: 0; padding: 0; list-style: none; pointer-events: none; }
+.iv-slider--v .iv-slider__ticks { flex-direction: column; }
+.iv-slider__ticks li { flex: 1; display: flex; justify-content: center; font-size: 0.75rem; font-weight: 700; line-height: 1; color: var(--c-ink-soft); font-variant-numeric: tabular-nums; }
+.iv-slider--h .iv-slider__ticks li { align-items: flex-start; padding-top: 0.1rem; }
+.iv-slider--v .iv-slider__ticks li { align-items: center; justify-content: flex-start; padding-left: 0.05rem; }
+.iv-slider__ticks li.is-off { opacity: 0.3; }
+.iv-slider__thumb {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 3px solid var(--c-surface);
+  border-radius: 50%;
+  background: var(--tone);
+  box-shadow: 0 2px 0 var(--c-line-strong), 0 0 0 2px var(--tone);
+  color: var(--c-on-brand);
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 700;
+  pointer-events: none;
+}
+.iv-slider--h .iv-slider__thumb { top: 62%; left: calc((var(--value) - 0.5) / var(--count) * 100%); translate: -50% -50%; }
+.iv-slider--v .iv-slider__thumb { left: 62%; top: calc((var(--value) - 0.5) / var(--count) * 100%); translate: -50% -50%; }
+.iv-slider.is-dragging .iv-slider__thumb { scale: 1.12; }
+.iv-slider:has(input:focus-visible) .iv-slider__track { outline: 3px solid var(--c-focus); outline-offset: 3px; border-radius: var(--r-2); }
+.iv-slider__step { flex: none; width: 2.75rem; min-height: 2.75rem; padding: 0; font-size: 1.5rem; touch-action: manipulation; }
+.iv-control { display: grid; gap: 0.25rem; }
+.iv-control__label { font-family: var(--font-title); font-weight: 700; }
+
+/* ——— Dreptunghiul înmulțirii ——— */
+.iv-array {
+  --track: 2.75rem;
+  --side: 2.25rem;
+  --gap: 0.25rem;
+  --chrome: 13rem;
+  --cell: clamp(1.25rem, min((100cqw - var(--track) - var(--side) - 2 * var(--gap)) / var(--cols-max), (100dvh - var(--chrome)) / var(--rows-max)), 2.75rem);
+  --pitch: var(--cell);
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-3);
+}
+.iv-array--split { --side: var(--track); }
+.iv-array--table { --side: 0rem; }
+/* farfuriile: cel mult 6 × 6, deci căsuțe mai mari, iar între tăvi rămâne loc */
+.iv-array--plates {
+  --cell: clamp(1.75rem, min((100cqw - var(--track) - var(--side) - 2 * var(--gap)) / var(--cols-max), (100dvh - var(--chrome)) / var(--rows-max) - 0.5rem), 3.25rem);
+  --pitch: calc(var(--cell) + 0.5rem);
+}
+.iv-array__stage {
+  display: grid;
+  grid-template-columns: var(--track) calc(var(--cell) * var(--cols-max)) var(--side);
+  grid-template-rows: var(--track) calc(var(--pitch) * var(--rows-max));
+  grid-template-areas: 'corner top .' 'left board side';
+  gap: var(--gap);
+}
+.iv-array__top { grid-area: top; min-width: 0; }
+.iv-array__left { grid-area: left; min-height: 0; }
+.iv-array__side { grid-area: side; min-height: 0; }
+.iv-array__board {
+  grid-area: board;
+  position: relative;
+  touch-action: manipulation;
+  cursor: pointer;
+  border-radius: var(--r-1);
+  -webkit-tap-highlight-color: transparent;
+}
+/* locurile goale ale careului: puncte la mijlocul căsuțelor */
+.iv-array--grid .iv-array__board, .iv-array--split .iv-array__board {
+  background-image: radial-gradient(circle, var(--c-line-strong) 0 2px, transparent 2.5px);
+  background-size: var(--cell) var(--cell);
+}
+.iv-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: var(--cell);
+  height: var(--pitch);
+  transform: translate(calc(var(--c) * var(--cell)), calc(var(--r) * var(--pitch)));
+  opacity: 0;
+  scale: 0.4;
+  transition: transform var(--dur-3) var(--ease-out), opacity var(--dur-2) var(--ease-out), scale var(--dur-2) var(--ease-spring);
+  pointer-events: none;
+}
+.iv-item.is-on { opacity: 1; scale: 1; }
+/* „Întoarce”: fiecare obiect alunecă din (r, c) în (c, r) */
+.iv-array.is-flipped .iv-item { transform: translate(calc(var(--r) * var(--cell)), calc(var(--c) * var(--pitch))); }
+.iv-item .c-emoji { width: calc(var(--cell) * 0.82); height: calc(var(--cell) * 0.82); margin: 0; }
+.iv-bead { display: block; width: 62%; aspect-ratio: 1; border-radius: 50%; background: var(--c-rows); box-shadow: inset 0 0 0 2px var(--c-rows-ink); }
+.iv-tile { display: block; width: 92%; aspect-ratio: 1; border-radius: 3px; background: var(--c-cols); box-shadow: inset 0 0 0 2px var(--c-cols-ink); }
+.iv-item__bottom { display: none; }
+.iv-item.is-bottom .iv-item__top { display: none; }
+.iv-item.is-bottom .iv-item__bottom { display: block; }
+.iv-item.is-bump { animation: iv-bump var(--dur-3) var(--ease-spring); }
+@keyframes iv-bump {
+  50% { scale: 1.3; }
+}
+
+/* farfuriile: câte o tavă sub fiecare rând, cât rândul */
+.iv-tray {
+  position: absolute;
+  top: calc(var(--r) * var(--pitch) + 0.1rem);
+  left: calc(var(--cell) * -0.1);
+  width: calc(var(--cols) * var(--cell) + var(--cell) * 0.2);
+  height: calc(var(--pitch) - 0.2rem);
+  border: 2px solid var(--c-line-strong);
+  border-radius: var(--r-pill);
+  background: var(--v-cream, #ffebcc);
+  opacity: 0;
+  transition: opacity var(--dur-2) var(--ease-out);
+}
+.iv-tray.is-on { opacity: 1; }
+
+/* numărătoarea de la capătul rândurilor: 4, 8, 12… */
+.iv-array__totals { position: relative; height: 100%; margin: 0; padding: 0; list-style: none; }
+.iv-array__totals li {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--r) * var(--pitch));
+  display: grid;
+  place-items: center;
+  height: var(--pitch);
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: clamp(0.75rem, calc(var(--cell) * 0.5), 1.1rem);
+  color: var(--c-rows-ink);
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+}
+.iv-array__totals li.is-on { opacity: 1; }
+.iv-array__totals li.is-bump { animation: iv-bump var(--dur-3) var(--ease-spring); }
+
+/* tăietura dintre rânduri */
+.iv-cutline {
+  position: absolute;
+  top: calc(var(--cut) * var(--cell));
+  left: -0.4rem;
+  width: calc(var(--cols) * var(--cell) + 0.8rem);
+  border-top: 3px dashed var(--c-ink);
+  translate: 0 -1.5px;
+  pointer-events: none;
+}
+
+/* harta tablei: produsul se vede în căsuțele știute și în cea aleasă; dreptunghiul până acolo e colorat */
+.iv-cell {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: var(--cell);
+  height: var(--cell);
+  transform: translate(calc(var(--c) * var(--cell)), calc(var(--r) * var(--cell)));
+  border: 1px solid var(--c-line);
+  background: var(--c-paper-2);
+  color: transparent;
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: max(0.75rem, calc(var(--cell) * 0.42));
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.iv-cell.is-in { background: var(--c-cols-bg); }
+.iv-cell.is-lit { color: var(--c-ok-ink); }
+.iv-cell.is-lit:not(.is-in) { background: var(--c-ok-bg); }
+.iv-cell.is-todo { border: 2px dashed var(--c-bad-ink); }
+.iv-cell.is-sel { z-index: 1; color: var(--c-ink); background: var(--c-accent); box-shadow: 0 0 0 3px var(--c-ink); }
+
+/* ——— Săriturile pe axă ——— */
+.iv-jumps { display: grid; justify-items: center; gap: var(--sp-3); }
+.iv-jumps__art { width: 100%; max-width: 40rem; justify-self: center; }
+.iv-jumps__controls { display: grid; gap: var(--sp-3); width: 100%; max-width: 32rem; justify-self: center; }
+.v-skip-line__hop { transform-box: fill-box; transform-origin: 50% 100%; }
+.v-skip-line__hop.is-new { animation: iv-hop var(--dur-3) var(--ease-spring) both; }
+.iv-jumps__art.is-playing .v-skip-line__hop { animation: iv-hop 0.32s var(--ease-out) both; animation-delay: calc(var(--i) * 280ms); }
+@keyframes iv-hop {
+  from { opacity: 0; transform: scale(0.6); }
+}
+
+/* ——— Ecranele joase (telefonul ținut orizontal): desenul în stânga; Cifruța, calculul și butoanele în dreapta ———
+   Scena și widgetul devin `display: contents`, ca bucățile widgetului să se așeze direct în grila lecției; căsuța se socotește
+   atunci după înălțime (fără container, unitățile cq trec la ecran). */
+@media (max-height: 32rem) and (min-width: 40rem) {
+  body.is-lesson .l-header__inner { min-height: 3rem; }
+  body.is-lesson .c-logo__art { width: 2rem; height: 2rem; }
+  body.is-lesson .c-logo__sub { display: none; }
+  body.is-lesson .l-main { padding-block: var(--sp-2) var(--sp-5); }
+  .iv-lesson { gap: var(--sp-2); }
+  .iv-lesson__title { font-size: var(--fs-2); }
+  .iv-lesson__body {
+    grid-template-columns: auto minmax(14rem, 1fr);
+    grid-template-rows: auto auto auto auto auto 1fr;
+    grid-template-areas: 'stage guide' 'stage eq' 'stage ctrl' 'stage tools' 'stage text' 'stage .';
+    column-gap: var(--sp-5);
+    row-gap: var(--sp-2);
+  }
+  .iv-lesson__guide { grid-area: guide; }
+  .iv-stage, .iv-array, .iv-jumps { display: contents; }
+  .iv-array__stage, .iv-jumps__art { grid-area: stage; }
+  .iv-jumps__art { width: min(26rem, 52vw); align-self: center; }
+  .iv-eq { grid-area: eq; justify-self: start; font-size: var(--fs-3); }
+  .iv-jumps__controls { grid-area: ctrl; justify-self: stretch; }
+  .iv-tools { grid-area: tools; justify-self: start; justify-content: flex-start; }
+  .iv-text { grid-area: text; justify-items: start; text-align: left; }
+  .iv-array { --chrome: 7.5rem; }
+  .iv-guide .c-mascot__art { width: 3rem; }
+  .iv-intro { font-size: var(--fs-0); }
+  .iv-ask { font-size: var(--fs-1); }
+}
+/* pe telefoanele înguste: Cifruța și textele balonului mai mici, ca desenul să încapă sub provocare */
+@media (max-width: 30rem) {
+  body.is-lesson .l-main { padding-top: var(--sp-3); }
+  .iv-lesson { gap: var(--sp-3); }
+  .iv-guide .c-mascot__art { width: 2.75rem; }
+  .iv-intro { font-size: var(--fs-0); }
+  .iv-ask { font-size: var(--fs-1); }
+  .iv-array { --gap: 0.15rem; }
+}

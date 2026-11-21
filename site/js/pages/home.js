@@ -4,9 +4,12 @@ import { h } from '../core/dom.js';
 import { allTests, catalog } from '../core/loader.js';
 import { historyBox } from '../components/history.js';
 import { cantitate } from '../core/ro.js';
-import { getFulger } from '../core/storage.js';
+import { getFulger, getLessons } from '../core/storage.js';
 import { art, chip, mascot } from '../components/ui.js';
 import { playableTopics, topicTotal } from '../fulger/engine.js';
+import invataData from '../../data/invata.js';
+import { playableChapters } from '../invata/logic.js';
+import { lessonsDone } from '../invata/progress.js';
 import { medalsWon } from '../fulger/medals.js';
 import { emojiHTML } from '../visuals/emoji.js';
 
@@ -36,6 +39,31 @@ function fulgerCard() {
       medalChip,
     ),
     h('span', { class: 'c-btn c-btn--accent c-btn--lg fg-home__cta', 'aria-hidden': 'true' }, 'Joacă'),
+  );
+}
+
+/** Cardul secțiunii Învață, cu lecțiile terminate din fiecare capitol. */
+function invataCard() {
+  const all = getLessons();
+  return h(
+    'a',
+    { class: 'fg-home iv-home anim-fade-up', href: '#/invata', 'data-testid': 'invata-card' },
+    h('div', { class: 'fg-home__bolt', 'aria-hidden': 'true', html: emojiHTML('idee') }),
+    h(
+      'div',
+      { class: 'fg-home__body l-stack l-stack--sm' },
+      h('h2', { class: 'fg-home__title' }, 'Învață cu Cifruța'),
+      h('p', { class: 'fg-home__text' }, 'Lecții cu desene pe care le miști tu: înmulțirea cu rânduri și coloane, sărituri și trucuri pentru tabla înmulțirii.'),
+    ),
+    h(
+      'div',
+      { class: 'fg-home__levels l-cluster' },
+      playableChapters(invataData).map((c) => {
+        const done = lessonsDone(c, all);
+        return done ? chip(`${c.short}: ${done} din ${cantitate(c.lessons.length, 'lecție', 'lecții')}`, done === c.lessons.length ? 'c-chip--ok' : '') : chip(`${c.short}: nou`, 'c-chip--soon');
+      }),
+    ),
+    h('span', { class: 'c-btn c-btn--accent c-btn--lg fg-home__cta', 'aria-hidden': 'true' }, 'Învață'),
   );
 }
 
@@ -76,6 +104,7 @@ export default function home(container) {
         ),
       ),
       fulgerCard(),
+      invataCard(),
       h('div', { class: 'l-grid anim-stagger', style: { '--grid-min': '15rem' } }, sections),
       mascot('incurajeaza', 'Sfat: citește cu atenție fiecare cerință. Poți sări peste un exercițiu și poți reveni la el oricând.'),
       historyBox(allTests(), {

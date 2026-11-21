@@ -3,8 +3,8 @@
 // „Ce am aflat” (`notes`). Provocările:
 //   want    — o stare a widgetului („Arată 4 × 6.” → { rows: 4, cols: 6 });
 //   collect — mai multe soluții diferite, după `by`, cel puțin `need`;
-//   pick    — o alegere, cu răspunsul calculat de regula `rule` (js/invata/logic.js, PICK_RULES); `hide` ascunde o mărime cât e
-//             activă provocarea, ca răspunsul să nu stea scris pe ecran.
+//   pick    — o alegere, cu răspunsul calculat de regula `rule` (js/invata/logic.js, PICK_RULES), și un indiciu (`hint`) după o
+//             variantă greșită; `hide` ascunde o mărime cât e activă provocarea, ca răspunsul să nu stea scris pe ecran.
 // tests/invata.test.js verifică totul: provocările se pot rezolva din interfață, în ordine, iar textele sunt corecte.
 // Id-urile capitolelor, ale lecțiilor și ale provocărilor sunt permanente: stau în progresul salvat (`cifruta:invata`).
 
@@ -76,12 +76,12 @@ export default {
           id: 'spargem-dreptunghiul',
           title: 'Spargem dreptunghiul',
           icon: 'para',
-          intro: 'Taie dreptunghiul în două bucăți ușoare, apoi adună-le.',
+          intro: 'Taie dreptunghiul în două bucăți ușoare, apoi adună bucățile.',
           concepts: ['mat.op.tabla-inmultirii', 'mat.op.inmultire-proprietati'],
           widget: { w: 'array', skin: 'split', rows: 4, cols: 3, cut: 2 },
           tasks: [
             { id: 'sapte-sase', ask: 'Arată 7 × 6, tăiat după 5 rânduri.', want: { rows: 7, cols: 6, cut: 5 } },
-            { id: 'sapte-opt', ask: 'Cât face 7 × 8? Taie-l după 5 rânduri.', pick: [54, 56, 63], rule: 'produs', of: [7, 8], hide: ['product'] },
+            { id: 'sapte-opt', ask: 'Cât face 7 × 8? Taie-l după 5 rânduri.', pick: [54, 56, 63], rule: 'produs', of: [7, 8], hide: ['product'], hint: 'Încă nu. Adună bucățile: 5 × 8 = 40 și 2 × 8 = 16.' },
             { id: 'sase-noua', ask: 'Arată 6 × 9 din două bucăți egale.', want: { rows: 6, cols: 9, cut: 3 } },
           ],
           notes: [

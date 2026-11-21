@@ -57,6 +57,14 @@
   --c-z-ink: #c92a2a;
   --c-u-ink: #1971c2;
 
+  /* ——— Învață: culorile factorilor (rândurile sau grupele și câte în fiecare), aceleași pe glisoare și în calcul ——— */
+  --c-rows: #1c6fc0;
+  --c-rows-bg: #dfeefb;
+  --c-rows-ink: #155f9e;
+  --c-cols: #c2410c;
+  --c-cols-bg: #ffedd5;
+  --c-cols-ink: #9a3412;
+
   /* ——— Temele testelor (accent decorativ) ——— */
   --c-theme: var(--c-brand);
   --c-theme-bg: var(--c-brand-soft);

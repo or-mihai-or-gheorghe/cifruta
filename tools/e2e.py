@@ -132,7 +132,7 @@ def header_ok(run: Run, page: Page, label: str):
 
 
 def smoke(run: Run, page: Page, vp: str):
-    for route, name in [("", "acasa"), ("sectiune/recapitulare", "sectiune"), ("fulger", "calcul-fulger"), ("invata", "invata"), ("fulger/adunari-scaderi-100", "calcul-fulger-tema"), ("fulger/siruri-intrusi", "fulger-siruri-intrusi"), ("atelier/fulger", "atelier-fulger"), ("atelier/componente", "atelier-componente"), ("atelier/vizualuri", "atelier-vizualuri"), ("atelier/tipuri", "atelier-tipuri"), ("atelier/avatare", "atelier-avatare"), ("nu-exista", "404")]:
+    for route, name in [("", "acasa"), ("sectiune/recapitulare", "sectiune"), ("fulger", "calcul-fulger"), ("invata", "invata"), ("invata/inmultirea/randuri-coloane", "invata-lectie"), ("fulger/adunari-scaderi-100", "calcul-fulger-tema"), ("fulger/siruri-intrusi", "fulger-siruri-intrusi"), ("atelier/fulger", "atelier-fulger"), ("atelier/componente", "atelier-componente"), ("atelier/vizualuri", "atelier-vizualuri"), ("atelier/tipuri", "atelier-tipuri"), ("atelier/avatare", "atelier-avatare"), ("nu-exista", "404")]:
         run.goto(page, route)
         page.wait_for_function("document.querySelector('main')?.innerText.trim().length > 0")
         page.wait_for_timeout(300)
@@ -1190,9 +1190,241 @@ def keyboard_flow(run: Run, browser, base: str):
     context.close()
 
 
+# ——— Învață: lecțiile interactive ———
+IV_STATE = "window.__dbg.invata.state()"
+IV_TASK = "window.__dbg.invata.task()"
+# mărimile de pe ecran: scena (desenul cu glisoarele) încape sub antet, pistele glisoarelor au cel puțin 44 px, căsuțele cel puțin
+# 20 px, iar textul HTML și cel din desene are cel puțin `min_text` px
+IV_FIT = """(() => {
+  const stage = document.querySelector('.iv-array__stage, .iv-jumps__art');
+  const r = stage.getBoundingClientRect();
+  const tracks = [...document.querySelectorAll('.iv-slider__track')].map((t) => { const b = t.getBoundingClientRect(); return t.closest('.iv-slider--v') ? b.width : b.height; });
+  const board = document.querySelector('.iv-array__board');
+  const cell = board ? board.getBoundingClientRect().width / Number(getComputedStyle(board).getPropertyValue('--cols-max')) : null;
+  const shown = (e) => e.getClientRects().length && !e.closest('.u-visually-hidden, svg');
+  const texts = [...document.querySelectorAll('.iv-lesson *')].filter((e) => shown(e) && [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()));
+  const svgText = [...document.querySelectorAll('.iv-lesson svg text')].map((t) => parseFloat(t.getAttribute('font-size')) * t.getScreenCTM().a);
+  return { w: r.width, h: r.height, vw: innerWidth, vh: innerHeight, header: document.querySelector('.l-header').getBoundingClientRect().height,
+           track: Math.min(...tracks), cell, text: Math.min(...texts.map((e) => parseFloat(getComputedStyle(e).fontSize)), ...svgText) };
+})()"""
+
+
+def iv_lessons(run: Run, page: Page) -> list[dict]:
+    """Lecțiile din pagina secțiunii (?debug=1): capitolul, lecția și câte provocări are."""
+    run.goto(page, "invata", debug=True)
+    page.wait_for_function("window.__dbg && window.__dbg.invata && window.__dbg.invata.lessons")
+    return page.evaluate("window.__dbg.invata.lessons")
+
+
+def iv_slide(page: Page, sid: str, value: int):
+    """Duce glisorul la `value` din tastatură; fiecare tastă e un gest încheiat, deci provocarea se verifică după fiecare."""
+    slider = page.get_by_test_id(f"iv-slider-{sid}")
+    box = slider.locator("input")
+    current = int(box.input_value())
+    if current == value:
+        return
+    more, less = ("ArrowDown", "ArrowUp") if "iv-slider--v" in (slider.get_attribute("class") or "") else ("ArrowRight", "ArrowLeft")
+    box.focus()
+    for _ in range(abs(value - current)):
+        page.keyboard.press(more if value > current else less)
+
+
+def iv_reach(page: Page, target: dict):
+    """Starea-țintă dată de __dbg.invata.solution(): întâi glisoarele, apoi strategiile hărții."""
+    for cid in page.evaluate("window.__dbg.invata.controls()"):
+        if cid in target:
+            iv_slide(page, cid, target[cid])
+    lit = page.evaluate(IV_STATE).get("lit")
+    if lit is not None:
+        for sid in sorted(set(target.get("lit", [])) ^ set(lit)):
+            page.get_by_test_id(f"iv-toggle-{sid}").click()
+
+
+def iv_solve(run: Run, page: Page, label: str, wrong_pick: bool = True) -> int:
+    """Rezolvă din interfață toate provocările lecției deschise; întoarce câte au primit „Bravo”."""
+    won = 0
+    for _ in range(40):
+        task = page.evaluate(IV_TASK)
+        if task["phase"] == "done":
+            break
+        if task["phase"] == "won":
+            page.get_by_test_id("iv-continue").click()
+            continue
+        sol = page.evaluate("window.__dbg.invata.solution()")
+        if task["hide"]:
+            eq = page.get_by_test_id("iv-eq").inner_text().strip()
+            run.check(eq.endswith("?"), f"{label}: {task['id']}: rezultatul e ascuns cât timp se cere („{eq}”)")
+        if "pick" in sol:
+            if wrong_pick:
+                count = page.locator("[data-testid^=iv-option-]").count()
+                wrong = next(i for i in range(count) if i != sol["pick"])
+                page.get_by_test_id(f"iv-option-{wrong}").click()
+                run.check(page.get_by_test_id("iv-hint").is_visible() and page.evaluate(IV_TASK)["phase"] == "task", f"{label}: {task['id']}: la o variantă greșită, un indiciu, iar provocarea rămâne")
+            page.get_by_test_id(f"iv-option-{sol['pick']}").click()
+        else:
+            before = len(task["found"])
+            iv_reach(page, sol)
+            after = page.evaluate(IV_TASK)
+            if after["phase"] == "task":
+                run.check(len(after["found"]) > before, f"{label}: {task['id']}: o soluție nouă ({after['found']})")
+                continue
+        done = page.evaluate(IV_TASK)["phase"]
+        run.check(done in ("won", "done") and (page.get_by_test_id("iv-bravo").count() + page.get_by_test_id("iv-done").count()) > 0, f"{label}: {task['id']}: rezolvată din interfață, cu „Bravo”")
+        won += 1
+    return won
+
+
+def invata_flow(run: Run, page: Page, vp: str):
+    """Învață: pagina secțiunii, lecțiile rezolvate din interfață (pe laptop toate, altfel două), apoi bifele salvate."""
+    run.goto(page, "")
+    page.evaluate("localStorage.removeItem('cifruta:invata')")
+    lessons = iv_lessons(run, page)
+    run.check(len(lessons) >= 5 and page.get_by_test_id("iv-soon-impartirea").is_visible(), f"[{vp}] învață: {len(lessons)} lecții, iar „Împărțirea” e „în curând”")
+    run.layout_ok(page, f"[{vp}] învață")
+    run.shot(page, f"{vp}-invata")
+    chosen = lessons if vp == "laptop" else [x for x in lessons if x["lesson"] in ("randuri-coloane", "spargem-dreptunghiul")]
+    for lesson in chosen:
+        label = f"[{vp}] {lesson['lesson']}"
+        run.goto(page, f"invata/{lesson['chapter']}/{lesson['lesson']}", debug=True)
+        page.wait_for_selector("[data-testid=iv-bubble] [data-testid=iv-ask]")
+        run.layout_ok(page, label)
+        run.shot(page, f"{vp}-invata-{lesson['lesson']}")
+        won = iv_solve(run, page, label)
+        run.check(won == lesson["tasks"] and page.get_by_test_id("iv-notes").is_visible(), f"{label}: toate cele {lesson['tasks']} provocări, apoi „Ce am aflat” ({won})")
+        if vp == "laptop":
+            run.shot(page, f"{vp}-invata-{lesson['lesson']}-gata")
+    run.goto(page, "invata")
+    page.reload()
+    page.wait_for_selector("[data-testid^=iv-card-state-]")
+    states = {x["lesson"]: page.get_by_test_id(f"iv-card-state-{x['lesson']}").inner_text() for x in lessons}
+    run.check(all(("Gata" in states[x["lesson"]]) == (x in chosen) for x in lessons), f"[{vp}] învață: bifele lecțiilor terminate rămân după reîncărcare ({states})")
+    run.goto(page, "")
+    chips = page.get_by_test_id("invata-card").inner_text()
+    run.check(f"{len(chosen)} din" in chips, f"[{vp}] prima pagină: cardul „Învață” arată lecțiile terminate ({chips!r})")
+    run.goto(page, "invata/inmultirea")
+    page.wait_for_selector("[data-testid=iv-chapter-inmultirea]")
+    page.wait_for_timeout(200)
+    top = page.get_by_test_id("iv-chapter-inmultirea").bounding_box()["y"]
+    run.check(0 <= top <= 160, f"[{vp}] #/invata/inmultirea derulează la capitol (sus la {top:.0f}px)")
+    run.goto(page, "invata/nu-exista")
+    page.wait_for_selector("[data-testid^=iv-chapter-]")
+    run.check(page.evaluate("location.hash") == "#/invata", f"[{vp}] un capitol necunoscut duce la #/invata")
+
+
+def invata_gestures(run: Run, page: Page, vp: str):
+    """Gesturile pe dreptunghi: atingerea pe careu, tragerea glisoarelor (mouse sau deget, fără să se miște pagina), „Întoarce”,
+    obiectele și „Numără”."""
+    touch = vp != "laptop"
+    run.goto(page, "invata/inmultirea/randuri-coloane", debug=True)
+    page.wait_for_selector("[data-testid=iv-array]")
+    board = page.locator(".iv-array__board")
+    board.scroll_into_view_if_needed()
+    b = board.bounding_box()
+    x, y = b["x"] + b["width"] * 0.55, b["y"] + b["height"] * 0.45  # rândul 5, coloana 6
+    if touch:
+        page.touchscreen.tap(x, y)
+    else:
+        page.mouse.click(x, y)
+    st = page.evaluate(IV_STATE)
+    status = page.get_by_test_id("iv-status").inner_text()
+    run.check((st["rows"], st["cols"]) == (5, 6) and "5 ori 6 egal 30" in status, f"[{vp}] învață: o atingere pe careu întinde dreptunghiul ({st['rows']} × {st['cols']}; „{status}”)")
+
+    def drag(sid: str, to: int):
+        track = page.locator(f"[data-testid=iv-slider-{sid}] .iv-slider__track")
+        track.scroll_into_view_if_needed()
+        t = track.bounding_box()
+        vertical = sid == "rows"
+        cur = page.evaluate(IV_STATE)[sid]
+        at = lambda v: (t["x"] + t["width"] / 2, t["y"] + t["height"] * (v - 0.5) / 10) if vertical else (t["x"] + t["width"] * (v - 0.5) / 10, t["y"] + t["height"] / 2)
+        (x0, y0), (x1, y1) = at(cur), at(to)
+        scroll = page.evaluate("scrollY")
+        if touch:
+            cdp = page.context.new_cdp_session(page)
+            cdp.send("Input.dispatchTouchEvent", {"type": "touchStart", "touchPoints": [{"x": x0, "y": y0}]})
+            for k in range(1, 9):
+                cdp.send("Input.dispatchTouchEvent", {"type": "touchMove", "touchPoints": [{"x": x0 + (x1 - x0) * k / 8, "y": y0 + (y1 - y0) * k / 8}]})
+            cdp.send("Input.dispatchTouchEvent", {"type": "touchEnd", "touchPoints": []})
+            cdp.detach()
+        else:
+            page.mouse.move(x0, y0)
+            page.mouse.down()
+            page.mouse.move(x1, y1, steps=8)
+            page.mouse.up()
+        page.wait_for_timeout(100)
+        got = page.evaluate(IV_STATE)[sid]
+        moved = page.evaluate("scrollY") - scroll
+        run.check(got == to and abs(moved) <= 1, f"[{vp}] învață: tragerea glisorului „{sid}” până la {to} ({got}; pagina s-a mișcat {moved}px)")
+
+    drag("rows", 8)
+    drag("cols", 9)
+    page.get_by_test_id("iv-flip").click()
+    st = page.evaluate(IV_STATE)
+    flipped = "is-flipped" in (page.get_by_test_id("iv-array").get_attribute("class") or "")
+    run.check((st["rows"], st["cols"]) == (9, 8) and flipped, f"[{vp}] învață: „Întoarce” schimbă rândurile cu coloanele ({st['rows']} × {st['cols']})")
+    page.get_by_test_id("iv-item").click()
+    reading = page.locator(".iv-reading").inner_text()
+    run.check(page.evaluate(IV_STATE)["item"] == "stea" and "stele" in reading, f"[{vp}] învață: butonul din colț schimbă obiectele („{reading}”)")
+    page.get_by_test_id("iv-count").click()
+    page.wait_for_timeout(300)
+    run.layout_ok(page, f"[{vp}] învață, după gesturi")
+    run.shot(page, f"{vp}-invata-gesturi")
+
+
+def invata_screens(run: Run, browser, base: str):
+    """Fiecare lecție pe telefonul ținut orizontal și pe cel mic: desenul încape, glisoarele și căsuțele au mărimi de atins, textul
+    se citește."""
+    screens = [
+        ("telefon culcat", {"viewport": {"width": 844, "height": 390}, "has_touch": True, "is_mobile": True}, 11),
+        ("telefon mic", {"viewport": {"width": 360, "height": 640}, "has_touch": True, "is_mobile": True}, 12),
+    ]
+    for name, opts, min_text in screens:
+        context = browser.new_context(locale="ro-RO", **opts)
+        page = context.new_page()
+        run.watch(page, name)
+        for lesson in iv_lessons(run, page):
+            label = f"[{name}] {lesson['lesson']}"
+            run.goto(page, f"invata/{lesson['chapter']}/{lesson['lesson']}", debug=True)
+            page.wait_for_selector("[data-testid=iv-stage] .iv-slider")
+            page.wait_for_timeout(150)
+            run.layout_ok(page, label)
+            m = page.evaluate(IV_FIT)
+            run.check(m["w"] <= m["vw"] and m["h"] <= m["vh"] - m["header"], f"{label}: desenul încape sub antet ({m['w']:.0f}×{m['h']:.0f} în {m['vw']}×{m['vh'] - m['header']:.0f})")
+            run.check(m["track"] >= 43.5, f"{label}: glisoarele au cel puțin 44 px de atins ({m['track']:.0f})")
+            run.check(m["cell"] is None or m["cell"] >= 20, f"{label}: căsuțele au cel puțin 20 px ({m['cell']})")
+            run.check(m["text"] >= min_text, f"{label}: textul are cel puțin {min_text} px ({m['text']:.1f})")
+            run.shot(page, f"invata-{name.replace(' ', '-')}-{lesson['lesson']}")
+        context.close()
+
+
+def invata_keyboard(run: Run, browser, base: str):
+    """Doar tastatura, cu mișcare redusă: glisorul vertical merge după direcția de pe ecran, focusul se vede, iar la finalul lecției
+    nu cade confetti."""
+    context = browser.new_context(locale="ro-RO", reduced_motion="reduce", viewport={"width": 1280, "height": 800})
+    page = context.new_page()
+    run.watch(page, "tastatură, învață")
+    page.goto(f"{base}?debug=1#/invata/inmultirea/randuri-coloane")
+    page.wait_for_selector("[data-testid=iv-slider-rows]")
+    page.get_by_test_id("iv-slider-rows").locator("input").focus()
+    before = page.evaluate(IV_STATE)["rows"]
+    page.keyboard.press("ArrowDown")
+    run.check(page.evaluate(IV_STATE)["rows"] == before + 1, "[tastatură] învață: ↓ adaugă un rând (glisorul vertical crește în jos)")
+    page.keyboard.press("End")
+    run.check(page.evaluate(IV_STATE)["rows"] == 10, "[tastatură] învață: End duce la 10 rânduri")
+    outline = page.evaluate("getComputedStyle(document.querySelector('[data-testid=iv-slider-rows] .iv-slider__track')).outlineStyle")
+    run.check(outline not in ("none", ""), f"[tastatură] învață: focusul se vede pe glisor ({outline})")
+    page.keyboard.press("Shift+Tab")
+    run.check(page.evaluate("document.activeElement?.closest('[data-testid]')?.dataset.testid") == "iv-slider-cols", "[tastatură] învață: Shift+Tab trece la glisorul de sus")
+    page.goto(f"{base}?debug=1#/invata/inmultirea/grupe-egale")
+    page.wait_for_selector("[data-testid=iv-slider-rows]")
+    iv_solve(run, page, "[tastatură] grupe-egale", wrong_pick=False)
+    page.wait_for_timeout(300)
+    run.check(page.locator(".anim-confetti").count() == 0 and page.get_by_test_id("iv-done").is_visible(), "[tastatură] învață: lecția terminată, fără confetti la mișcare redusă")
+    context.close()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--only", help="rulează doar testele cu aceste id-uri, despărțite prin virgulă, și cu * („u2-t*”); „tipuri”: tipurile din atelier și tastatura; „fulger”: Jocurile fulger")
+    parser.add_argument("--only", help="rulează doar testele cu aceste id-uri, despărțite prin virgulă, și cu * („u2-t*”); „tipuri”: tipurile din atelier și tastatura; „fulger”: Jocurile fulger; „invata”: lecțiile din Învață")
     parser.add_argument("--shots", action="store_true", help="salvează capturi în test-results/")
     parser.add_argument("--base-url", help="testează un site publicat în loc de serverul local")
     parser.add_argument("--viewports", default="laptop,tableta,telefon")
@@ -1203,6 +1435,7 @@ def main() -> int:
     only = [p.strip() for p in (args.only or "").split(",") if p.strip()]
     fulger_only = "fulger" in only
     types_only = "tipuri" in only
+    invata_only = "invata" in only
     tests = [t for t in catalog_tests() if not only or any(fnmatch.fnmatchcase(t["id"], p) for p in only)]
 
     with sync_playwright() as pw:
@@ -1221,6 +1454,9 @@ def main() -> int:
             if not only or fulger_only:
                 fulger_flow(run, page, vp)
                 fulger_topics_flow(run, page, vp)
+            if not only or invata_only:
+                invata_flow(run, page, vp)
+                invata_gestures(run, page, vp)
             if tests:
                 pages_flow(run, page, tests[0], vp)
             for test in tests:
@@ -1230,6 +1466,9 @@ def main() -> int:
             keyboard_flow(run, browser, run.base)
         if not only or fulger_only:
             fulger_screens(run, browser, run.base)
+        if not only or invata_only:
+            invata_screens(run, browser, run.base)
+            invata_keyboard(run, browser, run.base)
         browser.close()
     if httpd:
         httpd.shutdown()

@@ -10,7 +10,10 @@ import { findNonJSON, lintText, walkTexts } from '../site/js/core/lint.js';
 import { markupErrors, plain } from '../site/js/core/markup.js';
 import { chapterConcepts, findLesson, lessonErrors, paramsOf, pickCorrect, playableChapters, reachable, search, widgetOf } from '../site/js/invata/logic.js';
 import { WIDGETS } from '../site/js/invata/registry.js';
-import { NBSP, equation, repeatedSum, spokenMath } from '../site/js/invata/text.js';
+import { keyStep, percentOf, valueAt } from '../site/js/invata/ruler.js';
+import { NBSP, equation, keepMath, repeatedSum, spokenMath } from '../site/js/invata/text.js';
+import '../site/js/visuals/all.js';
+import { visualErrors, visualLabel, visualSVG } from '../site/js/visuals/index.js';
 import array, { litCells, pairsLeft } from '../site/js/invata/widgets/array/logic.js';
 import jumps from '../site/js/invata/widgets/jumps/logic.js';
 
@@ -93,7 +96,8 @@ test('învață: dreptunghiul — farfuriile, careul, tăietura și harta', () =
   const flipped = array.apply(grid, array.initial(grid), { do: 'flip' });
   assert.deepEqual([flipped.rows, flipped.cols, flipped.flipped], [6, 4, true]);
   assert.equal(array.texts(grid, flipped).reading, '6 rânduri cu câte 4 stele');
-  assert.deepEqual(array.apply(grid, flipped, { tap: [1, 8] }), { rows: 2, cols: 9, flipped: true });
+  assert.deepEqual(array.apply(grid, flipped, { tap: [1, 8] }), { rows: 2, cols: 9, flipped: true, item: 'stea' });
+  assert.equal(array.texts(grid, array.apply(grid, flipped, { set: 'item', value: 'patrat' })).reading, '6 rânduri cu câte 4 pătrățele');
 
   const split = { skin: 'split', rows: 7, cols: 6, cut: 5 };
   const s = array.initial(split);
@@ -156,4 +160,44 @@ test('învață: lessonErrors prinde provocările care nu merg', () => {
   assert.match(errs([{ id: 'a', ask: 'x', pick: [12, 13], rule: 'produs', of: [3, 4], hide: ['rows'] }]), /nu se poate ascunde/);
   assert.match(errs([{ id: 'A b', ask: 'x', want: { rows: 5, cols: 5 } }]), /id lipsă, greșit/);
   assert.match(lessonErrors({ id: 'x', widget: { w: 'nimic' }, tasks: [] }).join(), /widget necunoscut/);
+});
+
+test('învață: glisorul e rigla desenului (poziția, valoarea de sub deget, tastele)', () => {
+  // 10 căsuțe pe o pistă de 300 px: mânerul valorii 3 stă la mijlocul căsuței a treia
+  assert.equal(percentOf(3, 10), 25);
+  assert.equal(valueAt(0, 300, 10, 1, 10), 1);
+  assert.equal(valueAt(89, 300, 10, 1, 10), 3);
+  assert.equal(valueAt(299, 300, 10, 1, 10), 10);
+  assert.equal(valueAt(-40, 300, 10, 1, 10), 1, 'înainte de pistă: minimul');
+  assert.equal(valueAt(400, 300, 10, 1, 10), 10, 'după pistă: maximul');
+  assert.equal(valueAt(10, 300, 10, 2, 6), 2, 'gradațiile din afara intervalului nu se pot alege');
+  assert.equal(valueAt(299, 300, 10, 2, 6), 6);
+  // glisorul vertical crește în jos: ↓ adaugă, ↑ scoate; cel orizontal, ca de obicei
+  assert.equal(keyStep('ArrowDown', true), 1);
+  assert.equal(keyStep('ArrowUp', true), -1);
+  assert.equal(keyStep('ArrowRight', false), 1);
+  assert.equal(keyStep('ArrowDown', false), -1);
+  assert.equal(keyStep('PageDown', true), 5);
+  assert.equal(keyStep('Home', false), -Infinity);
+  assert.equal(keyStep('End', true), Infinity);
+  assert.equal(keyStep('a', true), 0);
+});
+
+test('învață: textele lecțiilor țin calculele pe un rând', () => {
+  assert.equal(keepMath('Găsește pe hartă 6 × 7.'), `Găsește pe hartă 6${NBSP}×${NBSP}7.`);
+  assert.equal(keepMath('7 × 6 = 5 × 6 + 2 × 6'), `7${NBSP}×${NBSP}6${NBSP}=${NBSP}5${NBSP}×${NBSP}6${NBSP}+ 2${NBSP}×${NBSP}6`);
+  assert.equal(keepMath('Arată 5 + 5.'), `Arată 5${NBSP}+ 5.`);
+  assert.equal(keepMath('fără calcule'), 'fără calcule');
+});
+
+test('învață: desenul săriturilor arată axa până la 10 × pasul, fără să spună unde ajunge veverița', () => {
+  const spec = { v: 'skip-line', step: 3, count: 4 };
+  assert.deepEqual(visualErrors(spec), []);
+  assert.equal(visualLabel(spec), 'axa numerelor de la 0 la 30, din 3 în 3; veverița face 4 sărituri de câte 3');
+  const svg = visualSVG(spec);
+  assert.equal((svg.match(/v-skip-line__hop/g) ?? []).length, 4, 'câte un arc pe săritură');
+  assert.equal((svg.match(/<text /g) ?? []).length, 11, 'numerele 0, 3, … 30');
+  assert.ok(svg.includes('1f43f.svg'), 'veverița');
+  assert.equal(visualErrors({ v: 'skip-line', step: 11, count: 2 }).length, 1);
+  assert.ok(visualSVG({ ...spec, fresh: 3 }).includes('is-new'), 'săritura nouă are animația ei');
 });

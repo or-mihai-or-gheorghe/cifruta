@@ -93,6 +93,7 @@ export default {
 
   initial(p) {
     const s = { rows: p.rows, cols: p.cols };
+    if (p.skin === 'grid') s.item = p.item; // obiectul se poate schimba din careu (🍎 ⭐ ● ■)
     if (p.skin === 'grid' && p.flip) s.flipped = false;
     if (p.skin === 'split') s.cut = p.cut;
     if (p.skin === 'table') s.lit = [];
@@ -104,6 +105,7 @@ export default {
     const list = [];
     for (const c of this.controls(p, s)) for (let v = c.min; v <= c.max; v++) if (v !== s[c.id]) list.push({ set: c.id, value: v });
     if (p.skin === 'grid' && p.flip) list.push({ do: 'flip' });
+    if (p.skin === 'grid') for (const item of Object.keys(ITEMS)) if (item !== s.item) list.push({ set: 'item', value: item });
     if (p.skin === 'table') for (const st of STRATEGIES) list.push({ toggle: st.id });
     return list;
   },
@@ -114,6 +116,8 @@ export default {
     if (a.set === 'rows' || a.set === 'cols' || a.set === 'cut') {
       const c = this.controls(p, s).find((x) => x.id === a.set);
       next[a.set] = clamp(a.value, c.min, c.max);
+    } else if (a.set === 'item') {
+      if (p.skin === 'grid' && ITEMS[a.value]) next.item = a.value;
     } else if (a.tap) {
       next.rows = clamp(a.tap[0] + 1, minRows(p), max);
       next.cols = clamp(a.tap[1] + 1, 1, max);
@@ -150,7 +154,7 @@ export default {
     const product = show('product', d.product);
     const out = { equation: equation(a, b, product) };
     if (p.skin === 'plates' || p.skin === 'grid') {
-      const [sg, pl] = ITEMS[p.item].unit;
+      const [sg, pl] = ITEMS[s.item ?? p.item].unit;
       const groups = p.skin === 'plates' ? cantitate(s.rows, 'farfurie', 'farfurii') : cantitate(s.rows, 'rând', 'rânduri');
       out.reading = `${groups} cu câte ${cantitate(s.cols, sg, pl)}`;
       out.sum = repeatedSum(s.cols, s.rows, product);

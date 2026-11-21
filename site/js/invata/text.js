@@ -35,3 +35,10 @@ export const spokenMath = (text) =>
     .replace(/\?/g, 'cât')
     .replace(/\s+/g, ' ')
     .trim();
+
+/** Un text al lecției (cerință, indicație, „Ce am aflat”) cu calculele ținute pe un rând: „6 × 7 = 42” nu se rupe, o sumă se rupe
+ *  doar după „+”. Textele din date se scriu cu spații obișnuite. */
+export const keepMath = (text) =>
+  String(text ?? '')
+    .replace(/(\S) ([×=]) (?=\S)/g, `$1${NBSP}$2${NBSP}`)
+    .replace(/(\S) ([+−]) (?=\S)/g, `$1${NBSP}$2 `);

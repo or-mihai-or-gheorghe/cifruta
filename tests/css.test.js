@@ -47,6 +47,13 @@ const PAIRS = [
   ['--c-on-brand', '--c-brand-dark'],
   ['--c-z-ink', '--c-paper'],
   ['--c-u-ink', '--c-paper'],
+  // Învață: mânerele glisoarelor (text alb) și factorii colorați din calcul
+  ['--c-on-brand', '--c-rows'],
+  ['--c-on-brand', '--c-cols'],
+  ['--c-rows-ink', '--c-paper'],
+  ['--c-rows-ink', '--c-rows-bg'],
+  ['--c-cols-ink', '--c-paper'],
+  ['--c-cols-ink', '--c-cols-bg'],
 ];
 
 test('css: textul are contrast de cel puțin 4,5:1 pe fundalul lui', () => {

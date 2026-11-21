@@ -40,7 +40,8 @@
 .acc-signin__art,
 .fg-buddy,
 .fg-panel__art,
-.fg-hub__mascot { --mascot-play: running; }
+.fg-hub__mascot,
+.iv-hub__mascot { --mascot-play: running; }
 /* regula asta stă ultima: pusă înaintea vreunui `animation`, shorthand-ul ar reseta starea */
 .v-mascot [class*='v-mascot__'] { animation-play-state: var(--mascot-play, paused); }
 
