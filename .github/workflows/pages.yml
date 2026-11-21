@@ -45,6 +45,13 @@ jobs:
           grep -q "apiKey: ''," site/js/cloud/config.js || { echo "::error::config.js nu mai are locul gol pentru cheie"; exit 1; }
           sed -i "0,/apiKey: '',/s//apiKey: '${FIREBASE_API_KEY}',/" site/js/cloud/config.js
           grep -q "apiKey: 'AIza" site/js/cloud/config.js
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      # fiecare publicare are alte adrese de module (?v=<commit>), deci browserul nu amestecă module vechi din cache (GitHub Pages:
+      # max-age=600) cu module noi; un amestec arăta „Ceva nu a mers” (tools/versiune.mjs, testat în tests/versiune.test.js)
+      - name: Versiunea în adresele modulelor
+        run: node tools/versiune.mjs site "${GITHUB_SHA::7}"
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:

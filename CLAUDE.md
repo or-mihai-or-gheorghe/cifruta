@@ -212,7 +212,10 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
 
 ## Capcane știute
 - `node --test` fără argumente ar prinde fișiere `test-*.js` — rulăm explicit `tests/**/*.test.js`.
-- GitHub Pages ține fișierele în cache ~10 min; testele se încarcă cu `?v=<version>`.
+- GitHub Pages ține fișierele în cache ~10 min (`max-age=600`). Testele se încarcă cu `?v=<version>`, iar la publicare
+  `tools/versiune.mjs` pune `?v=<commit>` la toate importurile relative, la `js/app.js` și la foile de stil. Fără asta, un browser
+  amesteca module vechi și noi („Ceva nu a mers”: „does not provide an export named …”). Un import relativ se scrie deci static
+  (`'./x.js'`) sau ca șablon care se termină în `.js`; `tests/versiune.test.js` verifică.
 - În capturile headless nu există font de emoji → emoji-urile vin din `site/assets/emoji/*.svg`.
 - Slider/ceas/numărătoare: răspunsul e `null` până la prima atingere.
 - Acordul numeral + substantiv: `cantitate(n, 'leu', 'lei')` → „1 leu”, „19 lei”, „20 de lei”, „101 lei”; `formatNumber(2.7)` → „2,7”.

@@ -1,8 +1,9 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-11-21 · **Versiune:** 0.22.0 (secțiunea nouă **Învață**: în 0.21.0 cinci lecții interactive de înmulțire și
-  antetul refăcut, în 0.22.0 cinci lecții de fracții; în 0.20.0, tema fulger „Înmulțirea”, cu 13 tipuri noi și grupele desenate)
+- **Data:** 2026-11-21 · **Versiune:** 0.22.1 (secțiunea nouă **Învață**: în 0.21.0 cinci lecții interactive de înmulțire și
+  antetul refăcut, în 0.22.0 cinci lecții de fracții, în 0.22.1 scopul fiecărei lecții, scara de tăiere și versiunea în adresele
+  modulelor; în 0.20.0, tema fulger „Înmulțirea”, cu 13 tipuri noi și grupele desenate)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -616,6 +617,7 @@
 | 2026-11-21 | Glisoarele din Învață sunt rigle aliniate cu desenul, peste un input nativ ascuns; cel vertical crește în jos, iar săgețile merg după direcția de pe ecran; provocările se verifică doar la gestul încheiat | glisorul trebuie să arate ce schimbă (gradația lângă rândul ei); cititoarele de ecran de pe telefon schimbă doar inputurile native; trecerea de la 2 la 8 ar fi rezolvat din greșeală „4” |
 | 2026-11-21 | Antetul: linkurile nu se strâng și nu se rup, treptele stau într-un singur loc, antetul e mai lat decât conținutul (72rem), iar un baleiaj 320–1280 (`header_ok`) le verifică, cu și fără cont | măsurat: cu un al cincilea link, depășiri la 360, 481 și 673 px, iar deja înainte „Jocuri fulger” trecea pe două rânduri cu contul deschis |
 | 2026-11-21 | Fiecare lecție din Învață spune întâi ce învățăm și ce înseamnă desenul (caseta „Ce învățăm”, `goal`), iar indicația spune ce face fiecare glisor și buton; sub calcul, o legendă în culorile glisoarelor; pe hartă, fiecare buton își spune trucul; la „Jumătatea și sfertul”, o scară desenată (întreg ✂ jumătăți ✂ sferturi ✂ optimi) în locul butoanelor „Taie fiecare bucată în două” și „Lipește la loc”, cu Cifruța care povestește ce s-a schimbat | utilizatorul: „explică pe undeva scopul? care este rolul farfuriilor?” și „«taie fiecare bucată în două» nu pare intuitiv” |
+| 2026-11-21 | La publicare, adresele modulelor și ale foilor de stil primesc versiunea commit-ului (`tools/versiune.mjs`, în GitHub Actions; codul din git rămâne fără) | după v0.22.0, un browser a amestecat module vechi din cache (`max-age=600`) cu module noi și a arătat „Ceva nu a mers”; propunerea, aprobată de utilizator |
 | 2026-11-21 | Fracțiile, în Învață: întâi jumătatea și sfertul (programa clasei a II-a), apoi până la zecimi (numărătorul și numitorul, fracția dintr-o mulțime, fracțiile egale, compararea; clasa a III-a); 1/4 se numește „sfert”, iar fracțiile se scriu etajat (`{{f:n/d}}`); testele de recapitulare rămân fără fracții | alegerea utilizatorului; termenii clasei a II-a sunt „jumătate” și „sfert” |
 
 ## Probleme cunoscute
@@ -1060,8 +1062,8 @@
   - **Rezultate:** npm test 150/150, E2E Învață 315/315.
   - **După publicare:** la v0.22.0, un browser a amestecat module vechi și noi din cache (GitHub Pages:
     `max-age=600`), iar pagina a arătat „Ceva nu a mers” („storage.js does not provide an export named getLessons”). Eroarea s-a
-    reprodus pe site-ul live; trece la o reîncărcare forțată. Propunerea (versiunea în adresele modulelor, la publicare) așteaptă
-    răspunsul utilizatorului.
+    reprodus pe site-ul live; trece la o reîncărcare forțată. De la v0.22.1, la publicare, `tools/versiune.mjs` pune `?v=<commit>`
+    în adresele modulelor (încercat pe o copie a site-ului, cu E2E-ul complet pe laptop).
 
 - **2026-11-21 (Învață: recenzia și E2E-ul complet)**
   - **Recenzia** (agent fără istoricul conversației, cu fiecare problemă verificată în Chromium, cu Node sau pe drumul codului): 8
