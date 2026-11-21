@@ -2,8 +2,9 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import {
-  addAttempt, clearAccountCopies, clearFulger, clearHistory, clearScopeData, getAttempt, getDraft, getFulger, getScoped, isUnsaved, lastAttempt,
-  listAttempts, listDrafts, moveDrafts, onWrite, readScopeData, saveDraft, saveFulgerRound, setScope, setScoped, updateAttempt, writeScopeData,
+  addAttempt, clearAccountCopies, clearFulger, clearHistory, clearScopeData, getAttempt, getDraft, getFulger, getLessons, getScoped, isUnsaved, lastAttempt,
+  listAttempts, listDrafts, mergeLessons, moveDrafts, moveLessons, onWrite, readScopeData, saveDraft, saveFulgerRound, saveLessons, setScope, setScoped,
+  updateAttempt, writeScopeData,
 } from '../site/js/core/storage.js';
 import { formatDateTime } from '../site/js/core/ro.js';
 
@@ -134,6 +135,37 @@ test('storage: fiecare profil are datele lui, iar scrierile se anunță', () => 
   stop();
   addAttempt({ id: 'c1', testId: 't', score: 1 });
   assert.deepEqual(events, ['attempt', 'attempt', 'attempt', 'fulger-round', 'fulger-clear']);
+  delete globalThis.localStorage;
+});
+
+test('storage: progresul din Învață e pe profil, se mută la prima intrare în cont și pleacă odată cu profilul', () => {
+  globalThis.localStorage = fakeStorage();
+  setScope(null);
+  const events = [];
+  const stop = onWrite((e) => events.push(e.type));
+  const ana = { uid: 'u1', pid: 'p1' };
+  saveLessons({ 'inmultirea/grupe-egale': { done: ['a', 'b'], at: '2026-11-20T10:00:00Z' }, 'inmultirea/sarituri': { done: ['x'], at: '2026-11-20T11:00:00Z' } });
+  setScope(ana);
+  assert.deepEqual(getLessons(), {});
+  saveLessons({ 'inmultirea/grupe-egale': { done: ['c'], at: '2026-11-21T09:00:00Z' } });
+  setScope(null);
+  moveLessons(null, ana); // înainte de clearScopeData(null), ca în moveAnonymousInto
+  clearScopeData(null);
+  assert.deepEqual(getLessons(), {});
+  setScope(ana);
+  assert.deepEqual(getLessons(), {
+    'inmultirea/grupe-egale': { done: ['c', 'a', 'b'], at: '2026-11-21T09:00:00Z' },
+    'inmultirea/sarituri': { done: ['x'], at: '2026-11-20T11:00:00Z' },
+  });
+  clearScopeData(ana); // la ștergerea profilului
+  assert.deepEqual(getLessons(), {});
+  // datele stricate din browser se citesc tolerant
+  localStorage.setItem('cifruta:p:u1:p1:invata', JSON.stringify({ a: { done: 'x' }, b: { done: ['ok', 3] }, c: null }));
+  assert.deepEqual(getLessons(), { b: { done: ['ok'], at: '' } });
+  assert.deepEqual(mergeLessons([], 'x'), {});
+  setScope(null);
+  stop();
+  assert.deepEqual(events, [], 'progresul din Învață nu se anunță: nu urcă în cont');
   delete globalThis.localStorage;
 });
 

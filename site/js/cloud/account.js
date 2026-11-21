@@ -5,7 +5,7 @@
 import fulgerConfig from '../../data/fulger.js';
 import { avatarId, parseAvatar } from '../core/avatar.js';
 import { currentRoute, refresh } from '../core/router.js';
-import { clearAccountCopies, clearScopeData, moveDrafts, readScopeData, setScope, writeScopeData } from '../core/storage.js';
+import { clearAccountCopies, clearScopeData, moveDrafts, moveLessons, readScopeData, setScope, writeScopeData } from '../core/storage.js';
 import { cloudConfigured, USE_EMULATOR } from './config.js';
 import { loadFirebase } from './firebase.js';
 import { cleanNickname, combineData, freeProfileId, isRetiredBoard, shownBoards, signInError } from './logic.js';
@@ -338,6 +338,7 @@ export async function moveAnonymousInto(pid) {
   const profile = { uid: state.user.uid, pid };
   writeScopeData(profile, combineData(readScopeData(profile), readScopeData(null), fulgerConfig.keepRounds));
   moveDrafts(null, profile);
+  moveLessons(null, profile); // înainte de ștergere: progresul din Învață nu e în cloud
   clearScopeData(null);
   uploadAll();
 }

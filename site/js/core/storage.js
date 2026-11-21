@@ -191,10 +191,45 @@ export function moveDrafts(from, to) {
   }
 }
 
-/** Șterge datele unui scop: încercări, Calcul fulger, ciorne, coada spre cloud și semnul că s-au adus din cloud. */
+// ——— Învață: progresul lecțiilor (provocările făcute, pe lecții), doar în browser: nu urcă în cont ———
+const LESSONS = 'invata';
+
+/** Progresul citit tolerant (localStorage poate avea orice): { '<capitol>/<lecție>': { done: [id…], at } }. */
+function cleanLessons(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  const out = {};
+  for (const [key, rec] of Object.entries(value)) {
+    if (!rec || !Array.isArray(rec.done)) continue;
+    out[key] = { done: [...new Set(rec.done.filter((id) => typeof id === 'string'))], at: typeof rec.at === 'string' ? rec.at : '' };
+  }
+  return out;
+}
+
+export const getLessons = () => cleanLessons(read(scope + LESSONS, {}));
+export const saveLessons = (value) => write(scope + LESSONS, cleanLessons(value));
+
+/** Unește două progrese: provocările făcute în oricare, cu data cea mai nouă. */
+export function mergeLessons(target, extra) {
+  const out = cleanLessons(target);
+  for (const [key, rec] of Object.entries(cleanLessons(extra))) {
+    const had = out[key];
+    out[key] = had ? { done: [...new Set([...had.done, ...rec.done])], at: had.at > rec.at ? had.at : rec.at } : rec;
+  }
+  return out;
+}
+
+/** Mută progresul din Învață dintr-un scop în altul (la prima intrare în cont), unit cu ce era acolo. */
+export function moveLessons(from, to) {
+  const [a, b] = [scopeOf(from), scopeOf(to)];
+  const merged = mergeLessons(read(`${b}${LESSONS}`, {}), read(`${a}${LESSONS}`, {}));
+  if (Object.keys(merged).length) write(`${b}${LESSONS}`, merged);
+  remove(`${a}${LESSONS}`);
+}
+
+/** Șterge datele unui scop: încercări, Calcul fulger, Învață, ciorne, coada spre cloud și semnul că s-au adus din cloud. */
 export function clearScopeData(p = null) {
   const s = scopeOf(p);
-  for (const key of ['attempts', 'fulger', 'pending', 'pulled']) remove(`${s}${key}`);
+  for (const key of ['attempts', 'fulger', LESSONS, 'pending', 'pulled']) remove(`${s}${key}`);
   for (const id of draftIds(s)) remove(`${s}draft:${id}`);
 }
 
