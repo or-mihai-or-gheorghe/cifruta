@@ -434,6 +434,9 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 }
 @media (hover: hover) {
   .fg-opt:hover { transform: translateY(-2px); box-shadow: var(--sh-edge-hover) var(--edge); }
+  /* ridicat de hover, butonul își lasă dedesubt o fâșie din aria lui: altfel, cu cursorul pe marginea de jos, butonul urca de sub el,
+     hover-ul se stingea, butonul cobora și hover-ul se aprindea iar, la nesfârșit (tremura; E2E-ul îl găsea „nestabil” 30 s) */
+  .fg-opt:hover::before { content: ''; position: absolute; left: -2px; right: -2px; bottom: -6px; height: 6px; }
 }
 .fg-opt:active { transform: translateY(3px); box-shadow: var(--sh-edge-active) var(--edge); }
 .fg-opt__key { position: absolute; top: 0.3rem; left: 0.55rem; font-family: var(--font-body); font-weight: 400; font-size: 0.72rem; color: var(--c-ink-soft); }
