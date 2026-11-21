@@ -45,6 +45,7 @@ export default {
     const [a, b] = factorsOf(s.count, s.step);
     const out = {
       reading: `${cantitate(s.count, 'săritură', 'sărituri')} de câte ${s.step}`,
+      legend: [['rows', cantitate(s.count, 'săritură', 'sărituri')], ['', ' de câte '], ['cols', String(s.step)]],
       equation: equation(a, b, end),
       sum: repeatedSum(s.step, s.count, end),
       landings: Array.from({ length: s.count }, (_, i) => (i + 1) * s.step),

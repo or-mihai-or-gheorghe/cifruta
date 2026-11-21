@@ -296,8 +296,10 @@ Secțiunea Învață (`#/invata`) are lecții, nu teste: copilul mișcă un dese
 și fără cronometru. Lecțiile stau în `site/data/invata.js`, pe capitole (un capitol „în curând” are doar `soon: true`, titlul, textul
 și iconița). Acolo se învață și conceptele pe care testele le ocolesc (înmulțirea, apoi fracțiile).
 
-**Lecția:** `{ id, title, icon, intro, concepts, widget: { w, ...parametri }, tasks, notes }`.
-- `intro` — indicația Cifruței pentru desen, cu verbul întâi („Trage de glisoare: …”), cel mult 90 de caractere;
+**Lecția:** `{ id, title, icon, goal, intro, concepts, widget: { w, ...parametri }, tasks, notes }`.
+- `goal` — caseta „Ce învățăm”, sub titlu și pe cardul lecției: scopul și ce înseamnă desenul („Fiecare farfurie e o grupă, cu la
+  fel de multe mere.”), cel mult 170 de caractere; fără ea, copilul mișcă glisoare fără să știe de ce;
+- `intro` — indicația Cifruței: ce face fiecare glisor și fiecare buton (și „Numără”, „Întoarce”, butonul din colț), cel mult 170;
 - `widget` — unul din `js/invata/registry.js`, cu parametrii lui (`check` îi validează):
   - `array` cu `skin: 'plates' | 'grid' | 'split' | 'table'` (la `plates`, `mark: true` colorează farfurii: fracția dintr-o mulțime);
   - `jumps` (săriturile pe axă);

@@ -6,6 +6,7 @@ import { cantitate } from '../../../core/ro.js';
 import { play } from '../../../core/sound.js';
 import { visualSVG } from '../../../visuals/index.js';
 import { slider } from '../../slider.js';
+import { legendNodes } from '../../legend.js';
 import { factorsOf } from '../../text.js';
 
 export function mount(host, params, { logic, dispatch }) {
@@ -18,12 +19,13 @@ export function mount(host, params, { logic, dispatch }) {
   };
   const art = h('div', { class: 'iv-jumps__art', 'aria-hidden': 'true' });
   const eq = h('p', { class: 'iv-eq', 'data-testid': 'iv-eq' });
-  const reading = h('p', { class: 'iv-reading' });
+  const legend = h('p', { class: 'iv-legend iv-reading', 'data-testid': 'iv-legend' });
   const sum = h('p', { class: 'iv-sum', 'data-testid': 'iv-sum' });
   const root = h(
     'div',
     { class: 'iv-jumps', 'data-testid': 'iv-jumps' },
     eq,
+    legend,
     art,
     h(
       'div',
@@ -32,7 +34,7 @@ export function mount(host, params, { logic, dispatch }) {
       h('div', { class: 'iv-control' }, h('span', { class: 'iv-control__label iv-f--rows' }, 'Câte sărituri?'), sliders.count.el),
     ),
     h('div', { class: 'iv-tools' }, h('button', { type: 'button', class: 'c-btn c-btn--sm', 'data-testid': 'iv-jump', onClick: replay }, 'Sari!')),
-    h('div', { class: 'iv-text' }, reading, sum),
+    h('div', { class: 'iv-text' }, sum),
   );
   host.append(root);
 
@@ -58,7 +60,7 @@ export function mount(host, params, { logic, dispatch }) {
     const [ta, tb] = factorsOf('rows', 'cols');
     const tone = (v, which) => h('span', { class: `iv-f iv-f--${which}` }, String(v));
     eq.replaceChildren(tone(a, ta), ' × ', tone(b, tb), ` = ${t.equation.split('=').pop().trim()}`);
-    reading.textContent = t.reading;
+    legend.replaceChildren(...legendNodes(t.legend));
     sum.textContent = t.sum ?? '';
     sum.hidden = !t.sum;
   }

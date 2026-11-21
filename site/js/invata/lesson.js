@@ -49,6 +49,8 @@ export async function mountLesson(host, { chapter, lesson, index }) {
     { class: 'l-container iv-lesson', 'data-testid': `iv-lesson-${lesson.id}` },
     h('div', { class: 'iv-lesson__head' }, backLink(`#/invata/${chapter.id}`, chapter.title), h('span', { class: 'iv-lesson__count' }, `Lecția ${index + 1} din ${chapter.lessons.length}`)),
     h('h1', { class: 'iv-lesson__title' }, h('span', { class: 'iv-lesson__icon', 'aria-hidden': 'true', html: emojiHTML(lesson.icon) }), lesson.title),
+    // „Ce învățăm”: scopul lecției și ce înseamnă desenul, înainte de orice glisor
+    h('p', { class: 'iv-goal', 'data-testid': 'iv-goal' }, h('strong', { class: 'iv-goal__label' }, 'Ce învățăm: '), h('span', { html: md(keepMath(lesson.goal)) })),
     h('div', { class: 'iv-lesson__body' }, h('div', { class: 'iv-lesson__guide' }, h('div', { class: 'c-mascot iv-guide' }, mascotArt, bubble)), stage),
     status,
     h('nav', { class: 'iv-lesson__nav', 'aria-label': 'Lecțiile capitolului' }, prev ? link(prev, 'prev') : h('span'), next ? link(next, 'next') : h('span')),
@@ -261,7 +263,7 @@ export async function mountLesson(host, { chapter, lesson, index }) {
 
   setMood('vesela');
   paint();
-  say(`${plain(lesson.intro)} ${plain(tasks[0].ask)}`);
+  say(`${plain(lesson.goal)} ${plain(lesson.intro)} ${plain(tasks[0].ask)}`);
 
   return {
     /** Pentru E2E (?debug=1): doar citește. */

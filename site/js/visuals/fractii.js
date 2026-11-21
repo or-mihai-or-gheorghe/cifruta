@@ -1,5 +1,5 @@
 // Desenele pentru fracții (Învață): un întreg tăiat în bucăți (`parts`, 1–10). Forma e cerc („pizza”), bară („ciocolata”) sau
-// pătrat („napolitana”). `sizes` face bucățile inegale (pentru „Sunt părți egale?”), iar `cut` alege tăietura pătratului: fâșii,
+// pătrat („napolitana”). `sizes` face bucățile inegale (pentru „Sunt părți egale?”), iar `cut` alege tăietura pătratului: fâșii, jumătăți succesive (`halves`),
 // careu 2 × 2 sau diagonale. Bucățile din `on` sunt colorate și hașurate, deci nu se deosebesc doar prin culoare. Fiecare bucată
 // are `data-piece` (lecția le colorează la atingere). Numele desenului spune în câte bucăți e tăiat și câte sunt colorate, dar nu și
 // dacă bucățile sunt egale: o provocare întreabă tocmai asta.
@@ -9,7 +9,7 @@ import { registerVisual } from './index.js';
 import { C, list, num, st } from './palette.js';
 
 const SHAPES = { circle: ['un cerc', 'n'], bar: ['o bară', 'f'], square: ['un pătrat', 'n'] };
-const CUTS = ['strips', 'grid', 'diagonal'];
+const CUTS = ['strips', 'grid', 'diagonal', 'halves'];
 const CREAM = 'var(--v-cream, #FFEBCC)';
 
 const shapeOf = (p) => (SHAPES[p.shape] ? p.shape : 'circle');
@@ -51,6 +51,13 @@ function pieces(p) {
     const cells = [[0, 0], [1, 0], [0, 1], [1, 1]];
     return { box, d: cells.map(([i, j]) => `M${pt(x0 + i * hw, y0 + j * hh)} h${r1(hw)} v${r1(hh)} h${r1(-hw)} Z`) };
   }
+  if (cut === 'halves') {
+    // tăiat de mai multe ori în două, ca la școală: jumătăți (stânga, dreapta), apoi 4 pătrate, apoi 8; bucata i se taie mereu în
+    // bucățile 2i și 2i + 1, deci o parte colorată rămâne pe loc când tai din nou
+    const cells = { 1: [[0, 0, 1, 1]], 2: [[0, 0, 0.5, 1], [0.5, 0, 0.5, 1]], 4: [[0, 0, 0.5, 0.5], [0, 0.5, 0.5, 0.5], [0.5, 0, 0.5, 0.5], [0.5, 0.5, 0.5, 0.5]] };
+    cells[8] = cells[4].flatMap(([x, y, cw, ch]) => [[x, y, cw / 2, ch], [x + cw / 2, y, cw / 2, ch]]);
+    return { box, d: (cells[n] ?? cells[1]).map(([x, y, cw, ch]) => `M${pt(x0 + x * w, y0 + y * h)} h${r1(cw * w)} v${r1(ch * h)} h${r1(-cw * w)} Z`) };
+  }
   if (cut === 'diagonal') {
     const [tl, tr, br, bl, c] = [[x0, y0], [x0 + w, y0], [x0 + w, y0 + h], [x0, y0 + h], [x0 + w / 2, y0 + h / 2]];
     const tri = (...ps) => `M${ps.map(([x, y]) => pt(x, y)).join(' L')} Z`;
@@ -88,6 +95,7 @@ registerVisual('fraction', {
       else if (p.cut !== 'strips' && p.shape !== 'square') errors.push('„cut” (careu, diagonale) e doar pentru pătrat');
       else if (p.cut === 'grid' && n !== 4) errors.push('careul are 4 bucăți');
       else if (p.cut === 'diagonal' && n !== 2 && n !== 4) errors.push('diagonalele dau 2 sau 4 bucăți');
+      else if (p.cut === 'halves' && ![1, 2, 4, 8].includes(n)) errors.push('tăiat în două de mai multe ori: 1, 2, 4 sau 8 bucăți');
     }
     if (p.sizes !== undefined) {
       const s = list(p.sizes).map(Number);
@@ -114,6 +122,7 @@ registerVisual('fraction', {
     { shape: 'bar', parts: 5, on: [0, 1, 2] },
     { shape: 'square', parts: 4, cut: 'grid', on: [1, 2] },
     { shape: 'square', parts: 2, cut: 'diagonal' },
+    { shape: 'square', parts: 8, cut: 'halves', on: [0, 1, 2, 3] },
     { shape: 'circle', parts: 2, sizes: [1, 2] },
     { shape: 'circle', parts: 1 },
   ],

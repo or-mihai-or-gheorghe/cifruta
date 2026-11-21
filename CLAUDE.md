@@ -181,9 +181,11 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   id-urile `<metal>:<temă>`); pragurile medaliilor în plus (`medals.extras[].count`) rămân cel mult numărul temelor jucabile (testul
   din `tests/fulger-medals.test.js` verifică).
 - **Lecție nouă în Învață** (`site/data/invata.js`, `docs/ghid-autor.md` § 11):
-  - **Lecția:** `{ id, title, icon, intro, concepts, widget: { w, ...params }, tasks, notes }`, cu id-uri permanente (stau în
-    progres). `intro` începe cu verbul (cel mult 90 de caractere), 3–4 provocări (`ask` de cel mult 60 de caractere) și 1–3 lucruri în
-    „Ce am aflat”.
+  - **Lecția:** `{ id, title, icon, goal, intro, concepts, widget: { w, ...params }, tasks, notes }`, cu id-uri permanente (stau în
+    progres).
+    - `goal`: caseta „Ce învățăm”, cu scopul lecției și ce înseamnă desenul („fiecare farfurie e o grupă”).
+    - `intro`: ce face fiecare glisor și buton.
+    - Amândouă au cel mult 170 de caractere. Urmează 3–4 provocări (`ask` de cel mult 60) și 1–3 lucruri în „Ce am aflat”.
   - **Provocările:**
     - `want`: o stare a widgetului, prin mărimile din `derive`;
     - `collect` + `by` + `need`: mai multe soluții diferite;
@@ -390,6 +392,10 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
     - `invata_screens` măsoară desenul, pistele (≥ 44 px), căsuțele (≥ 20 px) și textul.
   - **Progresul** (`cifruta:invata`, `getLessons`/`saveLessons`) stă doar în browser, pe profil. `moveAnonymousInto` îl mută înaintea
     lui `clearScopeData(null)`. La ieșirea din cont pleacă odată cu copiile profilului.
+  - **Legenda** de sub calcul (`texts().legend`, `invata/legend.js`) scrie ce schimbă fiecare glisor, în culoarea lui („3 farfurii”
+    albastru, „câte 4 mere” portocaliu).
+  - **Scara de tăiere** (`parts` cu `cut: true`) desenează fiecare treaptă (întreg ✂ jumătăți ✂ sferturi ✂ optimi). Napolitana se
+    taie în pătrate (`fraction` cu `cut: 'halves'`), iar Cifruța povestește ce s-a schimbat (`narrate`).
   - **Textele lecțiilor** trec prin `keepMath`, ca „6 × 7” să nu se rupă pe două rânduri. Fracțiile se scriu `{{f:n/d}}` (etajate,
     citite cu `fractionWords` din `core/ro.js`: „o jumătate”, „un sfert”, „două treimi”); un `texts()` cu `markup: true` dă calculul ca
     mini-markup.

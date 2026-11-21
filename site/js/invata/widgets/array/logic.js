@@ -23,12 +23,12 @@ export const SPLIT_ITEMS = { top: 'mar', bottom: 'para', unit: { mar: ['măr', '
 
 /** Strategiile hărții: × 1, × 2, × 5 și × 10 aprind câte un rând; pătratele, diagonala; „Întoarse” oglindește tot ce e aprins. */
 export const STRATEGIES = [
-  { id: 'x1', label: `×${NBSP}1`, row: 1 },
-  { id: 'x2', label: `×${NBSP}2`, row: 2 },
-  { id: 'x5', label: `×${NBSP}5`, row: 5 },
-  { id: 'x10', label: `×${NBSP}10`, row: 10 },
-  { id: 'patrate', label: 'Pătratele' },
-  { id: 'intoarse', label: 'Întoarse' },
+  { id: 'x1', label: `×${NBSP}1`, row: 1, tip: 'Truc: o dată un număr e chiar numărul: 1 × 7 = 7.' },
+  { id: 'x2', label: `×${NBSP}2`, row: 2, tip: 'Truc: de 2 ori înseamnă dublul: 2 × 7 = 7 + 7 = 14.' },
+  { id: 'x5', label: `×${NBSP}5`, row: 5, tip: 'Truc: de 5 ori e jumătate din de 10 ori: 5 × 6 = 30, jumătate din 60.' },
+  { id: 'x10', label: `×${NBSP}10`, row: 10, tip: 'Truc: de 10 ori pune un 0 la coadă: 10 × 7 = 70.' },
+  { id: 'patrate', label: 'Pătratele', tip: 'Pătratele: același număr de două ori (3 × 3, 4 × 4…), pe diagonala hărții.' },
+  { id: 'intoarse', label: 'Întoarse', tip: 'Truc: ordinea nu contează: dacă știi 2 × 7, știi și 7 × 2.' },
 ];
 
 export const QUANTITIES = ['rows', 'cols', 'product', 'cut', 'top', 'bottom', 'known', 'left', 'pairs', 'marked', 'part', ...STRATEGIES.map((s) => s.id)];
@@ -167,6 +167,7 @@ export default {
     if (p.mark) {
       // fracția dintr-o mulțime: „2/3 din 12 mere = 8 mere” (mini-markup, cu fracția etajată)
       const [sg, pl] = ITEMS[p.item].unit;
+      out.legend = [['rows', cantitate(s.rows, 'farfurie', 'farfurii')], ['', ' cu câte '], ['cols', cantitate(s.cols, sg, pl)], ['', ', '], ['mark', cantitate(s.marked, 'farfurie colorată', 'farfurii colorate')]];
       out.markup = true;
       out.equation = `{{f:${s.marked}/${s.rows}}} din ${cantitate(d.product, sg, pl)} = ${cantitate(d.part, sg, pl)}`;
       out.reading = `${cantitate(d.product, sg, pl)} pe ${cantitate(s.rows, 'farfurie', 'farfurii')} egale, câte ${s.cols} pe farfurie`;
@@ -178,6 +179,7 @@ export default {
       const [sg, pl] = ITEMS[s.item ?? p.item].unit;
       const groups = p.skin === 'plates' ? cantitate(s.rows, 'farfurie', 'farfurii') : cantitate(s.rows, 'rând', 'rânduri');
       out.reading = `${groups} cu câte ${cantitate(s.cols, sg, pl)}`;
+      out.legend = [['rows', groups], ['', ' cu câte '], ['cols', cantitate(s.cols, sg, pl)]];
       out.sum = repeatedSum(s.cols, s.rows, product);
       out.totals = Array.from({ length: s.rows }, (_, i) => (hidden.includes('product') && i === s.rows - 1 ? '?' : (i + 1) * s.cols));
     } else if (p.skin === 'split') {
@@ -185,12 +187,16 @@ export default {
       const [ta, tb] = factorsOf(top, s.cols);
       const [ba, bb] = factorsOf(bottom, s.cols);
       out.reading = `${cantitate(top, 'rând', 'rânduri')} de mere și ${cantitate(bottom, 'rând', 'rânduri')} de pere, câte ${s.cols} pe rând`;
+      out.legend = [['rows', cantitate(s.rows, 'rând', 'rânduri')], ['', ' cu câte '], ['cols', String(s.cols)], ['', ', tăietura după rândul '], ['cut', String(s.cut)]];
       out.parts = [equation(ta, tb, d.top), equation(ba, bb, d.bottom)];
       out.equation = `${times(a, b)}${NBSP}=${NBSP}${times(ta, tb)}${NBSP}+ ${times(ba, bb)}${NBSP}=${NBSP}${d.top}${NBSP}+ ${d.bottom}${NBSP}=${NBSP}${product}`;
     } else if (p.skin === 'table') {
       out.reading = `rândul ${s.rows}, coloana ${s.cols}`;
+      out.legend = [['rows', `rândul ${s.rows}`], ['', ' și '], ['cols', `coloana ${s.cols}`]];
       if (d.known) {
-        out.extra = `Știi deja ${cantitate(d.known, 'căsuță', 'căsuțe')} din 100.`;
+        // trucul ultimului buton aprins, apoi câte știi și câte mai rămân
+        const tip = STRATEGIES.find((st) => st.id === s.lit.at(-1))?.tip;
+        out.extra = `${tip ? `${tip} ` : ''}Știi deja ${cantitate(d.known, 'căsuță', 'căsuțe')} din 100.`;
         if (s.lit.includes('intoarse')) out.extra += ` Mai ai de învățat ${cantitate(d.pairs, 'calcul', 'calcule')} (și întoarsele lor).`;
       }
     }

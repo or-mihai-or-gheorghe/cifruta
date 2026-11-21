@@ -615,6 +615,7 @@
 | 2026-11-21 | Convenția factorilor: „3 × 4” = „de 3 ori câte 4” = 4 + 4 + 4 (rânduri × câte pe rând), într-o singură constantă (`js/invata/text.js`) | neverificată încă cu manualul; lecția „Rânduri și coloane” arată oricum că ordinea nu schimbă produsul |
 | 2026-11-21 | Glisoarele din Învață sunt rigle aliniate cu desenul, peste un input nativ ascuns; cel vertical crește în jos, iar săgețile merg după direcția de pe ecran; provocările se verifică doar la gestul încheiat | glisorul trebuie să arate ce schimbă (gradația lângă rândul ei); cititoarele de ecran de pe telefon schimbă doar inputurile native; trecerea de la 2 la 8 ar fi rezolvat din greșeală „4” |
 | 2026-11-21 | Antetul: linkurile nu se strâng și nu se rup, treptele stau într-un singur loc, antetul e mai lat decât conținutul (72rem), iar un baleiaj 320–1280 (`header_ok`) le verifică, cu și fără cont | măsurat: cu un al cincilea link, depășiri la 360, 481 și 673 px, iar deja înainte „Jocuri fulger” trecea pe două rânduri cu contul deschis |
+| 2026-11-21 | Fiecare lecție din Învață spune întâi ce învățăm și ce înseamnă desenul (caseta „Ce învățăm”, `goal`), iar indicația spune ce face fiecare glisor și buton; sub calcul, o legendă în culorile glisoarelor; pe hartă, fiecare buton își spune trucul; la „Jumătatea și sfertul”, o scară desenată (întreg ✂ jumătăți ✂ sferturi ✂ optimi) în locul butoanelor „Taie fiecare bucată în două” și „Lipește la loc”, cu Cifruța care povestește ce s-a schimbat | utilizatorul: „explică pe undeva scopul? care este rolul farfuriilor?” și „«taie fiecare bucată în două» nu pare intuitiv” |
 | 2026-11-21 | Fracțiile, în Învață: întâi jumătatea și sfertul (programa clasei a II-a), apoi până la zecimi (numărătorul și numitorul, fracția dintr-o mulțime, fracțiile egale, compararea; clasa a III-a); 1/4 se numește „sfert”, iar fracțiile se scriu etajat (`{{f:n/d}}`); testele de recapitulare rămân fără fracții | alegerea utilizatorului; termenii clasei a II-a sunt „jumătate” și „sfert” |
 
 ## Probleme cunoscute
@@ -1043,6 +1044,24 @@
   - **Publicat:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
+
+- **2026-11-21 (Învață: scopul lecțiilor și scara de tăiere)**
+  - **Ce a observat utilizatorul**, după publicare:
+    - lecțiile spuneau cum se mișcă glisoarele, nu ce învățăm („care este rolul farfuriilor?”);
+    - „Taie fiecare bucată în două” nu era intuitiv.
+  - **Ce s-a schimbat:**
+    - fiecare lecție are „Ce învățăm” (`goal`), iar indicațiile pomenesc fiecare glisor și buton;
+    - sub calcul, o legendă în culorile glisoarelor;
+    - pe hartă, butoanele își spun trucul;
+    - la „Jumătatea și sfertul”, o scară desenată de trepte, cu napolitana tăiată în pătrate și cu o poveste a ce s-a schimbat
+      („partea colorată e aceeași: 1/2 = 2/4”); o bucată colorată se păstrează la tăiere și, cât se poate, la lipire.
+  - **Lecție:** un widget bun nu ajunge; copilul trebuie să știe de ce mișcă glisorul și ce înseamnă fiecare lucru din desen, înainte
+    de prima provocare. O acțiune care schimbă desenul (tăiatul) se vede dinainte și se povestește după.
+  - **Rezultate:** npm test 150/150, E2E Învață 315/315.
+  - **După publicare:** la v0.22.0, un browser a amestecat module vechi și noi din cache (GitHub Pages:
+    `max-age=600`), iar pagina a arătat „Ceva nu a mers” („storage.js does not provide an export named getLessons”). Eroarea s-a
+    reprodus pe site-ul live; trece la o reîncărcare forțată. Propunerea (versiunea în adresele modulelor, la publicare) așteaptă
+    răspunsul utilizatorului.
 
 - **2026-11-21 (Învață: recenzia și E2E-ul complet)**
   - **Recenzia** (agent fără istoricul conversației, cu fiecare problemă verificată în Chromium, cu Node sau pe drumul codului): 8

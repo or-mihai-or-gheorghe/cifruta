@@ -7,6 +7,7 @@ import { h } from '../../../core/dom.js';
 import { md } from '../../../core/markup.js';
 import { fractionWords } from '../../../core/ro.js';
 import { slider } from '../../slider.js';
+import { legendNodes } from '../../legend.js';
 import { keepMath } from '../../text.js';
 import { ROWS } from './logic.js';
 
@@ -42,12 +43,14 @@ export function mount(host, params, { logic, dispatch }) {
   });
 
   const eq = h('p', { class: 'iv-eq iv-frac-eq', 'data-testid': 'iv-eq' });
+  const legend = h('p', { class: 'iv-legend', 'data-testid': 'iv-legend' });
   const reading = h('p', { class: 'iv-reading' });
   const sum = h('p', { class: 'iv-sum', 'data-testid': 'iv-sum' });
   const root = h(
     'div',
     { class: 'iv-array iv-array--wall', 'data-testid': 'iv-wall', style: { '--rows-max': ROWS, '--cols-max': ROWS } },
     eq,
+    legend,
     h(
       'div',
       { class: 'iv-array__stage' },
@@ -77,6 +80,7 @@ export function mount(host, params, { logic, dispatch }) {
     }
     const t = logic.texts(params, state, hidden);
     eq.innerHTML = md(keepMath(t.equation));
+    legend.replaceChildren(...legendNodes(t.legend));
     reading.textContent = t.reading;
     sum.textContent = t.sum;
   }

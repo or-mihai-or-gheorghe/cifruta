@@ -1,6 +1,6 @@
 // Învață: capitolele, lecțiile și provocările (date JSON, fără funcții). Fiecare lecție are în centru un widget din
-// js/invata/registry.js, cu parametrii lui (`widget`), o indicație a Cifruței (`intro`, începe cu verbul), 3–4 provocări și
-// „Ce am aflat” (`notes`). Provocările:
+// js/invata/registry.js, cu parametrii lui (`widget`), scopul lecției și ce înseamnă desenul (`goal`, caseta „Ce învățăm”), indicația
+// Cifruței pentru glisoare și butoane (`intro`), 3–4 provocări și „Ce am aflat” (`notes`). Provocările:
 //   want    — o stare a widgetului („Arată 4 × 6.” → { rows: 4, cols: 6 });
 //   collect — mai multe soluții diferite, după `by`, cel puțin `need`;
 //   pick    — o alegere (numere, fracții „n/d” sau desene din bancă), cu răspunsul calculat de regula `rule` (js/invata/logic.js,
@@ -24,13 +24,14 @@ export default {
           id: 'grupe-egale',
           title: 'Grupe egale',
           icon: 'mar',
-          intro: 'Mută glisoarele: câte farfurii pui și câte mere pe fiecare?',
+          goal: 'Fiecare farfurie e o grupă, cu la fel de multe mere. Când grupele sunt egale, nu mai aduni de mai multe ori același număr: înmulțești.',
+          intro: 'Glisorul din stânga pune farfurii, cel de sus pune mere pe fiecare farfurie. „Numără” le numără farfurie cu farfurie.',
           concepts: ['mat.op.inmultire'],
           widget: { w: 'array', skin: 'plates', rows: 2, cols: 3, item: 'mar' },
           tasks: [
             { id: 'trei-farfurii', ask: 'Pune 3 farfurii cu câte 2 mere.', want: { rows: 3, cols: 2 } },
-            { id: 'suma-cinci', ask: 'Arată 5 + 5 + 5 + 5.', want: { rows: 4, cols: 5 } },
-            { id: 'douasprezece', ask: 'Așază 12 mere pe farfurii egale, în 3 feluri.', collect: { product: 12 }, by: ['rows', 'cols'], need: 3 },
+            { id: 'suma-cinci', ask: 'Arată cu farfurii adunarea 5 + 5 + 5 + 5.', want: { rows: 4, cols: 5 } },
+            { id: 'douasprezece', ask: 'Așază 12 mere, la fel pe fiecare farfurie, în 3 feluri.', collect: { product: 12 }, by: ['rows', 'cols'], need: 3 },
           ],
           notes: [
             'Când aduni de mai multe ori același număr, **înmulțești**: 5 + 5 + 5 + 5 = 4 × 5.',
@@ -41,7 +42,8 @@ export default {
           id: 'randuri-coloane',
           title: 'Rânduri și coloane',
           icon: 'stea',
-          intro: 'Trage de glisoare: cel de sus pune mai multe pe rând, cel din stânga adaugă rânduri.',
+          goal: 'Fără farfurii, merele rămân în rânduri egale și fac un dreptunghi. Înmulțirea îl numără repede: câte rânduri × câte pe fiecare rând.',
+          intro: 'Glisorul din stânga alege rândurile, cel de sus câte stau pe rând; poți și atinge un punct. „Întoarce” răstoarnă dreptunghiul, iar butonul din colț schimbă obiectele.',
           concepts: ['mat.op.inmultire', 'mat.op.inmultire-proprietati'],
           widget: { w: 'array', skin: 'grid', rows: 3, cols: 4, item: 'mar', flip: true },
           tasks: [
@@ -60,7 +62,8 @@ export default {
           id: 'sarituri',
           title: 'Sărituri pe axă',
           icon: 'veverita',
-          intro: 'Alege cât de lungă e o săritură și câte sărituri face veverița.',
+          goal: 'Înmulțirea e și o numărătoare din n în n: 4 sărituri de câte 3 ajung la 3, 6, 9, 12, adică la 4 × 3.',
+          intro: 'Glisorul de sus alege cât de lungă e o săritură, cel de jos câte sărituri face veverița. „Sari!” arată săriturile pe rând.',
           concepts: ['mat.op.inmultire', 'mat.op.tabla-inmultirii'],
           widget: { w: 'jumps', step: 2, count: 3 },
           tasks: [
@@ -77,7 +80,8 @@ export default {
           id: 'spargem-dreptunghiul',
           title: 'Spargem dreptunghiul',
           icon: 'para',
-          intro: 'Taie dreptunghiul în două bucăți ușoare, apoi adună bucățile.',
+          goal: 'Un calcul greu se face din două ușoare: 7 × 6 înseamnă 5 × 6 și încă 2 × 6. Așa afli și calculele pe care nu le știi pe de rost.',
+          intro: 'Glisoarele din stânga și de sus fac dreptunghiul, iar glisorul din dreapta mută tăietura: deasupra ei sunt mere, dedesubt pere.',
           concepts: ['mat.op.tabla-inmultirii', 'mat.op.inmultire-proprietati'],
           widget: { w: 'array', skin: 'split', rows: 4, cols: 3, cut: 2 },
           tasks: [
@@ -94,7 +98,8 @@ export default {
           id: 'harta-tablei',
           title: 'Harta tablei înmulțirii',
           icon: 'harta',
-          intro: 'Alege un rând și o coloană: unde se întâlnesc, afli produsul.',
+          goal: 'Tabla înmulțirii are 100 de calcule, dar pe multe le știi deja, cu câteva trucuri. Vezi cât de puține îți mai rămân de învățat.',
+          intro: 'Glisoarele aleg un rând și o coloană: unde se întâlnesc, afli produsul. Fiecare buton aprinde calculele știute cu un truc.',
           concepts: ['mat.op.tabla-inmultirii', 'mat.op.inmultire-proprietati'],
           widget: { w: 'array', skin: 'table', rows: 2, cols: 3 },
           tasks: [
@@ -121,7 +126,8 @@ export default {
           id: 'parti-egale',
           title: 'Părți egale',
           icon: 'prajitura',
-          intro: 'Taie în părți egale cu glisorul, apoi atinge o bucată ca s-o colorezi.',
+          goal: 'Când tai un întreg în părți egale, fiecare parte e o fracție: o parte din 2 e o jumătate, o parte din 4 e un sfert.',
+          intro: 'Alege ce tai (pizza, ciocolata sau napolitana) și, cu glisorul, în câte părți egale. Atinge o bucată ca s-o colorezi.',
           concepts: ['mat.fractii.jumatate-sfert'],
           widget: { w: 'parts', shape: 'circle', parts: 1, min: 1, max: 4, shapes: ['circle', 'bar', 'square'] },
           tasks: [
@@ -159,14 +165,15 @@ export default {
           id: 'jumatate-sfert',
           title: 'Jumătatea și sfertul',
           icon: 'ciocolata',
-          intro: 'Taie fiecare bucată în două, apoi colorează. Bucățile colorate se taie și ele.',
+          goal: 'Un sfert e jumătate dintr-o jumătate. Tai napolitana în două, apoi fiecare jumătate încă o dată, și vezi că două sferturi fac o jumătate.',
+          intro: 'Sub desen alegi în câte bucăți tai: întreg, jumătăți, sferturi sau optimi; fiecare treaptă taie fiecare bucată în două. Atinge o bucată ca s-o colorezi.',
           concepts: ['mat.fractii.jumatate-sfert', 'mat.fractii.egale'],
           widget: { w: 'parts', shape: 'square', parts: 1, cut: true, shapes: ['square', 'circle'] },
           tasks: [
-            { id: 'o-jumatate', ask: 'Colorează o jumătate.', want: { value: '1/2' } },
-            { id: 'un-sfert', ask: 'Colorează un sfert.', want: { value: '1/4' } },
+            { id: 'o-jumatate', ask: 'Taie napolitana în jumătăți și colorează una.', want: { parts: 2, on: 1 } },
+            { id: 'doua-sferturi', ask: 'Taie acum în sferturi. Uită-te la partea colorată!', want: { parts: 4, on: 2 } },
+            { id: 'un-sfert', ask: 'Lasă colorat doar un sfert.', want: { parts: 4, on: 1 } },
             { id: 'trei-sferturi', ask: 'Colorează trei sferturi.', want: { value: '3/4' } },
-            { id: 'doua-sferturi', ask: 'Arată că două sferturi fac o jumătate.', want: { parts: 4, on: 2 } },
           ],
           notes: [
             'Un **sfert** e jumătate dintr-o jumătate: tai jumătatea încă o dată în două.',
@@ -178,7 +185,8 @@ export default {
           id: 'numarator-numitor',
           title: 'Numărătorul și numitorul',
           icon: 'biscuit',
-          intro: 'Alege în câte părți egale tai și câte bucăți colorezi.',
+          goal: 'O fracție are două numere: jos, numitorul spune în câte părți egale tai întregul; sus, numărătorul spune câte părți iei.',
+          intro: 'Glisorul de sus alege în câte părți tai, cel de jos câte bucăți colorezi; poți și atinge bucățile.',
           concepts: ['mat.fractii.numarator-numitor'],
           widget: { w: 'parts', shape: 'bar', parts: 2, min: 1, max: 10, shapes: ['bar', 'circle', 'square'], labels: true },
           tasks: [
@@ -204,7 +212,8 @@ export default {
           id: 'din-multime',
           title: 'Fracția dintr-o mulțime',
           icon: 'mar',
-          intro: 'Împarte merele pe farfurii egale, apoi atinge farfuriile pe care le iei.',
+          goal: 'O fracție se ia și dintr-un grup de obiecte: jumătate din 8 mere înseamnă să le împarți pe 2 farfurii egale și să iei una.',
+          intro: 'Glisorul din stânga alege pe câte farfurii împarți merele, cel de sus câte stau pe fiecare. Atinge farfuriile pe care le iei.',
           concepts: ['mat.fractii.din-multime'],
           widget: { w: 'array', skin: 'plates', mark: true, rows: 2, cols: 2, item: 'mar' },
           tasks: [
@@ -221,14 +230,15 @@ export default {
           id: 'zidul-fractiilor',
           title: 'Zidul fracțiilor',
           icon: 'cuburi',
-          intro: 'Alege un rând și câte bucăți. Linia arată ce fracții sunt egale.',
+          goal: 'Pe zid, fiecare rând e același întreg, tăiat în tot mai multe bucăți. Vezi ce fracții sunt egale și care e mai mare.',
+          intro: 'Glisorul din stânga alege rândul, cel de sus câte bucăți iei; poți și atinge o cărămidă. Linia arată unde se termină fracția.',
           concepts: ['mat.fractii.egale', 'mat.fractii.comparare'],
           widget: { w: 'wall', den: 3, num: 1 },
           tasks: [
             { id: 'o-doime', ask: 'Arată {{f:1/2}} pe zid.', want: { den: 2, num: 1 } },
-            { id: 'zecimi', ask: 'Găsește, la zecimi, fracția egală cu {{f:1/2}}.', want: { den: 10, num: 5 }, hide: ['same'] },
-            { id: 'sesimi', ask: 'Găsește, la șesimi, fracția egală cu {{f:2/3}}.', want: { den: 6, num: 4 }, hide: ['same'] },
-            { id: 'mai-mare', ask: 'Care e mai mare?', pick: ['1/5', '1/3'], rule: 'mai-mare', hint: 'Încă nu. Uită-te pe zid: care bucată e mai lungă?' },
+            { id: 'zecimi', ask: 'Pe rândul zecimilor, arată fracția egală cu {{f:1/2}}.', want: { den: 10, num: 5 }, hide: ['same'] },
+            { id: 'sesimi', ask: 'Pe rândul șesimilor, arată fracția egală cu {{f:2/3}}.', want: { den: 6, num: 4 }, hide: ['same'] },
+            { id: 'mai-mare', ask: 'Care fracție e mai mare?', pick: ['1/5', '1/3'], rule: 'mai-mare', hint: 'Încă nu. Uită-te pe zid: care bucată e mai lungă?' },
           ],
           notes: [
             '{{f:1/2}} = {{f:2/4}} = {{f:3/6}} = {{f:4/8}} = {{f:5/10}}: aceeași lungime pe zid.',

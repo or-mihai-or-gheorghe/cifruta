@@ -62,6 +62,7 @@ export default {
       markup: true,
       equation: all.map(([n, d]) => `{{f:${n}/${d}}}`).join(' = '),
       reading: fractionWords(s.num, s.den),
+      legend: [['rows', s.den === 1 ? 'întregul' : `întregul tăiat în ${s.den} bucăți`], ['', ', din care '], ['cols', `iei ${s.num === 1 ? 'una' : s.num}`]],
       sum: hidden.includes('same')
         ? 'Caută pe zid: unde se termină la fel?'
         : all.length > 1

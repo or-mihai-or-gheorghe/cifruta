@@ -8,6 +8,7 @@ import { cantitate } from '../../../core/ro.js';
 import { play } from '../../../core/sound.js';
 import { emojiHTML } from '../../../visuals/emoji.js';
 import { slider } from '../../slider.js';
+import { legendNodes } from '../../legend.js';
 import { factorsOf, keepMath } from '../../text.js';
 import { ITEMS, SPLIT_ITEMS, STRATEGIES, litCells } from './logic.js';
 
@@ -99,11 +100,11 @@ export function mount(host, params, { logic, dispatch }) {
 
   // ——— calculul ———
   const eq = h('p', { class: 'iv-eq', 'data-testid': 'iv-eq' });
-  const reading = h('p', { class: 'iv-reading' });
+  const legend = h('p', { class: 'iv-legend iv-reading', 'data-testid': 'iv-legend' });
   const sum = h('p', { class: 'iv-sum', 'data-testid': 'iv-sum' });
   const extra = h('p', { class: 'iv-extra', 'data-testid': 'iv-extra' });
   const parts = h('p', { class: 'iv-parts', 'data-testid': 'iv-parts' });
-  const text = h('div', { class: 'iv-text' }, reading, sum, parts, extra);
+  const text = h('div', { class: 'iv-text' }, sum, parts, extra);
 
   const stage = h(
     'div',
@@ -114,7 +115,7 @@ export function mount(host, params, { logic, dispatch }) {
     board,
     side ? h('div', { class: 'iv-array__side' }, side) : null,
   );
-  const root = h('div', { class: `iv-array iv-array--${p.skin}`, 'data-testid': 'iv-array', style: { '--rows-max': R, '--cols-max': C } }, eq, stage, tools.childElementCount ? tools : null, text);
+  const root = h('div', { class: `iv-array iv-array--${p.skin}`, 'data-testid': 'iv-array', style: { '--rows-max': R, '--cols-max': C } }, eq, legend, stage, tools.childElementCount ? tools : null, text);
   host.append(root);
   paintItems(first.item ?? p.item);
 
@@ -210,7 +211,7 @@ export function mount(host, params, { logic, dispatch }) {
       const result = t.equation.split('=').pop().trim();
       eq.replaceChildren(tone(a, ta), '\u00a0×\u00a0', tone(b, tb), `\u00a0=\u00a0${result}`);
     }
-    reading.textContent = t.reading;
+    legend.replaceChildren(...legendNodes(t.legend));
     sum.textContent = t.sum ?? '';
     sum.hidden = !t.sum;
     parts.hidden = !t.parts;
@@ -219,7 +220,7 @@ export function mount(host, params, { logic, dispatch }) {
         ...t.parts.map((text, i) => h('span', { class: 'iv-part' }, h('span', { 'aria-hidden': 'true', html: emojiHTML(i ? SPLIT_ITEMS.bottom : SPLIT_ITEMS.top) }), text)),
       );
     }
-    extra.textContent = t.extra ?? '';
+    extra.textContent = keepMath(t.extra ?? '');
     extra.hidden = !t.extra;
   }
 

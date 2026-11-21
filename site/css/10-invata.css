@@ -101,6 +101,19 @@
 .iv-lesson__nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sp-3); }
 .iv-lesson__link { font-family: var(--font-title); font-weight: 700; }
 
+/* „Ce învățăm”: scopul lecției și ce înseamnă desenul, sub titlu */
+.iv-goal {
+  margin: 0;
+  max-width: 70ch;
+  padding: var(--sp-3) var(--sp-4);
+  border-left: 5px solid var(--c-accent-dark);
+  border-radius: var(--r-2);
+  background: var(--c-note);
+  font-size: var(--fs-1);
+  line-height: 1.45;
+}
+.iv-goal__label { font-family: var(--font-title); }
+
 /* balonul: indicația, provocarea, soluțiile găsite, variantele, „Bravo!” și „Ce am aflat” */
 .iv-bubble { display: grid; gap: 0.5rem; }
 .iv-intro { margin: 0; color: var(--c-ink-soft); }
@@ -154,6 +167,11 @@
 .iv-array--split .iv-eq { font-size: var(--fs-2); }
 .iv-f--rows { color: var(--c-rows-ink); }
 .iv-f--cols { color: var(--c-cols-ink); }
+.iv-f--cut { color: var(--c-ink); text-decoration: underline dashed; text-underline-offset: 0.2em; }
+.iv-f--mark { color: var(--c-ok-ink); }
+/* legenda de sub calcul: părțile ei au culorile glisoarelor și sunt îngroșate */
+.iv-legend { margin: 0; font-size: var(--fs-1); text-align: center; }
+.iv-legend .iv-f { font-weight: 700; }
 .iv-reading { margin: 0; font-size: var(--fs-1); }
 .iv-sum, .iv-extra { margin: 0; max-width: 40ch; font-size: var(--fs-1); color: var(--c-ink-soft); }
 .iv-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--sp-2); }
@@ -456,6 +474,28 @@
 .iv-option--art { padding: 0.35rem; border-radius: var(--r-3); }
 .iv-option__art { display: block; width: 5rem; }
 
+/* scara de tăiere (Jumătatea și sfertul): fiecare treaptă e desenată, cu „✂” între trepte */
+.iv-ladder-box { display: grid; justify-items: center; gap: 0.4rem; width: 100%; }
+.iv-ladder { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.3rem; }
+.iv-ladder__step { color: var(--c-ink-soft); font-size: 1.1rem; }
+.iv-ladder__opt {
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  min-width: 4.2rem;
+  padding: 0.35rem 0.45rem;
+  border: 2px solid var(--c-line-strong);
+  border-radius: var(--r-3);
+  background: var(--c-surface);
+  font-family: var(--font-title);
+  font-size: var(--fs-0);
+  font-weight: 700;
+  cursor: pointer;
+}
+.iv-ladder__opt[aria-checked='true'] { border: 3px solid var(--c-ink); background: var(--c-accent); }
+.iv-ladder__art { display: block; width: 2.6rem; }
+.iv-story { margin: 0; max-width: 40ch; min-height: 1.4em; font-weight: 700; text-align: center; color: var(--c-ok-ink); }
+
 /* zidul fracțiilor: aceeași scenă ca dreptunghiul (glisorul de sus, cel din stânga, desenul) */
 .iv-array--wall { --side: 0rem; }
 .iv-wall { display: grid; grid-template-rows: repeat(10, var(--cell)); cursor: pointer; }
@@ -516,8 +556,8 @@
   .iv-lesson__title { font-size: var(--fs-2); }
   .iv-lesson__body {
     grid-template-columns: auto minmax(14rem, 1fr);
-    grid-template-rows: auto auto auto auto auto 1fr;
-    grid-template-areas: 'stage guide' 'stage eq' 'stage ctrl' 'stage tools' 'stage text' 'stage .';
+    grid-template-rows: auto auto auto auto auto auto 1fr;
+    grid-template-areas: 'stage guide' 'stage eq' 'stage ctrl' 'stage tools' 'stage more' 'stage text' 'stage .';
     column-gap: var(--sp-5);
     row-gap: var(--sp-2);
   }
@@ -526,6 +566,10 @@
   .iv-array__stage, .iv-jumps__art, .iv-parts__art { grid-area: stage; }
   .iv-parts__art { width: min(14rem, 40vw); align-self: center; }
   .iv-parts__controls { grid-area: ctrl; justify-self: stretch; }
+  /* la fracții: scara de tăiere sub calcul, apoi glisorul de colorat, apoi alegerea formei */
+  .iv-ladder-box { grid-area: ctrl; justify-items: start; }
+  .iv-parts:has(.iv-ladder-box) .iv-parts__controls { grid-area: tools; }
+  .iv-parts .iv-tools { grid-area: more; }
   .iv-jumps__art { width: min(26rem, 52vw); align-self: center; }
   .iv-eq { grid-area: eq; justify-self: start; font-size: var(--fs-3); }
   .iv-jumps__controls { grid-area: ctrl; justify-self: stretch; }
@@ -540,6 +584,10 @@
 /* pe telefoanele înguste: Cifruța și textele balonului mai mici, ca desenul să încapă sub provocare */
 @media (max-width: 30rem) {
   body.is-lesson .l-main { padding-top: var(--sp-3); }
+  .iv-ladder { gap: 0.15rem; }
+  .iv-ladder__opt { min-width: 0; padding: 0.3rem; font-size: 0.8rem; }
+  .iv-ladder__art { width: 2.2rem; }
+  .iv-ladder__step { font-size: 0.85rem; }
   .iv-parts__art { width: min(100%, 12.5rem); }
   .iv-frac-eq { font-size: var(--fs-4); }
   .iv-lesson { gap: var(--sp-3); }

@@ -16,7 +16,7 @@ import '../site/js/visuals/all.js';
 import { visualErrors, visualLabel, visualSVG } from '../site/js/visuals/index.js';
 import array, { litCells, pairsLeft } from '../site/js/invata/widgets/array/logic.js';
 import jumps from '../site/js/invata/widgets/jumps/logic.js';
-import parts from '../site/js/invata/widgets/parts/logic.js';
+import parts, { narrate, relevel } from '../site/js/invata/widgets/parts/logic.js';
 import wall from '../site/js/invata/widgets/wall/logic.js';
 import { compareFractions, equalParts, equivalents, parseFraction, reduce, sameValue } from '../site/js/invata/fractions.js';
 
@@ -67,7 +67,9 @@ test('învață: textele sunt scurte, cu diacritice corecte, NFC și doar mini-m
   });
   assert.deepEqual(errors, []);
   for (const { lesson } of lessons) {
-    assert.ok(plain(lesson.intro).length <= 90, `${lesson.id}: indicația are ${plain(lesson.intro).length} de caractere (cel mult 90)`);
+    // „Ce învățăm”: scopul lecției și ce înseamnă desenul; indicația: ce face fiecare glisor și buton (două propoziții scurte)
+    assert.ok(lesson.goal && plain(lesson.goal).length <= 170, `${lesson.id}: „Ce învățăm” lipsește sau e prea lung (${plain(lesson.goal ?? '').length})`);
+    assert.ok(plain(lesson.intro).length <= 170, `${lesson.id}: indicația are ${plain(lesson.intro).length} de caractere (cel mult 170)`);
     for (const t of lesson.tasks) assert.ok(plain(t.ask).length <= 60, `${lesson.id}/${t.id}: cerința are ${plain(t.ask).length} de caractere (cel mult 60)`);
   }
 });
@@ -239,17 +241,23 @@ test('învață: fracțiile — simplificarea, fracțiile egale, compararea', ()
 test('învață: întregul tăiat — tăiatul în două păstrează bucățile colorate, textele spun fracția', () => {
   const p = { shape: 'square', parts: 1, cut: true, shapes: ['square', 'circle'] };
   let s = parts.initial(p);
-  s = parts.apply(p, s, { do: 'cut' });
+  s = parts.apply(p, s, { set: 'level', value: 2 });
   s = parts.apply(p, s, { toggle: 1 });
   assert.equal(parts.derive(p, s).value, '1/2');
-  s = parts.apply(p, s, { do: 'cut' });
+  const halves = s;
+  s = parts.apply(p, s, { set: 'level', value: 4 });
   assert.deepEqual(s.on, [2, 3], 'jumătatea colorată devine două sferturi');
   assert.equal(parts.derive(p, s).value, '1/2');
   assert.equal(parts.texts(p, s).reading, 'două sferturi, adică o jumătate');
   assert.equal(parts.texts(p, s).equation, '{{f:2/4}} = {{f:1/2}}');
-  for (let i = 0; i < 3; i++) s = parts.apply(p, s, { do: 'cut' });
-  assert.equal(s.parts, 8, 'cel mult 8 bucăți');
-  assert.deepEqual(parts.apply(p, s, { do: 'glue' }), { shape: 'square', parts: 1, on: [] });
+  assert.equal(narrate(halves, s), 'Ai tăiat fiecare bucată în două: acum sunt patru sferturi. Partea colorată e aceeași: {{f:1/2}} = {{f:2/4}}.');
+  // înapoi la jumătăți: jumătatea colorată rămâne; un sfert singur nu mai încape într-o jumătate
+  assert.deepEqual(parts.apply(p, s, { set: 'level', value: 2 }).on, [1]);
+  assert.deepEqual(relevel([2], 4, 2), []);
+  assert.match(narrate({ parts: 4, on: [2] }, { parts: 2, on: [] }), /doar pe jumătate nu mai e colorată/);
+  assert.equal(narrate(s, { ...s, on: [3] }), null, 'fără o treaptă nouă, nimic de povestit');
+  assert.deepEqual(parts.apply(p, s, { set: 'level', value: 3 }), s, 'doar treptele 1, 2, 4 și 8');
+  assert.deepEqual(parts.apply(p, s, { set: 'level', value: 1 }), { shape: 'square', parts: 1, on: [] });
   const q = { shape: 'bar', parts: 2, min: 1, max: 10, shapes: ['bar', 'circle'] };
   let t = parts.apply(q, parts.initial(q), { set: 'count', value: 2 });
   assert.equal(parts.texts(q, t).reading, 'două jumătăți, adică un întreg');

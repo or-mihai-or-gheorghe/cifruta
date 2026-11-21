@@ -1,6 +1,7 @@
 // Învață: întregul tăiat în părți egale (logica, pură). Copilul alege forma (pizza, ciocolata, napolitana), în câte părți egale o
-// taie și ce bucăți colorează; cu `cut: true`, partea se schimbă doar tăind fiecare bucată în două (1 → 2 → 4 → 8), iar bucățile
-// colorate se taie odată cu restul, deci o jumătate colorată devine 2/4. Desenul vine din bancă (`fraction`).
+// taie și ce bucăți colorează. Cu `cut: true`, întregul se taie pe o scară: întreg → jumătăți → sferturi → optimi. Fiecare treaptă
+// taie fiecare bucată în două, iar bucățile colorate se taie odată cu restul (o jumătate colorată devine 2/4); la lipire, o bucată
+// rămâne colorată dacă toate bucățile ei erau colorate. Desenul vine din bancă (`fraction`; napolitana se taie în pătrate).
 
 import { cantitate, fractionWords } from '../../../core/ro.js';
 import { fractionText, reduce } from '../../fractions.js';
@@ -9,11 +10,49 @@ import { fractionText, reduce } from '../../fractions.js';
 export const SHAPES = { circle: 'Pizza', bar: 'Ciocolata', square: 'Napolitana' };
 export const QUANTITIES = ['shape', 'parts', 'on', 'value'];
 const MAX = 10;
-const CUTS = [1, 2, 4, 8];
+/** Treptele scării de tăiere și numele bucăților. */
+export const LEVELS = [
+  [1, 'întreg'],
+  [2, 'jumătăți'],
+  [4, 'sferturi'],
+  [8, 'optimi'],
+];
+const CUTS = LEVELS.map(([n]) => n);
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 const range = (n) => Array.from({ length: n }, (_, i) => i);
 const limits = (p) => (p.cut ? [1, 8] : [p.min ?? 1, p.max ?? MAX]);
+
+/**
+ * Bucățile colorate după o altă treaptă: la tăiere, bucata i devine bucățile i·k … i·k + k − 1 (aceeași parte din întreg); la
+ * lipire, o bucată nouă e colorată doar dacă toate bucățile ei erau colorate.
+ */
+export function relevel(on, from, to) {
+  if (to === from) return on;
+  if (to > from) {
+    const k = to / from;
+    return on.flatMap((i) => range(k).map((j) => i * k + j));
+  }
+  const k = from / to;
+  const set = new Set(on);
+  return range(to).filter((i) => range(k).every((j) => set.has(i * k + j)));
+}
+
+/** Ce s-a întâmplat la o treaptă nouă, pentru copil (mini-markup); null dacă treapta nu s-a schimbat. */
+export function narrate(prev, next) {
+  if (prev.parts === next.parts) return null;
+  const [n, d] = [next.on.length, next.parts];
+  const pieces = d === 1 ? 'un întreg' : fractionWords(d, d);
+  if (next.parts > prev.parts) {
+    const k = next.parts / prev.parts;
+    const cut = `Ai tăiat fiecare bucată în ${k === 2 ? 'două' : k === 4 ? 'patru' : 'opt'}: acum sunt ${pieces}.`;
+    return prev.on.length ? `${cut} Partea colorată e aceeași: {{f:${prev.on.length}/${prev.parts}}} = {{f:${n}/${d}}}.` : cut;
+  }
+  const glued = `Ai lipit bucățile la loc: acum ${d === 1 ? 'e un întreg' : `sunt ${pieces}`}.`;
+  if (!prev.on.length) return glued;
+  const kept = n * prev.parts === prev.on.length * d;
+  return kept ? `${glued} Partea colorată e aceeași: {{f:${prev.on.length}/${prev.parts}}} = {{f:${n}/${d}}}.` : `${glued} O bucată colorată doar pe jumătate nu mai e colorată.`;
+}
 
 export default {
   QUANTITIES,
@@ -47,8 +86,7 @@ export default {
     if (!p.cut) for (let v = limits(p)[0]; v <= limits(p)[1]; v++) if (v !== s.parts) list.push({ set: 'parts', value: v });
     for (let k = 0; k <= s.parts; k++) list.push({ set: 'count', value: k });
     for (let i = 0; i < s.parts; i++) list.push({ toggle: i });
-    if (p.cut && s.parts < 8) list.push({ do: 'cut' });
-    if (p.cut && s.parts > 1) list.push({ do: 'glue' });
+    if (p.cut) for (const n of CUTS) if (n !== s.parts) list.push({ set: 'level', value: n });
     return list;
   },
 
@@ -63,8 +101,7 @@ export default {
       const on = s.on.includes(a.toggle) ? s.on.filter((i) => i !== a.toggle) : [...s.on, a.toggle].sort((x, y) => x - y);
       return { ...s, on };
     }
-    if (a.do === 'cut' && p.cut && s.parts < 8) return { ...s, parts: s.parts * 2, on: s.on.flatMap((i) => [2 * i, 2 * i + 1]) };
-    if (a.do === 'glue' && p.cut) return { ...s, parts: 1, on: [] };
+    if (a.set === 'level' && p.cut && CUTS.includes(a.value)) return { ...s, parts: a.value, on: relevel(s.on, s.parts, a.value) };
     return s;
   },
 

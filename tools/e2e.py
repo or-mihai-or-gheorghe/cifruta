@@ -1238,11 +1238,8 @@ def iv_reach(page: Page, target: dict):
         if cid in target:
             iv_slide(page, cid, target[cid])
     state = page.evaluate(IV_STATE)
-    if "on" in target and target["parts"] != state["parts"]:  # fără glisor de părți: lipește la loc, apoi taie în două
-        if state["parts"] != 1:
-            page.get_by_test_id("iv-glue").click()
-        while page.evaluate(IV_STATE)["parts"] < target["parts"]:
-            page.get_by_test_id("iv-cut").click()
+    if "on" in target and target["parts"] != state["parts"]:  # fără glisor de părți: treapta de pe scara de tăiere
+        page.get_by_test_id(f"iv-level-{target['parts']}").click()
     lit = page.evaluate(IV_STATE).get("lit")
     if lit is not None:
         for sid in sorted(set(target.get("lit", [])) ^ set(lit)):
@@ -1403,6 +1400,17 @@ def invata_gestures(run: Run, page: Page, vp: str):
             page.touchscreen.tap(x, y)
         else:
             page.mouse.click(x, y)
+
+    # scara de tăiere: jumătatea colorată devine două sferturi, iar Cifruța povestește ce s-a întâmplat
+    run.goto(page, "invata/fractiile/jumatate-sfert", debug=True)
+    page.wait_for_selector("[data-testid=iv-level-2]")
+    page.get_by_test_id("iv-level-2").click()
+    press(page.locator("[data-testid=iv-parts-art] [data-piece='0']"))
+    page.get_by_test_id("iv-level-4").click()
+    st = page.evaluate(IV_STATE)
+    story = page.get_by_test_id("iv-story").inner_text().replace("\n", " ")
+    run.check(st["parts"] == 4 and st["on"] == [0, 1] and "aceeași" in story, f"[{vp}] învață: tăiat în sferturi, jumătatea colorată devine două sferturi („{story}”)")
+    run.check(page.get_by_test_id("iv-goal").is_visible(), f"[{vp}] învață: lecția spune ce învățăm")
 
     # fracțiile: o bucată a ciocolatei, o cărămidă a zidului, o farfurie
     run.goto(page, "invata/fractiile/numarator-numitor", debug=True)
