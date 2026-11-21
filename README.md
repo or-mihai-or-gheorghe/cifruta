@@ -25,7 +25,8 @@ explicații pe înțelesul copiilor. Mascota site-ului este **Veverița Cifruța
   și arbori), fiecare cu trei niveluri, stele, recorduri și medalii.
 - **Învață** — lecții interactive, cu desene pe care copilul le mișcă: la înmulțire, grupe egale, un dreptunghi de rânduri și coloane
   întins cu glisoare pe orizontală și pe verticală (și întors, ca să se vadă că 4 × 6 = 6 × 4), sărituri pe axă, dreptunghiul spart
-  în două bucăți ușoare și harta tablei înmulțirii; fiecare lecție are provocări cu „Bravo!” și „Ce am aflat”, iar bifele rămân.
+  în două bucăți ușoare și harta tablei înmulțirii; la fracții, părți egale, jumătatea și sfertul, numărătorul și numitorul, fracția
+  dintr-o mulțime și zidul fracțiilor; fiecare lecție are provocări cu „Bravo!” și „Ce am aflat”, iar bifele rămân.
 - **Contul familiei** (opțional) — părintele intră cu Google și face profiluri pentru copii (poreclă și avatar desenat);
   rezultatele se păstrează și în cloud, iar cei din cont văd clasamentul.
 - Funcționează pe telefon, tabletă și calculator; progresul se salvează în browser.

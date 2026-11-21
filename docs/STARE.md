@@ -1,8 +1,8 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-11-21 · **Versiune:** 0.21.0 (secțiunea nouă **Învață**, cu cinci lecții interactive de înmulțire, și antetul
-  refăcut; în 0.20.0, tema fulger „Înmulțirea”, cu 13 tipuri noi și grupele desenate)
+- **Data:** 2026-11-21 · **Versiune:** 0.22.0 (secțiunea nouă **Învață**: în 0.21.0 cinci lecții interactive de înmulțire și
+  antetul refăcut, în 0.22.0 cinci lecții de fracții; în 0.20.0, tema fulger „Înmulțirea”, cu 13 tipuri noi și grupele desenate)
 - **URL live:** https://or-mihai-or-gheorghe.github.io/cifruta/ · **Repo:** https://github.com/or-mihai-or-gheorghe/cifruta (public)
 - **Ce funcționează:** site complet: catalog pe secțiuni, player (pagina de început ca punct de plecare: Continuă / Reîncepe de
   la zero / Vezi rezultatele; un exercițiu pe ecran, hartă pe niveluri, ecrane între niveluri, ciornă, cronometru discret),
@@ -30,7 +30,9 @@
   provocările, verificate automat, și cu „Ce am aflat” la final; bifele rămân pe profil, doar în browser. Capitolul „Înmulțirea” are 5
   lecții: grupe egale (farfurii), rânduri și coloane (careul de 10 × 10 cu glisoare pe orizontală și pe verticală, „Întoarce”,
   „Numără”), sărituri pe axă, dreptunghiul spart (7 × 6 = 5 × 6 + 2 × 6) și harta tablei înmulțirii (strategiile lasă doar 15 calcule
-  de învățat); „Fracțiile” și „Împărțirea” apar „în curând”. Conținut: **4 teste
+  de învățat). Capitolul „Fracțiile” (v0.22.0) are tot 5 lecții: părți egale (și „Care desen arată două jumătăți?”), jumătatea și
+  sfertul (tăiatul în două păstrează bucățile colorate: 1/2 = 2/4), numărătorul și numitorul (până la zecimi), fracția dintr-o
+  mulțime (farfurii colorate) și zidul fracțiilor (fracțiile egale și compararea); „Împărțirea” apare „în curând”. Conținut: **4 teste
   de recapitulare a clasei I** (T1–T4 v2),
   **8 teste tematice „Numerele de la 0 la 1000”** (cumpărături, oraș, excursie, sondaj, concurs sportiv, corpul omenesc, spațiu,
   școală) și **8 teste „Călătorie pe Planeta Albastră”** (adunarea și scăderea până la 1000 cu trecere peste ordin, cu Pământul:
@@ -48,7 +50,7 @@
   - Fără configurarea Firebase, site-ul arată ca în v0.8.1, plus legătura „Confidențialitate” din subsol.
 
   **Calitate:**
-  - 139 de teste Node (și lecțiile din Învață: fiecare provocare se poate rezolva din interfață, în ordine), plus validarea conținutului (cu regula secțiunii U2: trecerile pe nivel, calculele în 0–1000, cifrele
+  - 147 de teste Node (și lecțiile din Învață: fiecare provocare se poate rezolva din interfață, în ordine), plus validarea conținutului (cu regula secțiunii U2: trecerile pe nivel, calculele în 0–1000, cifrele
     calculate și unicitatea cifrelor ascunse), a tabelului de acoperire (fiecare concept are acum cel puțin un exercițiu) și a contrastului, calibrarea stelelor din Jocurile fulger
     pe fiecare temă și nivel, regulile independente ale celor 24 de tipuri cu figuri, ale celor 32 cu grafice și grafuri (numele din
     cerință, sensul și răspunsul, calculate din datele desenului, pe 3000 de semințe) ale celor 14 cu trecere până la 1000 (și forma
@@ -61,9 +63,10 @@
     măsurat pe ecran, fiecare temă jucată tip cu tip, mascota care se mișcă doar unde trebuie);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** capitolul „Fracțiile” din Învață (v0.22.0), apoi publicarea, după confirmarea utilizatorului (regulile Firestore
-  nu se schimbă). v0.20.0 e publicată (regulile `80fba2c5`, rularea 44900403986, tag `v0.20.0`).
-  - Copilul parcurge lecțiile de înmulțire: ce provocări sunt prea ușoare sau prea grele, ce gesturi merg pe telefonul lui.
+- **Următorul pas:** publicarea v0.21.0 și v0.22.0, după confirmarea utilizatorului (regulile Firestore nu se schimbă). v0.20.0 e
+  publicată (regulile `80fba2c5`, rularea 44900403986, tag `v0.20.0`).
+  - Copilul parcurge lecțiile de înmulțire și de fracții: ce provocări sunt prea ușoare sau prea grele, ce gesturi merg pe telefonul
+    lui.
   - Copilul joacă temele pe fiecare nivel, și înmulțirea: din tabelul „Pentru părinți” (timpul mediu pe tip) se reglează `fastMs` și
     pragurile.
   - Copilul încearcă un test U2 pe dispozitivul lui: timpii reali, căsuțele „ține minte”, calculul pe coloane pe telefon.
@@ -298,6 +301,22 @@
     24; regulile Firestore nu se schimbă), tag `v0.18.0`; E2E pe site-ul live 2566/2567 — singura verificare căzută (pe tabletă,
     peisajul unui card din secțiunea de recapitulare, „lipsă” la prima încărcare după publicare) trece la reluare, de trei ori din
     trei.
+- [x] M41 (v0.22.0): Învață, capitolul „Fracțiile” (5 lecții).
+  - **Lecțiile:**
+    - **părți egale:** pizza, ciocolata sau napolitana, tăiate cu glisorul; „Care desen arată două jumătăți / sferturi?”, cu
+      tăieturi inegale, diagonale și careu;
+    - **jumătatea și sfertul:** „Taie fiecare bucată în două”, iar bucățile colorate se taie și ele (1/2 devine 2/4);
+    - **numărătorul și numitorul:** până la zecimi, cu fracția mare etichetată și „Ce fracție e colorată?”;
+    - **fracția dintr-o mulțime:** farfuriile colorate, de exemplu 2/3 din 9 mere;
+    - **zidul fracțiilor:** linia arată fracțiile egale, iar 1/3 e mai mare decât 1/5.
+  - **Ce e nou:**
+    - desenul `fraction` din bancă;
+    - `{{f:n/d}}` în mini-markup și `fractionWords` în `core/ro.js`;
+    - widgeturile `parts` și `wall`, plus `mark` la farfurii;
+    - regulile alegerilor cu fracții;
+    - patru concepte de îmbogățire, plus rândul lipsă pentru `mat.fractii.jumatate-sfert` în `docs/curriculum.md`.
+  - **Verificare:** npm test 147/147, E2E Învață 291/291 (toate lecțiile rezolvate din interfață pe laptop, atingeri pe bucăți, pe
+    zid și pe farfurii, 360×640 și 844×390).
 - [x] M40 (v0.21.0): secțiunea **Învață**, cu capitolul „Înmulțirea” (5 lecții), și antetul refăcut.
   - **Cererea utilizatorului:** o secțiune nouă, pe lângă teste și Jocuri fulger, pentru învățat interactiv: întâi înmulțirea, cu
     glisoare pe orizontală și pe verticală care schimbă rândurile și coloanele, apoi fracțiile; totul vizual, interactiv, intuitiv.
@@ -587,6 +606,7 @@
 | 2026-11-21 | Convenția factorilor: „3 × 4” = „de 3 ori câte 4” = 4 + 4 + 4 (rânduri × câte pe rând), într-o singură constantă (`js/invata/text.js`) | neverificată încă cu manualul; lecția „Rânduri și coloane” arată oricum că ordinea nu schimbă produsul |
 | 2026-11-21 | Glisoarele din Învață sunt rigle aliniate cu desenul, peste un input nativ ascuns; cel vertical crește în jos, iar săgețile merg după direcția de pe ecran; provocările se verifică doar la gestul încheiat | glisorul trebuie să arate ce schimbă (gradația lângă rândul ei); cititoarele de ecran de pe telefon schimbă doar inputurile native; trecerea de la 2 la 8 ar fi rezolvat din greșeală „4” |
 | 2026-11-21 | Antetul: linkurile nu se strâng și nu se rup, treptele stau într-un singur loc, antetul e mai lat decât conținutul (72rem), iar un baleiaj 320–1280 (`header_ok`) le verifică, cu și fără cont | măsurat: cu un al cincilea link, depășiri la 360, 481 și 673 px, iar deja înainte „Jocuri fulger” trecea pe două rânduri cu contul deschis |
+| 2026-11-21 | Fracțiile, în Învață: întâi jumătatea și sfertul (programa clasei a II-a), apoi până la zecimi (numărătorul și numitorul, fracția dintr-o mulțime, fracțiile egale, compararea; clasa a III-a); 1/4 se numește „sfert”, iar fracțiile se scriu etajat (`{{f:n/d}}`); testele de recapitulare rămân fără fracții | alegerea utilizatorului; termenii clasei a II-a sunt „jumătate” și „sfert” |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -1011,6 +1031,15 @@
   - **Publicat:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
+
+- **2026-11-21 (Învață: fracțiile, v0.22.0)**
+  - **Ce s-a făcut:** capitolul „Fracțiile”, cu 5 lecții și 18 provocări. Noi: desenul `fraction`, fracția etajată `{{f:n/d}}`,
+    `fractionWords`, widgeturile `parts` (întregul tăiat) și `wall` (zidul), farfuriile colorate pentru fracția dintr-o mulțime.
+  - **Din capturi:** „0/1” și „zero întregi” la început au devenit „un întreg, încă netăiat”; pizza a ieșit prea mare pe telefon;
+    numitorul fracției mari ajunsese în coloana etichetelor (o grilă fără arii).
+  - **Lecție:** desenele din variante umflau butoanele pe telefon. Regula din `CLAUDE.md` („desenele se dimensionează prin
+    containere”, pentru că `.v-svg { width: 100% }` din stratul visuals câștigă) se aplică și la variantele noi.
+  - **Rezultate:** npm test 147/147, E2E Învață 291/291.
 
 - **2026-11-21 (secțiunea Învață și lecțiile de înmulțire, v0.21.0)**
   - **Cererea utilizatorului:** o secțiune nouă pentru învățat interactiv, întâi înmulțirea (glisoare pe orizontală și pe verticală

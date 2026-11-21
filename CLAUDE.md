@@ -17,7 +17,7 @@ Mascota: **Veverița Cifruța**. Repo public `or-mihai-or-gheorghe/cifruta`; sit
   Un commit publicat cu o cheie se repară doar cu o cheie nouă și rescrierea istoriei.
 - **Pragmatic**: fără soluții complicate pentru cazuri-limită (ex. localStorage simplu), **fără funcții de voce** deocamdată. Ideile „nice to have” merg în backlog.
 - Testele sunt **date declarative** (obiecte serializabile JSON, fără funcții) → vor putea fi mutate într-o bază de date.
-- Textele din teste folosesc doar **mini-markup** (`**tare**`, `==evidențiat==`, `{{e:mar}}`, `{{v:star n=47}}`, `{{z:4}}`), niciodată HTML.
+- Textele din teste folosesc doar **mini-markup** (`**tare**`, `==evidențiat==`, `{{e:mar}}`, `{{v:star n=47}}`, `{{z:4}}`, `{{f:2/3}}`), niciodată HTML.
 - **Răspunsurile se calculează**, nu se tastează de mână unde se poate (`expr`, semne deduse, căutare exhaustivă pentru ghicitori).
 - După orice schimbare: `npm test` (+ `npm run e2e` dacă ai atins interfața).
 
@@ -39,7 +39,8 @@ site/                      ← publicat
                            grafice (bare, linii, pictograme, tabel, cerc, Venn) · grafuri (hartă, rețea, turneu, arbore): desenele jocurilor
                            calcule (column-op: un calcul în scris desenat, eventual greșit sau cu o cifră lipsă „?”)
                            inmultire (groups: grupe egale de obiecte pe tăvi, cu numărătoarea în desenul rezolvat;
-                           skip-line: săriturile egale pe axă, pentru Învață)
+                           skip-line: săriturile egale pe axă, pentru Învață) · fractii (fraction: cerc, bară sau pătrat
+                           tăiat în bucăți egale sau nu, cu bucățile colorate și hașurate)
   js/fulger/               Jocuri fulger (jocuri pe viteză, pe teme, #/fulger): kinds (calcule până la 100), kinds-1000 (numerele până
                            la 1000), kinds-calcule-1000 (adunări și scăderi până la 1000, cu trecere), kinds-inmultire (tabla,
                            o cifră × două cifre, × 10, × 11, zeci rotunde), kinds-forme (figuri), kinds-grafice și kinds-grafuri
@@ -52,7 +53,8 @@ site/                      ← publicat
   js/invata/               Învață (lecții interactive, #/invata): logic (lecțiile: căutarea prin acțiunile widgetului, provocările,
                            regulile alegerilor) · registry (widgeturile) · lesson (cadrul: Cifruța, provocările, „Ce am aflat”) ·
                            slider + ruler (glisorul-riglă) · text (calculele scrise, convenția factorilor) · progress (bifele, pe
-                           profil) · widgets/<w>/logic.js (pur) + view.js: array (farfurii, careu, tăietură, harta tablei), jumps;
+                           profil) · fractions (fracțiile: simplificare, egale, comparare) · widgets/<w>/logic.js (pur) + view.js:
+                           array (farfurii, și colorate; careu; tăietură; harta tablei), jumps, parts (întregul tăiat), wall (zidul);
                            pagina e pages/invata.js
   data/catalog.js          secțiuni → grupuri → teste · concepts.js (ID-uri de concepte) · scoring.js · demo.js · fulger.js (jocul)
                            · invata.js (capitolele, lecțiile și provocările din Învață)
@@ -388,7 +390,13 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
     - `invata_screens` măsoară desenul, pistele (≥ 44 px), căsuțele (≥ 20 px) și textul.
   - **Progresul** (`cifruta:invata`, `getLessons`/`saveLessons`) stă doar în browser, pe profil. `moveAnonymousInto` îl mută înaintea
     lui `clearScopeData(null)`. La ieșirea din cont pleacă odată cu copiile profilului.
-  - **Textele lecțiilor** trec prin `keepMath`, ca „6 × 7” să nu se rupă pe două rânduri.
+  - **Textele lecțiilor** trec prin `keepMath`, ca „6 × 7” să nu se rupă pe două rânduri. Fracțiile se scriu `{{f:n/d}}` (etajate,
+    citite cu `fractionWords` din `core/ro.js`: „o jumătate”, „un sfert”, „două treimi”); un `texts()` cu `markup: true` dă calculul ca
+    mini-markup.
+  - **Glisoarele care nu încep de la 1** („Câte bucăți colorezi?”, de la 0) au `origin`; cel al zidului își schimbă gradațiile cu
+    `setCount` (câte bucăți are rândul ales), ca să stea sub bucăți.
+  - **Desenele din variante** (alegerile cu desene, `show`) stau într-un container cu lățime fixă: `.v-svg { width: 100% }` din
+    stratul visuals bate orice lățime pusă pe SVG.
 - Avatarul desenat (`core/avatar.js`, `visuals/avatar*.js`, `components/avatar-studio.js`):
   - **Textul:** profilul și intrările din clasamente păstrează un singur text canonic, `animal[.culoare-…][.fundal-…][.cap-…][.fata-…][.gat-…]`,
     fără valorile implicite. Un avatar vechi (`vulpe`) înseamnă aspectul implicit, iar același aspect dă mereu același text.

@@ -130,7 +130,8 @@ export default {
 
 ## 4. Mini-markup (în orice text)
 `**tare**` · `==evidențiat==` · `\n` rând nou · `{{e:mar}}` emoji (lista în `site/js/visuals/emoji.js`) ·
-`{{v:star n=47}}` desen mic în text · `{{s:3}} {{z:4}} {{u:7}}` jetoane pentru sute / zeci / unități.
+`{{v:star n=47}}` desen mic în text · `{{s:3}} {{z:4}} {{u:7}}` jetoane pentru sute / zeci / unități · `{{f:2/3}}` fracție etajată,
+citită „două treimi” (numitorul 1–10; doar în Învață: testele de recapitulare n-au fracții).
 HTML nu este permis (se afișează ca text).
 
 ## 5. Banca vizuală (`visual: { v: 'nume', …parametri }`)
@@ -180,6 +181,11 @@ HTML nu este permis (se afișează ca text).
   counts?}`: grupe egale de obiecte pe tăvi cu contur (cel mult 3 pe rând, obiectele așezate ca punctele zarului); `counts` adaugă sub
   fiecare tavă numărătoarea din grupă în grupă (4, 8, 12), pe aceleași dimensiuni. Numele spune grupele („3 grupe cu câte 4 mere”),
   nu totalul.
+- **Săriturile pe axă (Învață):** `skip-line {step: 1–10, count: 0–10}`: axa de la 0 la 10 × pasul, cu săriturile și veverița pe
+  ultimul număr atins; numele nu spune unde ajunge.
+- **Fracțiile (Învață):** `fraction {shape: circle | bar | square, parts: 1–10, on?, sizes?, cut?}`: un întreg tăiat în bucăți;
+  `on` sunt bucățile colorate (și hașurate), `sizes` le face inegale („Sunt părți egale?”), iar la pătrat `cut` alege fâșii, careu
+  2 × 2 sau diagonale. Numele spune în câte bucăți e tăiat și câte sunt colorate, nu și dacă sunt egale.
 
 Toate apar cu exemple la `#/atelier/vizualuri`. **Desen nou:** `registerVisual('nume', { group, defaults, label, render, viewBox, demos })`
 într-un modul din `site/js/visuals/`; culori doar din variabile `--v-*` (vezi `css/00-tokens.css`), contur
@@ -292,8 +298,12 @@ Secțiunea Învață (`#/invata`) are lecții, nu teste: copilul mișcă un dese
 
 **Lecția:** `{ id, title, icon, intro, concepts, widget: { w, ...parametri }, tasks, notes }`.
 - `intro` — indicația Cifruței pentru desen, cu verbul întâi („Trage de glisoare: …”), cel mult 90 de caractere;
-- `widget` — unul din `js/invata/registry.js` (`array` cu `skin: 'plates' | 'grid' | 'split' | 'table'`, `jumps`), cu parametrii lui
-  (`check` îi validează);
+- `widget` — unul din `js/invata/registry.js`, cu parametrii lui (`check` îi validează):
+  - `array` cu `skin: 'plates' | 'grid' | 'split' | 'table'` (la `plates`, `mark: true` colorează farfurii: fracția dintr-o mulțime);
+  - `jumps` (săriturile pe axă);
+  - `parts` (întregul tăiat: `shapes`, `min`/`max` sau `cut: true` pentru „Taie fiecare bucată în două”, `labels` pentru numărător și
+    numitor);
+  - `wall` (zidul fracțiilor);
 - `tasks` — 3–4 provocări, în ordinea în care se fac;
 - `notes` — 1–3 propoziții pentru „Ce am aflat”, cu termenii în **aldin** („**factorii**”, „**produsul**”).
 
@@ -303,7 +313,10 @@ Secțiunea Învață (`#/invata`) are lecții, nu teste: copilul mișcă un dese
 |-|-|-|
 | o stare | `want` | „Arată 4 × 6.” → `{ rows: 4, cols: 6 }` |
 | mai multe soluții | `collect`, `by`, `need` | „Găsește toate dreptunghiurile cu 24.” → `{ product: 24 }`, `by: ['rows', 'cols']`, `need: 4` |
-| o alegere | `pick`, `rule`, datele regulii, `hint`, `hide` | „Cât face 7 × 8?” → `[54, 56, 63]`, `rule: 'produs'`, `of: [7, 8]`, `hide: ['product']` |
+| o alegere | `pick`, `rule`, datele regulii, `hint`, `hide`, `show` | „Cât face 7 × 8?” → `[54, 56, 63]`, `rule: 'produs'`, `of: [7, 8]`, `hide: ['product']` |
+
+Regulile alegerilor (`PICK_RULES`): `produs` (`of: [a, b]`), `jumatati` și `sferturi` (variantele sunt desene `fraction`; corect e cel
+tăiat în 2, respectiv 4 părți egale), `mai-mare` (variante „n/d”), `valoare` (`of: [n, d]`: exact fracția colorată din desenul `show`).
 
 - Mărimile din `want`, `collect` și `by` sunt cele din `derive` ale widgetului (`QUANTITIES`); `hide` ascunde una dintre ele cât e
   activă provocarea (altfel răspunsul ar sta scris lângă desen).
