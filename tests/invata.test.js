@@ -95,6 +95,23 @@ test('învață: jocul unui capitol (tabla în 2 minute) are id permanent, alt i
   }
 });
 
+test('învață: iconițele lecțiilor și ale poveștilor există, iar „pas cu pas” cere alegerile, nu doar glisorul', () => {
+  for (const { chapter, lesson } of lessons) {
+    assert.ok(EMOJI[lesson.icon], `${chapter.id}/${lesson.id}: iconița „${lesson.icon}”`);
+    for (const story of [lesson.widget.story, ...lesson.tasks.map((t) => t.start?.story)].filter(Boolean)) assert.ok(EMOJI[story.icon], `${lesson.id}: iconița poveștii „${story.icon}”`);
+  }
+  // o provocare care pornește o ecuație nouă la „pas cu pas” se rezolvă doar prin alegeri (trecerea, împărțirea și, la o poveste, ecuația)
+  for (const { lesson } of lessons.filter((x) => x.lesson.widget.w === 'pasi')) {
+    const W = widgetOf(lesson);
+    const params = paramsOf(lesson);
+    for (const t of lesson.tasks.filter((x) => x.start && x.want)) {
+      const path = searchPath(W, params, startState(W.initial(params), t), (d) => Object.entries(t.want).every(([k, v]) => d[k] === v));
+      const need = t.start.story ? 3 : 2;
+      assert.ok(path && path.filter((a) => 'choose' in a).length >= need, `${lesson.id}/${t.id}: drumul trece prin ${need} alegeri (${JSON.stringify(path)})`);
+    }
+  }
+});
+
 test('învață: id-urile lecțiilor sunt unice în toată secțiunea (cardurile și testele E2E le caută după id)', () => {
   const ids = lessons.map(({ lesson }) => lesson.id);
   assert.deepEqual(ids.filter((id, i) => ids.indexOf(id) !== i), []);

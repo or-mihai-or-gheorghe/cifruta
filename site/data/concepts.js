@@ -90,6 +90,9 @@ export default {
   // câturile de două cifre sunt materie de clasa a III-a: lecția „Zecile, apoi unitățile” din Învață și Avansatul temei „Împărțirea”
   'mat.op.impartire-zeci': { domain: 'mat', title: 'Împărțirea zecilor și a unităților (84 : 4 = 21)', grade: 2, competencies: ['1.5'], source: ['imbogatire'] },
   'mat.op.necunoscut-doi-pasi': { domain: 'mat', title: 'Ecuații în doi pași (□ + 5 = 3 × 4)', grade: 2, competencies: ['1.4', '1.5'], source: ['imbogatire'] },
+  // capitolul „Ecuații cu x” din Învață (peste programa clasei a II-a): necunoscuta cu o literă, trecerea dincolo de egal, apoi împărțirea
+  'mat.op.necunoscut-litera': { domain: 'mat', title: 'Necunoscuta scrisă cu o literă (3 × x + 4 = 19)', grade: 2, competencies: ['1.4', '1.5'], source: ['imbogatire'] },
+  'mat.op.trecerea-dincolo': { domain: 'mat', title: 'Trecerea în partea cealaltă: + devine −, × devine :', grade: 2, competencies: ['1.4', '1.5'], source: ['imbogatire'] },
 
   // ——— 3. Rezolvarea problemelor ———
   'mat.pb.o-operatie': { domain: 'mat', title: 'Probleme care se rezolvă printr-o operație', grade: 1, competencies: ['5.2'], source: ['manual', 'auxiliar', 'programa'] },
@@ -97,6 +100,7 @@ export default {
   'mat.pb.mai-mult-mai-putin': { domain: 'mat', title: 'Probleme „cu … mai mult / cu … mai puțin”', grade: 1, competencies: ['5.2'], source: ['manual', 'auxiliar'] },
   'mat.pb.doua-moduri': { domain: 'mat', title: 'Rezolvarea unei probleme în mai multe moduri', grade: 1, competencies: ['5.2'], source: ['manual', 'programa'] },
   'mat.pb.mersul-invers': { domain: 'mat', title: 'Mersul invers („Mă gândesc la un număr”)', grade: 1, competencies: ['5.2', '4.1'], source: ['manual', 'auxiliar', 'imbogatire'] },
+  'mat.pb.ecuatie': { domain: 'mat', title: 'Probleme din viața de zi cu zi rezolvate cu o ecuație', grade: 2, competencies: ['5.2'], source: ['imbogatire'] },
   'mat.pb.capcana-limbaj': { domain: 'mat', title: 'Capcana de limbaj în problemele de comparare', grade: 1, competencies: ['5.2'], source: ['imbogatire'] },
   'mat.pb.decizie': { domain: 'mat', title: 'Decizii argumentate („Da/Nu, pentru că…”)', grade: 1, competencies: ['5.2', '4.2'], source: ['programa', 'en2'] },
   'mat.pb.plan': { domain: 'mat', title: 'Rezolvarea cu plan (Ce știm? Ce aflăm?)', grade: 1, competencies: ['5.2'], source: ['manual'] },

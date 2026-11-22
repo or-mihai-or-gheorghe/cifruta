@@ -1399,8 +1399,30 @@ def iv_slide(page: Page, sid: str, value: int):
         page.keyboard.press(more if value > current else less)
 
 
+# butoanele-comutator care apar pe drumul de acțiuni (împărțitul nucilor la saci, pe balanță)
+IV_PATH_TOGGLES = {"shared"}
+
+
+def iv_follow(page: Page, path: list):
+    """Urmează drumul de acțiuni dat de __dbg.invata.path(): glisoarele, alegerile (`iv-choice-<i>`) și butoanele-comutator."""
+    for a in path:
+        if "choose" in a:
+            page.get_by_test_id(f"iv-choice-{a['choose']}").click()
+        elif a.get("toggle") in IV_PATH_TOGGLES:
+            page.get_by_test_id(f"iv-toggle-{a['toggle']}").click()
+        elif "set" in a and isinstance(a.get("value"), int):
+            iv_slide(page, a["set"], a["value"])
+        else:
+            raise ValueError(f"acțiune necunoscută pe drum: {a}")
+
+
 def iv_reach(page: Page, target: dict):
-    """Starea-țintă dată de __dbg.invata.solution(): forma, glisoarele, tăiatul în două, strategiile hărții, apoi bucățile colorate."""
+    """Starea-țintă dată de __dbg.invata.solution(): forma, glisoarele, tăiatul în două, strategiile hărții, apoi bucățile colorate. La
+    widgeturile cu alegeri (ecuația pas cu pas) și la împărțitul pe balanță, urmează drumul de acțiuni găsit de căutare."""
+    path = page.evaluate("window.__dbg.invata.path()")
+    if path and any("choose" in a or a.get("toggle") in IV_PATH_TOGGLES for a in path):
+        iv_follow(page, path)
+        return
     state = page.evaluate(IV_STATE)
     if "shape" in target and target["shape"] != state.get("shape"):
         page.get_by_test_id(f"iv-shape-{target['shape']}").click()
@@ -1618,6 +1640,92 @@ def invata_game_screens(run: Run, browser, base: str):
         run.check(fit["bottom"] <= fit["vh"] and fit["scroll"] <= 1 and fit["x"] <= 1, f"[{name}] tabla în 2 minute: variantele încap fără derulare, cu seria pornită ({fit})")
         run.shot(page, f"invata-joc-{name.replace(' ', '-')}")
         context.close()
+
+
+IV_INSIDE = """(() => {
+  const box = (e) => e.getBoundingClientRect();
+  const inside = (a, b) => a.left >= b.left - 1 && a.right <= b.right + 1 && a.top >= b.top - 1 && a.bottom <= b.bottom + 1;
+  const art = box(document.querySelector('[data-testid=iv-scale]'));
+  const pans = [...document.querySelectorAll('.iv-scale__pan')];
+  return { sacks: document.querySelectorAll('.iv-sack').length,
+           sacksIn: [...document.querySelectorAll('.iv-sack')].every((s) => inside(box(s), box(s.closest('.iv-scale__pan')))),
+           pansIn: pans.every((p) => inside(box(p), art)),
+           piles: [...document.querySelectorAll('[data-testid=iv-pan-r] .iv-scale__pile')].map((p) => p.children.length) };
+})()"""
+
+
+def iv_task_done(page: Page):
+    """După o provocare câștigată, trece la următoarea."""
+    page.get_by_test_id("iv-continue").click()
+
+
+def invata_ecuatii_x(run: Run, page: Page, vp: str):
+    """Capitolul „Ecuații cu x”: 3 saci în taler și apoi 3 coloane de câte 5 nuci (fiecare sac în taler, talerele în desen), bucățile x
+    și cei luați la „− 3”, iar la „pas cu pas”: o alegere greșită lasă pasul pe loc, rândurile apar, proba se bifează, povestea își
+    ascunde ecuația până la alegere și se încheie cu răspunsul ei; litera x e desenată (`var.iv-x`)."""
+    lab = f"[{vp}] ecuații cu x"
+    run.goto(page, "invata/ecuatii-x/saci-la-fel", debug=True)
+    page.wait_for_selector("[data-testid=iv-scale]")
+    m = page.evaluate(IV_INSIDE)
+    run.check(m["sacks"] == 3 and m["sacksIn"] and m["pansIn"], f"{lab}: 3 saci, fiecare în taler, iar talerele în desen ({m})")
+    iv_slide(page, "guess", 5)
+    iv_task_done(page)
+    iv_slide(page, "taken", 4)
+    eq = page.get_by_test_id("iv-eq").inner_text().replace("\xa0", " ")
+    run.check(eq == "3 × x = 15", f"{lab}: după ce iei 4 din ambele talere, 3 × x = 15 („{eq}”)")
+    iv_task_done(page)
+    sliders = page.locator("[data-testid=iv-stage] .iv-slider").count()
+    page.get_by_test_id("iv-toggle-shared").click()
+    m = page.evaluate(IV_INSIDE)
+    eq = page.get_by_test_id("iv-eq").inner_text().replace("\xa0", " ")
+    run.check(sliders == 0 and m["piles"] == [5, 5, 5] and m["sacksIn"] and m["pansIn"] and eq == "x = 15 : 3 = 5",
+              f"{lab}: la împărțit, fără glisor, nucile stau în 3 coloane de câte 5 („{eq}”, {m['piles']})")
+    run.shot(page, f"{vp}-invata-ecuatii-x-balanta")
+
+    run.goto(page, "invata/ecuatii-x/bara-cu-x", debug=True)
+    page.wait_for_selector("[data-testid=iv-bars]")
+    xs = page.locator("[data-testid=iv-bars] .iv-bar--x").count()
+    letter = page.locator("[data-testid=iv-bars] .iv-bar--x var.iv-x").count()
+    iv_slide(page, "guess", 6)
+    run.check(xs == 3 and letter == 3 and page.get_by_test_id("iv-bars").get_attribute("data-fits") == "true", f"{lab}: 3 bucăți x, cu litera, se potrivesc la x = 6 ({xs}, {letter})")
+    iv_task_done(page)
+    iv_slide(page, "guess", 4)
+    iv_task_done(page)
+    taken = page.locator("[data-testid=iv-bars] .iv-bar--taken")
+    run.check(taken.count() == 1 and taken.inner_text().strip() == "3", f"{lab}: la „4 × x − 3 = 17”, cei 3 luați stau lângă 17, cu marginea punctată")
+
+    run.goto(page, "invata/ecuatii-x/trecem-dincolo", debug=True)
+    page.wait_for_selector("[data-testid=iv-pasi]")
+    run.check(page.locator("[data-testid=iv-eq] var.iv-x").count() == 1, f"{lab}: litera x din ecuație e desenată altfel decât ×")
+    choice = lambda text: page.locator("[data-testid^=iv-choice-]", has_text=text).first
+    choice("+ 4").click()
+    reading = page.get_by_test_id("iv-reading").inner_text()
+    moved_empty = "is-empty" in (page.get_by_test_id("iv-line-moved").get_attribute("class") or "")
+    run.check(reading.startswith("Încă nu") and moved_empty, f"{lab}: o alegere greșită lasă pasul pe loc și spune greșeala („{reading[:60]}…”)")
+    choice("− 4").click()
+    moved = page.get_by_test_id("iv-line-moved").inner_text().replace("\xa0", " ")
+    run.check(moved == "3 × x = 19 − 4 = 15", f"{lab}: după trecere, rândul „{moved}”")
+    iv_task_done(page)
+    choice(": 3").click()
+    iv_task_done(page)
+    iv_slide(page, "x", 5)
+    proba = page.get_by_test_id("iv-line-proba").inner_text().replace("\xa0", " ")
+    run.check(proba == "Proba: 3 × 5 + 4 = 19" and page.get_by_test_id("iv-pasi").get_attribute("data-solved") == "true", f"{lab}: proba se bifează („{proba}”)")
+    run.shot(page, f"{vp}-invata-ecuatii-x-pasi")
+
+    run.goto(page, "invata/ecuatii-x/probleme-cu-x", debug=True)
+    page.wait_for_selector("[data-testid=iv-story]")
+    hidden = page.get_by_test_id("iv-eq").inner_text().strip()
+    story = page.get_by_test_id("iv-story").inner_text()
+    run.check(hidden == "?" and "Ana cumpără" in story, f"{lab}: povestea se vede, iar ecuația nu, până la alegere („{hidden}”)")
+    choice("3 × x + 4 = 22").click()
+    iv_task_done(page)
+    choice("− 4").click()
+    choice(": 3").click()
+    iv_slide(page, "x", 6)
+    extra = page.get_by_test_id("iv-extra").inner_text().strip()
+    run.check(extra == "Un creion costă 6 lei.", f"{lab}: la final, răspunsul în cuvintele problemei („{extra}”)")
+    run.shot(page, f"{vp}-invata-ecuatii-x-problema")
 
 
 def invata_new_widgets(run: Run, page: Page, vp: str):
@@ -1896,6 +2004,7 @@ def main() -> int:
                 invata_gestures(run, page, vp)
                 invata_new_widgets(run, page, vp)
                 invata_game_flow(run, page, vp)
+                invata_ecuatii_x(run, page, vp)
             if tests:
                 pages_flow(run, page, tests[0], vp)
             for test in tests:

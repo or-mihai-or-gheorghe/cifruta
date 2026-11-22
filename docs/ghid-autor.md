@@ -338,7 +338,17 @@ Secțiunea Învață (`#/invata`) are lecții, nu teste: copilul mișcă un dese
 
 Regulile alegerilor (`PICK_RULES`): `produs` (`of: [a, b]`), `jumatati` și `sferturi` (variantele sunt desene `fraction`; corect e cel
 tăiat în 2, respectiv 4 părți egale), `mai-mare` (variante „n/d”), `valoare` (`of: [n, d]`: exact fracția colorată din desenul `show`),
-`cat` (`of: [24, 6]`: câtul unei împărțiri exacte) și `necunoscut` (`of: ['□ + 9 = 13']`: numărul din căsuță, căutat cu `solveBox`).
+`cat` (`of: [24, 6]`: câtul unei împărțiri exacte) și `necunoscut` (`of: ['□ + 9 = 13']`: numărul din căsuță, căutat cu `solveBox`;
+merge și cu litera x, `of: ['2 × x + 5 = 17']`, iar „Bravo!” scrie „x = 6, pentru că 2 × 6 + 5 = 17.”).
+
+**Ecuațiile cu x** (capitolul „Ecuații cu x”) au trei widgeturi:
+- **`balanta`:** cu `eq: '3 × x + 4 = 19'`, adică 2–3 saci la fel; nucile rămase se împart exact la saci. Modul `share` are butonul
+  „Împarte” și niciun glisor.
+- **`bare`:** cu `eq: '3 × x + 2 = 20'` sau `'4 × x − 3 = 17'`. Bara cea mai lungă de pe tot glisorul are cel mult 50.
+- **`pasi`:** `{ eq: 'a × x ± b = c', lo?, story? }`. O poveste are forma
+  `{ icon, text (≤ 120), explain (≤ 140, fără ecuație: „Bravo!” o adaugă), answer: 'Un creion costă', unit: ['leu', 'lei'] }`.
+  O provocare cu altă ecuație își golește pașii în `start`: `{ eq, story, written: false, moved: false, divided: false, x: 0,
+  wrong: null }`.
 
 `start` pune câteva mărimi peste starea lăsată de provocarea dinainte, când provocarea apare (și la „Încă o dată”): o ecuație nouă pe
 balanță, alt număr de nuci. Așa, o lecție dă numere diferite fără glisoare lungi (un glisor are cel mult ~11 gradații pe telefon;

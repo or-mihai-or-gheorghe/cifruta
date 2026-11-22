@@ -50,13 +50,13 @@ export function choices(s) {
   return [];
 }
 
-/** Întrebarea pasului de acum, deasupra variantelor (după împărțire: glisorul). */
+/** Întrebarea pasului de acum, deasupra variantelor (după împărțire: glisorul; nimic, după ce proba iese). */
 export function prompt(s) {
   const e = parseStep(s.eq);
   if (!s.written) return 'Care ecuație spune povestea?';
   if (!s.moved) return `Ce devine ${e.op} ${e.b} dincolo de egal?`;
   if (!s.divided) return `Ce devine ${e.a} × dincolo de egal?`;
-  return `Cât e ${e.rest} : ${e.a}? Pune x pe glisor.`;
+  return s.x === e.value ? '' : `Cât e ${e.rest} : ${e.a}? Pune x pe glisor.`;
 }
 
 /** Ce spune Cifruța după o alegere greșită: greșeala tipică, cu motivul. */

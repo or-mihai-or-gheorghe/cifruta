@@ -86,7 +86,7 @@ function hub(container, focus = null) {
         h('h2', { class: 'iv-chapter__title', id: `iv-cap-${chapter.id}` }, chapter.title),
         chip(`${done} din ${cantitate(chapter.lessons.length, 'lecție', 'lecții')}`, done === chapter.lessons.length ? 'c-chip--ok' : ''),
       ),
-      h('p', { class: 'iv-chapter__text' }, chapter.text),
+      h('p', { class: 'iv-chapter__text', html: drawLetter(md(markLetter(chapter.text))) }),
       h(
         'div',
         { class: 'iv-chapter__learn' },

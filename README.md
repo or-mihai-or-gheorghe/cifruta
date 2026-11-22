@@ -29,7 +29,9 @@ explicații pe înțelesul copiilor. Mascota site-ului este **Veverița Cifruța
   în două bucăți ușoare și harta tablei înmulțirii; la fracții, părți egale, jumătatea și sfertul, numărătorul și numitorul, fracția
   dintr-o mulțime și zidul fracțiilor; la împărțire, nuci împărțite pe farfurii și în pungi, tabla înmulțirii citită pe dos și
   pachete de câte 10 bețișoare (84 : 4); la termenul necunoscut, balanța (□ + 7 = 15 și 8 + 4 = □ + 5), barele părții care lipsește
-  și mașina de numere, cu drumul înapoi; fiecare lecție are provocări cu „Bravo!” și „Ce am aflat”, iar bifele rămân. După lecțiile
+  și mașina de numere, cu drumul înapoi; la ecuațiile cu x (3 × x + 4 = 19), sacii la fel de pe balanță, barele cu bucăți x,
+  rezolvarea pas cu pas (trecem dincolo de egal, apoi împărțim) și probleme din viața de zi cu zi; fiecare lecție are provocări cu
+  „Bravo!” și „Ce am aflat”, iar bifele rămân. După lecțiile
   de înmulțire, „Tabla în 2 minute” numără câte înmulțiri cu o cifră faci corect în 2 minute, cu recordul și rundele de până acum
   (fără clasament și medalii).
 - **Contul familiei** (opțional) — părintele intră cu Google și face profiluri pentru copii (poreclă și avatar desenat);

@@ -53,7 +53,7 @@ function invataCard() {
       'div',
       { class: 'fg-home__body l-stack l-stack--sm' },
       h('h2', { class: 'fg-home__title' }, 'Învață cu Cifruța'),
-      h('p', { class: 'fg-home__text' }, 'Lecții cu desene pe care le miști tu: înmulțirea, cu rânduri și coloane și harta tablei, fracțiile, de la jumătate la zidul fracțiilor, împărțirea, cu nuci pe farfurii, și termenul necunoscut, cu balanța.'),
+      h('p', { class: 'fg-home__text' }, 'Lecții cu desene pe care le miști tu: înmulțirea, cu rânduri și coloane și harta tablei, fracțiile, de la jumătate la zidul fracțiilor, împărțirea, cu nuci pe farfurii, termenul necunoscut, cu balanța, și ecuațiile cu x, din povești.'),
     ),
     h(
       'div',

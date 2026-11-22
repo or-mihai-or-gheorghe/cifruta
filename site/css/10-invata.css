@@ -745,7 +745,7 @@
    (`--sin` × jumătatea barei, în unități ale containerului, ca desenul să se strângă pe telefon); doar transform, cu tranziție. Pe
    talere, sacul (cu „?” sau cu numărul ghicit) și nucile (16 px, câte 4–5 pe rând, ca 20 de nuci să încapă). */
 .iv-balanta, .iv-bare, .iv-masina, .iv-pasi { display: grid; justify-items: center; gap: var(--sp-3); }
-.iv-balanta__controls, .iv-bare .iv-control, .iv-masina .iv-control { width: 100%; max-width: 32rem; }
+.iv-balanta__controls, .iv-bare .iv-control, .iv-masina .iv-control, .iv-pasi .iv-control { width: 100%; max-width: 32rem; }
 .iv-scale { --tilt: 0deg; --sin: 0; container-type: inline-size; position: relative; width: min(100%, 22em); height: 12em; margin-inline: auto; font-size: 1rem; }
 .iv-scale__post { position: absolute; left: 50%; bottom: 0; width: 0.6em; height: 9em; translate: -50% 0; border-radius: 0.3em 0.3em 0 0; background: var(--v-brown, #a86b3c); }
 .iv-scale__post::after { content: ''; position: absolute; left: 50%; bottom: 0; width: 5em; height: 0.7em; translate: -50% 0; border-radius: 0.4em 0.4em 0 0; background: var(--v-brown-dark, #7f4f2a); }

@@ -57,7 +57,7 @@ export function mount(host, params, { logic, dispatch }) {
     const t = logic.texts(params, state);
     // fiecare rând își păstrează locul și cât nu s-a făcut (gol, nevăzut), ca nimic să nu sară
     for (const k of LINES) {
-      lines[k].replaceChildren(...mathNodes(t.lines[k] ?? ' '));
+      lines[k].replaceChildren(...mathNodes(t.lines[k] ?? '\u00a0')); // un spațiu nedespărțit: rândul gol își păstrează înălțimea
       lines[k].classList.toggle('is-empty', !t.lines[k]);
     }
     art.dataset.solved = String(logic.derive(params, state).solved);
@@ -67,7 +67,7 @@ export function mount(host, params, { logic, dispatch }) {
     ask.textContent = prompt(state);
     options.replaceChildren(
       ...list.map((c, i) =>
-        h('button', { type: 'button', class: `c-btn iv-pasi__option${state.wrong && c.why === state.wrong ? ' is-wrong' : ''}`, 'aria-label': c.say, 'data-testid': `iv-choice-${i}`, onClick: () => dispatch({ choose: i }) }, mathNodes(c.text)),
+        h('button', { type: 'button', class: `c-btn iv-pasi__option${state.wrong && c.why === state.wrong ? ' is-wrong' : ''}`, 'aria-label': c.say, 'data-testid': `iv-choice-${i}`, onClick: () => dispatch({ choose: i }) }, h('span', {}, mathNodes(c.text))),
       ),
     );
     // după o alegere bună, focusul trece pe prima variantă a pasului următor (sau pe glisor, după împărțire)

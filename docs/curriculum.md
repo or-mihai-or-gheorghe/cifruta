@@ -119,7 +119,9 @@ Ce altă documentare am folosit (exemple de exerciții, aplicații, UX): `docs/c
 | Tabla împărțirii: înmulțirea citită pe dos, cu proba (24 : 6 = 4, pentru că 4 × 6 = 24) — în Învață și în Jocuri fulger | II | 📜 | `mat.op.tabla-impartirii` |
 | Deîmpărțitul și împărțitorul necunoscut (□ : 3 = 6, 24 : □ = 4) — în Învață și în Jocuri fulger | II | ➕ | `mat.op.impartire-necunoscut` |
 | Împărțirea zecilor și a unităților (84 : 4 = 21, 80 : 4 = 20) — în programă: clasa a III-a; doar în Învață și în Jocuri fulger | II | ➕ | `mat.op.impartire-zeci` |
-| Ecuații în doi pași (□ + 5 = 3 × 4, □ − 8 = 20 : 4) — doar în Jocuri fulger, tema „Termenul necunoscut” | II | ➕ | `mat.op.necunoscut-doi-pasi` |
+| Ecuații în doi pași (□ + 5 = 3 × 4, □ − 8 = 20 : 4, 3 × x + 4 = 19) — în Jocuri fulger, tema „Termenul necunoscut”, și în Învață, capitolul „Ecuații cu x” | II | ➕ | `mat.op.necunoscut-doi-pasi` |
+| Necunoscuta scrisă cu o literă (3 × x + 4 = 19) — doar în Învață, capitolul „Ecuații cu x” | II | ➕ | `mat.op.necunoscut-litera` |
+| Trecerea în partea cealaltă: + devine −, × devine : (3 × x + 4 = 19, deci 3 × x = 19 − 4, apoi x = 15 : 3) — doar în Învață | II | ➕ | `mat.op.trecerea-dincolo` |
 
 ### 3. Rezolvarea problemelor
 
@@ -131,6 +133,7 @@ Ce altă documentare am folosit (exemple de exerciții, aplicații, UX): `docs/c
 | Rezolvare în mai multe moduri | I | 📘📜 | `mat.pb.doua-moduri` |
 | Rezolvare cu plan (Ce știm? / Ce aflăm? / Rezolvare / Verificare) | I | 📘 | `mat.pb.plan` |
 | „Mă gândesc la un număr” — mersul invers | I | 📘➕ | `mat.pb.mersul-invers` |
+| Probleme din viața de zi cu zi rezolvate cu o ecuație (cumpărături, bomboane, taxiul) — doar în Învață, capitolul „Ecuații cu x” | II | ➕ | `mat.pb.ecuatie` |
 | Capcana de limbaj („are 18, cu 2 mai puține decât Vlad” → adunăm) | I | ➕ | `mat.pb.capcana-limbaj` |
 | Buget și decizii argumentate („Da/Nu, pentru că…”, format EN II) | I | 📜 | `mat.pb.decizie` |
 | Date în plus și date lipsă; „e realist răspunsul?”; soluții deschise | I | ➕ | `mat.pb.date-lipsa` |

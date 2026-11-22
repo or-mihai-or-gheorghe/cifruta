@@ -17,9 +17,11 @@ const pile = (n, cols) => h('span', { class: 'iv-scale__pile', style: { '--cols'
 export function mount(host, params, { logic, dispatch }) {
   let state = logic.initial(params);
   const send = (id, commit) => (v) => dispatch({ set: id, value: v }, { commit });
-  const guess = slider({ id: 'guess', label: 'Câte nuci pui în sac', valueText: (v) => (v === 1 ? 'o nucă' : `${v} nuci`), min: 0, max: MAX, count: MAX + 1, origin: 0, value: 0, tone: 'cols', onInput: send('guess', false), onCommit: send('guess', true) });
+  // cu mai mulți saci, glisorul pune aceleași nuci în fiecare
+  const many = (parseEq(params.eq)?.bags ?? 1) > 1;
+  const guess = slider({ id: 'guess', label: many ? 'Câte nuci pui în fiecare sac' : 'Câte nuci pui în sac', valueText: (v) => (v === 1 ? 'o nucă' : `${v} nuci`), min: 0, max: MAX, count: MAX + 1, origin: 0, value: 0, tone: 'cols', onInput: send('guess', false), onCommit: send('guess', true) });
   const taken = slider({ id: 'taken', label: 'Câte nuci iei din fiecare taler', valueText: (v) => (v === 1 ? 'o nucă' : `${v} nuci`), min: 0, max: 1, count: 2, origin: 0, value: 0, tone: 'cols', onInput: send('taken', false), onCommit: send('taken', true) });
-  const guessControl = h('div', { class: 'iv-control' }, h('span', { class: 'iv-control__label iv-f--cols' }, 'Câte nuci crezi că are sacul?'), guess.el);
+  const guessControl = h('div', { class: 'iv-control' }, h('span', { class: 'iv-control__label iv-f--cols' }, many ? 'Câte nuci crezi că are fiecare sac?' : 'Câte nuci crezi că are sacul?'), guess.el);
   const takenControl = h('div', { class: 'iv-control' }, h('span', { class: 'iv-control__label iv-f--cols' }, 'Câte nuci iei din fiecare taler?'), taken.el);
 
   const share = h('button', { type: 'button', class: 'c-btn iv-toggle', 'aria-pressed': 'false', 'data-testid': 'iv-toggle-shared', onClick: () => dispatch({ toggle: 'shared' }) });

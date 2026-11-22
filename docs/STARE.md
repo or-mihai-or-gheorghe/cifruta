@@ -1,7 +1,8 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-11-22 · **Versiune:** 0.27.0 („Tabla în 2 minute” în Învață: un joc fulger doar cu înmulțiri de o cifră, care
+- **Data:** 2026-11-22 · **Versiune:** 0.28.0 (capitolul „Ecuații cu x” în Învață: necunoscuta scrisă cu o literă, sacii la fel de pe
+  balanță, barele cu bucăți x, rezolvarea pas cu pas și probleme din viața de zi cu zi; în 0.27.0, „Tabla în 2 minute” în Învață: un joc fulger doar cu înmulțiri de o cifră, care
   numără răspunsurile corecte, fără clasament și medalii; meniul temelor pe pagina Jocurilor fulger; antetul de aceeași lățime pe toate
   paginile; în 0.26.0, Învață pe tablete și laptopuri: lecția pe două coloane, cu widgetul întreg pe ecran,
   fără derulare, și farfuriile de mărime fixă; în 0.25.0, fracțiile în Jocuri fulger: tema „Fracțiile”, cu 9 tipuri; în 0.24.0, termenul
@@ -81,7 +82,8 @@
     măsurat pe ecran, fiecare temă jucată tip cu tip, mascota care se mișcă doar unde trebuie);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.27.0 e publicată (tabla în 2 minute, meniul temelor, antetul: rularea 45002828184, tag `v0.27.0`,
+- **Următorul pas:** v0.28.0 (capitolul „Ecuații cu x”) e gata local și se publică la cererea utilizatorului (doar site-ul: regulile
+  Firestore nu se schimbă). Înainte, v0.27.0 e publicată (tabla în 2 minute, meniul temelor, antetul: rularea 45002828184, tag `v0.27.0`,
   `?v=6a7823b`; doar site-ul, regulile Firestore nu s-au schimbat), cu E2E pe site-ul publicat 4376/4376. Înainte: v0.26.0 (rularea
   44990014985) și v0.25.0 (regulile Firestore `e605bb44`, rularea 44952418317).
   - Copilul parcurge lecțiile (înmulțirea, fracțiile, împărțirea, termenul necunoscut) pe tableta sau laptopul lui: ce provocări sunt
@@ -645,6 +647,8 @@
 | 2026-11-22 | Învață are un joc pe timp, „Tabla în 2 minute”, după lecțiile de înmulțire: arena Jocurilor fulger cu un singur tip (`inm-tabla`, factori de la 2 la 9), care numără doar răspunsurile corecte, fără alune, stele, medalii și clasament; rundele (recordul și ultimele 20) stau doar în browser, ca progresul lecțiilor. E singura excepție de la „fără scor și fără cronometru” (2026-11-21) | cererea utilizatorului: „să măsoare câte înmulțiri corecte faci în 2 minute, fără clasament și medalii”; × 0 și × 1 nu cer socoteală, × 10 are două cifre |
 | 2026-11-22 | Antetul are 80rem (`--w-wide`) pe toate paginile, cât lecțiile din Învață; înlocuiește antetul de 72rem din 2026-11-21 | utilizatorul: lățimea antetului se schimba între paginile obișnuite și lecții (măsurat: la 1440 px, sigla sărea cu 64 px) |
 | 2026-11-22 | Pagina Jocurilor fulger are un meniu al temelor: pe margine, în stânga coloanei, de la 85rem (1360 px); mai îngust, un buton „Teme” în colțul de jos. Coloana nu se mișcă | cererea utilizatorului; pe machetă, la 1280 px meniul de pe margine ar fi avut 128 px, cu 9 nume rupte pe 2–3 rânduri |
+| 2026-11-22 | Capitolul nou „Ecuații cu x” (a × x ± b = c), separat de „Termenul necunoscut”: necunoscuta e litera x (înmulțirea rămâne ×), desenată înclinat și colorat; de la concret la scris: sacii la fel de pe balanță (ia din ambele talere, apoi împarte la saci), barele cu bucăți x (și „− b”, cu cei luați puși la loc), rezolvarea pas cu pas și probleme din viața de zi cu zi | cererea utilizatorului: „să abstractizeze că pot nota cu litere termenii necunoscuți, să facă trecerea în partea cealaltă și apoi împărțirea”, cu exemple reale; pe machetă, „3 × x” se confunda cu „3 × ×” |
+| 2026-11-22 | „Trecerea în partea cealaltă” se face alegând ce devine termenul dincolo de egal (+ 4 devine − 4, 3 × devine : 3); o alegere greșită lasă pasul pe loc și spune greșeala tipică (semnul păstrat, × în loc de :), cu balanța ca motiv | copilul face el trecerea, iar regula „cu semnul schimbat” vine din ce a văzut pe balanță |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -727,6 +731,8 @@
 - Jocuri fulger cu figuri, mai departe: tangram cu triunghiuri, perechi de piese care formează o figură, vederi de sus ale corpurilor,
   emoji-urile unei teme încărcate înainte de start, `fastMs` și pragurile de stele ajustate după rundele reale.
 - Amânate la cerere: citire cu voce (TTS), tastatură numerică proprie pe ecran.
+- Ecuații cu x, mai departe: o temă sau un joc fulger cu a × x ± b = c, mai multe povești (și cu împărțire: x : 3 + 4 = 9), apoi
+  forma prescurtată 3x, după rundele copilului.
 - Învață, mai departe: progresul și rundele jocurilor în cont (reguli Firestore noi), alte jocuri pe timp (de ex. tabla împărțirii,
   cu `game` pe capitol), lecții noi după rundele copilului, un atelier al widgeturilor (`#/atelier`).
 - Din feedback-ul nr. 2, neaplicate: explicații vizuale interactive
@@ -1076,6 +1082,44 @@
   - **Publicat:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
+
+- **2026-11-22 (capitolul „Ecuații cu x”, v0.28.0)**
+  - **Cererea:**
+    - o secțiune nouă de învățat, cu ecuații ax + b = c;
+    - copilul să învețe că necunoscuta se poate nota cu o literă, să facă trecerea în partea cealaltă și apoi împărțirea, pornind de
+      la exemple reale explicate pentru copii;
+    - la întrebări, utilizatorul a ales un capitol nou și formele „+ b” și „− b”.
+  - **Planul:** două treceri înainte de aprobare. Prima: machete în lecțiile de azi, măsurate pe 7 ecrane. Pe una dintre ele, „3 × x”
+    se confunda cu „3 × ×”. A doua: o verificare independentă în cod, care a găsit 5 probleme mari:
+    - povestea ar fi arătat ecuația înainte de alegere;
+    - `start`-uri fără golirea pașilor, iar căutarea ar fi găsit doar glisorul;
+    - balanța și-ar fi stricat testele, iar modul nou ar fi lăsat glisorul în pagină;
+    - structura widgetului nou;
+    - executorul E2E prea larg.
+  - **Capitolul** (`ecuatii-x`), cu 4 lecții:
+    1. „Saci la fel pe balanță”: ghicești, iei 4 nuci din ambele talere, apoi împarți nucile rămase la saci, în 3 coloane de câte 5.
+    2. „Bara cu x”: 3 bucăți x la fel și încă 2; la „− 3”, cei luați se pun la loc.
+    3. „Trecem dincolo, apoi împărțim”: alegi ce devine + 4 (− 4) și 3 × (: 3); proba se face pe loc, cu glisorul lui x.
+    4. „Probleme cu x”: creioanele și rigla, bomboanele (− b) și taxiul. Alegi ecuația poveștii, o rezolvi, iar răspunsul se spune în
+       cuvintele ei.
+  - **Cod:**
+    - `balanta` primește 2–3 saci și modul `share`;
+    - `bare` primește `parseAx`/`pieces`, iar formele vechi rămân neschimbate;
+    - widget nou, `pasi`;
+    - litera x (`text.js`, `mathNodes`, lint);
+    - regula `necunoscut` merge și cu x;
+    - `searchPath`, folosit de `__dbg.invata.path()` și de `iv_reach`.
+  - **Teste noi:**
+    - balanța cu saci, barele cu x, `pasi` (alegerile, greșeala, povestea ascunsă, răspunsul, locul variantei bune), litera x;
+    - iconițele tuturor lecțiilor;
+    - drumul cu alegeri la provocările „pas cu pas”;
+    - E2E `invata_ecuatii_x`, plus lecțiile noi în `invata_flow` și în `invata_screens`.
+  - **Rezultate:** npm test 170/170, E2E complet 4654/4654 (erau 4376).
+  - **Reparate pe parcurs, din capturi și din E2E:**
+    - pista glisorului lui x, de numai 66 px pe tablete și laptopuri;
+    - rândurile încă nefăcute, care nu-și păstrau locul (un spațiu obișnuit nu ține rândul);
+    - x-ul desprins în butoane;
+    - eticheta glisorului la mai mulți saci.
 
 - **2026-11-22 (Publicarea v0.27.0)**
   - La cererea utilizatorului, doar site-ul: regulile Firestore nu s-au schimbat față de v0.26.0, deci fără `deploy:rules`.

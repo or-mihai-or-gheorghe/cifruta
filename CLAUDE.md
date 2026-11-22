@@ -58,9 +58,10 @@ site/                      ← publicat
                            slider + ruler (glisorul-riglă) · text (calculele scrise, convenția factorilor) · progress (bifele, pe
                            profil) · fractions (fracțiile: simplificare, egale, comparare) · widgets/<w>/logic.js (pur) + view.js:
                            array (farfurii, și colorate; careu; tăietură; harta tablei, și citită pe dos), imparte (împărțirea:
-                           farfurii, pungi, pachete de bețișoare), balanta (balanța: ghicești sau iei din ambele talere), bare
-                           (partea care lipsește), masina (mașina de numere, și pe dos), jumps, parts (întregul tăiat), wall (zidul);
-                           game (jocul unui capitol: tabla în 2 minute, cu arena Jocurilor fulger); pagina e pages/invata.js
+                           farfurii, pungi, pachete de bețișoare), balanta (balanța: ghicești, iei din ambele talere sau împarți la saci; și saci la fel, 3 × x + 4 = 19), bare
+                           (partea care lipsește; și bucățile x), masina (mașina de numere, și pe dos), jumps, parts (întregul tăiat), wall (zidul);
+                           pasi (ecuația pas cu pas: trecerea dincolo de egal, împărțirea, proba, povestea) · game (jocul unui
+                           capitol: tabla în 2 minute, cu arena Jocurilor fulger); pagina e pages/invata.js
   data/catalog.js          secțiuni → grupuri → teste · concepts.js (ID-uri de concepte) · scoring.js · demo.js · fulger.js (jocul)
                            · invata.js (capitolele, lecțiile și provocările din Învață)
   data/tests/<grup>/tN-nume.js   testele (NU le numi test-*.js)
@@ -202,7 +203,7 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
     - `want`: o stare a widgetului, prin mărimile din `derive`;
     - `collect` + `by` + `need`: mai multe soluții diferite;
     - `pick` + `rule` (+ `hint`, `hide`): o alegere, cu răspunsul calculat de `PICK_RULES` din `js/invata/logic.js` (`cat` socotește
-      câtul, `necunoscut` caută căsuța cu `solveBox`);
+      câtul, `necunoscut` caută căsuța cu `solveBox`; o ecuație cu litera x se citește ca una cu căsuța);
     - `start`: punctul de plecare al provocării, pus peste starea lăsată de cea dinainte (o ecuație nouă pe balanță, alt număr de nuci),
       la montare, la provocarea următoare și la „Încă o dată”. Așa, glisoarele rămân de cel mult ~11 gradații (`setScale` le mută
       intervalul).
@@ -455,6 +456,18 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
     albastru, „câte 4 mere” portocaliu).
   - **Scara de tăiere** (`parts` cu `cut: true`) desenează fiecare treaptă (întreg ✂ jumătăți ✂ sferturi ✂ optimi). Napolitana se
     taie în pătrate (`fraction` cu `cut: 'halves'`), iar Cifruța povestește ce s-a schimbat (`narrate`).
+  - **Litera x** (capitolul „Ecuații cu x”) se desenează altfel decât semnul ×, cu care se confundă („3 × x”):
+    - e `<var class="iv-x">`, înclinat și colorat; pe saci și pe bucățile barelor are culoarea textului lor;
+    - textele lecției trec prin `rich` din `lesson.js` (`markLetter` → `md` → `drawLetter`, din `js/invata/text.js`);
+    - vederile folosesc `mathNodes` din `js/invata/legend.js`;
+    - se înfășoară doar x-ul singur (nu cel din „taxi”), iar semnul U+E000 care îi ține locul e interzis în date (lint).
+  - **Ecuația pas cu pas** (`pasi`):
+    - alegerile sunt acțiuni `{ choose: i }` (butoanele `iv-choice-<i>`), cu ordinea dată de ecuație;
+    - o provocare care pornește o ecuație nouă își golește pașii în `start` (altfel căutarea găsește doar glisorul; un test cere
+      alegerile pe drum);
+    - la o poveste, ecuația, proba și textul citit se arată abia după alegerea ecuației.
+  - **E2E:** `iv_reach` urmează drumul de acțiuni din `__dbg.invata.path()` când pe el sunt alegeri sau butonul „Împarte”
+    (`iv-toggle-shared`); verificările capitolului sunt în `invata_ecuatii_x`.
   - **Textele lecțiilor** trec prin `keepMath`, ca „6 × 7” să nu se rupă pe două rânduri. Fracțiile se scriu `{{f:n/d}}` (etajate,
     citite cu `fractionWords` din `core/ro.js`: „o jumătate”, „un sfert”, „două treimi”); un `texts()` cu `markup: true` dă calculul ca
     mini-markup.
