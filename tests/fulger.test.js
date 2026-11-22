@@ -453,6 +453,24 @@ test('fulger: runda e deterministă, începe cu încălzirea și nu repetă înt
   }
 });
 
+test('fulger: o rundă poate primi nivelul gata făcut (jocul din Învață): doar tipul lui, fără stele', () => {
+  const lvl = { warmup: ['inm-tabla'], mix: [{ kind: 'inm-tabla', weight: 1 }], stars: [] };
+  const round = createRound({ topic: 'inmultirea/tabla-in-2-minute', level: 'usor', seed: 5, lvl });
+  for (let i = 0; i < 40; i++) {
+    const q = round.next();
+    assert.equal(q.kind, 'inm-tabla');
+    round.answer(i % 4 ? q.answer : q.choices.find((c) => c !== q.answer), 1500);
+  }
+  const s = round.summary();
+  assert.equal(s.correct, 30);
+  assert.equal(s.wrong, 10);
+  assert.equal(s.stars, 0, 'fără stele');
+  assert.equal(s.mistakes.length, 10);
+  assert.equal(s.byKind['inm-tabla'].total, 40);
+  // fără nivel gata făcut, o temă necunoscută tot nu se joacă
+  assert.throws(() => createRound({ topic: 'inmultirea/tabla-in-2-minute', level: 'usor' }));
+});
+
 test('fulger: rezumatul adună alunele, seria cea mai lungă și bonusul de precizie', () => {
   const round = createRound({ topic: LEGACY_TOPIC, level: 'usor', seed: 3 });
   const rand = seededRandom(9);

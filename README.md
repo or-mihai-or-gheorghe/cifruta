@@ -22,13 +22,16 @@ explicații pe înțelesul copiilor. Mascota site-ului este **Veverița Cifruța
 - La final: scor, calificativ, stele pe niveluri, explicații pas cu pas, rezolvarea completă și „Mai încerc o dată”.
 - **Jocuri fulger** — runde de 2 minute pe 13 teme (adunări și scăderi până la 100, numerele până la 1000, adunări și scăderi până
   la 1000 cu trecere, înmulțirea, împărțirea, termenul necunoscut, fracțiile, șiruri și intruși, puzzle cu forme, figuri și corpuri,
-  poziții și trasee, grafice și tabele, hărți și arbori), fiecare cu trei niveluri, stele, recorduri și medalii.
+  poziții și trasee, grafice și tabele, hărți și arbori), fiecare cu trei niveluri, stele, recorduri și medalii; un meniu al temelor
+  stă pe margine pe ecranele late și e un buton „Teme” pe celelalte.
 - **Învață** — lecții interactive, cu desene pe care copilul le mișcă: la înmulțire, grupe egale, un dreptunghi de rânduri și coloane
   întins cu glisoare pe orizontală și pe verticală (și întors, ca să se vadă că 4 × 6 = 6 × 4), sărituri pe axă, dreptunghiul spart
   în două bucăți ușoare și harta tablei înmulțirii; la fracții, părți egale, jumătatea și sfertul, numărătorul și numitorul, fracția
   dintr-o mulțime și zidul fracțiilor; la împărțire, nuci împărțite pe farfurii și în pungi, tabla înmulțirii citită pe dos și
   pachete de câte 10 bețișoare (84 : 4); la termenul necunoscut, balanța (□ + 7 = 15 și 8 + 4 = □ + 5), barele părții care lipsește
-  și mașina de numere, cu drumul înapoi; fiecare lecție are provocări cu „Bravo!” și „Ce am aflat”, iar bifele rămân.
+  și mașina de numere, cu drumul înapoi; fiecare lecție are provocări cu „Bravo!” și „Ce am aflat”, iar bifele rămân. După lecțiile
+  de înmulțire, „Tabla în 2 minute” numără câte înmulțiri cu o cifră faci corect în 2 minute, cu recordul și rundele de până acum
+  (fără clasament și medalii).
 - **Contul familiei** (opțional) — părintele intră cu Google și face profiluri pentru copii (poreclă și avatar desenat);
   rezultatele se păstrează și în cloud, iar cei din cont văd clasamentul.
 - Funcționează pe telefon, tabletă și calculator; progresul se salvează în browser.

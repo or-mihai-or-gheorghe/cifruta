@@ -367,6 +367,8 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 .fg-basket { display: inline-flex; align-items: center; gap: 0.35rem; font-family: var(--font-title); font-weight: 700; }
 .fg-basket__art { width: 2.5rem; height: 2.5rem; }
 .fg-basket__art svg { width: 100%; height: 100%; }
+/* la jocul cu răspunsuri corecte (tabla în 2 minute), în coș stă 👏, nu alunele */
+.fg-basket__art .c-emoji { display: block; width: 100%; height: 100%; margin: 0; }
 .fg-basket__num { display: block; min-width: 2ch; font-size: var(--fs-3); line-height: 1; font-variant-numeric: tabular-nums; }
 .fg-basket__best { display: block; font-family: var(--font-body); font-weight: 400; font-size: 0.75rem; color: var(--c-ink-soft); white-space: nowrap; }
 .fg-pause__icon { display: inline-flex; gap: 0.3rem; }
@@ -806,6 +808,7 @@ body.is-game .l-page { display: flex; flex: 1; flex-direction: column; }
 .fg-total { display: inline-flex; align-items: center; gap: 0.4rem; font-family: var(--font-title); font-weight: 800; font-size: clamp(2.8rem, 2rem + 4vw, 4.5rem); line-height: 1; color: var(--c-brand-dark); font-variant-numeric: tabular-nums; }
 .fg-total__art { width: 0.95em; height: 0.95em; }
 .fg-total__art svg { width: 100%; height: 100%; }
+.fg-total__art .c-emoji { display: block; width: 100%; height: 100%; margin: 0; } /* 👏 la jocul din Învață */
 .fg-score-card .c-star { width: 3rem; height: 3rem; }
 .fg-score-card .c-star.is-stamped { --rot: 0deg; animation: anim-slam 350ms var(--ease-spring) both; }
 .fg-ribbon {

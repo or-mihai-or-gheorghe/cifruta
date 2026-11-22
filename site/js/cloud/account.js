@@ -5,7 +5,7 @@
 import fulgerConfig from '../../data/fulger.js';
 import { avatarId, parseAvatar } from '../core/avatar.js';
 import { currentRoute, refresh } from '../core/router.js';
-import { clearAccountCopies, clearScopeData, moveDrafts, moveLessons, readLessons, readScopeData, setScope, writeScopeData } from '../core/storage.js';
+import { clearAccountCopies, clearScopeData, moveDrafts, moveGames, moveLessons, readGames, readLessons, readScopeData, setScope, writeScopeData } from '../core/storage.js';
 import { cloudConfigured, USE_EMULATOR } from './config.js';
 import { loadFirebase } from './firebase.js';
 import { cleanNickname, combineData, freeProfileId, isRetiredBoard, shownBoards, signInError } from './logic.js';
@@ -326,10 +326,11 @@ export async function playAs(pid) {
   await activate(pid);
 }
 
-/** Rezultatele salvate în browser fără cont. */
+/** Rezultatele salvate în browser fără cont (`games`: rundele jocurilor din Învață, de ex. tabla în 2 minute). */
 export function anonymousCounts() {
   const { attempts, fulger } = readScopeData(null);
-  return { attempts: attempts.length, rounds: fulger.rounds.length, lessons: Object.keys(readLessons(null)).length };
+  const games = Object.values(readGames(null)).reduce((n, g) => n + g.rounds.length, 0);
+  return { attempts: attempts.length, rounds: fulger.rounds.length, lessons: Object.keys(readLessons(null)).length, games };
 }
 
 /** Mută rezultatele fără cont în profil (o singură dată) și le trimite în cloud. */
@@ -339,6 +340,7 @@ export async function moveAnonymousInto(pid) {
   writeScopeData(profile, combineData(readScopeData(profile), readScopeData(null), fulgerConfig.keepRounds));
   moveDrafts(null, profile);
   moveLessons(null, profile); // înainte de ștergere: progresul din Învață nu e în cloud
+  moveGames(null, profile); // la fel, rundele jocurilor din Învață
   clearScopeData(null);
   uploadAll();
 }

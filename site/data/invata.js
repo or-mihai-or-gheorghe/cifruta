@@ -8,6 +8,9 @@
 //             `hide` ascunde o mărime cât e activă provocarea, ca răspunsul să nu stea scris pe ecran.
 // tests/invata.test.js verifică totul: provocările se pot rezolva din interfață, în ordine, iar textele sunt corecte.
 // Id-urile capitolelor, ale lecțiilor și ale provocărilor sunt permanente: stau în progresul salvat (`cifruta:invata`).
+// Un capitol poate avea și un joc (`game`), după lecții: o rundă de 2 minute din Jocuri fulger cu un singur tip de întrebări (`kind`),
+// care numără doar răspunsurile corecte, fără clasament, medalii sau stele (js/invata/game.js). Id-ul lui e permanent (stă în rundele
+// salvate, `cifruta:invata-jocuri`) și nu e și id de lecție: amândouă se deschid la #/invata/<capitol>/<id>.
 
 export default {
   chapters: [
@@ -19,6 +22,17 @@ export default {
       grade: 2,
       text: 'Grupe egale, rânduri și coloane, sărituri pe axă și trucurile care fac tabla înmulțirii mai scurtă.',
       practice: 'inmultirea',
+      // înmulțiri a × b, cu a și b de la 2 la 9 (× 0 și × 1 nu cer socoteală, × 10 are două cifre)
+      game: {
+        id: 'tabla-in-2-minute',
+        title: 'Tabla în 2 minute',
+        icon: 'cronometru',
+        kind: 'inm-tabla',
+        // ce numără jocul, la singular și la plural (substantiv feminin: „37 de înmulțiri corecte”)
+        noun: ['înmulțire', 'înmulțiri'],
+        text: 'Câte înmulțiri cu o cifră faci corect în 2 minute? Te întreci doar cu recordul tău.',
+        rules: 'Ai 2 minute pentru cât mai multe înmulțiri, de la 2 × 2 la 9 × 9. Se numără doar cele corecte.',
+      },
       lessons: [
         {
           id: 'grupe-egale',

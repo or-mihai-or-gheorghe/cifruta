@@ -50,7 +50,8 @@ site/                      ← publicat
                            desene) · contexte (unități, nume, zile, date, obiectele grupelor) · rand · art (desenul și numele unei
                            variante, cerința cu emoji) · engine (temele, runda și punctajul, pur) · records (chei „temă:nivel”,
                            datele vechi) · medals (medaliile: catalogul, cele câștigate, cele ale unei runde; pur) · view (arena) ·
-                           effects (particule, bannere) · nav (meniul temelor de pe pagina jocului);
+                           effects (particule, bannere) · nav (meniul temelor de pe pagina jocului) · mistakes („Greșelile tale”,
+                           comune cu jocul din Învață);
                            pagina e pages/fulger.js
   js/invata/               Învață (lecții interactive, #/invata): logic (lecțiile: căutarea prin acțiunile widgetului, provocările,
                            regulile alegerilor) · registry (widgeturile) · lesson (cadrul: Cifruța, provocările, „Ce am aflat”) ·
@@ -59,7 +60,7 @@ site/                      ← publicat
                            array (farfurii, și colorate; careu; tăietură; harta tablei, și citită pe dos), imparte (împărțirea:
                            farfurii, pungi, pachete de bețișoare), balanta (balanța: ghicești sau iei din ambele talere), bare
                            (partea care lipsește), masina (mașina de numere, și pe dos), jumps, parts (întregul tăiat), wall (zidul);
-                           pagina e pages/invata.js
+                           game (jocul unui capitol: tabla în 2 minute, cu arena Jocurilor fulger); pagina e pages/invata.js
   data/catalog.js          secțiuni → grupuri → teste · concepts.js (ID-uri de concepte) · scoring.js · demo.js · fulger.js (jocul)
                            · invata.js (capitolele, lecțiile și provocările din Învață)
   data/tests/<grup>/tN-nume.js   testele (NU le numi test-*.js)
@@ -218,6 +219,14 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
     și stă deasupra desenului își rezervă rândurile (`min-height: 2lh`).
   - **Gesturile:** în timpul tragerii, `dispatch(…, { commit: false })` doar previzualizează; provocările se verifică la gestul
     încheiat.
+  - **Jocul capitolului** (`game`, opțional, după lecții; azi tabla în 2 minute la Înmulțirea):
+    `{ id, title, icon, kind, noun: [singular, plural], text, rules }`.
+    - Ce înseamnă: o rundă de 2 minute cu un singur tip din Jocuri fulger (`kind`), care numără doar răspunsurile corecte, fără
+      clasament, medalii sau stele.
+    - Id-ul e permanent și diferă de id-urile lecțiilor, pentru că amândouă se deschid la `#/invata/<capitol>/<id>`.
+    - `noun` e un substantiv feminin, ca „37 de înmulțiri corecte” să se acorde.
+    - `npm test` verifică id-ul, iconița, tipul și textele (cel mult 170).
+    - Jocul nu intră în `lessons`: nu se numără printre lecții și nu apare în `__dbg.invata.lessons`.
 - **Animal sau accesoriu nou pentru avatar:**
   1. Id permanent (`[a-z]+`, fără `fara` și `natural`), eticheta și genul în listele din `js/core/avatar.js`. La un animal, `natural`
      e culoarea lui din listă sau null; cu null, desenul are paleta proprie (`fur`).
@@ -434,6 +443,14 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
       fără să ridice degetul: nimic din afara desenului nu se mișcă, iar farfuriile au o singură mărime.
   - **Progresul** (`cifruta:invata`, `getLessons`/`saveLessons`) stă doar în browser, pe profil. `moveAnonymousInto` îl mută înaintea
     lui `clearScopeData(null)`. La ieșirea din cont pleacă odată cu copiile profilului.
+  - **Jocul capitolului** (`js/invata/game.js`, încărcat cu `import()` doar la deschidere, pentru că aduce tipurile Jocurilor fulger):
+    - **Arena:** e cea din Jocuri fulger cu opțiunea `count`. Fiecare răspuns corect valorează 1, fără alune, stele sau înmulțitorul
+      seriei; ținta și textele cu numere vin gata scrise. Nivelul vine gata făcut (`createRound({ …, lvl })`), nu dintr-o temă.
+    - **Rundele:** stau în `cifruta:invata-jocuri` (`getGames`, `saveGameRound`: recordul și ultimele 20 de runde). Ca progresul,
+      nu se anunță și nu urcă în cont. `moveGames` le mută la primul profil, iar întrebarea din profil le numără.
+    - **Pagina:** montează arena direct în `.l-page`, cu `body.is-game`. Dacă `import()` s-a terminat după o altă navigare, nu mai
+      pornește nimic.
+    - **E2E:** `invata_game_flow` și `invata_game_screens`.
   - **Legenda** de sub calcul (`texts().legend`, `invata/legend.js`) scrie ce schimbă fiecare glisor, în culoarea lui („3 farfurii”
     albastru, „câte 4 mere” portocaliu).
   - **Scara de tăiere** (`parts` cu `cut: true`) desenează fiecare treaptă (întreg ✂ jumătăți ✂ sferturi ✂ optimi). Napolitana se

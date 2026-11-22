@@ -208,6 +208,8 @@ def account_flow(run: Run, browser):
     now = page.evaluate("new Date().toISOString()")
     round_ = {"level": "usor", "at": now, "total": 120, "correct": 30, "wrong": 2, "bestStreak": 12, "fast": 9, "stars": 2, "byKind": {}}
     page.evaluate("([a, r]) => { localStorage.setItem('cifruta:attempts', JSON.stringify([a])); localStorage.setItem('cifruta:fulger', JSON.stringify({ best: { usor: { alune: r.total, at: r.at } }, rounds: [r], medals: {} })); }", [attempt(3), round_])
+    # o rundă din „Tabla în 2 minute” (Învață): stă doar în browser, dar trece în profil odată cu rezultatele
+    page.evaluate("(at) => localStorage.setItem('cifruta:invata-jocuri', JSON.stringify({ 'inmultirea/tabla-in-2-minute': { best: { correct: 21, at }, rounds: [{ at, correct: 21, wrong: 2, bestStreak: 9 }] } }))", now)
     run.goto(page, "")
     run.check(not cloud_requests, f"fără cont, nicio cerere spre Firebase ({len(cloud_requests)})")
     expect(page.get_by_test_id("nav-account")).to_contain_text("Intră")
@@ -237,6 +239,10 @@ def account_flow(run: Run, browser):
     run.check((doc(f"users/{uid}") or {}).get("email") == "ana@example.com", "cloud: contul părintelui")
     local = page.evaluate(f"[localStorage.getItem('cifruta:attempts'), JSON.parse(localStorage.getItem('cifruta:p:{uid}:p1:attempts') || '[]').length]")
     run.check(local[0] is None and local[1] == 1, "browser: rezultatele fără cont au trecut în profil")
+    games = page.evaluate(f"[localStorage.getItem('cifruta:invata-jocuri'), JSON.parse(localStorage.getItem('cifruta:p:{uid}:p1:invata-jocuri') || '{{}}')]")
+    moved = games[1].get("inmultirea/tabla-in-2-minute", {})
+    run.check(games[0] is None and (moved.get("best") or {}).get("correct") == 21 and len(moved.get("rounds", [])) == 1,
+              f"browser: rundele „Tabla în 2 minute” au trecut în profil ({moved})")
     run.shot(page, "cloud-profil-laptop")
 
     print("\n[cont] al doilea dispozitiv: datele vin din cloud, apoi scrierile urcă")

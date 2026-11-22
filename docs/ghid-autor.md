@@ -296,6 +296,15 @@ Secțiunea Învață (`#/invata`) are lecții, nu teste: copilul mișcă un dese
 și fără cronometru. Lecțiile stau în `site/data/invata.js`, pe capitole (un capitol „în curând” are doar `soon: true`, titlul, textul
 și iconița). Acolo se învață și conceptele pe care testele le ocolesc (înmulțirea, fracțiile, împărțirea, ecuațiile).
 
+**Jocul capitolului** (`game`, opțional) e singura excepție de la „fără scor și fără cronometru”:
+- **Ce e:** o rundă de 2 minute, după lecții (azi „Tabla în 2 minute”, la Înmulțirea), care numără doar răspunsurile corecte. N-are
+  clasament, medalii sau stele, iar rundele rămân în browser.
+- **Forma:** `{ id, title, icon, kind, noun, text, rules }`.
+  - `kind` e un tip din Jocuri fulger (`inm-tabla`: a × b, cu factori de la 2 la 9).
+  - `noun` e substantivul numărat, la singular și la plural, feminin: `['înmulțire', 'înmulțiri']`.
+  - `text` stă pe card, iar `rules` pe panoul de start.
+- **Id-ul** e permanent și nu poate fi și id de lecție: amândouă se deschid la `#/invata/<capitol>/<id>`.
+
 **Lecția:** `{ id, title, icon, goal, intro, concepts, widget: { w, ...parametri }, tasks, notes }`.
 - `goal` — caseta „Ce învățăm”, sub titlu și pe cardul lecției: scopul și ce înseamnă desenul („Fiecare farfurie e o grupă, cu la
   fel de multe mere.”), cel mult 170 de caractere; fără ea, copilul mișcă glisoare fără să știe de ce;

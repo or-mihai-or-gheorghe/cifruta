@@ -149,7 +149,7 @@ def header_same(run: Run, page: Page):
 
 
 def smoke(run: Run, page: Page, vp: str):
-    for route, name in [("", "acasa"), ("sectiune/recapitulare", "sectiune"), ("fulger", "calcul-fulger"), ("invata", "invata"), ("invata/inmultirea/randuri-coloane", "invata-lectie"), ("fulger/adunari-scaderi-100", "calcul-fulger-tema"), ("fulger/siruri-intrusi", "fulger-siruri-intrusi"), ("atelier/fulger", "atelier-fulger"), ("atelier/componente", "atelier-componente"), ("atelier/vizualuri", "atelier-vizualuri"), ("atelier/tipuri", "atelier-tipuri"), ("atelier/avatare", "atelier-avatare"), ("nu-exista", "404")]:
+    for route, name in [("", "acasa"), ("sectiune/recapitulare", "sectiune"), ("fulger", "calcul-fulger"), ("invata", "invata"), ("invata/inmultirea/randuri-coloane", "invata-lectie"), ("invata/inmultirea/tabla-in-2-minute", "invata-joc"), ("fulger/adunari-scaderi-100", "calcul-fulger-tema"), ("fulger/siruri-intrusi", "fulger-siruri-intrusi"), ("atelier/fulger", "atelier-fulger"), ("atelier/componente", "atelier-componente"), ("atelier/vizualuri", "atelier-vizualuri"), ("atelier/tipuri", "atelier-tipuri"), ("atelier/avatare", "atelier-avatare"), ("nu-exista", "404")]:
         run.goto(page, route)
         page.wait_for_function("document.querySelector('main')?.innerText.trim().length > 0")
         page.wait_for_timeout(300)
@@ -1505,6 +1505,121 @@ def invata_flow(run: Run, page: Page, vp: str):
     run.check(page.evaluate("location.hash") == "#/invata", f"[{vp}] un capitol necunoscut duce la #/invata")
 
 
+IV_GAME = "inmultirea/tabla-in-2-minute"
+IV_GAME_STATE = """() => { const s = window.__dbg.fulger.state();
+  return { score: s.score, kind: s.kind, shown: document.querySelector('[data-testid=fg-alune]').textContent, mult: document.querySelector('[data-testid=fg-mult]').textContent,
+           marks: document.querySelectorAll('.fg-track__mark').length, game: document.body.classList.contains('is-game') }; }"""
+IV_GAME_RESULTS = """() => ({ correct: document.querySelector('[data-testid=iv-game-correct]').textContent,
+  record: document.querySelector('[data-testid=iv-game-record]')?.textContent ?? null, best: document.querySelector('[data-testid=iv-game-best]')?.textContent ?? null,
+  mistakes: document.querySelectorAll('[data-testid=fg-mistakes] .fg-mistake').length, board: document.querySelectorAll('[data-testid=board-link]').length,
+  medals: document.querySelectorAll('.fg-medal, [data-testid=fg-new-medals]').length, stars: document.querySelectorAll('.fg-score-card .c-star').length,
+  bars: [...document.querySelectorAll('[data-testid=iv-game-history] li')].map((li) => li.className), game: document.body.classList.contains('is-game'),
+  focus: document.activeElement?.dataset?.testid ?? null, store: JSON.parse(localStorage.getItem('cifruta:invata-jocuri') || '{}'), fulger: localStorage.getItem('cifruta:fulger') })"""
+
+
+def iv_game_round(page: Page, correct: int, wrong: int = 0):
+    """O rundă din „Tabla în 2 minute”: `correct` răspunsuri bune și `wrong` greșite (a treia întrebare), apoi timpul trece."""
+    page.get_by_test_id("fg-start").click()
+    for i in range(correct + wrong):
+        page.wait_for_function(FULGER_READY)
+        s = page.evaluate("window.__dbg.fulger.state()")
+        bad = wrong and i == 2
+        page.get_by_test_id(f"fg-opt-{s['wrongIndex'] if bad else s['answerIndex']}").click()
+        if bad:
+            page.evaluate(FULGER_SKIP_PAUSE)
+    page.wait_for_function(FULGER_READY)
+
+
+def iv_game_end(page: Page):
+    """Timpul rundei trece, iar rezultatele apar (după numărătoarea numărului mare, 0,9 s)."""
+    page.evaluate("window.__dbg.fulger.elapse(window.__dbg.fulger.state().remainingMs + 50)")
+    page.wait_for_selector("[data-testid=iv-game-results]")
+    page.wait_for_timeout(1100)
+
+
+def invata_game_flow(run: Run, page: Page, vp: str):
+    """Tabla în 2 minute, jocul capitolului Înmulțirea: cardul de după lecții, runda din Jocuri fulger care numără doar răspunsurile
+    corecte (fără × 1,5 și fără stele pe pistă), rezultatele cu recordul, rundele de până acum și greșelile, fără clasament și medalii.
+    Rundele stau doar în `cifruta:invata-jocuri`, nu în `cifruta:fulger` (care urcă în cont)."""
+    run.goto(page, "")
+    page.evaluate("localStorage.removeItem('cifruta:invata-jocuri')")
+    fulger_before = page.evaluate("localStorage.getItem('cifruta:fulger')")
+    run.goto(page, "invata/inmultirea", debug=True)
+    state = page.get_by_test_id("iv-game-state-inmultirea")
+    cards = page.evaluate("[...document.querySelectorAll('[data-testid=iv-chapter-inmultirea] .iv-cards > *')].map((c) => c.dataset.testid)")
+    run.check(state.inner_text().strip() == "Nou" and cards[-1] == "iv-game-inmultirea", f"[{vp}] Învață: „Tabla în 2 minute” e ultimul card al capitolului, „Nou” ({cards[-1]})")
+    page.get_by_test_id("iv-game-inmultirea").click()
+    page.wait_for_selector("[data-testid=fg-start]")
+    start = page.get_by_test_id("fg-start").bounding_box()
+    goal = page.get_by_test_id("fg-goal").inner_text()
+    run.check(page.url.endswith(f"#/invata/{IV_GAME}") and "Prima rundă" in goal and page.get_by_test_id("fg-topic").count() == 0 and start["y"] + start["height"] <= page.viewport_size["height"],
+              f"[{vp}] tabla în 2 minute: panoul de start, fără nivel, cu ținta „{goal}”, iar Start încape pe ecran")
+    run.layout_ok(page, f"[{vp}] tabla în 2 minute")
+    iv_game_round(page, correct=5, wrong=1)
+    hud = page.evaluate(IV_GAME_STATE)
+    fit = page.evaluate(FULGER_FIT)
+    run.check(hud["score"] == 5 and hud["shown"] == "5" and hud["mult"] == "" and hud["marks"] == 0 and hud["kind"] == "inm-tabla" and hud["game"],
+              f"[{vp}] tabla în 2 minute: bara de sus numără doar răspunsurile corecte, fără × 1,5 și fără stele pe pistă ({hud})")
+    run.check(fit["bottom"] <= fit["vh"] and fit["scroll"] <= 1 and fit["x"] <= 1, f"[{vp}] tabla în 2 minute: variantele încap fără derulare ({fit})")
+    run.shot(page, f"{vp}-invata-joc-runda")
+    page.keyboard.press("Escape")
+    quit_href = page.get_by_test_id("fg-quit").get_attribute("href")
+    page.get_by_test_id("fg-resume").click()
+    run.check(quit_href == "#/invata/inmultirea", f"[{vp}] tabla în 2 minute: „Ieși din joc” duce înapoi la capitol ({quit_href})")
+    page.wait_for_function("window.__dbg.fulger.state().phase === 'playing'")  # după „START!” de la reluare
+    iv_game_end(page)
+    r = page.evaluate(IV_GAME_RESULTS)
+    saved = r["store"].get(IV_GAME, {})
+    run.check(r["correct"] == "5" and r["record"] == "Primul tău record!" and r["mistakes"] == 1 and not r["game"] and r["focus"] == "iv-game-again",
+              f"[{vp}] tabla în 2 minute: rezultatele arată 5 corecte, primul record și greșeala ({r['correct']}, {r['record']}, {r['mistakes']} greșeli, focus {r['focus']})")
+    run.check(r["board"] == 0 and r["medals"] == 0 and r["stars"] == 0 and not r["bars"], f"[{vp}] tabla în 2 minute: fără clasament, medalii și stele; „Rundele tale” apare de la două runde")
+    run.check(saved.get("best", {}).get("correct") == 5 and len(saved.get("rounds", [])) == 1 and r["fulger"] == fulger_before,
+              f"[{vp}] tabla în 2 minute: runda stă doar în cifruta:invata-jocuri, iar Jocurile fulger rămân neatinse ({saved})")
+    run.layout_ok(page, f"[{vp}] tabla în 2 minute, rezultatele")
+    run.shot(page, f"{vp}-invata-joc-rezultate")
+    page.get_by_test_id("iv-game-back").click()
+    page.wait_for_selector("[data-testid=iv-game-state-inmultirea]")
+    chip = page.get_by_test_id("iv-game-state-inmultirea").inner_text().strip()
+    run.check(chip == "Recordul tău: 5 înmulțiri", f"[{vp}] cardul jocului arată recordul ({chip!r})")
+    page.get_by_test_id("iv-game-inmultirea").click()
+    page.wait_for_selector("[data-testid=fg-start]")
+    goal = page.get_by_test_id("fg-goal").inner_text()
+    run.check("Recordul tău: 5 înmulțiri corecte" in goal, f"[{vp}] tabla în 2 minute: ținta de pe panoul de start e recordul ({goal})")
+    iv_game_round(page, correct=3)
+    iv_game_end(page)
+    r = page.evaluate(IV_GAME_RESULTS)
+    run.check(r["correct"] == "3" and r["record"] is None and r["best"] == "Recordul tău: 5 înmulțiri corecte" and len(r["bars"]) == 2 and "is-now" in r["bars"][-1] and "is-best" in r["bars"][0],
+              f"[{vp}] a doua rundă: fără record, cu recordul vechi și două bare în „Rundele tale” ({r['best']}, {r['bars']})")
+    page.get_by_test_id("iv-game-again").click()
+    page.wait_for_selector("[data-testid=fg-start]")
+    run.check(page.url.endswith(f"#/invata/{IV_GAME}"), f"[{vp}] „Mai joc o dată” pornește o rundă nouă")
+    run.goto(page, "")
+    page.evaluate("localStorage.removeItem('cifruta:invata-jocuri')")
+
+
+def invata_game_screens(run: Run, browser, base: str):
+    """Tabla în 2 minute pe telefonul ținut orizontal și pe cel mic: panoul de start și variantele încap fără derulare."""
+    for name, opts in [("telefon culcat", {"viewport": {"width": 844, "height": 390}, "has_touch": True, "is_mobile": True}),
+                       ("telefon mic", {"viewport": {"width": 360, "height": 640}, "has_touch": True, "is_mobile": True})]:
+        context = browser.new_context(locale="ro-RO", **opts)
+        page = context.new_page()
+        run.watch(page, name)
+        page.goto(f"{base}?debug=1#/invata/{IV_GAME}")
+        page.wait_for_selector("[data-testid=fg-start]")
+        box = page.get_by_test_id("fg-start").bounding_box()
+        run.check(box["y"] + box["height"] <= opts["viewport"]["height"], f"[{name}] tabla în 2 minute: butonul Start încape pe ecran")
+        page.get_by_test_id("fg-start").click()
+        page.wait_for_function(FULGER_READY)
+        page.evaluate("window.__dbg.fulger.setStreak(3)")
+        page.evaluate("window.__dbg.fulger.force('inm-tabla')")
+        page.wait_for_function(FULGER_READY)
+        page.wait_for_timeout(250)
+        fit = page.evaluate(FULGER_FIT)
+        run.check(fit["bottom"] <= fit["vh"] and fit["scroll"] <= 1 and fit["x"] <= 1, f"[{name}] tabla în 2 minute: variantele încap fără derulare, cu seria pornită ({fit})")
+        run.shot(page, f"invata-joc-{name.replace(' ', '-')}")
+        context.close()
+
+
 def invata_new_widgets(run: Run, page: Page, vp: str):
     """Widgeturile împărțirii și ale termenului necunoscut, din desen: farfuriile și coșul, balanța care se înclină și se îndreaptă,
     barele care se potrivesc și drumul înapoi al mașinii de numere."""
@@ -1780,6 +1895,7 @@ def main() -> int:
                 invata_flow(run, page, vp)
                 invata_gestures(run, page, vp)
                 invata_new_widgets(run, page, vp)
+                invata_game_flow(run, page, vp)
             if tests:
                 pages_flow(run, page, tests[0], vp)
             for test in tests:
@@ -1792,6 +1908,7 @@ def main() -> int:
             fulger_nav_screens(run, browser, run.base)
         if not only or invata_only:
             invata_screens(run, browser, run.base)
+            invata_game_screens(run, browser, run.base)
             invata_keyboard(run, browser, run.base)
         browser.close()
     if httpd:

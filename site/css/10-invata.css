@@ -84,6 +84,23 @@
 .iv-card__text { grid-column: 2; font-size: var(--fs-0); color: var(--c-ink-soft); }
 .iv-card__foot { grid-column: 1 / -1; }
 
+/* ——— Jocul capitolului (tabla în 2 minute, js/invata/game.js) ———
+   Cardul stă după lecții, galben, cu ⚡ în locul numărului. Runda e arena din Jocuri fulger, iar rezultatele folosesc cardul de
+   rezultate de acolo (`fg-score-card`); aici: rândul de sub număr și „Rundele tale”, barele ultimelor runde. */
+.iv-card--game { background: var(--c-warn-bg); border-color: var(--c-accent); }
+.iv-card--game:hover { border-color: var(--c-accent-dark); }
+.iv-card__num .c-emoji { width: 1.05rem; height: 1.05rem; margin: 0; }
+.iv-game-card__unit { margin-top: calc(-1 * var(--sp-3)); font-family: var(--font-title); font-weight: 700; font-size: var(--fs-1); }
+.iv-runs { display: grid; gap: var(--sp-3); }
+.iv-runs__list { display: flex; align-items: flex-end; justify-content: center; gap: var(--sp-2); height: 9.5rem; margin: 0; padding: 0; list-style: none; }
+.iv-runs__item { flex: 1 1 0; min-width: 0; max-width: 3rem; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 0.25rem; height: 100%; }
+.iv-runs__num { display: inline-flex; align-items: center; gap: 0.1rem; font-family: var(--font-title); font-weight: 700; font-variant-numeric: tabular-nums; }
+.iv-runs__mark .c-emoji { display: block; width: 0.95rem; height: 0.95rem; margin: 0; }
+.iv-runs__bar { width: 100%; height: calc(var(--h) * 6rem); min-height: 4px; border-radius: var(--r-1) var(--r-1) 0 0; background: var(--c-line-strong); }
+.iv-runs__item.is-best .iv-runs__bar { background: var(--c-accent); }
+.iv-runs__item.is-now .iv-runs__bar { background: var(--c-brand); }
+.iv-runs__label { min-height: 1.2em; color: var(--c-brand-dark); font-size: 0.8rem; font-weight: 700; }
+
 /* ——— Cadrul lecției ———
    De la 48rem (tableta ținută vertical, tableta culcată, laptopul): două coloane, Cifruța în stânga (scopul lecției, bulinele
    provocărilor, balonul) și widgetul în dreapta, iar widgetul încape sub titlul lecției fără derulare: desenele se socotesc după

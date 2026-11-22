@@ -78,9 +78,14 @@ const tinyArt = (spec) => (spec.emoji || spec.frac ? h('span', { class: 'fg-stri
 const sideArt = (list) =>
   h('span', { class: 'fg-strip__side' }, list.flatMap((spec, i) => (i ? [h('span', { class: 'fg-sign' }, '+'), tinyArt(spec)] : [tinyArt(spec)])));
 
-export function mountArena(host, { topic, topicTitle = '', level, best = null, seed, onEnd }) {
-  const lvl = levelConfig(topic, level);
-  const round = createRound({ topic, level, seed });
+/**
+ * Arena unei runde. Cu `count` ({ kind, title, text, goal, quit }) e un joc din afara temelor, care numără doar răspunsurile corecte
+ * (tabla în 2 minute, din Învață): fiecare valorează 1, fără alune, stele și înmulțitori, iar `best` e recordul de răspunsuri corecte;
+ * `goal` (ținta de pe panoul de start) vine gata scris, iar `quit` e adresa de la „Ieși din joc”.
+ */
+export function mountArena(host, { topic, topicTitle = '', level, best = null, seed, onEnd, count = null }) {
+  const lvl = count ? { warmup: [count.kind], mix: [{ kind: count.kind, weight: 1 }], stars: [] } : levelConfig(topic, level);
+  const round = createRound({ topic, level, seed, lvl });
   const reduced = prefersReducedMotion();
   const timers = new Set();
   const later = (ms, fn) => {
@@ -131,17 +136,22 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
   const streakMult = h('span', { class: 'fg-streak__mult', 'data-testid': 'fg-mult' });
   const flame = h('span', { class: 'fg-streak__flame', 'aria-hidden': 'true' }, h('span', { class: 'fg-streak__fire', html: emojiHTML('foc') }));
   const streakBox = h('div', { class: 'fg-streak is-off', title: 'Răspunsuri corecte la rând' }, flame, streakCount, streakMult);
-  const basketArt = h('span', { class: 'fg-basket__art', 'aria-hidden': 'true', html: visualSVG({ v: 'alune', n: 1 }) });
+  const basketArt = h('span', { class: 'fg-basket__art', 'aria-hidden': 'true', html: count ? emojiHTML('bravo') : visualSVG({ v: 'alune', n: 1 }) });
   const basketNum = h('span', { class: 'fg-basket__num', 'data-testid': 'fg-alune' }, '0');
-  const basket = h('div', { class: 'fg-basket', title: 'Alune' }, basketArt, h('span', {}, basketNum, h('span', { class: 'fg-basket__best' }, best ? `Record: ${best}` : 'alune')));
+  const basket = h(
+    'div',
+    { class: 'fg-basket', title: count ? 'Răspunsuri corecte' : 'Alune' },
+    basketArt,
+    h('span', {}, basketNum, h('span', { class: 'fg-basket__best' }, best ? `Record: ${best}` : count ? 'corecte' : 'alune')),
+  );
   const pauseBtn = h(
     'button',
     { type: 'button', class: 'c-btn c-btn--ghost c-btn--icon fg-pause', 'aria-label': 'Pauză', 'data-testid': 'fg-pause', onClick: () => pause() },
     h('span', { class: 'fg-pause__icon', 'aria-hidden': 'true' }, h('i'), h('i')),
   );
 
-  // ——— pista: stelele nivelului și recordul ———
-  const trackMax = Math.max(lvl.stars.at(-1), best ?? 0) * 1.1;
+  // ——— pista: stelele nivelului și recordul (fără stele, la jocul cu răspunsuri corecte: recordul, cel puțin 30) ———
+  const trackMax = Math.max(lvl.stars.at(-1) ?? 0, best ?? 0, count ? 30 : 0) * 1.1;
   const place = (v) => `${Math.min(100, (v / trackMax) * 100).toFixed(2)}%`;
   const marks = lvl.stars.map((s, i) => h('span', { class: 'fg-track__mark', style: { left: place(s) }, 'data-testid': `fg-mark-${i + 1}` }, stars(0, 1)));
   const flag = best ? h('span', { class: 'fg-track__flag', style: { left: place(best) }, html: emojiHTML('steag') }) : null;
@@ -178,7 +188,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
     h(
       'div',
       { class: 'fg-arena__inner' },
-      h('h1', { class: 'u-visually-hidden' }, `Jocuri fulger · ${topicTitle ? `${topicTitle} · ` : ''}${levelInfo(level)?.label ?? level}`),
+      h('h1', { class: 'u-visually-hidden' }, count ? count.title : `Jocuri fulger · ${topicTitle ? `${topicTitle} · ` : ''}${levelInfo(level)?.label ?? level}`),
       h('div', { class: 'fg-hud' }, timer, streakBox, basket, pauseBtn),
       track,
       h('div', { class: 'fg-stage' }, say, buddy, card, answers, cool),
@@ -195,6 +205,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
   // ——— start ———
   /** Ținta de pe panoul de start: recordul și steaua următoare. */
   function goal() {
+    if (count) return h('p', { class: 'fg-panel__goal', 'data-testid': 'fg-goal' }, count.goal);
     const next = nextStar(lvl, best ?? 0);
     const record = best ? `Recordul tău: ${cantitate(best, 'alună', 'alune')}. ` : '';
     const star = next ? `${STAR_WORDS[next.index]} stea: ${cantitate(next.at, 'alună', 'alune')}.` : 'Ai toate stelele: poți bate recordul?';
@@ -208,10 +219,10 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
         'div',
         { class: 'fg-panel anim-bounce-in' },
         h('div', { class: 'fg-panel__art', 'aria-hidden': 'true', html: visualSVG({ v: 'mascot', mood: 'vesela' }) }),
-        h('h2', { class: 'fg-panel__title' }, 'Jocuri fulger'),
-        topicTitle ? h('p', { class: 'u-small u-muted', 'data-testid': 'fg-topic' }, topicTitle) : null,
-        levelPill(level),
-        h('p', { class: 'fg-panel__text' }, 'Ai 2 minute. Răspunde corect de mai multe ori la rând: alunele cresc, iar fulgerul le dublează!'),
+        h('h2', { class: 'fg-panel__title' }, count ? count.title : 'Jocuri fulger'),
+        !count && topicTitle ? h('p', { class: 'u-small u-muted', 'data-testid': 'fg-topic' }, topicTitle) : null,
+        count ? null : levelPill(level),
+        h('p', { class: 'fg-panel__text' }, count ? count.text : 'Ai 2 minute. Răspunde corect de mai multe ori la rând: alunele cresc, iar fulgerul le dublează!'),
         goal(),
         start,
         h('p', { class: 'u-small u-muted fg-keys-hint' }, 'La tastatură: Enter pornește, 1–4 alege, Esc pune pauză.'),
@@ -504,27 +515,32 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
   function celebrate(res, btn) {
     reveal(res.question);
     btn.classList.add('is-correct');
+    const gain = count ? 1 : res.alune; // la jocul cu răspunsuri corecte, fiecare valorează 1
     const before = alune;
-    alune += res.alune;
+    alune += gain;
     countUp(basketNum, alune, 450, before);
-    burst(fx, btn);
-    flyTo(fx, btn, basketNum, `+${res.alune}`, { gold: res.turbo });
+    burst(fx, btn, 6, { nuts: !count });
+    flyTo(fx, btn, basketNum, `+${gain}`, { gold: res.turbo });
     after(reduced ? 0 : 420, () => pop(basket, 'anim-pop')); // fix când aluna ajunge în coș
     if (res.speed) {
       const tier = config.speed.find((s) => s.id === res.speed);
       badge(fx, card, tier.label, { icon: res.speed === 'fulger' ? 'fulger' : null, cls: res.speed });
     }
-    live.textContent = `Corect! ${cantitate(res.alune, 'alună', 'alune')}. Serie: ${res.streak}.`;
+    live.textContent = count
+      ? `Corect! ${cantitate(alune, 'răspuns corect', 'răspunsuri corecte')}. Serie: ${res.streak}.`
+      : `Corect! ${cantitate(res.alune, 'alună', 'alune')}. Serie: ${res.streak}.`;
     play('hit', { step: res.streak - 1 });
     paintStreak(res.streak);
     paintProgress();
     if (res.milestone) {
       const { label, mult } = res.milestone;
-      banner(fx, card, CHEERS[res.streak] ? `${label} ×${formatNumber(mult)}` : label, { turbo: res.milestone.turbo });
+      // fără alune, seria nu înmulțește nimic: bannerul e doar lauda
+      const cheer = count ? null : CHEERS[res.streak];
+      banner(fx, card, cheer ? `${label} ×${formatNumber(mult)}` : label, { turbo: res.milestone.turbo });
       play('combo');
       confetti({ count: 28 });
       react('sarbatoreste');
-      live.textContent += ` ${CHEERS[res.streak] ?? label}`;
+      live.textContent += ` ${cheer ?? label}`;
     }
   }
 
@@ -551,7 +567,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
   function paintStreak(streak) {
     const tier = streakTier(streak);
     streakCount.textContent = String(streak);
-    streakMult.textContent = tier ? `×${formatNumber(tier.mult)}` : '';
+    streakMult.textContent = tier && !count ? `×${formatNumber(tier.mult)}` : '';
     streakBox.classList.toggle('is-off', streak === 0);
     flame.style.setProperty('--flame', String(1 + 0.15 * (tier ? config.streak.indexOf(tier) + 1 : 0)));
     if (streak > 0) pop(streakCount, 'anim-tick');
@@ -574,7 +590,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
       litStars++;
     }
     const nuts = alune >= lvl.stars[1] ? 3 : alune >= lvl.stars[0] ? 2 : 1;
-    if (nuts !== nutsShown) {
+    if (!count && nuts !== nutsShown) {
       nutsShown = nuts;
       basketArt.innerHTML = visualSVG({ v: 'alune', n: nuts });
     }
@@ -623,7 +639,7 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
         h('h2', { class: 'fg-panel__title' }, 'Pauză'),
         h('p', { class: 'fg-panel__text' }, 'Ceasul stă pe loc. Continuă când ești gata.'),
         resumeBtn,
-        h('a', { class: 'c-btn c-btn--ghost', href: `#/fulger/${topic}`, 'data-testid': 'fg-quit' }, 'Ieși din joc'),
+        h('a', { class: 'c-btn c-btn--ghost', href: count ? count.quit : `#/fulger/${topic}`, 'data-testid': 'fg-quit' }, 'Ieși din joc'),
       ),
     );
     resumeBtn.focus({ preventScroll: true });
@@ -699,7 +715,8 @@ export function mountArena(host, { topic, topicTitle = '', level, best = null, s
         phase,
         enabled,
         streak: round.streak,
-        alune,
+        alune, // la jocul cu răspunsuri corecte, tot numărul din coș
+        score: alune,
         turbo,
         remainingMs: Math.max(0, Math.round(config.durationMs - elapsed)),
         kind: q?.kind ?? null,

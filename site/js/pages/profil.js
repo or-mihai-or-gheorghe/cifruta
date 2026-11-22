@@ -289,11 +289,13 @@ export default function profil(container) {
             const created = await addProfile({ nickname: nickname.value, avatar: studio.get(), showOnBoards: boards.checked });
             close();
             const anon = anonymousCounts();
-            if (accountState().profiles.length === 1 && (anon.attempts || anon.rounds || anon.lessons)) {
+            if (accountState().profiles.length === 1 && (anon.attempts || anon.rounds || anon.lessons || anon.games)) {
+              // „…, 3 lecții începute și 2 runde de joc din Învață”: „din Învață” o singură dată, la capăt
               const parts = [
                 anon.attempts ? `${cantitate(anon.attempts, 'încercare', 'încercări')} la teste` : null,
                 anon.rounds ? `${cantitate(anon.rounds, 'rundă', 'runde')} de la Jocuri fulger` : null,
-                anon.lessons ? `${cantitate(anon.lessons, 'lecție începută', 'lecții începute')} din Învață` : null,
+                anon.lessons ? `${cantitate(anon.lessons, 'lecție începută', 'lecții începute')}${anon.games ? '' : ' din Învață'}` : null,
+                anon.games ? `${cantitate(anon.games, 'rundă', 'runde')} de joc din Învață` : null,
               ]
                 .filter(Boolean)
                 .join(', ')

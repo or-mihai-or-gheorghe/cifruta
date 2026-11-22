@@ -1,7 +1,9 @@
 # Starea proiectului Cifruța
 
 ## Instantaneu
-- **Data:** 2026-11-22 · **Versiune:** 0.26.0 (Învață pe tablete și laptopuri: lecția pe două coloane, cu widgetul întreg pe ecran,
+- **Data:** 2026-11-22 · **Versiune:** 0.27.0 („Tabla în 2 minute” în Învață: un joc fulger doar cu înmulțiri de o cifră, care
+  numără răspunsurile corecte, fără clasament și medalii; meniul temelor pe pagina Jocurilor fulger; antetul de aceeași lățime pe toate
+  paginile; în 0.26.0, Învață pe tablete și laptopuri: lecția pe două coloane, cu widgetul întreg pe ecran,
   fără derulare, și farfuriile de mărime fixă; în 0.25.0, fracțiile în Jocuri fulger: tema „Fracțiile”, cu 9 tipuri; în 0.24.0, termenul
   necunoscut: în Învață, capitolul cu balanța, barele și mașina de numere, iar în Jocuri fulger, tema „Termenul necunoscut”, cu 10 tipuri
   noi; în 0.23.0, împărțirea: în Învață, capitolul „Împărțirea”, cu 4 lecții,
@@ -79,11 +81,12 @@
     măsurat pe ecran, fiecare temă jucată tip cu tip, mascota care se mișcă doar unde trebuie);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.26.0 e publicată (așezarea lecțiilor pe tablete și laptopuri: rularea 44990014985, tag `v0.26.0`,
-  `?v=d8b3620`; doar site-ul, regulile Firestore nu s-au schimbat), cu E2E pe site-ul publicat 4258/4258. Înainte: v0.25.0 (regulile
-  Firestore `e605bb44`, rularea 44952418317) și reparația butoanelor din Jocuri fulger care tremurau sub cursor (rularea 44954525149).
+- **Următorul pas:** v0.27.0 (tabla în 2 minute, meniul temelor, antetul) e gata local și se publică la cererea utilizatorului (doar
+  site-ul: regulile Firestore nu se schimbă, rundele jocului stau în browser). Publicat: v0.26.0 (rularea 44990014985, tag `v0.26.0`,
+  `?v=d8b3620`), cu E2E pe site-ul publicat 4258/4258; înainte, v0.25.0 (regulile Firestore `e605bb44`, rularea 44952418317).
   - Copilul parcurge lecțiile (înmulțirea, fracțiile, împărțirea, termenul necunoscut) pe tableta sau laptopul lui: ce provocări sunt
-    prea ușoare sau prea grele, ce gesturi merg pe ecranul lui.
+    prea ușoare sau prea grele, ce gesturi merg pe ecranul lui. La „Tabla în 2 minute”: câte înmulțiri face și dacă pauza „Hopa” (4 s)
+    după ghicit e potrivită.
   - Copilul joacă temele pe fiecare nivel, și înmulțirea: din tabelul „Pentru părinți” (timpul mediu pe tip) se reglează `fastMs` și
     pragurile.
   - Copilul încearcă un test U2 pe dispozitivul lui: timpii reali, căsuțele „ține minte”, calculul pe coloane pe telefon.
@@ -639,6 +642,9 @@
 | 2026-11-21 | În Învață, o provocare își poate aduce punctul de plecare (`start`): altă ecuație pe balanță, alt număr de nuci | un glisor are cel mult ~11 gradații pe telefon (măsurat), deci numerele mari nu se aleg cu glisorul |
 | 2026-11-21 | Zecile se împart cu pachete de câte 10 bețișoare și bețișoare libere, nu cu batoane și cuburi | ca la clasă; pe machetă, batoanele și cuburile nu încăpeau pe telefonul ținut orizontal (84 : 10 = 401 px), bețișoarele da (242 px) |
 | 2026-11-21 | Fracțiile, în Învață: întâi jumătatea și sfertul (programa clasei a II-a), apoi până la zecimi (numărătorul și numitorul, fracția dintr-o mulțime, fracțiile egale, compararea; clasa a III-a); 1/4 se numește „sfert”, iar fracțiile se scriu etajat (`{{f:n/d}}`); testele de recapitulare rămân fără fracții | alegerea utilizatorului; termenii clasei a II-a sunt „jumătate” și „sfert” |
+| 2026-11-22 | Învață are un joc pe timp, „Tabla în 2 minute”, după lecțiile de înmulțire: arena Jocurilor fulger cu un singur tip (`inm-tabla`, factori de la 2 la 9), care numără doar răspunsurile corecte, fără alune, stele, medalii și clasament; rundele (recordul și ultimele 20) stau doar în browser, ca progresul lecțiilor. E singura excepție de la „fără scor și fără cronometru” (2026-11-21) | cererea utilizatorului: „să măsoare câte înmulțiri corecte faci în 2 minute, fără clasament și medalii”; × 0 și × 1 nu cer socoteală, × 10 are două cifre |
+| 2026-11-22 | Antetul are 80rem (`--w-wide`) pe toate paginile, cât lecțiile din Învață; înlocuiește antetul de 72rem din 2026-11-21 | utilizatorul: lățimea antetului se schimba între paginile obișnuite și lecții (măsurat: la 1440 px, sigla sărea cu 64 px) |
+| 2026-11-22 | Pagina Jocurilor fulger are un meniu al temelor: pe margine, în stânga coloanei, de la 85rem (1360 px); mai îngust, un buton „Teme” în colțul de jos. Coloana nu se mișcă | cererea utilizatorului; pe machetă, la 1280 px meniul de pe margine ar fi avut 128 px, cu 9 nume rupte pe 2–3 rânduri |
 
 ## Probleme cunoscute
 - Timpii `estMin` sunt estimați; trebuie calibrați cu timpii reali ai copilului (zona „Pentru părinți” de la rezultate).
@@ -690,8 +696,8 @@
   strategie bună, dar scurtează calculul.
 - E2E pe site-ul live: pasul „Șterge toate rezultatele” din `pages_flow` a rămas o dată fără buton vizibil (30 s); la reluare trece.
 - „Greșelile tale” arată × și − cu semnul și pentru cititorul de ecran (doar arena le citește „ori” și „minus”).
-- Învață: bifele lecțiilor se pierd la ieșirea din cont (stau doar în browser, cu copiile profilului) și nu trec pe alt dispozitiv;
-  ieșirea din cont nu avertizează (backlog: progresul în cont).
+- Învață: bifele lecțiilor și rundele „Tabla în 2 minute” se pierd la ieșirea din cont (stau doar în browser, cu copiile profilului)
+  și nu trec pe alt dispozitiv; ieșirea din cont nu avertizează (backlog: progresul în cont).
 - Versiunea din adresele modulelor nu alege conținutul: GitHub Pages servește mereu ultima publicare, oricare ar fi `?v=`. Rămâne un caz
   rar: o pagină deschisă cu cel mult 10 minute înainte de o publicare, care încarcă abia după publicare un modul neîncărcat încă.
   Acela vine din versiunea nouă, cu dependențele lui noi. Nu mai dă eroare de legare (ca în v0.22.0), dar poate avea o a doua copie
@@ -712,7 +718,7 @@
   indicii treptate, pașii unei probleme afișați pe rând, animații legate de operație (gruparea din 5 în 5, simbolul care se desface,
   deplasarea pe axă).
 - Variante generate aleator (cu sămânță), diplomă printabilă.
-- Jocuri fulger, mai departe: temele „în curând” (împărțirea, ecuații □ + 7 = 15) și super-totalul
+- Jocuri fulger, mai departe: super-totalul
   pe mai multe teme (`fulger-total-<perioadă>`, rezervat), răspuns tastat, antrenament
   fără cronometru, magazinul Cifruței (accesorii pentru mascotă cumpărate cu alune), provocarea zilei, vibrații pe tabletă, nivel
   adaptiv; pragurile de stele și timpii „fulger” se ajustează după runde reale.
@@ -721,8 +727,8 @@
 - Jocuri fulger cu figuri, mai departe: tangram cu triunghiuri, perechi de piese care formează o figură, vederi de sus ale corpurilor,
   emoji-urile unei teme încărcate înainte de start, `fastMs` și pragurile de stele ajustate după rundele reale.
 - Amânate la cerere: citire cu voce (TTS), tastatură numerică proprie pe ecran.
-- Învață, mai departe: progresul în cont (reguli Firestore noi), capitolul „Împărțirea” (grupe egale și legătura cu înmulțirea),
-  lecții noi după rundele copilului, un atelier al widgeturilor (`#/atelier`).
+- Învață, mai departe: progresul și rundele jocurilor în cont (reguli Firestore noi), alte jocuri pe timp (de ex. tabla împărțirii,
+  cu `game` pe capitol), lecții noi după rundele copilului, un atelier al widgeturilor (`#/atelier`).
 - Din feedback-ul nr. 2, neaplicate: explicații vizuale interactive
   (evidențieri pas cu pas în desen); ceas și termometru cu tragere directă; validator care leagă desenele cu date de răspunsuri.
 - Contul familiei, mai departe: App Check (reCAPTCHA) împotriva scorurilor trimise din afara site-ului; pagina cu istoricul clasamentelor pe
@@ -1070,6 +1076,36 @@
   - **Publicat:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
+
+- **2026-11-22 (Tabla în 2 minute, meniul temelor și antetul de aceeași lățime, v0.27.0)**
+  - **Cererea:**
+    - în Învață, la înmulțire, un joc fulger doar cu înmulțiri de o cifră cu o cifră, care măsoară câte faci corect în 2 minute, fără
+      clasament și medalii;
+    - pe pagina Jocurilor fulger, un meniu rapid, flotant în stânga unde ecranul permite, fără să mute coloana;
+    - antetul își schimba lățimea între paginile obișnuite și lecțiile mai late.
+  - **Planul:** două treceri înainte de aprobare. Prima: machete în pagina reală, măsurate cu Playwright. A doua: o verificare
+    independentă în cod, care a găsit 14 lucruri. Printre ele: `hidden` ar fi ascuns meniul de pe margine (`!important` în stratul de
+    bază), atingerea din afara listei ar fi pornit „Joacă” de dedesubt, iar întrebarea din profil nu le-ar fi văzut dacă erau singurele
+    rezultate fără cont.
+  - **Antetul:** `--w-wide` (80rem) pe toate paginile, cât lecțiile. La 1440 px sigla nu mai sare cu 64 px; `header_same` verifică 4
+    pagini.
+  - **Meniul temelor** (`js/fulger/nav.js`):
+    - de la 85rem stă pe margine, în afara coloanei (171 px la 1366, 208 px de la 1440), lipit sub antet cât derulezi;
+    - mai îngust e butonul „Teme”, cu lista pe 2–4 coloane (fără derulare de la 360 × 640 la 1280 × 800, și pe telefonul culcat) și
+      cu un strat care prinde atingerea din afara listei;
+    - o alegere derulează la temă și schimbă adresa cu `replaceState` (fără reconstruirea paginii), iar tema de acum e marcată.
+  - **Tabla în 2 minute** (`js/invata/game.js`, `game` pe capitolul Înmulțirea):
+    - e al șaselea card din grila capitolului;
+    - runda e arena Jocurilor fulger cu `count`: fiecare răspuns corect valorează 1, fără alune, stele și înmulțitorul seriei;
+      pista duce la steagul recordului;
+    - la rezultate: numărul mare, recordul, Cifruța, seria, timpul mediu, „Rundele tale” (barele ultimelor 10) și greșelile;
+    - rundele stau doar în browser (`cifruta:invata-jocuri`), se mută la primul profil și pleacă la ieșirea din cont;
+    - „Greșelile tale” s-au mutat într-un modul comun (`js/fulger/mistakes.js`).
+  - **E2E nou:**
+    - `fulger_nav_flow`, `fulger_nav_screens`, `invata_game_flow`, `invata_game_screens` și `header_same`;
+    - pagina jocului, în `smoke`;
+    - în E2E-ul contului, mutarea rundelor jocului la primul profil.
+  - **Teste:** npm test 164/164, E2E complet 4376/4376 (erau 4258), E2E cont 82/82.
 
 - **2026-11-22 (Publicarea v0.26.0)**
   - La cererea utilizatorului, doar site-ul: regulile Firestore nu s-au schimbat față de v0.25.0, deci fără `deploy:rules`.

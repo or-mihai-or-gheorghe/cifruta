@@ -228,10 +228,76 @@ export function moveLessons(from, to) {
   remove(`${a}${LESSONS}`);
 }
 
-/** Șterge datele unui scop: încercări, Calcul fulger, Învață, ciorne, coada spre cloud și semnul că s-au adus din cloud. */
+// ——— Învață: rundele jocurilor pe timp (tabla în 2 minute), tot doar în browser, pe profil: nu urcă în cont ———
+const GAMES = 'invata-jocuri';
+/** Câte runde se păstrează din fiecare joc. */
+export const GAME_KEEP = 20;
+
+const isCount = (n) => Number.isInteger(n) && n >= 0;
+
+/** Rundele citite tolerant: { '<capitol>/<joc>': { best: { correct, at } | null, rounds: [{ at, correct, wrong, bestStreak }] } }. */
+function cleanGames(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  const out = {};
+  for (const [key, rec] of Object.entries(value)) {
+    if (!rec || typeof rec !== 'object') continue;
+    const rounds = (Array.isArray(rec.rounds) ? rec.rounds : [])
+      .filter((r) => r && typeof r.at === 'string' && isCount(r.correct) && isCount(r.wrong))
+      .map((r) => ({ at: r.at, correct: r.correct, wrong: r.wrong, bestStreak: isCount(r.bestStreak) ? r.bestStreak : 0 }));
+    const best = rec.best && isCount(rec.best.correct) && typeof rec.best.at === 'string' ? { correct: rec.best.correct, at: rec.best.at } : null;
+    out[key] = { best, rounds: rounds.slice(-GAME_KEEP) };
+  }
+  return out;
+}
+
+export const getGames = () => cleanGames(read(scope + GAMES, {}));
+/** Rundele jocurilor din Învață ale unui scop anume (fără cont: `null`). */
+export const readGames = (p) => cleanGames(read(`${scopeOf(p)}${GAMES}`, {}));
+
+/**
+ * Salvează runda unui joc (`key` = '<capitol>/<joc>'), fără s-o anunțe: nu urcă în cont. Întoarce { saved, record, previous }: `record`
+ * când răspunsurile corecte trec de recordul de dinainte (`previous`, null până la primul record).
+ */
+export function saveGameRound(key, { at, correct, wrong, bestStreak }) {
+  const data = getGames();
+  const entry = data[key] ?? { best: null, rounds: [] };
+  const previous = entry.best?.correct ?? null;
+  const record = correct > (previous ?? 0);
+  if (record) entry.best = { correct, at };
+  entry.rounds = [...entry.rounds, { at, correct, wrong, bestStreak }].slice(-GAME_KEEP);
+  data[key] = entry;
+  return { saved: write(scope + GAMES, data), record, previous };
+}
+
+/** Unește rundele a două scopuri: recordul mai mare și rundele amândurora (o dată fiecare, după dată), cele mai noi `GAME_KEEP`. */
+export function mergeGames(target, extra) {
+  const out = cleanGames(target);
+  for (const [key, rec] of Object.entries(cleanGames(extra))) {
+    const had = out[key];
+    if (!had) {
+      out[key] = rec;
+      continue;
+    }
+    // o rundă din aceeași clipă apare o singură dată (rămâne cea din `target`)
+    const rounds = [...new Map([...rec.rounds, ...had.rounds].map((r) => [r.at, r])).values()].sort((a, b) => (a.at < b.at ? -1 : a.at > b.at ? 1 : 0));
+    const best = [had.best, rec.best].filter(Boolean).sort((a, b) => b.correct - a.correct)[0] ?? null;
+    out[key] = { best, rounds: rounds.slice(-GAME_KEEP) };
+  }
+  return out;
+}
+
+/** Mută rundele jocurilor din Învață dintr-un scop în altul (la prima intrare în cont), unite cu ce era acolo. */
+export function moveGames(from, to) {
+  const [a, b] = [scopeOf(from), scopeOf(to)];
+  const merged = mergeGames(read(`${b}${GAMES}`, {}), read(`${a}${GAMES}`, {}));
+  if (Object.keys(merged).length) write(`${b}${GAMES}`, merged);
+  remove(`${a}${GAMES}`);
+}
+
+/** Șterge datele unui scop: încercări, Calcul fulger, Învață (lecțiile și jocurile), ciorne, coada spre cloud și semnul că s-au adus din cloud. */
 export function clearScopeData(p = null) {
   const s = scopeOf(p);
-  for (const key of ['attempts', 'fulger', LESSONS, 'pending', 'pulled']) remove(`${s}${key}`);
+  for (const key of ['attempts', 'fulger', LESSONS, GAMES, 'pending', 'pulled']) remove(`${s}${key}`);
   for (const id of draftIds(s)) remove(`${s}draft:${id}`);
 }
 

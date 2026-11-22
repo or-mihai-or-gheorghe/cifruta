@@ -94,9 +94,11 @@ export const topicTotal = (topicId, best = {}) =>
 export const topicStars = (topicId, best = {}) =>
   (topicConfig(topicId)?.levels ?? []).reduce((sum, l) => sum + starsFor(l, best[recordKey(topicId, l.id)]?.alune ?? 0), 0);
 
-/** O rundă: `next()` dă întrebarea următoare, `answer(given, ms)` o închide, `summary()` face rezumatul. */
-export function createRound({ topic, level, seed = newSeed() }) {
-  const lvl = levelConfig(topic, level);
+/**
+ * O rundă: `next()` dă întrebarea următoare, `answer(given, ms)` o închide, `summary()` face rezumatul. Nivelul vine din temă, sau gata
+ * făcut (`lvl`: { warmup, mix, stars }), pentru un joc din afara temelor (tabla în 2 minute, din Învață).
+ */
+export function createRound({ topic, level, seed = newSeed(), lvl = levelConfig(topic, level) }) {
   if (!lvl) throw new Error(`fulger: temă sau nivel necunoscut „${topic}/${level}”`);
   const rand = seededRandom(seed);
   const answers = [];

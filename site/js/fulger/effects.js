@@ -20,15 +20,15 @@ function spawn(layer, el, ms) {
 
 let nutSVG = null;
 
-/** Particule (alune și stele) care țâșnesc din centrul lui `from`. */
-export function burst(layer, from, count = 6) {
+/** Particule (alune și stele, sau doar stele cu `nuts: false`) care țâșnesc din centrul lui `from`. */
+export function burst(layer, from, count = 6, { nuts = true } = {}) {
   if (prefersReducedMotion()) return;
   nutSVG ??= visualSVG({ v: 'alune', n: 1 });
   const { x, y } = center(from, layer);
   for (let i = 0; i < count; i++) {
     const angle = (i / count) * 2 * Math.PI + Math.random() * 0.5;
     const dist = 50 + Math.random() * 40;
-    const nut = i % 2 === 0;
+    const nut = nuts && i % 2 === 0;
     const style = {
       '--x': `${Math.round(x)}px`,
       '--y': `${Math.round(y)}px`,

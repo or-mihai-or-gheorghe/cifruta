@@ -1,5 +1,6 @@
 // Învață: lecțiile interactive. #/invata arată capitolele desfășurate (ca Jocurile fulger), cu „Ce învățăm” și cardurile lecțiilor;
-// #/invata/<capitol> e aceeași pagină, derulată la capitol; #/invata/<capitol>/<lecție> deschide lecția (js/invata/lesson.js).
+// #/invata/<capitol> e aceeași pagină, derulată la capitol; #/invata/<capitol>/<lecție> deschide lecția (js/invata/lesson.js), iar
+// #/invata/<capitol>/<joc> jocul capitolului, dacă are unul (tabla în 2 minute, js/invata/game.js).
 
 import data from '../../data/invata.js';
 import concepts from '../../data/concepts.js';
@@ -13,7 +14,7 @@ import { visualSVG } from '../visuals/index.js';
 import { chapterConcepts, findLesson, playableChapters } from '../invata/logic.js';
 import { mountLesson } from '../invata/lesson.js';
 import { doneTasks, isLessonDone, lessonsDone } from '../invata/progress.js';
-import { getLessons } from '../core/storage.js';
+import { getGames, getLessons } from '../core/storage.js';
 
 const debug = () => new URLSearchParams(location.search).has('debug');
 
@@ -22,8 +23,33 @@ export default async function invata(container, [chapterId, lessonId] = []) {
   const found = findLesson(data, chapterId, lessonId);
   if (!found) return redirect('invata');
   if (lessonId === undefined) return hub(container, found.chapter);
+  if (found.chapter.game?.id === lessonId) return gamePage(container, found.chapter);
   if (!found.lesson) return redirect(`invata/${chapterId}`);
   return lessonPage(container, found);
+}
+
+/** Cardul jocului unui capitol, după lecții: ⚡ în locul numărului, iar jos recordul sau „Nou”. */
+function gameCard(chapter, games) {
+  const { game } = chapter;
+  const best = games[`${chapter.id}/${game.id}`]?.best?.correct ?? null;
+  const state = best === null ? chip('Nou', 'c-chip--soon') : chip(`Recordul tău: ${cantitate(best, game.noun[0], game.noun[1])}`, '', 'trofeu');
+  state.dataset.testid = `iv-game-state-${chapter.id}`;
+  return h(
+    'a',
+    { class: 'iv-card iv-card--game', href: `#/invata/${chapter.id}/${game.id}`, 'data-testid': `iv-game-${chapter.id}` },
+    h('span', { class: 'iv-card__num', 'aria-hidden': 'true', html: emojiHTML('fulger') }),
+    h('span', { class: 'iv-card__icon', 'aria-hidden': 'true', html: emojiHTML(game.icon) }),
+    h('h3', { class: 'iv-card__title' }, game.title),
+    h('p', { class: 'iv-card__text' }, game.text),
+    h('div', { class: 'iv-card__foot' }, state),
+  );
+}
+
+/** Jocul capitolului: modulul lui aduce tipurile Jocurilor fulger, deci se încarcă doar acum (calea scrisă întreagă primește `?v=`). */
+async function gamePage(container, chapter) {
+  const { mountGame } = await import('../invata/game.js');
+  if (!container.isConnected) return null; // între timp s-a deschis altă pagină: jocul nu mai pornește
+  return mountGame(container, chapter, { debug: debug() });
 }
 
 /** Cardul unei lecții: numărul, iconița, titlul, indicația și cât s-a făcut din ea. */
@@ -46,6 +72,7 @@ function lessonCard(chapter, lesson, i, all) {
 function hub(container, focus = null) {
   document.title = 'Învață — Cifruța';
   const all = getLessons();
+  const games = getGames();
   const chapters = playableChapters(data).map((chapter) => {
     const done = lessonsDone(chapter, all);
     return h(
@@ -65,7 +92,12 @@ function hub(container, focus = null) {
         h('h3', { class: 'iv-chapter__label' }, 'Ce învățăm'),
         h('ul', { class: 'fg-concepts' }, chapterConcepts(chapter).map((id) => h('li', {}, chip(concepts[id]?.title ?? id)))),
       ),
-      h('div', { class: 'l-grid anim-stagger iv-cards', style: { '--grid-min': '15rem' } }, chapter.lessons.map((l, i) => lessonCard(chapter, l, i, all))),
+      h(
+        'div',
+        { class: 'l-grid anim-stagger iv-cards', style: { '--grid-min': '15rem' } },
+        chapter.lessons.map((l, i) => lessonCard(chapter, l, i, all)),
+        chapter.game ? gameCard(chapter, games) : null,
+      ),
       chapter.practice
         ? h('p', { class: 'iv-chapter__practice' }, h('a', { class: 'c-btn', href: `#/fulger/${chapter.practice}`, 'data-testid': `iv-practice-${chapter.id}` }, h('span', { 'aria-hidden': 'true', html: emojiHTML('fulger') }), 'Exersează pe viteză, în Jocuri fulger'))
         : null,

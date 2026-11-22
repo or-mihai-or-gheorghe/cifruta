@@ -27,6 +27,13 @@ singura barieră** și au teste automate pe emulator.
 un profil, `cifruta:p:<uid>:<pid>:…`. Sunetul rămâne comun. Paginile citesc tot sincron. După aducerea datelor din cloud, `account.js`
 reîncarcă doar paginile liniștite (`#/`, secțiunile, pagina Jocurilor fulger), niciodată un test sau o rundă în desfășurare.
 
+Din Învață, două chei stau doar în browser, pe profil, și nu urcă în cont:
+- `…invata`: provocările făcute;
+- `…invata-jocuri`: rundele jocului „Tabla în 2 minute”.
+
+Scrierile lor nu se anunță. La primul profil, `moveAnonymousInto` le mută (`moveLessons`, `moveGames`). La ieșirea din cont pleacă
+odată cu copiile profilului.
+
 Fiecare scriere (`addAttempt`, `updateAttempt`, `clearHistory`, `saveFulgerRound`, `clearFulger`) se anunță prin `onWrite`.
 Cât scopul e un profil, `sync.js` o pune imediat în coada profilului (`…:pending`, cel mult 200 de operații, cu număr de ordine), chiar
 dacă Firebase nu s-a încărcat încă sau nu e internet; o trimite după 0,8 s, când sincronizarea e pornită. La fiecare activare se

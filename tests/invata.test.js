@@ -16,7 +16,9 @@ import { backwards, steps } from '../site/js/invata/widgets/masina/logic.js';
 import { keyStep, percentOf, valueAt } from '../site/js/invata/ruler.js';
 import { NBSP, equation, keepMath, repeatedSum, spokenMath } from '../site/js/invata/text.js';
 import '../site/js/visuals/all.js';
+import { EMOJI } from '../site/js/visuals/emoji.js';
 import { visualErrors, visualLabel, visualSVG } from '../site/js/visuals/index.js';
+import { KINDS } from '../site/js/fulger/kinds.js';
 import array, { litCells, pairsLeft } from '../site/js/invata/widgets/array/logic.js';
 import jumps from '../site/js/invata/widgets/jumps/logic.js';
 import parts, { narrate, relevel } from '../site/js/invata/widgets/parts/logic.js';
@@ -74,6 +76,22 @@ test('învață: textele sunt scurte, cu diacritice corecte, NFC și doar mini-m
     assert.ok(lesson.goal && plain(lesson.goal).length <= 170, `${lesson.id}: „Ce învățăm” lipsește sau e prea lung (${plain(lesson.goal ?? '').length})`);
     assert.ok(plain(lesson.intro).length <= 170, `${lesson.id}: indicația are ${plain(lesson.intro).length} de caractere (cel mult 170)`);
     for (const t of lesson.tasks) assert.ok(plain(t.ask).length <= 60, `${lesson.id}/${t.id}: cerința are ${plain(t.ask).length} de caractere (cel mult 60)`);
+  }
+});
+
+test('învață: jocul unui capitol (tabla în 2 minute) are id permanent, alt id decât lecțiile, un tip din Jocuri fulger și texte scurte', () => {
+  const games = playableChapters(data).filter((c) => c.game);
+  assert.ok(games.length >= 1, 'Înmulțirea are tabla în 2 minute');
+  for (const chapter of games) {
+    const { game } = chapter;
+    assert.match(game.id, ID, game.id);
+    // jocul și lecțiile se deschid la aceeași adresă (#/invata/<capitol>/<id>)
+    assert.ok(!chapter.lessons.some((l) => l.id === game.id), `${chapter.id}: jocul are id-ul unei lecții`);
+    assert.ok(game.title && game.text && game.rules, `${chapter.id}: titlul, textul cardului și regulile`);
+    assert.ok(game.text.length <= 170 && game.rules.length <= 170, `${chapter.id}: textele jocului au cel mult 170 de caractere`);
+    assert.ok(EMOJI[game.icon], `${chapter.id}: iconița „${game.icon}” există`);
+    assert.ok(KINDS[game.kind], `${chapter.id}: tipul „${game.kind}” e din Jocuri fulger`);
+    assert.ok(Array.isArray(game.noun) && game.noun.length === 2 && game.noun.every((s) => typeof s === 'string' && s), `${chapter.id}: substantivul, la singular și la plural`);
   }
 });
 

@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import {
-  addAttempt, clearAccountCopies, clearFulger, clearHistory, clearScopeData, getAttempt, getDraft, getFulger, getLessons, getScoped, isUnsaved, lastAttempt,
-  listAttempts, listDrafts, mergeLessons, moveDrafts, moveLessons, onWrite, readLessons, readScopeData, saveDraft, saveFulgerRound, saveLessons, setScope, setScoped,
-  updateAttempt, writeScopeData,
+  addAttempt, clearAccountCopies, clearFulger, clearHistory, clearScopeData, GAME_KEEP, getAttempt, getDraft, getFulger, getGames, getLessons, getScoped, isUnsaved,
+  lastAttempt, listAttempts, listDrafts, mergeGames, mergeLessons, moveDrafts, moveGames, moveLessons, onWrite, readGames, readLessons, readScopeData, saveDraft,
+  saveFulgerRound, saveGameRound, saveLessons, setScope, setScoped, updateAttempt, writeScopeData,
 } from '../site/js/core/storage.js';
 import { formatDateTime } from '../site/js/core/ro.js';
 
@@ -167,6 +167,49 @@ test('storage: progresul din Învață e pe profil, se mută la prima intrare î
   setScope(null);
   stop();
   assert.deepEqual(events, [], 'progresul din Învață nu se anunță: nu urcă în cont');
+  delete globalThis.localStorage;
+});
+
+test('storage: rundele jocurilor din Învață (tabla în 2 minute): recordul, ultimele runde, mutarea în profil, fără să urce în cont', () => {
+  globalThis.localStorage = fakeStorage();
+  setScope(null);
+  const events = [];
+  const stop = onWrite((e) => events.push(e.type));
+  const key = 'inmultirea/tabla-in-2-minute';
+  const round = (day, correct, wrong = 1) => ({ at: `2026-11-${String(day).padStart(2, '0')}T10:00:00Z`, correct, wrong, bestStreak: 3 });
+  assert.deepEqual(saveGameRound(key, round(1, 0)), { saved: true, record: false, previous: null }, 'fără niciun corect nu e record');
+  assert.deepEqual(saveGameRound(key, round(2, 12)), { saved: true, record: true, previous: null }, 'primul record');
+  assert.deepEqual(saveGameRound(key, round(3, 9)), { saved: true, record: false, previous: 12 });
+  assert.deepEqual(saveGameRound(key, round(4, 15)), { saved: true, record: true, previous: 12 }, 'record nou');
+  assert.deepEqual(getGames()[key].best, { correct: 15, at: '2026-11-04T10:00:00Z' });
+  for (let d = 5; d <= 30; d++) saveGameRound(key, round(d, 10));
+  assert.equal(getGames()[key].rounds.length, GAME_KEEP, `se păstrează ultimele ${GAME_KEEP} runde`);
+  assert.equal(getGames()[key].best.correct, 15, 'recordul rămâne și când runda lui iese din listă');
+  // la primul profil: rundele fără cont se unesc cu cele ale profilului (recordul mai mare, fiecare rundă o dată), apoi pleacă
+  const ana = { uid: 'u1', pid: 'p1' };
+  setScope(ana);
+  saveGameRound(key, round(30, 20));
+  assert.equal(readGames(null)[key].rounds.length, GAME_KEEP, 'fără cont: rundele, pentru întrebarea despre mutare');
+  setScope(null);
+  moveGames(null, ana);
+  clearScopeData(null);
+  assert.deepEqual(getGames(), {});
+  setScope(ana);
+  const moved = getGames()[key];
+  assert.equal(moved.best.correct, 20);
+  assert.equal(moved.rounds.length, GAME_KEEP);
+  assert.equal(new Set(moved.rounds.map((r) => r.at)).size, GAME_KEEP, 'runda din aceeași clipă apare o singură dată');
+  assert.equal(moved.rounds.at(-1).correct, 20, 'la aceeași dată rămâne runda profilului');
+  clearScopeData(ana); // la ștergerea profilului
+  assert.deepEqual(getGames(), {});
+  // datele stricate din browser se citesc tolerant; cheia nu se încurcă cu progresul lecțiilor (`invata`)
+  localStorage.setItem('cifruta:p:u1:p1:invata-jocuri', JSON.stringify({ a: { best: { correct: -1 }, rounds: [{ at: 'x', correct: 2, wrong: 0 }, { correct: 'mult' }] }, b: null }));
+  assert.deepEqual(getGames(), { a: { best: null, rounds: [{ at: 'x', correct: 2, wrong: 0, bestStreak: 0 }] } });
+  assert.deepEqual(getLessons(), {});
+  assert.deepEqual(mergeGames('x', [1]), {});
+  setScope(null);
+  stop();
+  assert.deepEqual(events, [], 'rundele jocurilor din Învață nu se anunță: nu urcă în cont');
   delete globalThis.localStorage;
 });
 
