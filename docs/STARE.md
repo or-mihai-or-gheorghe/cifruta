@@ -81,9 +81,9 @@
     măsurat pe ecran, fiecare temă jucată tip cu tip, mascota care se mișcă doar unde trebuie);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.27.0 (tabla în 2 minute, meniul temelor, antetul) e gata local și se publică la cererea utilizatorului (doar
-  site-ul: regulile Firestore nu se schimbă, rundele jocului stau în browser). Publicat: v0.26.0 (rularea 44990014985, tag `v0.26.0`,
-  `?v=d8b3620`), cu E2E pe site-ul publicat 4258/4258; înainte, v0.25.0 (regulile Firestore `e605bb44`, rularea 44952418317).
+- **Următorul pas:** v0.27.0 e publicată (tabla în 2 minute, meniul temelor, antetul: rularea 45002828184, tag `v0.27.0`,
+  `?v=6a7823b`; doar site-ul, regulile Firestore nu s-au schimbat), cu E2E pe site-ul publicat 4376/4376. Înainte: v0.26.0 (rularea
+  44990014985) și v0.25.0 (regulile Firestore `e605bb44`, rularea 44952418317).
   - Copilul parcurge lecțiile (înmulțirea, fracțiile, împărțirea, termenul necunoscut) pe tableta sau laptopul lui: ce provocări sunt
     prea ușoare sau prea grele, ce gesturi merg pe ecranul lui. La „Tabla în 2 minute”: câte înmulțiri face și dacă pauza „Hopa” (4 s)
     după ghicit e potrivită.
@@ -1076,6 +1076,12 @@
   - **Publicat:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
+
+- **2026-11-22 (Publicarea v0.27.0)**
+  - La cererea utilizatorului, doar site-ul: regulile Firestore nu s-au schimbat față de v0.26.0, deci fără `deploy:rules`.
+  - `npm run deploy` (164/164), rularea 45002828184, tag `v0.27.0`; adresele au `?v=6a7823b`, iar pe site sunt `js/invata/game.js`,
+    `js/fulger/nav.js` și `--w-wide`.
+  - **E2E pe site-ul publicat:** 4376/4376, cu jocul, meniul temelor și antetul.
 
 - **2026-11-22 (Tabla în 2 minute, meniul temelor și antetul de aceeași lățime, v0.27.0)**
   - **Cererea:**
