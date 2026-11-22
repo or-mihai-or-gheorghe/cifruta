@@ -79,16 +79,16 @@
     măsurat pe ecran, fiecare temă jucată tip cu tip, mascota care se mișcă doar unde trebuie);
   - E2E pentru cont pe emulatoare, cu 82 de verificări: două dispozitive, două file, blocare, clasamente pe temă și săptămâni trecute,
     date vechi din cloud, atelierul avatarului, antetul de la 1024 la 360 px.
-- **Următorul pas:** v0.25.0 e publicată (regulile Firestore `e605bb44`, rularea 44952418317, tag `v0.25.0`), plus reparația
-  butoanelor din Jocuri fulger care tremurau sub cursor (rularea 44954525149). v0.26.0 (așezarea lecțiilor pe tablete și laptopuri)
-  e gata local și se publică la cererea utilizatorului (doar site-ul: regulile Firestore nu se schimbă).
-  - Copilul parcurge lecțiile de înmulțire și de fracții: ce provocări sunt prea ușoare sau prea grele, ce gesturi merg pe telefonul
-    lui.
+- **Următorul pas:** v0.26.0 e publicată (așezarea lecțiilor pe tablete și laptopuri: rularea 44990014985, tag `v0.26.0`,
+  `?v=d8b3620`; doar site-ul, regulile Firestore nu s-au schimbat), cu E2E pe site-ul publicat 4258/4258. Înainte: v0.25.0 (regulile
+  Firestore `e605bb44`, rularea 44952418317) și reparația butoanelor din Jocuri fulger care tremurau sub cursor (rularea 44954525149).
+  - Copilul parcurge lecțiile (înmulțirea, fracțiile, împărțirea, termenul necunoscut) pe tableta sau laptopul lui: ce provocări sunt
+    prea ușoare sau prea grele, ce gesturi merg pe ecranul lui.
   - Copilul joacă temele pe fiecare nivel, și înmulțirea: din tabelul „Pentru părinți” (timpul mediu pe tip) se reglează `fastMs` și
     pragurile.
   - Copilul încearcă un test U2 pe dispozitivul lui: timpii reali, căsuțele „ține minte”, calculul pe coloane pe telefon.
   - Rămân: verificarea în Firestore a clasamentelor mutate pe temă și a stelelor; cererea la GitHub Support pentru commit-urile vechi.
-  - Apoi: temele „în curând” (împărțirea, ecuațiile) și secțiunea de teste pentru înmulțire (după scanările noi).
+  - Apoi: secțiunea de teste pentru înmulțire (după scanările noi); pe telefonul ținut vertical, bara cu provocarea (backlog).
 - **Publicat înainte:** v0.19.0 (regulile `ee21fbac`, rularea 38163564398, tag `v0.19.0`), cu E2E pe site-ul live 2689/2691 (peisajul
   trecător). Din v0.18.0, acțiunile din `pages.yml` rulează pe Node 24 (fără avertismentul de Node 20).
 
@@ -1070,6 +1070,12 @@
   - **Publicat:** site-ul prin GitHub Actions (rularea 35504627022; regulile Firestore nu se schimbă); E2E pe site-ul live
     1800/1801 la prima trecere — un peisaj de pe cardurile testelor nu se încărcase, iar reluarea pe telefon a dat 670/670 —,
     tag `v0.15.1`.
+
+- **2026-11-22 (Publicarea v0.26.0)**
+  - La cererea utilizatorului, doar site-ul: regulile Firestore nu s-au schimbat față de v0.25.0, deci fără `deploy:rules`.
+  - `npm run deploy` (161/161), rularea 44990014985, tag `v0.26.0`; adresele au `?v=d8b3620`, iar `10-invata.css` de pe site are
+    containerul `iv-stage`.
+  - **E2E pe site-ul publicat:** 4258/4258, cu ecranele noi de tabletă și laptop și tragerea fără ridicarea degetului.
 
 - **2026-11-22 (Învață pe tablete și laptopuri: lecția pe două coloane și farfuriile de mărime fixă, v0.26.0)**
   - **Cererea:**
