@@ -1009,6 +1009,137 @@ def fulger_screens(run: Run, browser, base: str):
         context.close()
 
 
+FULGER_NAV = """() => {
+  const nav = document.querySelector('[data-testid=fg-nav]');
+  const panel = nav.querySelector('.fg-nav__panel'), toggle = nav.querySelector('[data-testid=fg-nav-toggle]');
+  const box = (el) => { const r = el.getBoundingClientRect(); return { left: Math.round(r.left), right: Math.round(r.right), top: Math.round(r.top), bottom: Math.round(r.bottom), width: Math.round(r.width) }; };
+  const shown = (el) => getComputedStyle(el).display !== 'none';
+  const back = document.querySelector('.fg-hub > .c-back'), hero = document.querySelector('.fg-hub__hero');
+  const active = document.activeElement;
+  return { panel: box(panel), panelShown: shown(panel), toggle: box(toggle), toggleShown: shown(toggle), expanded: toggle.getAttribute('aria-expanded'),
+           scroll: panel.scrollHeight > panel.clientHeight + 1, vw: innerWidth, vh: innerHeight,
+           gap: Math.round(hero.offsetTop - back.offsetTop - back.offsetHeight), first: box(document.querySelector('section.fg-topic')),
+           current: nav.querySelector('[aria-current]')?.dataset.testid ?? null, focus: active?.dataset?.testid ?? (active?.id || null),
+           links: [...panel.querySelectorAll('.fg-nav__link')].map((a) => a.dataset.testid),
+           topics: [...document.querySelectorAll('section.fg-topic')].map((s) => s.dataset.testid.replace('fg-topic-', '')) };
+}"""
+TOPIC_TOP = "(id) => Math.round(document.querySelector(`[data-testid=${id}]`).getBoundingClientRect().top)"
+# un loc în afara listei deschise (și a butonului), de preferat chiar peste o legătură sau un buton al paginii; `hit` spune ce ar
+# primi atingerea acolo: stratul de sub listă (meniul), nu ce e dedesubt
+FREE_SPOT = """() => {
+  const nav = document.querySelector('[data-testid=fg-nav]');
+  const boxes = [nav.querySelector('.fg-nav__panel'), nav.querySelector('.fg-nav__toggle')].map((el) => el.getBoundingClientRect());
+  const top = document.querySelector('.l-header').getBoundingClientRect().bottom;
+  const outside = (x, y) => y > top + 4 && y < innerHeight - 4 && x > 4 && x < innerWidth - 4 && boxes.every((b) => x < b.left - 4 || x > b.right + 4 || y < b.top - 4 || y > b.bottom + 4);
+  const hit = (x, y) => document.elementFromPoint(x, y)?.dataset?.testid ?? null;
+  for (const el of document.querySelectorAll('main a[href], main button')) {
+    if (nav.contains(el)) continue;
+    const r = el.getBoundingClientRect();
+    const [x, y] = [r.left + r.width / 2, r.top + r.height / 2];
+    if (r.width && outside(x, y)) return { x, y, what: el.textContent.trim().slice(0, 30), hit: hit(x, y) };
+  }
+  const [x, y] = [innerWidth - 12, top + 24];
+  return { x, y, what: 'margine', hit: hit(x, y) };
+}"""
+
+
+def fulger_nav_flow(run: Run, page: Page, vp: str):
+    """Meniul temelor pe ecranele înguste (laptopul de 1280 px, tableta, telefonul): butonul „Teme” din colțul de jos deschide lista,
+    care se închide la Esc, la o atingere în afară (fără să pornească ce e dedesubt) și la alegere; alegerea derulează la temă, o
+    marchează și schimbă adresa. Meniul nu ia loc în coloană, iar la capătul paginii butonul nu acoperă subsolul."""
+    page.emulate_media(reduced_motion="reduce")  # derularea e instantă: tema curentă se poate verifica imediat
+    run.goto(page, "fulger")
+    page.wait_for_selector("[data-testid=fg-nav]")
+    m = page.evaluate(FULGER_NAV)
+    run.check(m["toggleShown"] and not m["panelShown"] and m["expanded"] == "false", f"[{vp}] meniul temelor: butonul „Teme” se vede, lista e închisă ({m['toggle']})")
+    run.check(m["links"] == [f"fg-nav-{t}" for t in m["topics"]] + ["fg-nav-medalii"], f"[{vp}] meniul are toate temele, în ordinea din pagină, și medaliile ({len(m['links'])})")
+    run.check(m["gap"] == 32, f"[{vp}] meniul nu ia loc în coloană: între „Pagina de început” și caseta de sus rămân 32 px ({m['gap']})")
+    toggle = page.get_by_test_id("fg-nav-toggle")
+    toggle.click()
+    m = page.evaluate(FULGER_NAV)
+    p = m["panel"]
+    run.check(m["panelShown"] and m["expanded"] == "true" and p["top"] >= 0 and p["left"] >= 0 and p["right"] <= m["vw"] and p["bottom"] <= m["vh"] and not m["scroll"],
+              f"[{vp}] lista temelor se deschide în ecran, fără derulare ({p})")
+    page.keyboard.press("Escape")
+    m = page.evaluate(FULGER_NAV)
+    run.check(not m["panelShown"] and m["expanded"] == "false" and m["focus"] == "fg-nav-toggle", f"[{vp}] Esc închide lista, iar focusul revine pe buton ({m['focus']})")
+    # o atingere în afara listei o închide, fără să pornească ce e dedesubt (de preferat „Joacă” de la prima temă, sus pe ecran)
+    page.evaluate("(() => { const a = document.querySelector('section.fg-topic [data-testid=fg-level-usor]'); window.scrollBy(0, a.getBoundingClientRect().top - 140); })()")
+    toggle.click()
+    spot = page.evaluate(FREE_SPOT)
+    url = page.url
+    page.mouse.click(spot["x"], spot["y"])
+    page.wait_for_timeout(200)
+    m = page.evaluate(FULGER_NAV)
+    run.check(spot["hit"] == "fg-nav" and not m["panelShown"] and page.url == url and page.get_by_test_id("fg-arena").count() == 0,
+              f"[{vp}] o atingere în afara listei („{spot['what']}”) o închide, fără să deschidă ce e dedesubt ({spot['hit']}, {page.url.split('#')[-1]})")
+    toggle.click()
+    page.get_by_test_id("fg-nav-fractii").click()
+    page.wait_for_timeout(150)
+    m = page.evaluate(FULGER_NAV)
+    top = page.evaluate(TOPIC_TOP, "fg-topic-fractii")
+    run.check(not m["panelShown"] and 0 <= top <= 160 and page.url.endswith("#/fulger/fractii") and m["current"] == "fg-nav-fractii" and m["focus"] == "fg-tema-fractii",
+              f"[{vp}] o alegere închide lista și derulează la temă (sus la {top} px), o marchează și schimbă adresa ({page.url.split('#')[-1]}, {m['current']}, focus {m['focus']})")
+    page.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)")
+    page.wait_for_timeout(100)
+    covered = page.evaluate(
+        """() => { const t = document.querySelector('[data-testid=fg-nav-toggle]').getBoundingClientRect();
+          return [...document.querySelectorAll('.l-footer a, .l-footer button')].filter((a) => { const r = a.getBoundingClientRect();
+            return r.width && r.left < t.right && r.right > t.left && r.top < t.bottom && r.bottom > t.top; }).map((a) => a.textContent.trim()); }"""
+    )
+    run.check(not covered, f"[{vp}] la capătul paginii, butonul „Teme” nu acoperă legăturile din subsol ({covered})")
+    run.shot(page, f"{vp}-fulger-meniu")
+    page.emulate_media(reduced_motion="no-preference")
+
+
+def fulger_nav_screens(run: Run, browser, base: str):
+    """Meniul temelor pe margine, de la 85rem (laptopurile de 1366 și 1440 px): în afara coloanei, care nu se mișcă, lipit sub antet cât
+    derulezi; o alegere derulează la temă, o marchează și schimbă adresa; la încărcarea `#/fulger/<temă>` e marcată chiar ea. Pe
+    telefonul ținut orizontal și pe cel mic, butonul „Teme” (fulger_nav_flow)."""
+    for name, size in [("laptop 1440", {"width": 1440, "height": 900}), ("laptop 1366", {"width": 1366, "height": 650})]:
+        context = browser.new_context(locale="ro-RO", viewport=size, reduced_motion="reduce")
+        page = context.new_page()
+        run.watch(page, name)
+        page.goto(f"{base}#/fulger")
+        page.wait_for_load_state("networkidle")
+        page.evaluate("document.fonts.ready")
+        m = page.evaluate(FULGER_NAV)
+        p, first = m["panel"], m["first"]
+        left = (size["width"] - 992) // 2 + 32  # coloana de 62rem, cu marginea ei de 2rem
+        run.check(m["panelShown"] and not m["toggleShown"], f"[{name}] meniul temelor stă pe margine, fără butonul „Teme”")
+        run.check(first["left"] == left and first["width"] == 928 and m["gap"] == 32, f"[{name}] coloana nu se mișcă: la {first['left']} px, lată de {first['width']} px, iar meniul nu ia loc în ea")
+        run.check(p["left"] >= 0 and p["right"] <= first["left"] - 16 and p["bottom"] <= m["vh"] and not m["scroll"],
+                  f"[{name}] meniul nu atinge coloana și încape fără derulare ({p}, coloana de la {first['left']} px)")
+        run.check(m["current"] is None, f"[{name}] sus, lângă titlul paginii, nicio temă nu e marcată ({m['current']})")
+        page.get_by_test_id("fg-nav-fractii").click()
+        page.wait_for_timeout(150)
+        m = page.evaluate(FULGER_NAV)
+        top = page.evaluate(TOPIC_TOP, "fg-topic-fractii")
+        run.check(0 <= top <= 160 and page.url.endswith("#/fulger/fractii") and m["current"] == "fg-nav-fractii" and m["focus"] == "fg-tema-fractii",
+                  f"[{name}] un clic derulează la temă (sus la {top} px), o marchează și schimbă adresa ({m['current']}, focus {m['focus']})")
+        run.check(abs(m["panel"]["top"] - 82) <= 2, f"[{name}] meniul stă lipit sub antet cât derulezi (sus la {m['panel']['top']} px)")
+        run.shot(page, f"fulger-meniu-{size['width']}")
+        page.get_by_test_id("fg-nav-medalii").click()
+        page.wait_for_timeout(150)
+        m = page.evaluate(FULGER_NAV)
+        top = page.evaluate(TOPIC_TOP, "fg-medals")
+        run.check(0 <= top < m["vh"] * 0.6 and page.url.endswith("#/fulger") and m["current"] == "fg-nav-medalii",
+                  f"[{name}] „Medaliile tale” duce la raft (sus la {top} px) și pune înapoi adresa paginii ({page.url.split('#')[-1]}, {m['current']})")
+        page.goto(f"{base}#/fulger/grafice-tabele")
+        page.wait_for_load_state("networkidle")
+        page.wait_for_timeout(200)
+        m = page.evaluate(FULGER_NAV)
+        run.check(m["current"] == "fg-nav-grafice-tabele", f"[{name}] la încărcarea unei teme, meniul o marchează ({m['current']})")
+        context.close()
+    for name, opts in [("telefon culcat", {"viewport": {"width": 844, "height": 390}, "has_touch": True, "is_mobile": True}),
+                       ("telefon mic", {"viewport": {"width": 360, "height": 640}, "has_touch": True, "is_mobile": True})]:
+        context = browser.new_context(locale="ro-RO", **opts)
+        page = context.new_page()
+        run.watch(page, name)
+        fulger_nav_flow(run, page, name)
+        context.close()
+
+
 def avatar_studio_flow(run: Run, page: Page, vp: str):
     """Atelierul avatarului din #/atelier/avatare (același cu cel din profil): file, variante, numele, „Naturală”, „La întâmplare”."""
     run.goto(page, "atelier/avatare")
@@ -1644,6 +1775,7 @@ def main() -> int:
             if not only or fulger_only:
                 fulger_flow(run, page, vp)
                 fulger_topics_flow(run, page, vp)
+                fulger_nav_flow(run, page, vp)
             if not only or invata_only:
                 invata_flow(run, page, vp)
                 invata_gestures(run, page, vp)
@@ -1657,6 +1789,7 @@ def main() -> int:
             keyboard_flow(run, browser, run.base)
         if not only or fulger_only:
             fulger_screens(run, browser, run.base)
+            fulger_nav_screens(run, browser, run.base)
         if not only or invata_only:
             invata_screens(run, browser, run.base)
             invata_keyboard(run, browser, run.base)

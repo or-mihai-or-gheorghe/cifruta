@@ -17,6 +17,7 @@ import { artHTML, artName, aspect, boxParts, isChart, promptHTML, promptSpoken }
 import { levelConfig, nextStar, playableTopics, practiceFor, starsFor, topicConfig, topicStars, topicTotal } from '../fulger/engine.js';
 import { isDrawn, KINDS } from '../fulger/kinds.js';
 import { medalCatalog, medalsAfterRound, medalsWon, metalCount, metalOf } from '../fulger/medals.js';
+import { topicNav } from '../fulger/nav.js';
 import { LEGACY_TOPIC, LEVEL_IDS, recordKey } from '../fulger/records.js';
 import { mountArena } from '../fulger/view.js';
 import { emojiHTML } from '../visuals/emoji.js';
@@ -112,30 +113,40 @@ function soonSection(topics) {
   );
 }
 
-/** #/fulger și #/fulger/<temă>: toate temele pe aceeași pagină; cu o temă dată, pagina se derulează la ea. */
+/** #/fulger și #/fulger/<temă>: toate temele pe aceeași pagină; cu o temă dată, pagina se derulează la ea. Întoarce curățenia. */
 function gamePage(container, focus = null) {
   document.title = 'Jocuri fulger — Cifruța';
   const data = getFulger();
   const playable = playableTopics();
   // medaliile câștigate se calculează o dată, pentru cardurile nivelurilor și pentru raft
   const medals = { catalog: medalCatalog(playable), won: medalsWon(data.best, data.medals, playable) };
+  const sections = playable.map((t) => topicSection(t, data, medals));
+  const shelf = medalShelf(data, medals, playable);
+  // meniul temelor: pe margine pe ecranele late, butonul „Teme” pe celelalte (în afara coloanei, deci nu-i schimbă așezarea)
+  const nav = topicNav([
+    ...playable.map((t, i) => ({ id: t.id, label: t.short, icon: t.icon ?? 'calcul', el: sections[i], hash: `#/fulger/${t.id}` })),
+    { id: 'medalii', label: 'Medaliile tale', icon: 'medalie', el: shelf, hash: '#/fulger' },
+  ]);
   container.append(
     h(
       'div',
-      { class: 'l-container l-stack l-stack--lg' },
+      { class: 'l-container l-stack l-stack--lg fg-hub' },
       backLink('#/', 'Pagina de început'),
+      nav.el,
       hero('Jocuri fulger', 'Câte întrebări rezolvi în 2 minute? Alege tema și nivelul, strânge alune, fă serii și bate-ți recordul!'),
       howTo(),
-      playable.map((t) => topicSection(t, data, medals)),
+      sections,
       playable[0] ? boardLink(`fulger/${playable[0].id}/total/week`, { row: 'center' }) : null,
-      medalShelf(data, medals, playable),
+      shelf,
       soonSection(config.topics.filter((t) => t.soon)),
       parentsBox(data.rounds),
     ),
   );
+  nav.start();
   // după primul calcul al paginii, peste derularea la început făcută de router
   const target = focus && container.querySelector(`[data-testid="fg-topic-${focus.id}"]`);
   if (target) requestAnimationFrame(() => target.scrollIntoView({ block: 'start', behavior: 'instant' }));
+  return () => nav.destroy();
 }
 
 /** O întrebare-exemplu ca plăcuță: 7 + 5, 14 ◻ 17, 12 · 9 · 15 sau o miniatură a desenului (fără desen: cele 4 variante). */

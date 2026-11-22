@@ -50,7 +50,7 @@ site/                      ← publicat
                            desene) · contexte (unități, nume, zile, date, obiectele grupelor) · rand · art (desenul și numele unei
                            variante, cerința cu emoji) · engine (temele, runda și punctajul, pur) · records (chei „temă:nivel”,
                            datele vechi) · medals (medaliile: catalogul, cele câștigate, cele ale unei runde; pur) · view (arena) ·
-                           effects (particule, bannere);
+                           effects (particule, bannere) · nav (meniul temelor de pe pagina jocului);
                            pagina e pages/fulger.js
   js/invata/               Învață (lecții interactive, #/invata): logic (lecțiile: căutarea prin acțiunile widgetului, provocările,
                            regulile alegerilor) · registry (widgeturile) · lesson (cadrul: Cifruța, provocările, „Ce am aflat”) ·
@@ -323,9 +323,18 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   o ia în cam jumătate din runde; a doua între 70% și 100% din mediana unui copil bun; prima sub copilul încet dar sigur și peste
   ghicit (pragurile noi: `FULGER_CALIBRARE=1`, rotunjite la 5). Rundele stau în
   `cifruta:fulger` și se șterg din „Pentru părinți” de pe pagina jocului (`#/fulger`, toate temele odată), nu odată cu istoricul testelor.
-  Pagina jocului arată temele desfășurate, grupate (titlu, explicație, „Ce exersăm”, nivelurile; cele „în curând” la final), fără pagini
-  separate: `#/fulger/<temă>` e aceeași pagină, derulată la temă. E2E: `?debug=1` → `window.__dbg.fulger` (`state`, `force`,
+  Pagina jocului arată temele desfășurate, una sub alta (titlu, explicație, „Ce exersăm”, nivelurile; cele „în curând” la final), fără
+  pagini separate: `#/fulger/<temă>` e aceeași pagină, derulată la temă. E2E: `?debug=1` → `window.__dbg.fulger` (`state`, `force`,
   `elapse`, `setStreak`). Efectele trecătoare nu apar la mișcare redusă; bannerele se așază deasupra cardului, nu peste întrebare.
+  **Meniul temelor** (`js/fulger/nav.js`) nu ia loc în coloană:
+  - de la 85rem stă pe margine, în stânga ei (absolut, `right: 100%`; lista e `sticky` sub antet);
+  - mai îngust e butonul „Teme” din colțul de jos (fix), cu lista deasupra, pe 2–4 coloane, și un strat transparent care prinde
+    atingerea din afara ei;
+  - o alegere derulează la temă și schimbă adresa cu `replaceState`, fără să reconstruiască pagina;
+  - tema de acum are `aria-current`;
+  - lista deschisă are clasa `is-open`, nu `hidden`: `[hidden]` are `!important` în stratul de bază.
+
+  E2E: `fulger_nav_flow` (butonul) și `fulger_nav_screens` (marginea, la 1366 și 1440 px).
 - Jocuri fulger pe dispozitive: Safari pe iOS pornește sunetul doar dintr-un gest încheiat, deci arena cheamă `unlockSound()` la
   Start și la ridicarea degetului (răspunsurile se iau la `pointerdown`). În rundă arena umple spațiul de sub antet prin flex
   (`body.is-game`); sub 32rem înălțime (telefon ținut orizontal) întrebarea și variantele stau una lângă alta, iar E2E verifică pe
