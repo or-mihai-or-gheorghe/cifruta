@@ -529,6 +529,59 @@ test('învață: barele cu x — bucățile x la fel, cei luați puși la loc, s
   assert.match(W.check({ eq: '6 × x + 2 = 20' }).join(), /peste 50/);
 });
 
+test('învață: ecuația pas cu pas — trecerea dincolo de egal, împărțirea, proba și povestea', async () => {
+  const { choices, prompt } = await import('../site/js/invata/widgets/pasi/logic.js');
+  const W = WIDGETS.pasi;
+  const nbsp = (t) => (t ?? '').replaceAll(NBSP, ' ');
+  const good = (s) => choices(s).findIndex((c) => c.ok);
+  const bad = (s) => choices(s).findIndex((c) => !c.ok);
+  const p = { eq: '3 × x + 4 = 19' };
+  let s = W.initial(p);
+  assert.deepEqual(W.check(p), []);
+  assert.equal(prompt(s), 'Ce devine + 4 dincolo de egal?');
+  assert.deepEqual(choices(s).map((c) => [c.text, c.ok]).sort(), [['+ 4', false], ['− 4', true]]);
+  // o alegere greșită lasă pasul pe loc și spune greșeala tipică
+  const wrong = W.apply(p, s, { choose: bad(s) });
+  assert.equal(wrong.moved, false);
+  assert.match(W.texts(p, wrong).reading, /^Încă nu: dincolo de egal, \+ 4 devine − 4/);
+  s = W.apply(p, s, { choose: good(s) });
+  assert.equal(nbsp(W.texts(p, s).lines.moved), '3 × x = 19 − 4 = 15');
+  assert.equal(nbsp(W.texts(p, s).equation), '3 × x = 15');
+  assert.deepEqual(choices(s).map((c) => c.say).sort(), ['minus 3', 'ori 3', 'împărțit la 3']);
+  s = W.apply(p, s, { choose: good(s) });
+  assert.equal(nbsp(W.texts(p, s).lines.divided), 'x = 15 : 3');
+  assert.deepEqual(choices(s), []);
+  // x pus pe glisor înainte de împărțire nu rezolvă: trebuie și pașii
+  assert.equal(W.derive(p, { ...W.initial(p), x: 5 }).solved, false);
+  assert.equal(nbsp(W.texts(p, { ...s, x: 4 }).lines.proba), 'Proba: 3 × 4 + 4 < 19');
+  s = W.apply(p, s, { set: 'x', value: 5 });
+  assert.equal(W.derive(p, s).solved, true);
+  assert.equal(nbsp(W.texts(p, s).extra), 'Proba: 3 × 5 + 4 = 19.');
+  // − b: dincolo de egal devine + b
+  const q = { eq: '4 × x − 3 = 25' };
+  assert.equal(choices(W.initial(q)).find((c) => c.ok).text, '+ 3');
+  // povestea: ecuația, proba și textul citit nu se văd până când copilul alege ecuația
+  const story = { text: 'Ana cumpără 3 creioane la fel și o riglă de 4 lei. Plătește 22 de lei.', icon: 'creion', explain: 'Un creion costă x lei.', answer: 'Un creion costă', unit: ['leu', 'lei'] };
+  const r = { eq: '3 × x + 4 = 22', story };
+  const r0 = W.initial(r);
+  assert.equal(W.texts(r, r0).equation, '?');
+  assert.equal(W.texts(r, r0).lines.proba, null);
+  assert.doesNotMatch(W.texts(r, r0).spoken, /22|ori/);
+  assert.deepEqual(choices(r0).map((c) => c.text).sort(), ['3 × x + 4 = 22', '3 × x − 4 = 22', '4 × x + 3 = 22']);
+  const path = searchPath(W, r, r0, (d) => d.solved);
+  assert.deepEqual(path.filter((a) => 'choose' in a).length, 3, 'drumul trece prin cele trei alegeri');
+  const done = path.reduce((st, a) => W.apply(r, st, a), r0);
+  assert.equal(W.texts(r, done).extra, 'Un creion costă 6 lei.');
+  // varianta bună nu stă mereu pe același loc
+  const eqs = ['3 × x + 4 = 19', '4 × x − 3 = 25', '3 × x + 4 = 22', '3 × x + 5 = 29'];
+  for (const at of [{}, { written: true }, { written: true, moved: true }]) {
+    assert.ok(new Set(eqs.map((eq) => good({ eq, written: false, moved: false, divided: false, ...at }))).size > 1, `varianta bună e pe locuri diferite (${JSON.stringify(at)})`);
+  }
+  assert.match(W.check({ eq: '3 × x + 4 = 20' }).join(), /nu e număr natural/);
+  assert.match(W.check({ eq: '3 × x + 4 = 22', story: { ...story, unit: ['lei'] } }).join(), /unitatea/);
+  assert.match(W.check({ eq: '3 × x + 3 = 21' }).join(), /^$/);
+});
+
 test('învață: mașina de numere — înainte, blocată la împărțiri neexacte, și pe dos', () => {
   const W = WIDGETS.masina;
   const nbsp = (t) => t.replaceAll(NBSP, ' ');

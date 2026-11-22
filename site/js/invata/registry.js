@@ -7,9 +7,10 @@ import imparte from './widgets/imparte/logic.js';
 import jumps from './widgets/jumps/logic.js';
 import masina from './widgets/masina/logic.js';
 import parts from './widgets/parts/logic.js';
+import pasi from './widgets/pasi/logic.js';
 import wall from './widgets/wall/logic.js';
 
-export const WIDGETS = { array, balanta, bare, imparte, jumps, masina, parts, wall };
+export const WIDGETS = { array, balanta, bare, imparte, jumps, masina, parts, pasi, wall };
 
 export const VIEWS = {
   array: () => import('./widgets/array/view.js'),
@@ -19,5 +20,6 @@ export const VIEWS = {
   jumps: () => import('./widgets/jumps/view.js'),
   masina: () => import('./widgets/masina/view.js'),
   parts: () => import('./widgets/parts/view.js'),
+  pasi: () => import('./widgets/pasi/view.js'),
   wall: () => import('./widgets/wall/view.js'),
 };

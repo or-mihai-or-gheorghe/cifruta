@@ -744,7 +744,7 @@
    Balanța: o bară care se rotește cu cel mult ±12° (`--tilt`) și două talere care atârnă de capetele ei și urcă sau coboară cu ele
    (`--sin` × jumătatea barei, în unități ale containerului, ca desenul să se strângă pe telefon); doar transform, cu tranziție. Pe
    talere, sacul (cu „?” sau cu numărul ghicit) și nucile (16 px, câte 4–5 pe rând, ca 20 de nuci să încapă). */
-.iv-balanta, .iv-bare, .iv-masina { display: grid; justify-items: center; gap: var(--sp-3); }
+.iv-balanta, .iv-bare, .iv-masina, .iv-pasi { display: grid; justify-items: center; gap: var(--sp-3); }
 .iv-balanta__controls, .iv-bare .iv-control, .iv-masina .iv-control { width: 100%; max-width: 32rem; }
 .iv-scale { --tilt: 0deg; --sin: 0; container-type: inline-size; position: relative; width: min(100%, 22em); height: 12em; margin-inline: auto; font-size: 1rem; }
 .iv-scale__post { position: absolute; left: 50%; bottom: 0; width: 0.6em; height: 9em; translate: -50% 0; border-radius: 0.3em 0.3em 0 0; background: var(--v-brown, #a86b3c); }
@@ -805,6 +805,23 @@
    bucățile barelor păstrează culoarea textului lor (contrastul) */
 .iv-x { padding-inline: 0.04em; color: var(--c-cols-ink); font-family: var(--font-body); font-style: italic; font-weight: 700; }
 .iv-sack .iv-x, .iv-bar .iv-x { color: inherit; }
+
+/* ——— Ecuația pas cu pas (iv-pasi, capitolul „Ecuații cu x”) ———
+   Povestea, rândurile rezolvării (cele încă nefăcute își păstrează locul, goale și nevăzute, ca nimic să nu sară) și, dedesubt,
+   întrebarea pasului cu variantele lui, ca butoane (locul lor rămâne și după ultimul pas). Rândurile și butoanele sunt conținut. */
+.iv-pasi__art { display: grid; justify-items: center; gap: 0.15rem; width: min(100%, 30rem); }
+.iv-pasi__story { display: flex; align-items: flex-start; gap: var(--sp-3); width: 100%; margin-bottom: var(--sp-2); padding: var(--sp-2) var(--sp-3); border: 2px solid var(--c-line); border-radius: var(--r-2); background: var(--c-surface); text-align: left; }
+.iv-pasi__icon .c-emoji { display: block; width: 2.2rem; height: 2.2rem; margin: 0; }
+.iv-pasi__story-text { margin: 0; font-size: var(--fs-1); }
+.iv-pasi__line { margin: 0; font-family: var(--font-title); font-size: var(--fs-2); font-weight: 700; line-height: 1.35; }
+.iv-pasi__line.is-empty { visibility: hidden; }
+.iv-pasi__line--proba { color: var(--c-ink-soft); font-size: var(--fs-1); }
+.iv-pasi__art[data-solved='true'] .iv-pasi__line--proba { color: var(--c-ok-ink); }
+.iv-pasi__choices { display: grid; justify-items: center; gap: var(--sp-2); }
+.iv-pasi__ask { margin: 0; font-weight: 700; text-align: center; }
+.iv-pasi__options { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-2); min-height: var(--tap); }
+.iv-pasi__option { font-size: var(--fs-1); }
+.iv-pasi__option.is-wrong { --btn-edge: var(--c-bad-ink); color: var(--c-bad-ink); text-decoration: line-through; }
 
 /* barele: aceeași scară (`--scale` unități pe lățime), fără animație la lungime (doar transform și opacity se animă) */
 .iv-bars { --scale: 22; position: relative; display: grid; gap: 0.5rem; width: min(100%, 26rem); padding-block: 0.4rem; }
