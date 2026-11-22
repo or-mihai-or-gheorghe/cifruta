@@ -13,6 +13,8 @@ export function lintText(s) {
   if (s !== s.normalize('NFC')) errors.push('text ne-normalizat (NFC)');
   const m = MISSING_DIACRITICS.exec(s);
   if (m) errors.push(`posibil cuvânt fără diacritice: „${m[0]}”`);
+  // semnul ține locul literei x în textele din Învață (js/invata/text.js), deci nu poate apărea în date
+  if (s.includes('')) errors.push('semnul U+E000 e rezervat (litera x din Învață)');
   return errors;
 }
 

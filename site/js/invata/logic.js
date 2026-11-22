@@ -5,6 +5,7 @@ import { WIDGETS } from './registry.js';
 import { solveBox } from '../core/expr.js';
 import { fractionWords } from '../core/ro.js';
 import { compareFractions, equalParts, parseFraction } from './fractions.js';
+import { LETTER } from './text.js';
 
 export const widgetOf = (lesson) => WIDGETS[lesson?.widget?.w] ?? null;
 
@@ -52,6 +53,28 @@ export function search(W, params, from, ok, { limit = 20000 } = {}) {
 /** Toate stările la care se ajunge din `from`. */
 export const reachable = (W, params, from = W.initial(params), { limit = 20000 } = {}) => [...walk(W, params, from, limit)];
 
+/**
+ * Drumul de acțiuni (aceleași ca în interfață) până la cea mai apropiată stare cu `ok(derive(stare))`, sau null: aceeași căutare în
+ * lățime ca `search`, cu drumul păstrat. E2E îl urmează la widgeturile cu alegeri și butoane (`iv_reach`).
+ */
+export function searchPath(W, params, from, ok, { limit = 20000 } = {}) {
+  const seen = new Set([keyOf(from)]);
+  const queue = [{ state: from, path: [] }];
+  for (let i = 0; i < queue.length; i++) {
+    const { state, path } = queue[i];
+    if (ok(W.derive(params, state))) return path;
+    for (const action of W.actions(params, state)) {
+      const next = W.apply(params, state, action);
+      const key = keyOf(next);
+      if (seen.has(key)) continue;
+      if (seen.size >= limit) throw new Error(`peste ${limit} de stări`);
+      seen.add(key);
+      queue.push({ state: next, path: [...path, action] });
+    }
+  }
+  return null;
+}
+
 /** Identitatea unei soluții `collect` (de exemplu „3,8”: 3 rânduri cu câte 8 e alt dreptunghi decât 8 cu câte 3). */
 export const solutionKey = (task, derived) => task.by.map((k) => derived[k]).join(',');
 
@@ -82,9 +105,14 @@ export const PICK_RULES = {
   valoare: (task, option) => option === `${task.of[0]}/${task.of[1]}`,
   /** „Cât face 24 : 6?”: câtul împărțirii din `of` (exactă). */
   cat: (task, option) => task.of[0] % task.of[1] === 0 && option === task.of[0] / task.of[1],
-  /** „□ + 9 = 13. Câte nuci are sacul?”: numărul care face ecuația din `of[0]` adevărată (căutat, nu scris de mână). */
-  necunoscut: (task, option) => Number.isInteger(option) && option === solveBox(task.of[0], 1000),
+  /** „□ + 9 = 13” sau „2 × x + 5 = 17”: numărul care face ecuația din `of[0]` adevărată (căutat, nu scris de mână). */
+  necunoscut: (task, option) => Number.isInteger(option) && option === solveBox(boxed(task.of[0]), 1000),
 };
+
+/** Ecuația cu litera x scrisă ca o căsuță, pentru `solveBox`. */
+const boxed = (eq) => eq.replace(LETTER, '□');
+/** Ecuația cu necunoscuta (□ sau x) înlocuită cu un număr. */
+const filledIn = (eq, value) => eq.replace('□', String(value)).replace(LETTER, String(value));
 
 /** Locurile variantelor corecte ale unei alegeri. */
 export const pickCorrect = (task) => task.pick.flatMap((option, i) => (PICK_RULES[task.rule]?.(task, option) ? [i] : []));
@@ -96,7 +124,7 @@ export function pickAnswer(task) {
   if (task.rule === 'mai-mare') return `{{f:${option}}} e mai mare decât ${task.pick.filter((o) => o !== option).map((o) => `{{f:${o}}}`).join(' și ')}.`;
   if (task.rule === 'valoare') return `{{f:${option}}}: ${fractionWords(...parseFraction(option))}.`;
   if (task.rule === 'cat') return `${task.of[0]} : ${task.of[1]} = ${option}. Proba: ${option} × ${task.of[1]} = ${task.of[0]}.`;
-  if (task.rule === 'necunoscut') return `□ = ${option}, pentru că ${task.of[0].replace('□', String(option))}.`;
+  if (task.rule === 'necunoscut') return `${task.of[0].includes('□') ? '□' : 'x'} = ${option}, pentru că ${filledIn(task.of[0], option)}.`;
   if (task.rule === 'jumatati') return 'Două bucăți la fel de mari: două jumătăți.';
   if (task.rule === 'sferturi') return 'Patru bucăți la fel de mari: patru sferturi.';
   return '';

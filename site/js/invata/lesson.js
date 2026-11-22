@@ -8,10 +8,13 @@ import { play } from '../core/sound.js';
 import { backLink, confetti } from '../components/ui.js';
 import { emojiHTML } from '../visuals/emoji.js';
 import { visualLabel, visualSVG } from '../visuals/index.js';
-import { matches, paramsOf, pickAnswer, pickCorrect, search, solutionKey, startState, widgetOf } from './logic.js';
+import { matches, paramsOf, pickAnswer, pickCorrect, search, searchPath, solutionKey, startState, widgetOf } from './logic.js';
 import { markTask } from './progress.js';
 import { VIEWS } from './registry.js';
-import { keepMath } from './text.js';
+import { drawLetter, keepMath, markLetter } from './text.js';
+
+/** Un text al lecției ca HTML: calculele ținute pe un rând, mini-markup și litera x desenată altfel decât semnul ×. */
+const rich = (text) => drawLetter(md(markLetter(keepMath(text))));
 
 /** O variantă a unei alegeri: un desen din bancă, o fracție („2/3”) sau un număr. */
 function optionHTML(option) {
@@ -58,7 +61,7 @@ export async function mountLesson(host, { chapter, lesson, index }) {
   const guide = h(
     'div',
     { class: 'iv-lesson__guide' },
-    h('p', { class: 'iv-goal', 'data-testid': 'iv-goal' }, h('strong', { class: 'iv-goal__label' }, 'Ce învățăm: '), h('span', { html: md(keepMath(lesson.goal)) })),
+    h('p', { class: 'iv-goal', 'data-testid': 'iv-goal' }, h('strong', { class: 'iv-goal__label' }, 'Ce învățăm: '), h('span', { html: rich(lesson.goal) })),
     h('div', { class: 'iv-guide' }, h('div', { class: 'iv-guide__top' }, mascotArt, dots), bubble),
   );
   const root = h(
@@ -195,8 +198,8 @@ export async function mountLesson(host, { chapter, lesson, index }) {
     const t = tasks[current];
     const parts = [
       // indicația Cifruței (cum se folosește desenul) stă deasupra primei provocări
-      current === 0 ? h('p', { class: 'iv-intro', 'data-testid': 'iv-intro', html: md(keepMath(lesson.intro)) }) : null,
-      h('p', { class: 'iv-ask', 'data-testid': 'iv-ask', tabindex: '-1', html: md(keepMath(t.ask)) }),
+      current === 0 ? h('p', { class: 'iv-intro', 'data-testid': 'iv-intro', html: rich(lesson.intro) }) : null,
+      h('p', { class: 'iv-ask', 'data-testid': 'iv-ask', tabindex: '-1', html: rich(t.ask) }),
     ];
     if (t.collect) {
       const chips = [...found.values()].map((text) => h('li', { class: 'iv-found is-found' }, `${text} ✓`));
@@ -226,7 +229,7 @@ export async function mountLesson(host, { chapter, lesson, index }) {
       });
       parts.push(options);
     }
-    if (hint) parts.push(h('p', { class: 'iv-hint', 'data-testid': 'iv-hint', html: md(keepMath(hint)) }));
+    if (hint) parts.push(h('p', { class: 'iv-hint', 'data-testid': 'iv-hint', html: rich(hint) }));
     fill(...parts);
   }
 
@@ -237,8 +240,8 @@ export async function mountLesson(host, { chapter, lesson, index }) {
       h('p', { class: 'iv-bravo', 'data-testid': 'iv-bravo' }, 'Bravo!'),
       already ? h('p', { class: 'iv-intro' }, 'Ai făcut-o deja, înainte să ți-o cer.') : null,
       // la o alegere, răspunsul ales; altfel, calculul din desen (text simplu sau mini-markup, la fracții)
-      h('p', { class: 'iv-ask', 'data-testid': 'iv-won-text', html: md(keepMath(wonText())) }),
-      !pick && t.extra ? h('p', { class: 'iv-ask' }, t.extra) : null,
+      h('p', { class: 'iv-ask', 'data-testid': 'iv-won-text', html: rich(wonText()) }),
+      !pick && t.extra ? h('p', { class: 'iv-ask', html: rich(t.extra) }) : null,
       h('button', { type: 'button', class: 'c-btn c-btn--primary', 'data-testid': 'iv-continue', 'data-focus': '', onClick: nextTask }, 'Mai departe →'),
     );
   }
@@ -247,7 +250,7 @@ export async function mountLesson(host, { chapter, lesson, index }) {
     fill(
       h('p', { class: 'iv-bravo', 'data-testid': 'iv-done' }, 'Ai terminat lecția!'),
       h('p', { class: 'iv-notes__title' }, 'Ce am aflat'),
-      h('ul', { class: 'iv-notes', 'data-testid': 'iv-notes' }, lesson.notes.map((n) => h('li', { html: md(keepMath(n)) }))),
+      h('ul', { class: 'iv-notes', 'data-testid': 'iv-notes' }, lesson.notes.map((n) => h('li', { html: rich(n) }))),
       h(
         'div',
         { class: 'iv-bubble__actions' },
@@ -295,6 +298,13 @@ export async function mountLesson(host, { chapter, lesson, index }) {
         return search(W, params, state, ok);
       },
       controls: () => W.controls(params, state).map((c) => c.id),
+      /** Drumul de acțiuni până la starea-țintă a provocării curente (la widgeturile cu alegeri și butoane); la `pick`, null. */
+      path() {
+        const t = tasks[current];
+        if (!t || t.pick) return null;
+        const ok = t.want ? (d) => matches(t.want, d) : (d) => matches(t.collect, d) && !found.has(solutionKey(t, d));
+        return searchPath(W, params, state, ok);
+      },
     },
     destroy() {
       view.destroy();

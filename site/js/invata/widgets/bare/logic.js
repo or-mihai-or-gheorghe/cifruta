@@ -2,6 +2,8 @@
 //   „□ + 7 = 15”, „7 + □ = 15” — lipsește o parte (□ = 15 − 7);
 //   „15 − □ = 8”               — lipsește partea luată (scăzătorul): 15 = 8 + □, deci □ = 15 − 8;
 //   „□ − 7 = 8”                — lipsește întregul (descăzutul): □ = 8 + 7.
+// Capitolul „Ecuații cu x” adaugă forma cu un factor (`parseAx`): „3 × x + 2 = 20” (sus întregul, jos 3 bucăți x și 2) și
+// „4 × x − 3 = 17” (sus 4 bucăți x, jos 17 și cei 3 luați), cu x sau □; glisorul lungește deodată toate bucățile x.
 // Glisorul lungește bucata necunoscută (11 valori, de la `lo`) până când barele sunt la fel de lungi. Ecuația și `lo` vin din parametri
 // sau din `start`-ul unei provocări. Starea se schimbă doar prin apply(); vederea (view.js) desenează starea și trimite acțiunile.
 
@@ -41,6 +43,36 @@ export function parseBar(eq) {
   return null;
 }
 
+/** Forma cu un factor: „3 × x + 2 = 20”, „4 × x − 3 = 17” (cu x sau □), cu x (`value`) socotit; null pentru celelalte forme. */
+export function parseAx(eq) {
+  const m = /^(\d+) × (□|x) ([+−]) (\d+) = (\d+)$/.exec(String(eq ?? ''));
+  if (!m) return null;
+  const [a, b, c] = [Number(m[1]), Number(m[4]), Number(m[5])];
+  if (a < 2 || b < 1 || c < 1) return null;
+  return { a, b, c, op: m[3], letter: m[2], value: (m[3] === '+' ? c - b : c + b) / a };
+}
+
+/**
+ * Bucățile celor două bare la forma cu un factor, pentru o încercare: { top, bottom }, fiecare bucată { n, kind } cu `kind` „x”
+ * (necunoscuta, cât încercarea), „known” (un număr știut) sau „taken” (cei luați, la „− b”, puși la loc lângă rest).
+ */
+export function pieces(eq, guess) {
+  const e = parseAx(eq);
+  const xs = Array.from({ length: e.a }, () => ({ n: guess, kind: 'x' }));
+  return e.op === '+'
+    ? { top: [{ n: e.c, kind: 'known' }], bottom: [...xs, { n: e.b, kind: 'known' }] }
+    : { top: xs, bottom: [{ n: e.c, kind: 'known' }, { n: e.b, kind: 'taken' }] };
+}
+
+/** Cele mai multe unități pe lățimea desenului, la forma cu un factor: bara cea mai lungă de pe tot glisorul (scara nu sare cât tragi). */
+export function scaleOf(eq, lo = 0) {
+  const e = parseAx(eq);
+  const most = e.a * (lo + SPAN);
+  return e.op === '+' ? Math.max(e.c, most + e.b) : Math.max(most, e.c + e.b);
+}
+/** Cea mai lungă scară: o bucată x de 5 rămâne lată de vreo 30 px pe telefonul de 360 px. */
+export const SCALE_MAX = 50;
+
 /** Ce e scris pe bare și cât de lungă e fiecare bucată, pentru o încercare `guess`: întregul de sus și cele două părți de jos. */
 export function bars(eq, guess) {
   const b = parseBar(eq);
@@ -55,10 +87,19 @@ export default {
   hideable: () => [],
 
   check(p) {
-    const b = parseBar(p.eq);
-    if (!b) return [`ecuație greșită „${p.eq}” (□ + 7 = 15, 15 − □ = 8 sau □ − 7 = 8)`];
-    const errors = [];
     const lo = p.lo ?? 0;
+    const ax = parseAx(p.eq);
+    if (ax) {
+      const errors = [];
+      if (!Number.isInteger(lo) || lo < 0) errors.push('„lo” e un număr natural');
+      if (!Number.isInteger(ax.value)) errors.push(`x nu e număr natural în „${p.eq}”`);
+      else if (ax.value < lo || ax.value > lo + SPAN) errors.push(`x (${ax.value}) nu e pe glisor (${lo}–${lo + SPAN})`);
+      if (scaleOf(p.eq, lo) > SCALE_MAX) errors.push(`bara cea mai lungă are ${scaleOf(p.eq, lo)}, peste ${SCALE_MAX}`);
+      return errors;
+    }
+    const b = parseBar(p.eq);
+    if (!b) return [`ecuație greșită „${p.eq}” (□ + 7 = 15, 15 − □ = 8, □ − 7 = 8 sau 3 × x + 2 = 20)`];
+    const errors = [];
     if (!Number.isInteger(lo) || lo < 0) errors.push('„lo” e un număr natural');
     if (b.value < lo || b.value > lo + SPAN) errors.push(`căsuța (${b.value}) nu e pe glisor (${lo}–${lo + SPAN})`);
     if ((b.whole ?? b.value) > WHOLE_MAX) errors.push(`întregul are cel mult ${WHOLE_MAX}`);
@@ -81,12 +122,13 @@ export default {
   },
 
   derive(p, s) {
-    const b = parseBar(s.eq);
-    return { guess: s.guess, fits: s.guess === b.value };
+    const value = parseAx(s.eq)?.value ?? parseBar(s.eq).value;
+    return { guess: s.guess, fits: s.guess === value };
   },
 
   /** Textele: `equation` (cu încercarea în locul căsuței și semnul potrivit), `reading`, `legend`, `extra` (regula) și `spoken`. */
   texts(p, s) {
+    if (parseAx(s.eq)) return axTexts(s);
     const b = parseBar(s.eq);
     const { top, bottom } = bars(s.eq, s.guess);
     const below = bottom[0] + bottom[1];
@@ -120,3 +162,31 @@ export default {
     return out;
   },
 };
+
+/** Textele formei cu un factor: ecuația cu încercarea și semnul potrivit, ce bară e mai lungă și, la final, cei doi pași. */
+function axTexts(s) {
+  const e = parseAx(s.eq);
+  const g = s.guess;
+  const fits = g === e.value;
+  const nb = (text) => text.replace(/ ([+−=<>×:]) /g, `${NBSP}$1${NBSP}`);
+  const sign = (a, b) => (a === b ? '=' : a < b ? '<' : '>');
+  const out = { legend: [['cols', `bucata x: ${g}`]] };
+  if (e.op === '+') {
+    const below = e.a * g + e.b;
+    out.equation = nb(`${e.a} × ${g} + ${e.b} ${sign(below, e.c)} ${e.c}`);
+    out.reading = fits
+      ? 'Barele sunt la fel de lungi, deci ai aflat x.'
+      : `Bara de jos e mai ${below < e.c ? 'scurtă' : 'lungă'}: ${nb(`${e.a} × ${g} + ${e.b} = ${below}`)}, iar sus e ${e.c}.`;
+    if (fits) out.extra = `${nb(`${e.a} × x = ${e.c} − ${e.b} = ${e.c - e.b}`)}, deci ${nb(`x = ${e.c - e.b} : ${e.a} = ${e.value}`)}.`;
+  } else {
+    const top = e.a * g;
+    const bottom = e.c + e.b;
+    out.equation = nb(`${e.a} × ${g} − ${e.b} ${sign(top - e.b, e.c)} ${e.c}`);
+    out.reading = fits
+      ? 'Barele sunt la fel de lungi, deci ai aflat x.'
+      : `Bara de sus e mai ${top < bottom ? 'scurtă' : 'lungă'}: ${nb(`${e.a} × ${g} = ${top}`)}, iar jos e ${nb(`${e.c} + ${e.b} = ${bottom}`)}.`;
+    if (fits) out.extra = `${nb(`${e.a} × x = ${e.c} + ${e.b} = ${bottom}`)}, deci ${nb(`x = ${bottom} : ${e.a} = ${e.value}`)}.`;
+  }
+  out.spoken = `${out.reading} ${spokenMath(out.equation)}`;
+  return out;
+}

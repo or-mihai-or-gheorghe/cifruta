@@ -794,6 +794,17 @@
   font-weight: 700;
 }
 .iv-sack.is-guess { background: var(--c-cols-bg); box-shadow: inset 0 0 0 3px var(--c-cols); color: var(--c-cols-ink); }
+/* mai mulți saci la fel (3 × x + 4 = 19): pe un rând, mai mici (3 saci au 7,1em, talerul are cel puțin 7,34em), cu nucile știute
+   dedesubt; la împărțit, nucile din celălalt taler stau în câte o coloană pentru fiecare sac */
+.iv-scale__load.is-stacked { flex-direction: column; align-items: center; }
+.iv-scale__sacks { display: flex; gap: 0.25em; }
+.iv-scale__sacks .iv-sack { font-size: 1.1em; }
+.iv-scale__load.is-groups { gap: 0.6em; }
+
+/* litera necunoscutei (capitolul „Ecuații cu x”): înclinată și colorată, ca să nu se confunde cu semnul × („3 × x”); pe saci și pe
+   bucățile barelor păstrează culoarea textului lor (contrastul) */
+.iv-x { padding-inline: 0.04em; color: var(--c-cols-ink); font-family: var(--font-body); font-style: italic; font-weight: 700; }
+.iv-sack .iv-x, .iv-bar .iv-x { color: inherit; }
 
 /* barele: aceeași scară (`--scale` unități pe lățime), fără animație la lungime (doar transform și opacity se animă) */
 .iv-bars { --scale: 22; position: relative; display: grid; gap: 0.5rem; width: min(100%, 26rem); padding-block: 0.4rem; }
@@ -815,6 +826,11 @@
 .iv-bar--part + .iv-bar--part { border-left-width: 0; }
 .iv-bar.is-unknown { background: repeating-linear-gradient(45deg, var(--c-warn-bg) 0 7px, var(--c-paper) 7px 12px); border-style: dashed; color: var(--c-ink); }
 .iv-bar.is-fit { border-style: solid; background: var(--c-ok-bg); color: var(--c-ok-ink); }
+/* forma cu un factor („3 × x + 2 = 20”): bucățile x, una lângă alta (mai înguste decât o bară cu număr, ca la încercări mici să nu
+   lungească bara), și cei luați la „− b”, cu marginea punctată (nu hașurați: hașura e a lui x) */
+.iv-bar--x { min-width: 0.6rem; overflow: hidden; }
+.iv-bar--x + .iv-bar--x, .iv-bar--x + .iv-bar, .iv-bar + .iv-bar--taken { border-left-width: 0; }
+.iv-bar--taken { border-style: dashed; border-color: var(--c-ink-soft); background: var(--c-surface); color: var(--c-ink-soft); }
 /* unde se termină întregul */
 .iv-bars__guide { position: absolute; top: 0; bottom: 0; left: calc(var(--n) * 100% / var(--scale)); width: 0; border-left: 2px dashed var(--c-ink-soft); pointer-events: none; }
 

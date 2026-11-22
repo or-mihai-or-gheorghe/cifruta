@@ -8,13 +8,13 @@ import data from '../site/data/invata.js';
 import CONCEPTS from '../site/data/concepts.js';
 import { findNonJSON, lintText, walkTexts } from '../site/js/core/lint.js';
 import { markupErrors, plain } from '../site/js/core/markup.js';
-import { chapterConcepts, findLesson, hideable, lessonErrors, paramsOf, pickAnswer, pickCorrect, playableChapters, reachable, search, startState, widgetOf } from '../site/js/invata/logic.js';
+import { chapterConcepts, findLesson, hideable, lessonErrors, paramsOf, pickAnswer, pickCorrect, playableChapters, reachable, search, searchPath, startState, widgetOf } from '../site/js/invata/logic.js';
 import { WIDGETS } from '../site/js/invata/registry.js';
 import { shareTens } from '../site/js/invata/widgets/imparte/logic.js';
-import { bars } from '../site/js/invata/widgets/bare/logic.js';
+import { bars, pieces, scaleOf } from '../site/js/invata/widgets/bare/logic.js';
 import { backwards, steps } from '../site/js/invata/widgets/masina/logic.js';
 import { keyStep, percentOf, valueAt } from '../site/js/invata/ruler.js';
-import { NBSP, equation, keepMath, repeatedSum, spokenMath } from '../site/js/invata/text.js';
+import { LETTER_MARK, NBSP, drawLetter, equation, keepMath, markLetter, repeatedSum, splitLetter, spokenMath } from '../site/js/invata/text.js';
 import '../site/js/visuals/all.js';
 import { EMOJI } from '../site/js/visuals/emoji.js';
 import { visualErrors, visualLabel, visualSVG } from '../site/js/visuals/index.js';
@@ -460,6 +460,73 @@ test('învață: barele — partea care lipsește, scăzătorul și descăzutul'
   assert.deepEqual(W.controls({}, { eq: '□ − 7 = 8', lo: 10, guess: 10 }), [{ id: 'guess', min: 10, max: 20, axis: 'cols' }]);
   assert.match(W.check({ eq: '□ − 7 = 8', lo: 0 }).join(), /nu e pe glisor/);
   assert.match(W.check({ eq: '□ × 7 = 42' }).join(), /ecuație greșită/);
+});
+
+test('învață: litera x se desenează altfel decât semnul ×, doar când e singură', () => {
+  assert.deepEqual(splitLetter('3 × x + 4 = 19'), ['3 × ', 'x', ' + 4 = 19']);
+  assert.deepEqual(splitLetter('Taxiul, de exemplu, ia 5 lei: x = 8.'), ['Taxiul, de exemplu, ia 5 lei: ', 'x', ' = 8.']);
+  assert.deepEqual(splitLetter('Un taxi cere 5 lei.'), ['Un taxi cere 5 lei.']);
+  assert.equal(markLetter('x = 15 : 3'), `${LETTER_MARK} = 15 : 3`);
+  assert.equal(drawLetter(`3 × ${LETTER_MARK}`), '3 × <var class="iv-x">x</var>');
+  assert.equal(spokenMath('3 × x + 4 = 19'), '3 ori x plus 4 egal 19');
+  assert.ok(lintText(`semn ${LETTER_MARK}`).length > 0, 'semnul literei nu poate apărea în date');
+});
+
+test('învață: alegerile cu x își socotesc răspunsul (x citit ca o căsuță)', () => {
+  const task = { pick: [12, 5, 6], rule: 'necunoscut', of: ['2 × x + 5 = 17'] };
+  assert.deepEqual(pickCorrect(task), [2]);
+  assert.equal(pickAnswer(task), 'x = 6, pentru că 2 × 6 + 5 = 17.');
+  assert.deepEqual(pickCorrect({ pick: [6, 30, 4], rule: 'necunoscut', of: ['5 × x − 4 = 26'] }), [0]);
+  assert.equal(pickAnswer({ pick: [4, 13, 22], rule: 'necunoscut', of: ['□ + 9 = 13'] }), '□ = 4, pentru că 4 + 9 = 13.');
+});
+
+test('învață: balanța cu saci la fel — ghicești câte nuci are fiecare, iei din ambele talere, apoi împarți la saci', () => {
+  const W = WIDGETS.balanta;
+  const nbsp = (t) => t.replaceAll(NBSP, ' ');
+  const p = { mode: 'guess', eq: '3 × x + 4 = 19' };
+  const at = (guess, extra = {}) => ({ ...W.initial(p), guess, ...extra });
+  assert.ok(W.tilt(p, at(4)) > 0 && W.tilt(p, at(6)) < 0 && W.tilt(p, at(5)) === 0, 'sacii (stânga) prea ușori coboară dreapta');
+  assert.equal(nbsp(W.texts(p, at(4)).equation), '3 × 4 + 4 < 19');
+  assert.equal(W.texts(p, at(6)).reading, 'Balanța coboară în stânga: 6 nuci în fiecare sac sunt prea multe.');
+  assert.deepEqual(W.derive(p, at(5)), { guess: 5, taken: 0, balanced: true, alone: false, bag: 5 });
+  assert.equal(nbsp(W.texts(p, at(5)).extra), '3 × x = 19 − 4 = 15, deci x = 15 : 3 = 5.');
+  // luatul din ambele talere: sacii rămân singuri
+  const take = at(0, { mode: 'take', taken: 4 });
+  assert.deepEqual(W.controls(p, take), [{ id: 'taken', min: 0, max: 4, axis: 'cols' }]);
+  assert.equal(nbsp(W.texts(p, take).equation), '3 × x = 15');
+  assert.equal(W.derive(p, take).alone, true);
+  // împărțitul: fără glisor, doar butonul; nucile rămase (19 − 4, nu din `taken`) se împart la 3 saci
+  const share = at(0, { mode: 'share', taken: 1 });
+  assert.deepEqual(W.controls(p, share), []);
+  assert.deepEqual(W.actions(p, share), [{ toggle: 'shared' }]);
+  const shared = W.apply(p, share, { toggle: 'shared' });
+  assert.equal(W.derive(p, shared).shared, true);
+  assert.equal(nbsp(W.texts(p, shared).equation), 'x = 15 : 3 = 5');
+  assert.equal(nbsp(W.texts(p, shared).extra), 'x = 15 : 3 = 5. Proba: 3 × 5 + 4 = 19.');
+  assert.deepEqual(searchPath(W, p, share, (d) => d.shared === true), [{ toggle: 'shared' }]);
+  assert.deepEqual(W.check(p), []);
+  assert.match(W.check({ mode: 'guess', eq: '4 × x + 2 = 22' }).join(), /cel mult 3 saci/);
+  assert.match(W.check({ mode: 'guess', eq: '3 × x + 4 = 20' }).join(), /doar exact/);
+  assert.match(W.check({ mode: 'share', eq: '□ + 7 = 15' }).join(), /mai mulți saci/);
+});
+
+test('învață: barele cu x — bucățile x la fel, cei luați puși la loc, scara stabilă', () => {
+  const W = WIDGETS.bare;
+  const nbsp = (t) => (t ?? '').replaceAll(NBSP, ' ');
+  const texts = (eq, guess, lo = 0) => W.texts({ eq, lo }, { eq, lo, guess });
+  assert.deepEqual(pieces('3 × x + 2 = 20', 4), { top: [{ n: 20, kind: 'known' }], bottom: [{ n: 4, kind: 'x' }, { n: 4, kind: 'x' }, { n: 4, kind: 'x' }, { n: 2, kind: 'known' }] });
+  assert.deepEqual(pieces('4 × x − 3 = 17', 5).bottom, [{ n: 17, kind: 'known' }, { n: 3, kind: 'taken' }]);
+  assert.equal(nbsp(texts('3 × x + 2 = 20', 4).equation), '3 × 4 + 2 < 20');
+  assert.equal(nbsp(texts('3 × x + 2 = 20', 6).extra), '3 × x = 20 − 2 = 18, deci x = 18 : 3 = 6.');
+  assert.equal(nbsp(texts('4 × x − 3 = 17', 4).reading), 'Bara de sus e mai scurtă: 4 × 4 = 16, iar jos e 17 + 3 = 20.');
+  assert.equal(nbsp(texts('4 × x − 3 = 17', 5).extra), '4 × x = 17 + 3 = 20, deci x = 20 : 4 = 5.');
+  assert.equal(W.derive({}, { eq: '5 × x − 4 = 26', guess: 6 }).fits, true);
+  // scara: bara cea mai lungă de pe tot glisorul (0–10), deci nu sare cât tragi
+  assert.equal(scaleOf('3 × x + 2 = 20'), 32);
+  assert.equal(scaleOf('4 × x − 3 = 17'), 40);
+  assert.deepEqual(W.check({ eq: '5 × x − 4 = 26' }), []);
+  assert.match(W.check({ eq: '3 × x + 2 = 21' }).join(), /nu e număr natural/);
+  assert.match(W.check({ eq: '6 × x + 2 = 20' }).join(), /peste 50/);
 });
 
 test('învață: mașina de numere — înainte, blocată la împărțiri neexacte, și pe dos', () => {

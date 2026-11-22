@@ -6,6 +6,7 @@ import data from '../../data/invata.js';
 import concepts from '../../data/concepts.js';
 import { h } from '../core/dom.js';
 import { md } from '../core/markup.js';
+import { drawLetter, markLetter } from '../invata/text.js';
 import { cantitate } from '../core/ro.js';
 import { redirect } from '../core/router.js';
 import { backLink, chip } from '../components/ui.js';
@@ -64,7 +65,7 @@ function lessonCard(chapter, lesson, i, all) {
     h('span', { class: 'iv-card__num', 'aria-hidden': 'true' }, String(i + 1)),
     h('span', { class: 'iv-card__icon', 'aria-hidden': 'true', html: emojiHTML(lesson.icon) }),
     h('h3', { class: 'iv-card__title' }, lesson.title),
-    h('p', { class: 'iv-card__text', html: md(lesson.goal) }),
+    h('p', { class: 'iv-card__text', html: drawLetter(md(markLetter(lesson.goal))) }),
     h('div', { class: 'iv-card__foot' }, state),
   );
 }
