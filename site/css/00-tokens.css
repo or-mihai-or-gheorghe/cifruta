@@ -195,6 +195,7 @@
   --tap-lg: 4rem;
   --w-content: 62rem;
   --w-narrow: 44rem;
+  --w-wide: 80rem; /* antetul, pe toate paginile, și lecțiile din Învață (cea mai lată pagină) */
   --gutter: clamp(1rem, 0.6rem + 2vw, 2rem);
   --z-sticky: 10;
   --z-overlay: 50;

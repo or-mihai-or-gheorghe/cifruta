@@ -46,9 +46,10 @@
   backdrop-filter: blur(8px);
   border-bottom: 2px solid var(--c-line);
 }
-/* antetul e mai lat decât conținutul: pe ecranele mari încap toate etichetele, chiar și cu o poreclă de 20 de caractere */
+/* antetul e mai lat decât conținutul: pe ecranele mari încap toate etichetele, chiar și cu o poreclă de 20 de caractere. Are aceeași
+   lățime pe toate paginile, cât lecțiile din Învață (cea mai lată pagină), ca sigla și legăturile să nu sară de la o pagină la alta */
 .l-header__inner {
-  max-width: 72rem;
+  max-width: var(--w-wide);
   display: flex;
   align-items: center;
   justify-content: space-between;

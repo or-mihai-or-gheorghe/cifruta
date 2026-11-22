@@ -131,6 +131,23 @@ def header_ok(run: Run, page: Page, label: str):
     run.check(len(heights) == 1, f"{label}: antetul are aceeași înălțime la toate lățimile ({sorted(heights)} px)")
 
 
+HEADER_BOX = "(() => { const r = document.querySelector('.l-header__inner').getBoundingClientRect(); return [Math.round(r.left), Math.round(r.right)]; })()"
+
+
+def header_same(run: Run, page: Page):
+    """Antetul are aceeași lățime pe toate paginile (`--w-wide`, cât lecțiile din Învață): sigla și legăturile nu sar la intrarea
+    într-o lecție, pe un ecran mai lat decât antetul."""
+    size = page.viewport_size
+    page.set_viewport_size({"width": 1440, "height": 900})
+    boxes = {}
+    for route in ["", "fulger", "invata", "invata/inmultirea/randuri-coloane"]:
+        run.goto(page, route)
+        page.wait_for_function("document.querySelector('main')?.innerText.trim().length > 0")
+        boxes[route or "acasa"] = page.evaluate(HEADER_BOX)
+    page.set_viewport_size(size)
+    run.check(len({tuple(b) for b in boxes.values()}) == 1, f"antetul are aceeași lățime pe toate paginile, la 1440 px ({boxes})")
+
+
 def smoke(run: Run, page: Page, vp: str):
     for route, name in [("", "acasa"), ("sectiune/recapitulare", "sectiune"), ("fulger", "calcul-fulger"), ("invata", "invata"), ("invata/inmultirea/randuri-coloane", "invata-lectie"), ("fulger/adunari-scaderi-100", "calcul-fulger-tema"), ("fulger/siruri-intrusi", "fulger-siruri-intrusi"), ("atelier/fulger", "atelier-fulger"), ("atelier/componente", "atelier-componente"), ("atelier/vizualuri", "atelier-vizualuri"), ("atelier/tipuri", "atelier-tipuri"), ("atelier/avatare", "atelier-avatare"), ("nu-exista", "404")]:
         run.goto(page, route)
@@ -166,6 +183,8 @@ def smoke(run: Run, page: Page, vp: str):
     kept = page.get_by_test_id("sound-toggle").get_attribute("aria-pressed") == "false"
     page.get_by_test_id("sound-toggle").click()
     run.check(was_on and off and kept and page.get_by_test_id("sound-toggle").get_attribute("aria-pressed") == "true", f"[{vp}] sunetele sunt pornite implicit, se opresc din antet și starea se ține minte")
+    if vp == "laptop":
+        header_same(run, page)
 
 
 def watch_pops(page: Page, selector: str):

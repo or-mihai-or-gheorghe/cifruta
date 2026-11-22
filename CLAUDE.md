@@ -410,7 +410,7 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
     `.is-flipped`; o animație pe obiecte folosește proprietatea `scale` (`is-bump`), nu `anim-pop`, care ar înlocui `transform`.
   - **Ecranele:**
     - de la 48rem, lecția are două coloane: Cifruța în stânga („Ce învățăm”, Cifruța cu bulinele provocărilor, balonul) și scena în
-      dreapta; pe ecranele mari, lecția și antetul au 80rem;
+      dreapta; pe ecranele mari, lecția are `--w-wide` (80rem), cât antetul de pe toate paginile;
     - fiecare widget își grupează bucățile în `iv-head` (calculul, legenda), `iv-main` (desenul cu glisoarele lui) și `iv-foot`
       (butoanele, textele); pe o scenă de la 40rem (containerul `iv-stage`), desenul stă în stânga, iar calculul și textele în dreapta;
     - desenele se socotesc din lățimea scenei (`cqw`) și din `--iv-h`, înălțimea rămasă sub titlul lecției (sub 48rem, ecranul de sub
@@ -443,7 +443,8 @@ Extra pe exercițiu: `context: { text, visual, size: 'lg' }`; pe parte: `visual`
   - **Id-urile** nu se scot, pentru că `validProfile()` verifică avatarul la fiecare scriere a profilului, și la contoare.
   - **Desenul** n-are id-uri și nici `clipPath` și se dimensionează prin container, ca orice `.v-svg`.
   - **Salvarea:** o schimbare doar de avatar rescrie numai clasamentele afișate (`shownBoards`); o poreclă nouă le rescrie pe toate.
-  - **Antetul** (treptele stau toate în `css/09-cloud.css`) e mai lat decât conținutul (72rem), iar linkurile lui nu se strâng și
+  - **Antetul** (treptele stau toate în `css/09-cloud.css`) e mai lat decât conținutul: `--w-wide` (80rem) pe toate paginile, cât
+    lecțiile din Învață, ca sigla să nu sară de la o pagină la alta (`header_same` verifică 4 pagini la 1440 px). Linkurile lui nu se strâng și
     nu se rup (`flex-shrink: 0`, `nowrap`); textele lor sunt `.c-nav__text`, ascunse doar vizual. Cu contul deschis, subtitlul siglei
     lipsește. Treptele:
     - sub 66rem, clasamentul rămâne doar iconiță;

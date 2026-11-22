@@ -89,7 +89,7 @@
    provocărilor, balonul) și widgetul în dreapta, iar widgetul încape sub titlul lecției fără derulare: desenele se socotesc după
    `--iv-h`, înălțimea ecranului rămasă sub titlu. Mai îngust (telefonul ținut vertical), coloanele trec una sub alta, iar `--iv-h` e
    ecranul de sub antet: widgetul încape după ce derulezi până la el. Pe ecranele mari, lecția e mai lată decât restul site-ului
-   (80rem, cu antetul aliniat la ea), ca desenul să fie mare. */
+   (`--w-wide`, cât antetul de pe toate paginile), ca desenul să fie mare. */
 .iv-lesson { --iv-h: calc(100dvh - 5.5rem); display: grid; gap: var(--sp-4); }
 .iv-lesson__head {
   display: grid;
@@ -139,7 +139,7 @@
   .iv-lesson .iv-slider__ticks li { font-size: 0.875rem; }
 }
 @media (min-width: 62rem) {
-  .iv-lesson.l-container, body.is-lesson .l-header__inner { max-width: 80rem; }
+  .iv-lesson.l-container { max-width: var(--w-wide); }
 }
 
 /* balonul: indicația, provocarea, soluțiile găsite, variantele, „Bravo!” și „Ce am aflat” */
